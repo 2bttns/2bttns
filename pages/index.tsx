@@ -1,9 +1,23 @@
-import type { NextPage } from 'next'
+import type { InferGetServerSidePropsType, NextPage } from 'next'
 import Head from 'next/head'
 import Image from 'next/image'
+import UserModel from '../db/models/UserModel'
 import styles from '../styles/Home.module.css'
 
-const Home: NextPage = () => {
+export const getServerSideProps = async () => {
+    const res = await UserModel.findAll()
+    const users = res.map((u) => u.toJSON())
+
+    return {
+        props: {
+            users,
+        },
+    }
+}
+
+const Home: NextPage<
+    InferGetServerSidePropsType<typeof getServerSideProps>
+> = ({ users }) => {
     return (
         <div className={styles.container}>
             <Head>
@@ -19,6 +33,21 @@ const Home: NextPage = () => {
                 <h1 className={styles.title}>
                     Welcome to <a href="https://nextjs.org">Next.js!</a>
                 </h1>
+
+                <h2>Sequelize with SQLite setup</h2>
+                {users.length > 0 ? (
+                    <ul>
+                        {users.map(({ id, name }) => {
+                            return (
+                                <li key={id}>
+                                    {name} ({id})
+                                </li>
+                            )
+                        })}
+                    </ul>
+                ) : (
+                    <p>No Users Found.</p>
+                )}
 
                 <p className={styles.description}>
                     Get started by editing{' '}
