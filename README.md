@@ -1,6 +1,7 @@
 ## Getting Started
 
 Install/use Node.js v16
+
 ```
 # If nvm is installed
 nvm use
