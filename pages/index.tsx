@@ -5,8 +5,7 @@ import UserModel from '../db/models/UserModel'
 import styles from '../styles/Home.module.css'
 
 export const getServerSideProps = async () => {
-    const res = await UserModel.findAll()
-    const users = res.map((u) => u.toJSON())
+    const users = await UserModel.findAll({ raw: true })
 
     return {
         props: {
@@ -37,12 +36,8 @@ const Home: NextPage<
                 <h2>Sequelize with SQLite setup</h2>
                 {users.length > 0 ? (
                     <ul>
-                        {users.map(({ id, name }) => {
-                            return (
-                                <li key={id}>
-                                    {name} ({id})
-                                </li>
-                            )
+                        {users.map((u) => {
+                            return <li key={u.id}>{JSON.stringify(u)}</li>
                         })}
                     </ul>
                 ) : (

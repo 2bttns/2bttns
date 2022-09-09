@@ -11,9 +11,6 @@ const config: Options = {
 
     storage: path.resolve('db/database.sqlite'),
     logging: console.log,
-    define: {
-        timestamps: false,
-    },
 }
 
 export default config

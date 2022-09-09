@@ -30,6 +30,6 @@ const UserModel = sequelize.define<UserModel>('User', {
     },
 })
 
-UserModel.sync()
+UserModel.sync({ alter: true })
 
 export default UserModel
