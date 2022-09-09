@@ -5,12 +5,21 @@ import UserModel from '../db/models/UserModel'
 import styles from '../styles/Home.module.css'
 
 export const getServerSideProps = async () => {
-    const users = await UserModel.findAll({ raw: true })
+    try {
+        const users = await UserModel.findAll({ raw: true })
 
-    return {
-        props: {
-            users,
-        },
+        return {
+            props: {
+                users,
+            },
+        }
+    } catch (error) {
+        console.error(error)
+        return {
+            props: {
+                users: [],
+            },
+        }
     }
 }
 
