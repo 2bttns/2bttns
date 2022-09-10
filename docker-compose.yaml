@@ -1,0 +1,15 @@
+version: "3"
+
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: web
+    restart: always
+    volumes:
+      - ./:/usr/src/2bttns
+      - /usr/src/2bttns/node_modules
+      - /usr/src/2bttns/.next
+    ports:
+      - "3000:3000"
