@@ -87,29 +87,22 @@ const createMachine2bttns = <I extends Item = Item>() => {
                                         .key as keyof ChoiceReplacement<DefaultOptionFields>
                                     const { current_options } = context
                                     const picked = current_options[choiceKey]
-                                    if (!picked) {
-                                        throw new Error('Value is null')
+
+                                    const notPicked: DefaultOptionFields =
+                                        choiceKey === 'first'
+                                            ? 'second'
+                                            : 'first'
+                                    const not_picked =
+                                        current_options[notPicked]
+
+                                    if (!picked || !not_picked) {
+                                        throw new Error('Unexpected null value')
                                     }
 
                                     const choice: UserChoice<I> = {
                                         picked,
-                                        not_picked: [],
+                                        not_picked,
                                     }
-
-                                    Object.keys(current_options).forEach(
-                                        (k) => {
-                                            const key =
-                                                k as keyof ChoiceReplacement<DefaultOptionFields>
-                                            if (key === choiceKey) return
-                                            const non_picked_item =
-                                                current_options[key]
-                                            if (non_picked_item) {
-                                                choice.not_picked.push(
-                                                    non_picked_item
-                                                )
-                                            }
-                                        }
-                                    )
 
                                     return context.results.concat(choice)
                                 },

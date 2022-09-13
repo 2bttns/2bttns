@@ -23,7 +23,7 @@ export type ChoiceReplacement<OptionFields extends string> = {
 
 export interface UserChoice<I extends Item> {
     picked: I
-    not_picked: I[]
+    not_picked: I
 }
 
 export interface Events<I extends Item, OptionFields extends string> {
