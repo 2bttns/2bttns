@@ -41,7 +41,7 @@ const Play: NextPage = () => {
                             >
                                 {isFinished
                                     ? 'Round over!'
-                                    : 'Which is more fun'}
+                                    : 'Which is more fun?'}
                             </Text>
 
                             {!isFinished && (
