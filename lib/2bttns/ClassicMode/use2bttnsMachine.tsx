@@ -41,9 +41,7 @@ export default function use2bttnsMachine({
     const handleButtonClick =
         (button: RegisterButtonConfig['button']) => async () => {
             if (!canPickRef.current) {
-                console.error(
-                    ':: 2bttns - Picking disabled, please wait.'
-                )
+                console.error(':: 2bttns - Picking disabled, please wait.')
                 return
             }
 
@@ -137,5 +135,6 @@ export default function use2bttnsMachine({
         registerButton,
         current_options: current.context.current_options,
         isFinished,
+        context: current.context,
     }
 }
