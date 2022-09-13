@@ -1,6 +1,7 @@
 import { useMachine } from '@xstate/react'
 import { motion } from 'framer-motion'
 import { useEffect, useRef, useState } from 'react'
+import wait from '../../util/wait'
 import { Context, DefaultOptionFields, Item, States } from '../core/types'
 import { machine } from './machine'
 import useAnimations from './useAnimations'
@@ -26,7 +27,8 @@ export default function use2bttnsMachine({
     onFinish,
     hotkeys,
 }: Use2bttnsMachineConfig) {
-    const { variants, controls, animateVariant, animate } = useAnimations()
+    const { variants, controls, animateVariant, animate, duration } =
+        useAnimations()
 
     const [current, send] = useMachine(machine)
     const [canPick, setCanPick] = useState(false)
@@ -49,17 +51,27 @@ export default function use2bttnsMachine({
                 args: { key: button },
             })
             await animate.beforeAll()
-            await Promise.all([
-                animate[button].onPickedPre(),
-                animate[otherButton].onNotPickedPre(),
-            ])
+
+            const onPickAnimations = async () => {
+                await Promise.all([
+                    animate[button].onPickedPre(),
+                    animate[otherButton].onNotPickedPre(),
+                ])
+                return
+            }
+
+            await Promise.race([onPickAnimations(), wait(duration)])
 
             send({ type: 'LOAD_NEXT_ITEMS', args: {} })
 
-            await Promise.all([
-                animate[button].onPickedPost(),
-                animate[otherButton].onNotPickedPost(),
-            ])
+            const onPickPostAnimations = async () => {
+                await Promise.all([
+                    animate[button].onPickedPost(),
+                    animate[otherButton].onNotPickedPost(),
+                ])
+            }
+            await Promise.race([onPickPostAnimations(), wait(duration)])
+
             await animate.afterAll(), send({ type: 'PICK_READY', args: {} })
         }
 

@@ -1,7 +1,7 @@
-export default async function wait(delayMS: number) {
+export default async function wait(delayS: number) {
     return new Promise<void>((res) => {
         setTimeout(() => {
             res()
-        }, delayMS)
+        }, delayS * 1000)
     })
 }
