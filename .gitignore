@@ -1,5 +1,8 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
+# Local SQLite DB
+db/database.sqlite
+
 # dependencies
 package-lock.json
 /node_modules
