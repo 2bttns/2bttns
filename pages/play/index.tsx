@@ -2,9 +2,9 @@ import { Stack, Text } from '@chakra-ui/react'
 import type { NextPage } from 'next'
 import Head from 'next/head'
 import Onboarding2bttnsButton from '../../components/Onboarding2bttnsButton'
-import FramerMotionAnimatedTwoBttns from '../../lib/2bttns/react/animated/framer-motion/FramerMotionAnimatedTwoBttns'
-import TwoBttnsRound from '../../lib/2bttns/react/TwoBttnsRound'
-import { BttnConfig } from '../../lib/2bttns/react/TwoBttnsRound/types'
+import FramerMotionAnimatedTwoBttns from '../../lib/2bttns-classic/react/animated/framer-motion/FramerMotionAnimatedTwoBttns'
+import TwoBttnsRound from '../../lib/2bttns-classic/react/TwoBttnsRound'
+import { BttnConfig } from '../../lib/2bttns-classic/react/TwoBttnsRound/types'
 
 const Play: NextPage = () => {
     const activities: { id: string }[] = '1234567890'.split('').map((n) => {

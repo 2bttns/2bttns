@@ -1,6 +1,6 @@
 import { useAnimation, Variant } from "framer-motion"
-import { TwoBttnsRoundProps } from "lib/2bttns/react/TwoBttnsRound"
-import { ButtonId } from "lib/2bttns/react/TwoBttnsRound/types"
+import { TwoBttnsRoundProps } from "../../TwoBttnsRound"
+import { ButtonId } from "../../TwoBttnsRound/types"
 
 export type AnimationVariants =
   | "initial"
