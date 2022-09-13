@@ -1,5 +1,5 @@
 import { useAnimation, Variant } from 'framer-motion'
-import { DefaultOptionFields } from '../core/twobttns.machine'
+import { DefaultOptionFields } from '../core/types'
 
 export type AnimationVariants =
     | 'initial'

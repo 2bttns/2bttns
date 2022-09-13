@@ -1,7 +1,7 @@
 import { useMachine } from '@xstate/react'
 import { motion } from 'framer-motion'
 import { useEffect, useRef, useState } from 'react'
-import { DefaultOptionFields, Item, States } from '../core/twobttns.machine'
+import { DefaultOptionFields, Item, States } from '../core/types'
 import { machine } from './machine'
 import useAnimations from './useAnimations'
 import useHotkey, { Hotkey } from './useHotkey'
