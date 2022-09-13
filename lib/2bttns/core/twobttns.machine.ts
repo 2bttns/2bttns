@@ -27,6 +27,8 @@ export interface Events<I extends Item, OptionFields extends string> {
 
     LOAD_NEXT_ITEMS: {}
 
+    PICK_READY: {}
+
     PICK_ITEM: {
         key: keyof OptionFields
     }
@@ -57,7 +59,6 @@ export type States =
     | 'picking'
     | 'picking_disabled'
     | 'finished'
-    | 'foo'
 
 export type TypeState<I extends Item, OptionFields extends string> = {
     value: States
@@ -125,15 +126,15 @@ const createMachine2bttns = <I extends Item = Item>() => {
                     always: [
                         {
                             cond: (ctx) =>
-                                hasEnoughChoices<I, DefaultOptionFields>(ctx),
-                            target: 'picking',
-                        },
-                        {
-                            cond: (ctx) =>
                                 !hasEnoughChoices<I, DefaultOptionFields>(ctx),
                             target: 'finished',
                         },
                     ],
+                    on: {
+                        PICK_READY: {
+                            target: 'picking',
+                        },
+                    },
                 },
                 picking: {
                     on: {
@@ -235,6 +236,7 @@ function hasEnoughChoices<I extends Item, OptionFields extends string>(
                 context.item_queue.length >=
                 Object.keys(context.to_replace).length
             )
+        default:
+            return false
     }
-    return false
 }
