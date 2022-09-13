@@ -9,13 +9,20 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@chakra-ui/react": "^2.3.2",
+    "@xstate/react": "^3.0.1",
+    "color-hash": "^2.0.1",
+    "framer-motion": "^7.3.2",
     "next": "12.3.0",
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "sequelize": "^6.21.6",
-    "sqlite3": "^5.0.11"
+    "sqlite3": "^5.0.11",
+    "use-fit-text": "^2.4.0",
+    "xstate": "^4.33.6"
   },
   "devDependencies": {
+    "@types/color-hash": "^1.0.2",
     "@types/node": "18.7.16",
     "@types/react": "18.0.18",
     "@types/react-dom": "18.0.6",
