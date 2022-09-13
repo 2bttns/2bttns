@@ -39,12 +39,12 @@ export default function useAnimations(props?: UseAnimationsConfig) {
     }
 
     const variants: { [V in AnimationVariants]: Variant } = {
-        initial: { scale: 1, y: 0, opacity: 1 },
-        picked: { scale: 1.5, y: 0, opacity: 1 },
-        notPickedUpwards: { scale: 0, y: -100, opacity: 0 },
-        notPickedDownwards: { scale: 0, y: 100, opacity: 0 },
-        focused: { scale: 1.1, y: 0, opacity: 1 },
-        tapping: { scale: 0.9, y: 0, opacity: 1 },
+        initial: { scale: 1, y: 0, opacity: 1, zIndex: 0 },
+        picked: { scale: 1.5, y: 0, opacity: 1, zIndex: 2 },
+        notPickedUpwards: { scale: 0, y: -100, opacity: 0, zIndex: 0 },
+        notPickedDownwards: { scale: 0, y: 100, opacity: 0, zIndex: 0 },
+        focused: { scale: 1.1, y: 0, opacity: 1, zIndex: 1 },
+        tapping: { scale: 0.9, y: 0, opacity: 1, zIndex: 1 },
     }
 
     const animateVariant = async (
