@@ -3,9 +3,11 @@ import Head from 'next/head'
 import ClassicMode from '../../lib/2bttns/ClassicMode'
 
 const Play: NextPage = () => {
-    const activities: { id: string }[] = '1234567890'.split('').map((n) => {
-        return { id: n }
-    })
+    const items: { id: string }[] = 'abcdefghijklmnopqrstuvwxyz'
+        .split('')
+        .map((n) => {
+            return { id: n }
+        })
 
     return (
         <div>
@@ -18,7 +20,7 @@ const Play: NextPage = () => {
                 <link rel="icon" href="/favicon.ico" />
             </Head>
 
-            <ClassicMode items={activities} />
+            <ClassicMode items={items} />
         </div>
     )
 }

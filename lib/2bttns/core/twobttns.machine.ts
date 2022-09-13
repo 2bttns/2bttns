@@ -36,7 +36,7 @@ const createMachine2bttns = <I extends Item = Item>() => {
                         INIT: {
                             actions: assign({
                                 item_queue: (context, event) => {
-                                    return event.args.items
+                                    return [...event.args.items]
                                 },
                                 replace_policy: (context, event) => {
                                     return event.args.replace ?? 'keep-picked'

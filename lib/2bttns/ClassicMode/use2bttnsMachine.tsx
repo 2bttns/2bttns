@@ -42,11 +42,11 @@ export default function use2bttnsMachine({
                 type: 'PICK_ITEM',
                 args: { key: button },
             })
-            await animate.beforeAll(),
-                await Promise.all([
-                    animate[button].onPickedPre(),
-                    animate[otherButton].onNotPickedPre(),
-                ])
+            await animate.beforeAll()
+            await Promise.all([
+                animate[button].onPickedPre(),
+                animate[otherButton].onNotPickedPre(),
+            ])
 
             send({ type: 'LOAD_NEXT_ITEMS', args: {} })
 
@@ -91,6 +91,9 @@ export default function use2bttnsMachine({
     }, [])
 
     useEffect(() => {
+        console.log(current.context)
+        console.log(current.value)
+
         const isPickingState = (current.value as States) === 'picking'
         setCanPick(isPickingState)
         canPickRef.current = isPickingState
