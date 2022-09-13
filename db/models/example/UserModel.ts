@@ -7,7 +7,7 @@ import {
     UUID,
     UUIDV4,
 } from 'sequelize'
-import { sequelize } from '..'
+import { sequelize } from '../..'
 
 interface UserModel
     extends Model<
