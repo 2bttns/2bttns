@@ -20,7 +20,13 @@ const Play: NextPage = () => {
                 <link rel="icon" href="/favicon.ico" />
             </Head>
 
-            <ClassicMode items={items} />
+            <ClassicMode
+                items={items}
+                hotkeys={{
+                    first: ['w', 'ArrowUp'],
+                    second: ['s', 'ArrowDown'],
+                }}
+            />
         </div>
     )
 }

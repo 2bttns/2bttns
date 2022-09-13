@@ -3,14 +3,12 @@ import ClassicButton from './ClassicButton'
 import { Item } from './types'
 import use2bttnsMachine, { Use2bttnsMachineConfig } from './use2bttnsMachine'
 
-export type ClassicModeProps = { items: Item[] }
+export type ClassicModeProps = {
+    items: Item[]
+    hotkeys?: Use2bttnsMachineConfig['hotkeys']
+}
 
-export default function ClassicMode({ items }: ClassicModeProps) {
-    const hotkeys: Use2bttnsMachineConfig['hotkeys'] = {
-        first: ['w', 'ArrowUp'],
-        second: ['s', 'ArrowDown'],
-    }
-
+export default function ClassicMode({ items, hotkeys }: ClassicModeProps) {
     const { registerButton, current_options, isFinished } = use2bttnsMachine({
         items,
         hotkeys,
@@ -29,7 +27,7 @@ export default function ClassicMode({ items }: ClassicModeProps) {
                 {registerButton({
                     button: 'first',
                     buttonComponent: (
-                        <ClassicButton hotkey={hotkeys.first[0]}>
+                        <ClassicButton hotkey={hotkeys?.first[0]}>
                             {current_options.first?.id || ''}
                         </ClassicButton>
                     ),
@@ -37,7 +35,7 @@ export default function ClassicMode({ items }: ClassicModeProps) {
                 {registerButton({
                     button: 'second',
                     buttonComponent: (
-                        <ClassicButton hotkey={hotkeys.second[0]}>
+                        <ClassicButton hotkey={hotkeys?.second[0]}>
                             {current_options.second?.id || ''}
                         </ClassicButton>
                     ),

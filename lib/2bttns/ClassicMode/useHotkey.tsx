@@ -18,8 +18,6 @@ export default function useHotkey({ hotkey, onPress }: UseHotkeyConfig) {
             return
         }
 
-        validateHotkey(hotkey)
-
         const handleHotkeyPress = (e: KeyboardEvent) => {
             if (e.key === hotkey || hotkey.indexOf(e.key) !== -1) {
                 onPress()
@@ -35,10 +33,4 @@ export default function useHotkey({ hotkey, onPress }: UseHotkeyConfig) {
             }
         }
     }, [hotkey, onPress])
-}
-
-export function validateHotkey(hotkey: Hotkey) {
-    if (Array.isArray(hotkey) && hotkey.length === 0) {
-        throw new Error('Hotkey array must not be empty')
-    }
 }
