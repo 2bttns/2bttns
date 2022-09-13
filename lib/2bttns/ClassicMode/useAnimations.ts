@@ -1,4 +1,4 @@
-import { useAnimation, Variant } from 'framer-motion'
+import { EasingFunction, useAnimation, Variant } from 'framer-motion'
 import { DefaultOptionFields } from '../core/types'
 
 export type AnimationVariants =
@@ -9,7 +9,30 @@ export type AnimationVariants =
     | 'focused'
     | 'tapping'
 
-export default function useAnimations() {
+export type Easing =
+    | [number, number, number, number]
+    | 'linear'
+    | 'easeIn'
+    | 'easeOut'
+    | 'easeInOut'
+    | 'circIn'
+    | 'circOut'
+    | 'circInOut'
+    | 'backIn'
+    | 'backOut'
+    | 'backInOut'
+    | 'anticipate'
+    | EasingFunction
+
+export type UseAnimationsConfig = {
+    duration?: number
+    ease?: Easing
+}
+
+export default function useAnimations(props?: UseAnimationsConfig) {
+    const duration = props?.duration ?? 0.4
+    const ease = props?.ease ?? 'backOut'
+
     const controls = {
         first: useAnimation(),
         second: useAnimation(),
@@ -29,7 +52,7 @@ export default function useAnimations() {
         variant: AnimationVariants
     ) => {
         controls[bttn].stop()
-        await controls[bttn].start(variant)
+        await controls[bttn].start(variant, { duration, ease })
     }
 
     const getBttnAnimation = (button: DefaultOptionFields) => {
@@ -61,5 +84,5 @@ export default function useAnimations() {
         second: getBttnAnimation('second'),
     }
 
-    return { controls, animate, variants, animateVariant }
+    return { controls, animate, variants, animateVariant, duration }
 }
