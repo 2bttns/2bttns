@@ -2,8 +2,8 @@ import { useMachine } from '@xstate/react'
 import { motion } from 'framer-motion'
 import { useEffect, useRef, useState } from 'react'
 import wait from '../../util/wait'
-import { Context, DefaultOptionFields, Item, States } from '../core/types'
-import { machine } from './machine'
+import createMachine2bttns from './twobttns.machine'
+import { Context, DefaultOptionFields, Item, States } from './types'
 import useAnimations from './useAnimations'
 import useHotkey, { Hotkey } from './useHotkey'
 
@@ -22,6 +22,8 @@ export type Use2bttnsMachineConfig = {
     hotkeys?: { [K in DefaultOptionFields]: Hotkey }
 }
 
+const machine = createMachine2bttns()
+
 export default function use2bttnsMachine({
     items,
     onFinish,
@@ -39,7 +41,9 @@ export default function use2bttnsMachine({
     const handleButtonClick =
         (button: RegisterButtonConfig['button']) => async () => {
             if (!canPickRef.current) {
-                console.error('PICK DISABLED')
+                console.error(
+                    ':: 2bttns - Picking disabled, please wait.'
+                )
                 return
             }
 

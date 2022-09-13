@@ -1,5 +1,5 @@
 import { EasingFunction, useAnimation, Variant } from 'framer-motion'
-import { DefaultOptionFields } from '../core/types'
+import { DefaultOptionFields } from './types'
 
 export type AnimationVariants =
     | 'initial'

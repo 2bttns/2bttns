@@ -1,6 +1,6 @@
 import { Stack } from '@chakra-ui/react'
-import { Item } from '../core/types'
 import ClassicButton from './ClassicButton'
+import { Item } from './types'
 import use2bttnsMachine, { Use2bttnsMachineConfig } from './use2bttnsMachine'
 
 export type ClassicModeProps = { items: Item[] }
