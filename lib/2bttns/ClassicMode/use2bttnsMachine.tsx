@@ -1,7 +1,7 @@
 import { useMachine } from '@xstate/react'
 import { motion } from 'framer-motion'
 import { useEffect, useRef, useState } from 'react'
-import { DefaultOptionFields, Item, States } from '../core/types'
+import { Context, DefaultOptionFields, Item, States } from '../core/types'
 import { machine } from './machine'
 import useAnimations from './useAnimations'
 import useHotkey, { Hotkey } from './useHotkey'
@@ -15,11 +15,15 @@ export type RegisterButton = (config: RegisterButtonConfig) => JSX.Element
 
 export type Use2bttnsMachineConfig = {
     items: Item[]
-    hotkeys: { [K in DefaultOptionFields]: Hotkey }
+    onFinish: (
+        results: Context<Item, DefaultOptionFields>['results']
+    ) => Promise<void>
+    hotkeys?: { [K in DefaultOptionFields]: Hotkey }
 }
 
 export default function use2bttnsMachine({
     items,
+    onFinish,
     hotkeys,
 }: Use2bttnsMachineConfig) {
     const { variants, controls, animateVariant, animate } = useAnimations()
@@ -27,6 +31,8 @@ export default function use2bttnsMachine({
     const [current, send] = useMachine(machine)
     const [canPick, setCanPick] = useState(false)
     const canPickRef = useRef<boolean>(canPick)
+
+    const isFinished = (current.value as States) === 'finished'
 
     const handleButtonClick =
         (button: RegisterButtonConfig['button']) => async () => {
@@ -91,23 +97,29 @@ export default function use2bttnsMachine({
     }, [])
 
     useEffect(() => {
-        console.log(current.context)
-        console.log(current.value)
-
         const isPickingState = (current.value as States) === 'picking'
         setCanPick(isPickingState)
         canPickRef.current = isPickingState
     }, [current.value])
 
-    useHotkey({ hotkey: hotkeys.first, onPress: handleButtonClick('first') })
+    useEffect(() => {
+        if (isFinished) {
+            onFinish(current.context.results)
+        }
+    }, [isFinished])
+
     useHotkey({
-        hotkey: hotkeys.second,
+        hotkey: hotkeys?.first ?? [],
+        onPress: handleButtonClick('first'),
+    })
+    useHotkey({
+        hotkey: hotkeys?.second ?? [],
         onPress: handleButtonClick('second'),
     })
 
     return {
         registerButton,
         current_options: current.context.current_options,
-        isFinished: (current.value as States) === 'finished',
+        isFinished,
     }
 }

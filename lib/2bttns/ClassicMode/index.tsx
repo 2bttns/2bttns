@@ -14,6 +14,9 @@ export default function ClassicMode({ items }: ClassicModeProps) {
     const { registerButton, current_options, isFinished } = use2bttnsMachine({
         items,
         hotkeys,
+        onFinish: async (results) => {
+            console.log(results)
+        },
     })
 
     if (isFinished) {
