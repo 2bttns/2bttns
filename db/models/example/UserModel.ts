@@ -1,34 +1,23 @@
-import {
-    CreationOptional,
-    DataTypes,
-    InferAttributes,
-    InferCreationAttributes,
-    Model,
-    UUID,
-    UUIDV4,
-} from 'sequelize'
-import { sequelize } from '../..'
+import { Optional, UUIDV4 } from 'sequelize'
+import { Column, Default, Model, PrimaryKey, Table } from 'sequelize-typescript'
 
-interface UserModel
-    extends Model<
-        InferAttributes<UserModel>,
-        InferCreationAttributes<UserModel>
-    > {
-    id: CreationOptional<string>
-    name: string
+export interface UserAttributes {
+    id: string
+    name?: string
 }
 
-const UserModel = sequelize.define<UserModel>('User', {
-    id: {
-        type: UUID,
-        defaultValue: UUIDV4,
-        primaryKey: true,
-    },
-    name: {
-        type: DataTypes.STRING,
-    },
-})
+export interface UserCreationAttributes
+    extends Optional<UserAttributes, 'id' | 'name'> {}
 
-UserModel.sync({ alter: true })
+@Table({ tableName: 'users', timestamps: false })
+class UserModel extends Model<UserAttributes, UserCreationAttributes> {
+    @Default(UUIDV4)
+    @PrimaryKey
+    @Column
+    id: string
+
+    @Column
+    name: string
+}
 
 export default UserModel

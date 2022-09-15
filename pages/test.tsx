@@ -1,37 +1,23 @@
 import type { InferGetServerSidePropsType, NextPage } from 'next'
 import Head from 'next/head'
 import Image from 'next/image'
-import { ListItemModel, ListModel, UserModel } from '../db'
-import { ListItemAttributes } from '../db/models/example/ListItemModel'
+import ListItemModel from '../db/models/example/ListItemModel'
+import ListModel from '../db/models/example/ListModel'
+import UserModel from '../db/models/example/UserModel'
 import styles from '../styles/Home.module.css'
 
 export const getServerSideProps = async () => {
     try {
         const users = await UserModel.findAll({ raw: true })
 
-        const list = (
-            await ListModel.create(
-                {
-                    name: 'Activities',
-                    list_items: [
-                        { name: 'Jiu Jitsu' },
-                        { name: 'Bowling' },
-                        { name: 'Creating Art with AI' },
-                    ],
-                },
-                { include: [ListItemModel] }
-            )
-        ).toJSON()
+        let id = "10d7260e-142d-4d0e-8737-8ca9cef151ac"
+        if (id) {
+            await ListModel.destroy({where: {id}})
+        }
 
-        const listItemAttrs: (keyof ListItemAttributes)[] = ['name']
         const lists = await ListModel.findAll({
-            include: [
-                {
-                    model: ListItemModel,
-                    attributes: listItemAttrs,
-                },
-            ],
-            nest: true,
+            raw: true,
+            include: [{ model: ListItemModel, attributes: ['id', 'name'] }],
         })
 
         const listItems = await ListItemModel.findAll({ raw: true })
@@ -39,10 +25,7 @@ export const getServerSideProps = async () => {
         return {
             props: {
                 users,
-                lists: lists.map((l) => {
-                    const json = l.toJSON()
-                    return json
-                }),
+                lists,
                 listItems,
             },
         }
@@ -63,8 +46,6 @@ const Home: NextPage<InferGetServerSidePropsType<typeof getServerSideProps>> = (
 
     console.log(props)
 
-    console.log(lists && lists[0].list_items)
-
     return (
         <div className={styles.container}>
             <Head>
@@ -82,6 +63,17 @@ const Home: NextPage<InferGetServerSidePropsType<typeof getServerSideProps>> = (
                 </h1>
 
                 <h2>Sequelize with SQLite setup</h2>
+                {JSON.stringify(lists)}
+
+                {users.length > 0 ? (
+                    <ul>
+                        {users.map((u) => {
+                            return <li key={u.id}>{JSON.stringify(u)}</li>
+                        })}
+                    </ul>
+                ) : (
+                    <p>No Users Found.</p>
+                )}
 
                 <p className={styles.description}>
                     Get started by editing{' '}

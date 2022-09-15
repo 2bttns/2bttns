@@ -1,49 +1,54 @@
+import { Optional, UUIDV4 } from 'sequelize'
 import {
-    CreationOptional,
-    DataTypes,
-    InferAttributes,
-    InferCreationAttributes,
+    BelongsTo,
+    Column,
+    Default,
+    ForeignKey,
     Model,
-    UUID,
-    UUIDV4,
-} from 'sequelize'
-import { sequelize } from '../..'
+    PrimaryKey,
+    Table,
+} from 'sequelize-typescript'
 import ListModel from './ListModel'
 
-interface ListItemModel
-    extends Model<
-        InferAttributes<ListItemModel>,
-        InferCreationAttributes<ListItemModel>
-    > {
-    id: CreationOptional<string>
-    list_id: string
+export interface ListItemAttributes {
+    id: string
     name: string
-    description: CreationOptional<string>
+    description?: string
+    list_id: string
 }
 
-const ListItemModel = sequelize.define<ListItemModel>('ListItem', {
-    id: {
-        type: UUID,
-        defaultValue: UUIDV4,
-        primaryKey: true,
-    },
-    list_id: {
-        type: UUID,
-    },
-    name: {
-        type: DataTypes.STRING,
-    },
-    description: {
-        type: DataTypes.STRING,
-    },
-})
+export interface ListItemCreationAttributes
+    extends Optional<ListItemAttributes, 'id' | 'description'> {}
 
-ListModel.hasMany(ListItemModel, {
-    foreignKey: 'list_id',
-    onDelete: 'CASCADE',
-})
-ListItemModel.belongsTo(ListModel)
+// Creating a ListItem through a relationship will automatically pass the list's id to list_id
+// -- 'list_id' should not be passed manually in such cases.
+export type ListItemRelationshipCreationAttributes = Omit<
+    ListItemCreationAttributes,
+    'list_id'
+>
 
-ListItemModel.sync({ alter: true })
+@Table({ tableName: 'list_items', timestamps: false })
+class ListItemModel extends Model<
+    ListItemAttributes,
+    ListItemCreationAttributes
+> {
+    @Default(UUIDV4)
+    @PrimaryKey
+    @Column
+    id: string
+
+    @Column
+    name: string
+
+    @Column
+    description: string
+
+    @ForeignKey(() => ListModel)
+    @Column
+    list_id: string
+
+    @BelongsTo(() => ListModel)
+    list: ListModel[]
+}
 
 export default ListItemModel

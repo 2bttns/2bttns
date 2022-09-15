@@ -1,38 +1,41 @@
+import { Optional, UUIDV4 } from 'sequelize'
 import {
-    CreationOptional,
-    DataTypes,
-    InferAttributes,
-    InferCreationAttributes,
+    Column,
+    Default,
+    HasMany,
     Model,
-    UUID,
-    UUIDV4,
-} from 'sequelize'
-import { sequelize } from '../..'
+    PrimaryKey,
+    Table,
+} from 'sequelize-typescript'
+import ListItemModel, {
+    ListItemRelationshipCreationAttributes,
+} from './ListItemModel'
 
-interface ListModel
-    extends Model<
-        InferAttributes<ListModel>,
-        InferCreationAttributes<ListModel>
-    > {
-    id: CreationOptional<string>
+export interface ListAttributes {
+    id: string
     name: string
-    description: CreationOptional<string>
+    description?: string
+    list_items?: ListItemRelationshipCreationAttributes[]
 }
 
-const ListModel = sequelize.define<ListModel>('List', {
-    id: {
-        type: UUID,
-        defaultValue: UUIDV4,
-        primaryKey: true,
-    },
-    name: {
-        type: DataTypes.STRING,
-    },
-    description: {
-        type: DataTypes.STRING,
-    },
-})
+export interface ListCreationAttributes
+    extends Optional<ListAttributes, 'id' | 'description' | 'list_items'> {}
 
-ListModel.sync({ alter: true })
+@Table({ tableName: 'lists', timestamps: false })
+class ListModel extends Model<ListAttributes, ListCreationAttributes> {
+    @Default(UUIDV4)
+    @PrimaryKey
+    @Column
+    id: string
+
+    @Column
+    name: string
+
+    @Column
+    description: string
+
+    @HasMany(() => ListItemModel)
+    list_items: ListItemModel[]
+}
 
 export default ListModel
