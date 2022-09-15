@@ -1,36 +1,40 @@
 {
-  "name": "2bttns",
-  "version": "0.1.0",
-  "private": true,
-  "scripts": {
-    "dev": "next dev -p 3001",
-    "build": "next build",
-    "start": "next start",
-    "lint": "next lint"
-  },
-  "dependencies": {
-    "@chakra-ui/react": "^2.3.2",
-    "@xstate/react": "^3.0.1",
-    "color-hash": "^2.0.1",
-    "framer-motion": "^7.3.2",
-    "next": "12.3.0",
-    "react": "18.2.0",
-    "react-dom": "18.2.0",
-    "reflect-metadata": "^0.1.13",
-    "sequelize": "^6.21.6",
-    "sequelize-typescript": "^2.1.3",
-    "sqlite3": "^5.0.11",
-    "use-fit-text": "^2.4.0",
-    "xstate": "^4.33.6"
-  },
-  "devDependencies": {
-    "@types/color-hash": "^1.0.2",
-    "@types/node": "^18.7.16",
-    "@types/react": "18.0.18",
-    "@types/react-dom": "18.0.6",
-    "@types/validator": "^13.7.6",
-    "eslint": "8.23.0",
-    "eslint-config-next": "12.3.0",
-    "typescript": "4.8.3"
-  }
+    "name": "2bttns",
+    "version": "0.1.0",
+    "private": true,
+    "scripts": {
+        "dev": "ts-node --project tsconfig.server.json server.ts",
+        "build": "next build && tsc --project tsconfig.server.json",
+        "start": "cross-env NODE_ENV=production node dist/server.js",
+        "lint": "next lint"
+    },
+    "dependencies": {
+        "@chakra-ui/react": "^2.3.2",
+        "@xstate/react": "^3.0.1",
+        "color-hash": "^2.0.1",
+        "dotenv": "^16.0.2",
+        "framer-motion": "^7.3.2",
+        "next": "12.3.0",
+        "react": "18.2.0",
+        "react-dom": "18.2.0",
+        "reflect-metadata": "^0.1.13",
+        "sequelize": "^6.21.6",
+        "sequelize-typescript": "^2.1.3",
+        "sqlite3": "^5.0.11",
+        "use-fit-text": "^2.4.0",
+        "xstate": "^4.33.6"
+    },
+    "devDependencies": {
+        "@types/color-hash": "^1.0.2",
+        "@types/node": "^18.7.16",
+        "@types/react": "18.0.18",
+        "@types/react-dom": "18.0.6",
+        "@types/validator": "^13.7.6",
+        "cross-env": "^7.0.3",
+        "eslint": "8.23.0",
+        "eslint-config-next": "12.3.0",
+        "nodemon": "^2.0.19",
+        "ts-node": "^10.9.1",
+        "typescript": "4.8.3"
+    }
 }

@@ -1,6 +1,11 @@
 import path from 'path'
 import { SequelizeOptions } from 'sequelize-typescript'
 
+const sqliteFileName =
+    process.env.NODE_ENV === 'production' ? 'db-prod.sqlite' : 'db-dev.sqlite'
+const sqlitePath = path.resolve(sqliteFileName)
+console.log(`SQLite Path: ${sqlitePath}`)
+
 const config: SequelizeOptions = {
     dialect: 'sqlite',
 
@@ -9,7 +14,8 @@ const config: SequelizeOptions = {
     database: process.env.DB_NAME,
     host: process.env.DB_HOST,
 
-    storage: path.resolve('db/database.sqlite'),
+    storage: sqlitePath,
+    logging: false,
 }
 
 export default config

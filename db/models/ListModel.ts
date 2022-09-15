@@ -34,7 +34,7 @@ class ListModel extends Model<ListAttributes, ListCreationAttributes> {
     @Column
     description: string
 
-    @HasMany(() => ListItemModel)
+    @HasMany(() => ListItemModel, { onDelete: 'CASCADE' })
     list_items: ListItemModel[]
 }
 
