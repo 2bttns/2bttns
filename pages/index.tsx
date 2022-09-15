@@ -2,7 +2,7 @@ import type { InferGetServerSidePropsType, NextPage } from 'next'
 import Head from 'next/head'
 import Image from 'next/image'
 import { ListItemModel, ListModel, UserModel } from '../db'
-import { ListItemAttributes } from '../db/models/example/ListItemModel'
+import { ListItemAttributes } from '../db/models/ListItemModel'
 import styles from '../styles/Home.module.css'
 
 export const getServerSideProps = async () => {

@@ -1,18 +1,16 @@
 import type { InferGetServerSidePropsType, NextPage } from 'next'
 import Head from 'next/head'
 import Image from 'next/image'
-import ListItemModel from '../db/models/example/ListItemModel'
-import ListModel from '../db/models/example/ListModel'
-import UserModel from '../db/models/example/UserModel'
+import { ListItemModel, ListModel, UserModel } from '../db'
 import styles from '../styles/Home.module.css'
 
 export const getServerSideProps = async () => {
     try {
         const users = await UserModel.findAll({ raw: true })
 
-        let id = "10d7260e-142d-4d0e-8737-8ca9cef151ac"
+        let id = '10d7260e-142d-4d0e-8737-8ca9cef151ac'
         if (id) {
-            await ListModel.destroy({where: {id}})
+            await ListModel.destroy({ where: { id } })
         }
 
         const lists = await ListModel.findAll({

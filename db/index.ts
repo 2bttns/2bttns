@@ -1,8 +1,8 @@
 import { Sequelize } from 'sequelize-typescript'
 import config from './config'
-import ListItemModel from './models/example/ListItemModel'
-import ListModel from './models/example/ListModel'
-import UserModel from './models/example/UserModel'
+import ListItemModel from './models/ListItemModel'
+import ListModel from './models/ListModel'
+import UserModel from './models/UserModel'
 
 export const sequelize = new Sequelize(config)
 export { UserModel, ListModel, ListItemModel }
