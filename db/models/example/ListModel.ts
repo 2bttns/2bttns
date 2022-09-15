@@ -9,16 +9,17 @@ import {
 } from 'sequelize'
 import { sequelize } from '../..'
 
-interface UserModel
+interface ListModel
     extends Model<
-        InferAttributes<UserModel>,
-        InferCreationAttributes<UserModel>
+        InferAttributes<ListModel>,
+        InferCreationAttributes<ListModel>
     > {
     id: CreationOptional<string>
     name: string
+    description: CreationOptional<string>
 }
 
-const UserModel = sequelize.define<UserModel>('User', {
+const ListModel = sequelize.define<ListModel>('List', {
     id: {
         type: UUID,
         defaultValue: UUIDV4,
@@ -27,8 +28,11 @@ const UserModel = sequelize.define<UserModel>('User', {
     name: {
         type: DataTypes.STRING,
     },
+    description: {
+        type: DataTypes.STRING,
+    },
 })
 
-UserModel.sync({ alter: true })
+ListModel.sync({ alter: true })
 
-export default UserModel
+export default ListModel

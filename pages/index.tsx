@@ -1,6 +1,8 @@
 import type { InferGetServerSidePropsType, NextPage } from 'next'
 import Head from 'next/head'
 import Image from 'next/image'
+import ListItemModel from '../db/models/example/ListItemModel'
+import ListModel from '../db/models/example/ListModel'
 import UserModel from '../db/models/example/UserModel'
 import styles from '../styles/Home.module.css'
 
@@ -8,9 +10,31 @@ export const getServerSideProps = async () => {
     try {
         const users = await UserModel.findAll({ raw: true })
 
+        const list = (await ListModel.create({ name: 'Activities' })).toJSON()
+
+        await ListItemModel.bulkCreate([
+            { list_id: list.id, name: 'Jiu Jitsu' },
+            { list_id: list.id, name: 'Bowling' },
+            { list_id: list.id, name: 'Using AI Tools' },
+        ])
+
+        const lists = await ListModel.findAll({
+            include: [
+                {
+                    model: ListItemModel,
+                },
+            ],
+            raw: true,
+            nest: true
+        })
+
+        const listItems = await ListItemModel.findAll({ raw: true })
+
         return {
             props: {
                 users,
+                lists,
+                listItems,
             },
         }
     } catch (error) {
@@ -23,9 +47,13 @@ export const getServerSideProps = async () => {
     }
 }
 
-const Home: NextPage<
-    InferGetServerSidePropsType<typeof getServerSideProps>
-> = ({ users }) => {
+const Home: NextPage<InferGetServerSidePropsType<typeof getServerSideProps>> = (
+    props
+) => {
+    const { users, lists, listItems } = props
+
+    console.log(props)
+
     return (
         <div className={styles.container}>
             <Head>
@@ -43,15 +71,6 @@ const Home: NextPage<
                 </h1>
 
                 <h2>Sequelize with SQLite setup</h2>
-                {users.length > 0 ? (
-                    <ul>
-                        {users.map((u) => {
-                            return <li key={u.id}>{JSON.stringify(u)}</li>
-                        })}
-                    </ul>
-                ) : (
-                    <p>No Users Found.</p>
-                )}
 
                 <p className={styles.description}>
                     Get started by editing{' '}
