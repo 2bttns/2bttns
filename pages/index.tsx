@@ -63,8 +63,6 @@ const Home: NextPage<InferGetServerSidePropsType<typeof getServerSideProps>> = (
 
     console.log(props)
 
-    console.log(lists && lists[0].list_items)
-
     return (
         <div className={styles.container}>
             <Head>
