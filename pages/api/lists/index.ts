@@ -2,6 +2,20 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { ListItemModel, ListModel } from '../../../db'
 
+/**
+ * @swagger
+ * /api/lists:
+ *   get:
+ *     tags:
+ *       - lists
+ *     summary: Get lists
+ *     description: Returns an array containing every list.
+ *     responses:
+ *       200:
+ *         description: "Success (TODO: schema)"
+ *       500:
+ *         description: Internal error
+ */
 export default async function handler(
     req: NextApiRequest,
     res: NextApiResponse

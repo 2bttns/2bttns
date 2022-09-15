@@ -17,7 +17,9 @@ export default async function handler(
                 const list_item = await getListItemById(id)
                 return res.status(200).json({ list_item })
             }
+
             case 'DELETE': {
+                // TODO: Delete multiple by ID
                 const deleted = await deleteListItemById(id)
                 return res.status(200).json({ deleted })
             }

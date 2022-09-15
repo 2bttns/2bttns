@@ -21,3 +21,8 @@ GET http://localhost:3001/api/list-items/e65e0b76-8c00-41a1-b181-3954557efd05
 
 ###
 DELETE http://localhost:3001/api/list-items/e65e0b76-8c00-41a1-b181-3954557efd05
+
+###
+### SWAGGER
+###
+GET http://localhost:3001/api/swagger.json
