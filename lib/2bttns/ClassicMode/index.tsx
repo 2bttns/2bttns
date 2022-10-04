@@ -1,5 +1,6 @@
+import { useMutation, useQuery } from 'react-query'
 import ClassicButton, { ClassicButtonProps } from './ClassicButton'
-import { Item } from './types'
+import { Item, Results } from './types'
 import use2bttnsMachine, { Use2bttnsMachineConfig } from './use2bttnsMachine'
 
 export type RenderPropParams = {
@@ -24,14 +25,57 @@ export default function ClassicMode({
     button1Props,
     button2Props,
 }: ClassicModeProps) {
+    // @TODO: Get input list based on game ID
+    const { isLoading, isError, data, error } = useQuery({
+        queryKey: ['lists'],
+        queryFn: async () => {
+            const response = await fetch('/api/lists')
+            if (!response.ok) {
+                throw new Error('Network response was not ok')
+            }
+            return response.json()
+        },
+    })
+
+
+    // @TODO: pass proper game_id and user_id
+    const submitResultsMutation = useMutation({
+        mutationFn: async (newResult: Results) => {
+            const response = await fetch(`/api/games/${2}/round-results/${2}`, {
+                method: 'POST',
+                body: JSON.stringify(newResult),
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            })
+            if (!response.ok) {
+                throw new Error('Network response was not ok')
+            }
+            return response.json()
+        },
+    })
+
     const { registerButton, current_options, isFinished, context } =
         use2bttnsMachine({
             items,
             hotkeys,
             onFinish: async (results) => {
                 console.log(results)
+                try {
+                    await submitResultsMutation.mutateAsync(results)
+                } catch (error) {
+                    console.error(error)
+                }
             },
         })
+
+    if (isLoading) {
+        return <span>Loading...</span>
+    }
+
+    if (isError) {
+        return <span>Error: {error instanceof Error && error.message}</span>
+    }
 
     return children({
         button1: registerButton({

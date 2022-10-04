@@ -4,7 +4,7 @@ import Head from 'next/head'
 import ClassicMode from '../../lib/2bttns/ClassicMode'
 
 const Play: NextPage = () => {
-    const items: { id: string }[] = 'abcdefghijklmnopqrstuvwxyz'
+    const items: { id: string }[] = 'abcde'
         .split('')
         .map((n) => {
             return { id: n }
