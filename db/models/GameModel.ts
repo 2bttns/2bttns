@@ -8,7 +8,7 @@ import {
     PrimaryKey,
     Table,
 } from 'sequelize-typescript'
-import { gameInclude } from '../constants'
+import { gameForeignKeys, gameInclude } from '../constants'
 import ListModel from './ListModel'
 
 export interface GameAttributes {
@@ -43,6 +43,7 @@ class GameModel extends Model<GameAttributes, GameCreationAttributes> {
     input_list_id: string
 
     @BelongsTo(() => ListModel, {
+        foreignKey: gameForeignKeys.input_list_id,
         as: gameInclude.input_list,
     })
     input_list: ListModel
@@ -53,6 +54,7 @@ class GameModel extends Model<GameAttributes, GameCreationAttributes> {
     output_list_id: string
 
     @BelongsTo(() => ListModel, {
+        foreignKey: gameForeignKeys.output_list_id,
         as: gameInclude.output_list,
     })
     output_list: ListModel

@@ -1,6 +1,8 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
 import type { NextApiRequest, NextApiResponse } from 'next'
-import { ListItemModel, ListModel } from '../../../db'
+import { Includeable } from 'sequelize'
+import { GameModel, ListItemModel, ListModel } from '../../../db'
+import { gameInclude } from '../../../db/constants'
 import { ListCreationAttributes } from '../../../db/models/ListModel'
 
 export default async function handler(
@@ -22,6 +24,11 @@ export default async function handler(
              *         schema:
              *           type: boolean
              *         description: Set to 'true' to include related list items with the results.
+             *       - in: query
+             *         name: include_games
+             *         schema:
+             *           type: boolean
+             *         description: Set to 'true' to include input_list and output_list relations to games along with the results.
              *     description: Returns an array containing every list.
              *     responses:
              *       200:
@@ -30,9 +37,19 @@ export default async function handler(
              *         description: Internal error
              */
             case 'GET': {
-                const include_list_items =
-                    req.query.include_list_items === 'true'
-                const include = include_list_items ? [ListItemModel] : undefined
+                const include: Includeable[] = []
+                if (req.query.include_list_items === 'true') {
+                    include.push(ListItemModel)
+                }
+                if (req.query.include_games === 'true') {
+                    include.push(
+                        ...[
+                            { model: GameModel, as: gameInclude.input_list },
+                            { model: GameModel, as: gameInclude.output_list },
+                        ]
+                    )
+                }
+
                 const result = await ListModel.findAll({ include })
                 return res.status(200).json({
                     lists: result.map((l) => {

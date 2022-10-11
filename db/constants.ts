@@ -4,6 +4,6 @@ export const gameForeignKeys = {
 }
 
 export const gameInclude = {
-    input_list: 'include_input_list',
-    output_list: 'include_output_list',
+    input_list: 'input_list',
+    output_list: 'output_list',
 }
