@@ -2,6 +2,8 @@
 ### LISTS
 ###
 GET http://localhost:3001/api/lists
+###
+GET http://localhost:3001/api/lists?include_list_items=true
 
 ###
 
@@ -30,5 +32,20 @@ GET http://localhost:3001/api/swagger.json
 
 ###
 ### GAME
+###
+
+###
+GET  http://localhost:3001/api/games
+
+###
+POST http://localhost:3001/api/games
+content-type: application/json
+
+{
+    "name": "sample",
+    "foo" : "bar",
+    "output_list_id" : "test"
+}
+
 ###
 POST http://localhost:3001/api/games/2/round-results/569e73ee-6fdb-42d5-926d-be615c156b48

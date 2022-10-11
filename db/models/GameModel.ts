@@ -1,12 +1,14 @@
 import { Optional, UUIDV4 } from 'sequelize'
 import {
+    BelongsTo,
     Column,
     Default,
-    HasOne,
+    ForeignKey,
     Model,
     PrimaryKey,
     Table,
 } from 'sequelize-typescript'
+import { gameInclude } from '../constants'
 import ListModel from './ListModel'
 
 export interface GameAttributes {
@@ -22,7 +24,6 @@ export interface GameCreationAttributes
         GameAttributes,
         'id' | 'name' | 'description' | 'input_list_id' | 'output_list_id'
     > {}
-
 @Table({ tableName: 'games', timestamps: false })
 class GameModel extends Model<GameAttributes, GameCreationAttributes> {
     @Default(UUIDV4)
@@ -36,11 +37,25 @@ class GameModel extends Model<GameAttributes, GameCreationAttributes> {
     @Column
     description: string
 
-    @HasOne(() => ListModel, { onDelete: 'SET NULL' })
-    input_list_id: ListModel
+    @ForeignKey(() => ListModel)
+    @Default(null)
+    @Column
+    input_list_id: string
 
-    @HasOne(() => ListModel, { onDelete: 'SET NULL' })
-    output_list_id: ListModel
+    @BelongsTo(() => ListModel, {
+        as: gameInclude.input_list,
+    })
+    input_list: ListModel
+
+    @ForeignKey(() => ListModel)
+    @Default(null)
+    @Column
+    output_list_id: string
+
+    @BelongsTo(() => ListModel, {
+        as: gameInclude.output_list,
+    })
+    output_list: ListModel
 }
 
 export default GameModel
