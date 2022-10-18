@@ -1,6 +1,6 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
 import type { NextApiRequest, NextApiResponse } from 'next'
-import { ListItemModel } from '../../../../../db'
+import { GameModel, ListItemModel, UserModel } from '../../../../../db'
 import { Results } from '../../../../../lib/2bttns/ClassicMode/types'
 
 /**
@@ -10,13 +10,13 @@ import { Results } from '../../../../../lib/2bttns/ClassicMode/types'
  *     tags:
  *       - games
  *     summary: Publish user round results
- *     description: | 
+ *     description: |
  *         Publish round results for a user based on a game instance.
- *         
- *         Results are calculated based on the game's configuration. 
- * 
+ *
+ *         Results are calculated based on the game's configuration.
+ *
  *         The calculated scores are saved to the user's respective cumulative scores.
- * 
+ *
  *     parameters:
  *       - in: path
  *         name: game_id
@@ -73,9 +73,25 @@ export default async function handler(
         // @TODO: Plugin: Related Weights
         // @TODO: Plugin: Delta
 
-        // const list_item = await getListItemById(user_id)
-        // return res.status(200).json({ list_item })
-        return res.status(200).json({game_id, user_id, body})
+        const game = await GameModel.findOne({ where: { id: game_id } })
+        if (!game) {
+            return res
+                .status(400)
+                .json({ message: `Game with id=${game_id} does not exist.` })
+        }
+
+        const user = await UserModel.findOne({ where: { id: user_id } })
+        // if (!user) {
+        //     return res
+        //         .status(400)
+        //         .json({ message: `User with id=${user_id} does not exist.` })
+        // }
+
+        const plugins = game.plugins.split(',')
+        // @TODO: Calculate results based on plugins        
+        // @TODO: Save results
+
+        return res.status(200).json({ plugins, game, user, body })
     } catch (error) {
         return res.status(500).json({ message: 'Internal error' })
     }
