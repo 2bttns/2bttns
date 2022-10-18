@@ -56,25 +56,24 @@ export default async function handler(
              *     summary: Create a game
              *     description: Creates a game.
              *     requestBody:
-             *       description: Foo
              *       required: true
              *       content:
              *         application/json:
              *             schema:
-             *               $ref: '#/components/schemas/Game'
+             *               $ref: '#/components/schemas/GameCreateUpdateBody'
              *             examples:
              *               'Example Body':
              *                 $ref: '#/components/examples/GameRequestBody'
              *     responses:
-             *       200:
-             *         description: "Success (TODO: schema)"
+             *       201:
+             *         description: "Created (TODO: schema)"
              *       500:
              *         description: Internal error
              */
             case 'POST': {
                 const body = req.body as GameCreationAttributes
                 const result = await GameModel.create(body)
-                return res.status(200).json({ result })
+                return res.status(201).json({ result })
             }
 
             /**
@@ -93,15 +92,14 @@ export default async function handler(
              *         description: Comma-separated IDs of games that should be updated.
              *         example: '1,42,777'
              *     requestBody:
-             *       description: Foo
              *       required: true
              *       content:
              *         application/json:
              *             schema:
-             *               $ref: '#/components/schemas/Game'
+             *               $ref: '#/components/schemas/GameCreateUpdateBody'
              *             examples:
              *               'Example Body':
-             *                 $ref: '#/components/examples/UpdateGameRequestBody'
+             *                 $ref: '#/components/examples/GameUpdateRequestBody'
              *     responses:
              *       200:
              *         description: "Success (TODO: schema)"

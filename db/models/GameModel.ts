@@ -37,6 +37,11 @@ class GameModel extends Model<GameAttributes, GameCreationAttributes> {
     @Column
     description: string
 
+    @Default("")
+    @Column
+    // Comma-separated plugin names -- e.g. "GLADIATOR_SORT,RELATED_ITEMS,DELTA"
+    plugins: string
+
     @ForeignKey(() => ListModel)
     @Default(null)
     @Column
