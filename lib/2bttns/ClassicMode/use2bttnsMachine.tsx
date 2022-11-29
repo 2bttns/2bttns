@@ -3,7 +3,7 @@ import { motion } from 'framer-motion'
 import { useEffect, useRef, useState } from 'react'
 import wait from '../../util/wait'
 import createMachine2bttns from './twobttns.machine'
-import { Context, DefaultOptionFields, Item, States } from './types'
+import { Context, DefaultOptionFields, Item, Results, States } from './types'
 import useAnimations from './useAnimations'
 import useHotkey, { Hotkey } from './useHotkey'
 
@@ -17,7 +17,7 @@ export type RegisterButton = (config: RegisterButtonConfig) => JSX.Element
 export type Use2bttnsMachineConfig = {
     items: Item[]
     onFinish: (
-        results: Context<Item, DefaultOptionFields>['results']
+        results: Results
     ) => Promise<void>
     hotkeys?: { [K in DefaultOptionFields]: Hotkey }
 }

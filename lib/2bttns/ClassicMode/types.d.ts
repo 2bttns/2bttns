@@ -73,3 +73,5 @@ export type TypeState<I extends Item, OptionFields extends string> = {
 }
 
 export type DefaultOptionFields = 'first' | 'second'
+
+export type Results = Context<Item, DefaultOptionFields>['results']

@@ -1,10 +1,11 @@
+import { swaggerDefinitionComponents } from './swaggerDefinitionComponents'
+
 const swaggerDefinition = {
     definition: {
         openapi: '3.0.3',
         info: {
             title: '2BTTNS API - OpenAPI 3.0',
-            description:
-                "The official 2bttns API.",
+            description: 'The official 2bttns API.',
             version: '0.1.0',
         },
         externalDocs: {
@@ -21,7 +22,12 @@ const swaggerDefinition = {
                 name: 'lists',
                 description: 'Manage lists',
             },
+            {
+                name: 'games',
+                description: 'Manage games',
+            },
         ],
+        components: swaggerDefinitionComponents
     },
 }
 

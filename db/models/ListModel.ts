@@ -7,6 +7,8 @@ import {
     PrimaryKey,
     Table,
 } from 'sequelize-typescript'
+import { gameForeignKeys, gameInclude } from '../constants'
+import GameModel from './GameModel'
 import ListItemModel, {
     ListItemRelationshipCreationAttributes,
 } from './ListItemModel'
@@ -36,6 +38,18 @@ class ListModel extends Model<ListAttributes, ListCreationAttributes> {
 
     @HasMany(() => ListItemModel, { onDelete: 'CASCADE' })
     list_items: ListItemModel[]
+
+    @HasMany(() => GameModel, {
+        foreignKey: gameForeignKeys.input_list_id,
+        as: gameInclude.input_list,
+    })
+    inputToGames: GameModel[]
+
+    @HasMany(() => GameModel, {
+        foreignKey: gameForeignKeys.output_list_id,
+        as: gameInclude.output_list,
+    })
+    outputOfGames: GameModel[]
 }
 
 export default ListModel
