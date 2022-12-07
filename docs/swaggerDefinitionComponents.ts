@@ -68,6 +68,13 @@ export const swaggerDefinitionComponents = {
                 },
             },
         },
+        User: {
+            type: 'object',
+            properties: {
+                id: { type: 'string' },
+                name: { type: 'string' },
+            },
+        },
     },
     examples: {
         GameRequestBody: {
@@ -101,6 +108,12 @@ export const swaggerDefinitionComponents = {
                         description: 'This is an example list item.',
                     },
                 ],
+            },
+        },
+        UserRequestBody: {
+            value: {
+                name: 'Example User',
+                description: 'This is an example user.',
             },
         },
     },
