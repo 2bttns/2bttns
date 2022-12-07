@@ -61,8 +61,8 @@ export default async function handler(
                 const body = req.body as UserCreationAttributes
                 const result = await UserModel.create(body)
                 return res
-                    .status(200)
-                    .json({ message: 'Created', statusCode: 200, result })
+                    .status(201)
+                    .json({ message: 'Created', statusCode: 201, result })
             }
             default: {
                 return res.status(405).send({ message: 'Method not allowed' })

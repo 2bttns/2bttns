@@ -1,6 +1,7 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { ListModel } from '../../../db'
+import { ListCreationAttributes } from '../../../db/models/ListModel'
 
 export default async function handler(
     req: NextApiRequest,
@@ -39,6 +40,43 @@ export default async function handler(
                 return res.status(200).json({ list })
             }
 
+            /**
+             * @swagger
+             * /api/lists/{id}:
+             *   put:
+             *     tags:
+             *       - lists
+             *     summary: Update list metadata
+             *     description: Update a list's metadata (name, description) by its ID.
+             *     parameters:
+             *       - in: path
+             *         name: id
+             *         required: true
+             *         schema:
+             *           type: string
+             *         description: ID of the list to update.
+             *     requestBody:
+             *       required: true
+             *       content:
+             *         application/json:
+             *             schema:
+             *               $ref: '#/components/schemas/List'
+             *             examples:
+             *               'Example Body':
+             *                 $ref: '#/components/examples/ListUpdateRequestBody'
+             *     responses:
+             *       200:
+             *         description: Success
+             *       500:
+             *         description: Internal error
+             */
+            case 'PUT': {
+                await updateListMetadataById(
+                    id,
+                    req.body as ListCreationAttributes
+                )
+                return res.status(200).json({ message: 'Success' })
+            }
             /**
              * @swagger
              * /api/lists/{id}:
@@ -81,6 +119,20 @@ export async function getListById(id: string) {
     }
 
     return result.toJSON()
+}
+
+export async function updateListMetadataById(
+    id: string,
+    body: ListCreationAttributes
+) {
+    const { name, description } = body
+    const result = await ListModel.update(body, {
+        where: { name, description },
+    })
+
+    if (!result || result[0] === 0) {
+        throw new Error(`Failed to update list with id: ${id}`)
+    }
 }
 
 export async function deleteListById(id: string) {
