@@ -26,6 +26,10 @@ const swaggerDefinition = {
                 name: 'games',
                 description: 'Manage games',
             },
+            {
+                name: 'users',
+                description: 'Manage users',
+            },
         ],
         components: swaggerDefinitionComponents
     },
