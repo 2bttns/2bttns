@@ -1,7 +1,7 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
 import type { NextApiRequest, NextApiResponse } from 'next'
-import { ListModel } from '../../../db'
-import { ListCreationAttributes } from '../../../db/models/ListModel'
+import { ListModel } from '../../../../db'
+import { ListCreationAttributes } from '../../../../db/models/ListModel'
 
 export default async function handler(
     req: NextApiRequest,

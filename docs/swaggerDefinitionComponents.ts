@@ -68,6 +68,14 @@ export const swaggerDefinitionComponents = {
                 },
             },
         },
+        ListItem: {
+            type: 'object',
+            properties: {
+                id: { type: 'string' },
+                name: { type: 'string' },
+                description: { type: 'string' },
+            },
+        },
         User: {
             type: 'object',
             properties: {
@@ -115,6 +123,22 @@ export const swaggerDefinitionComponents = {
                 name: 'Updated Example List',
                 description: 'Updated example list.',
             },
+        },
+        ListCreateItemsRequestBody: {
+            value: [
+                {
+                    name: 'New List Item #1',
+                    description: 'New List Item #1',
+                },
+                {
+                    name: 'New List Item #2',
+                    description: 'New List Item #2.',
+                },
+                {
+                    name: 'New List Item #3',
+                    description: 'New List Item #3.',
+                },
+            ],
         },
         UserRequestBody: {
             value: {
