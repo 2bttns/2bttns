@@ -37,7 +37,6 @@ export default function ClassicMode({
         },
     })
 
-
     // @TODO: pass proper game_id and user_id
     const submitResultsMutation = useMutation({
         mutationFn: async (newResult: Results) => {
@@ -60,7 +59,6 @@ export default function ClassicMode({
             items,
             hotkeys,
             onFinish: async (results) => {
-                console.log(results)
                 try {
                     await submitResultsMutation.mutateAsync(results)
                 } catch (error) {

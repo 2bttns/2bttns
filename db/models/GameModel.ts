@@ -15,6 +15,7 @@ export interface GameAttributes {
     id: string
     name?: string
     description?: string
+    plugins?: string
     input_list_id?: string
     output_list_id?: string
 }
@@ -22,7 +23,12 @@ export interface GameAttributes {
 export interface GameCreationAttributes
     extends Optional<
         GameAttributes,
-        'id' | 'name' | 'description' | 'input_list_id' | 'output_list_id'
+        | 'id'
+        | 'name'
+        | 'description'
+        | 'plugins'
+        | 'input_list_id'
+        | 'output_list_id'
     > {}
 @Table({ tableName: 'games', timestamps: false })
 class GameModel extends Model<GameAttributes, GameCreationAttributes> {
@@ -37,7 +43,7 @@ class GameModel extends Model<GameAttributes, GameCreationAttributes> {
     @Column
     description: string
 
-    @Default("")
+    @Default('')
     @Column
     // Comma-separated plugin names -- e.g. "GLADIATOR_SORT,RELATED_ITEMS,DELTA"
     plugins: string
