@@ -1,5 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { createGameRoute } from '../../../lib/api/games/server/createGameRoute'
+import { deleteGamesRoute } from '../../../lib/api/games/server/deleteGamesRoute'
 import { getGamesRoute } from '../../../lib/api/games/server/getGamesRoute'
 import { updateGamesRoute } from '../../../lib/api/games/server/updateGamesRoute'
 
@@ -93,6 +94,31 @@ export default async function handler(
              */
             case 'PUT': {
                 return await updateGamesRoute(req, res)
+            }
+
+            /**
+             * @swagger
+             * /api/games:
+             *   delete:
+             *     tags:
+             *       - games
+             *     summary: Delete games
+             *     description: Delete games.
+             *     parameters:
+             *       - in: query
+             *         name: game_ids
+             *         schema:
+             *           type: string
+             *         description: Comma-separated IDs of games that should be deleted.
+             *         example: '1,42,777'
+             *     responses:
+             *       200:
+             *         description: "Success (TODO: schema)"
+             *       500:
+             *         description: Internal error
+             */
+            case 'DELETE': {
+                return await deleteGamesRoute(req, res)
             }
 
             default: {

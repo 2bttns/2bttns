@@ -1,4 +1,4 @@
-import { Box, Button, Divider, Heading } from '@chakra-ui/react'
+import { Box, Button, Divider, Heading, Stack } from '@chakra-ui/react'
 import type { NextPage } from 'next'
 import Head from 'next/head'
 import Link from 'next/link'
@@ -6,6 +6,7 @@ import { useMutation, useQuery } from 'react-query'
 import GameForm, { GameFormValues } from '../../components/pages/games/GameForm'
 import GamesTable from '../../components/pages/games/GamesTable'
 import createGame from '../../lib/api/games/client/createGame'
+import deleteGames from '../../lib/api/games/client/deleteGames'
 import { getGames } from '../../lib/api/games/client/getGames'
 
 const Games: NextPage = () => {
@@ -22,11 +23,25 @@ const Games: NextPage = () => {
         },
         {
             onSuccess: (data) => {
-                console.log('Game created', data)
                 gamesQuery.refetch()
             },
         }
     )
+
+    const { mutate: deleteGamesMutation } = useMutation(
+        (gameIds: string[]) => {
+            return deleteGames(gameIds)
+        },
+        {
+            onSuccess: (data) => {
+                gamesQuery.refetch()
+            },
+        }
+    )
+
+    const handleDeleteGame = (gameId: string) => {
+        deleteGamesMutation([gameId])
+    }
 
     return (
         <Box sx={{ padding: '1rem', backgroundColor: '#ddd' }}>
@@ -66,11 +81,25 @@ const Games: NextPage = () => {
                             games={games}
                             renderActions={(game) => {
                                 return (
-                                    <Link href={`/play?id=${game.id}`} passHref>
-                                        <Button as="a" colorScheme="blue">
-                                            Play
+                                    <Stack direction="row">
+                                        <Link
+                                            href={`/play?id=${game.id}`}
+                                            passHref
+                                        >
+                                            <Button as="a" colorScheme="blue">
+                                                Play
+                                            </Button>
+                                        </Link>
+                                        <Button
+                                            as="a"
+                                            colorScheme="red"
+                                            onClick={() =>
+                                                handleDeleteGame(game.id)
+                                            }
+                                        >
+                                            Delete
                                         </Button>
-                                    </Link>
+                                    </Stack>
                                 )
                             }}
                         />
