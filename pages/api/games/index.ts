@@ -1,8 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
-import { Includeable } from 'sequelize'
-import { gameInclude } from '../../../db/constants'
-import { GameModel, ListModel } from '../../../db/index'
+import { GameModel } from '../../../db/index'
 import { GameCreationAttributes } from '../../../db/models/GameModel'
+import { getGamesRoute } from '../../../lib/api/games/server/getGamesRoute'
 
 export default async function handler(
     req: NextApiRequest,
@@ -32,19 +31,7 @@ export default async function handler(
              */
 
             case 'GET': {
-                const include_lists = req.query.include_lists === 'true'
-                const include: Includeable[] = include_lists
-                    ? [
-                          { model: ListModel, as: gameInclude.input_list },
-                          { model: ListModel, as: gameInclude.output_list },
-                      ]
-                    : []
-                const result = await GameModel.findAll({ include })
-                return res.status(200).json({
-                    games: result.map((l) => {
-                        return l.toJSON()
-                    }),
-                })
+                return await getGamesRoute(req, res)
             }
 
             /**

@@ -3,7 +3,6 @@ import {
     Button,
     Divider,
     FormControl,
-    FormErrorMessage,
     FormLabel,
     Heading,
     Input,
@@ -11,73 +10,35 @@ import {
     Text,
     Textarea,
 } from '@chakra-ui/react'
-import type { InferGetServerSidePropsType, NextPage } from 'next'
+import type { NextPage } from 'next'
 import Head from 'next/head'
-import Image from 'next/image'
 import { useState } from 'react'
-import { UserModel, ListModel, ListItemModel } from '../../db'
-import { ListItemAttributes } from '../../db/models/ListItemModel'
+import { useMutation, useQuery } from 'react-query'
+import createGame from '../../lib/api/games/client/createGame'
+import { getGames } from '../../lib/api/games/client/getGames'
 
-export const getServerSideProps = async () => {
-    try {
-        const users = await UserModel.findAll({ raw: true })
+const Games: NextPage = () => {
+    const gamesQuery = useQuery('games', () => {
+        return getGames()
+    })
+    const games = gamesQuery?.data?.games
+    const hasGames = games && games.length > 0
+    console.log('Games', games)
 
-        const list = (
-            await ListModel.create(
-                {
-                    name: 'Activities',
-                    list_items: [
-                        { name: 'Jiu Jitsu' },
-                        { name: 'Bowling' },
-                        { name: 'Creating Art with AI' },
-                    ],
-                },
-                { include: [ListItemModel] }
-            )
-        ).toJSON()
-
-        const listItemAttrs: (keyof ListItemAttributes)[] = ['name']
-        const lists = await ListModel.findAll({
-            include: [
-                {
-                    model: ListItemModel,
-                    attributes: listItemAttrs,
-                },
-            ],
-            nest: true,
-        })
-
-        const listItems = await ListItemModel.findAll({ raw: true })
-
-        return {
-            props: {
-                users,
-                lists: lists.map((l) => {
-                    const json = l.toJSON()
-                    return json
-                }),
-                listItems,
+    // React query mutation to create a game
+    const { mutate: createGameMutation } = useMutation(
+        (values: GameFormValues) => {
+            return createGame(values)
+        },
+        {
+            onSuccess: (data) => {
+                console.log('Game created', data)
+                gamesQuery.refetch()
             },
         }
-    } catch (error) {
-        console.error(error)
-        return {
-            props: {
-                users: [],
-            },
-        }
-    }
-}
-
-const Games: NextPage<
-    InferGetServerSidePropsType<typeof getServerSideProps>
-> = (props) => {
-    const { users, lists, listItems } = props
-
-    console.log(props)
+    )
 
     return (
-        // TODO: Style this page
         <Box sx={{ padding: '1rem', backgroundColor: '#ddd' }}>
             <Head>
                 <title>My Games</title>
@@ -92,12 +53,17 @@ const Games: NextPage<
                     </Heading>
                     <FormControl>
                         <FormLabel htmlFor="select-game">Select Game</FormLabel>
-                        <Select id="select-game">
-                            {/* TODO: Use real games from API */}
-                            {[1, 2, 3].map((game) => {
+                        <Select
+                            id="select-game"
+                            disabled={!hasGames}
+                            placeholder={
+                                hasGames ? 'Select a game' : 'No games found'
+                            }
+                        >
+                            {games?.map((game) => {
                                 return (
-                                    <option key={game} value={game}>
-                                        {game}
+                                    <option key={game.id} value={game.name}>
+                                        {game.name}
                                     </option>
                                 )
                             })}
@@ -126,7 +92,12 @@ const Games: NextPage<
                     <Heading as="h2" size="xl">
                         Create a Game
                     </Heading>
-                    <GameForm onSubmit={(values) => console.log(values)} />
+                    <GameForm
+                        onSubmit={(values) => {
+                            console.log('Submitting game', values)
+                            createGameMutation(values)
+                        }}
+                    />
                 </Box>
             </main>
         </Box>
@@ -142,7 +113,7 @@ export type GameFormProps = {
 export type GameFormValues = {
     name: string
     description: string
-    plugins: string[]
+    plugins: string
 }
 
 function GameForm(props: GameFormProps) {
@@ -158,13 +129,12 @@ function GameForm(props: GameFormProps) {
 
         if (!name || !description || !plugins) {
             setErrorMessage('All fields are required')
+            console.log('All fields are required')
             return
         }
+        setErrorMessage('')
 
-        // TODO: Fancy Formik validation
-
-        // submit the form
-        onSubmit({ description, name, plugins: plugins.split(',') })
+        onSubmit({ description, name, plugins })
     }
 
     return (
@@ -197,11 +167,15 @@ function GameForm(props: GameFormProps) {
                     onChange={(event) => setPlugins(event.target.value)}
                 />
             </FormControl>
-            {errorMessage && (
-                <FormErrorMessage>{errorMessage}</FormErrorMessage>
-            )}
+
+            {errorMessage && <Text color="red.500">{errorMessage}</Text>}
             <Box sx={{ paddingY: '1rem' }}>
-                <Button sx={{ width: '100%' }} colorScheme="blue" size="lg">
+                <Button
+                    sx={{ width: '100%' }}
+                    colorScheme="blue"
+                    size="lg"
+                    type="submit"
+                >
                     Create Game
                 </Button>
             </Box>
