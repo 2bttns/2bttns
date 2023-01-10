@@ -9,10 +9,14 @@ export type GamesViewProps = {
     games?: GameAttributes[]
     handleCreateGame: GameFormProps['onSubmit']
     handleDeleteGame: (gameId: string) => void
+    handleEditGame: (
+        gameId: string,
+        updated: Omit<GameAttributes, 'id'>
+    ) => void
 }
 
 export default function GamesView(props: GamesViewProps) {
-    const { games, handleCreateGame, handleDeleteGame } = props
+    const { games, handleCreateGame, handleDeleteGame, handleEditGame } = props
     return (
         <Box sx={{ padding: '1rem', backgroundColor: '#ddd' }}>
             <Head>
@@ -51,7 +55,7 @@ export default function GamesView(props: GamesViewProps) {
                                             href={`/play?id=${game.id}`}
                                             passHref
                                         >
-                                            <Button as="a" colorScheme="blue">
+                                            <Button as="a" colorScheme="green">
                                                 Play
                                             </Button>
                                         </Link>
@@ -63,6 +67,22 @@ export default function GamesView(props: GamesViewProps) {
                                             }
                                         >
                                             Delete
+                                        </Button>
+                                        <Button
+                                            as="a"
+                                            colorScheme="blue"
+                                            onClick={() => {
+                                                const {
+                                                    id,
+                                                    ...editableFields
+                                                } = game
+                                                handleEditGame(
+                                                    game.id,
+                                                    editableFields
+                                                )
+                                            }}
+                                        >
+                                            Edit
                                         </Button>
                                     </Stack>
                                 )

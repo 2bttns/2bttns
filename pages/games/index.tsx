@@ -1,7 +1,9 @@
 import type { NextPage } from 'next'
 import { useMutation, useQuery } from 'react-query'
 import { GameFormValues } from '../../components/pages/games/GameForm'
-import GamesView from '../../components/pages/games/GamesView'
+import GamesView, {
+    GamesViewProps,
+} from '../../components/pages/games/GamesView'
 import createGame from '../../lib/api/games/client/createGame'
 import deleteGames from '../../lib/api/games/client/deleteGames'
 import { getGames } from '../../lib/api/games/client/getGames'
@@ -34,8 +36,15 @@ const Games: NextPage = () => {
         }
     )
 
-    const handleDeleteGame = (gameId: string) => {
+    const handleDeleteGame: GamesViewProps['handleDeleteGame'] = (gameId) => {
         deleteGamesMutation([gameId])
+    }
+
+    const handleEditGame: GamesViewProps['handleEditGame'] = (
+        gameId,
+        updated
+    ) => {
+        console.log('handleEditGame', gameId, updated)
     }
 
     return (
@@ -43,6 +52,7 @@ const Games: NextPage = () => {
             games={games}
             handleCreateGame={createGameMutation}
             handleDeleteGame={handleDeleteGame}
+            handleEditGame={handleEditGame}
         />
     )
 }
