@@ -1,25 +1,20 @@
 import { Box, Button, Divider, Heading, Stack } from '@chakra-ui/react'
 import Head from 'next/head'
 import Link from 'next/link'
-import {
-    GameAttributes,
-    GameCreationAttributes,
-} from '../../../db/models/GameModel'
+import { GameAttributes } from '../../../db/models/GameModel'
 import GameForm, { GameFormProps } from './GameForm'
-import GamesTable from './GamesTable'
+import GamesTable, { GamesTableProps } from './GamesTable'
 
 export type GamesViewProps = {
     games?: GameAttributes[]
     handleCreateGame: GameFormProps['onSubmit']
     handleDeleteGame: (gameId: string) => void
-    handleEditGame: (
-        gameId: string,
-        updated: Omit<GameAttributes, 'id'>
-    ) => void
+    handleFieldEdited: GamesTableProps['onFieldEdited']
 }
 
 export default function GamesView(props: GamesViewProps) {
-    const { games, handleCreateGame, handleDeleteGame, handleEditGame } = props
+    const { games, handleCreateGame, handleDeleteGame, handleFieldEdited } =
+        props
     return (
         <Box sx={{ padding: '1rem', backgroundColor: '#ddd' }}>
             <Head>
@@ -50,14 +45,7 @@ export default function GamesView(props: GamesViewProps) {
                     </Heading>
                     {games && (
                         <GamesTable
-                            onFieldEdited={(field, newValue, game) => {
-                                const updated = {
-                                    ...game,
-                                    [field]: newValue,
-                                } as GameAttributes
-
-                                console.log(updated)
-                            }}
+                            onFieldEdited={handleFieldEdited}
                             games={games}
                             renderActions={(game) => {
                                 return (
@@ -78,22 +66,6 @@ export default function GamesView(props: GamesViewProps) {
                                             }
                                         >
                                             Delete
-                                        </Button>
-                                        <Button
-                                            as="a"
-                                            colorScheme="blue"
-                                            onClick={() => {
-                                                const {
-                                                    id,
-                                                    ...editableFields
-                                                } = game
-                                                handleEditGame(
-                                                    game.id,
-                                                    editableFields
-                                                )
-                                            }}
-                                        >
-                                            Edit
                                         </Button>
                                     </Stack>
                                 )

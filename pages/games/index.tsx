@@ -7,6 +7,7 @@ import GamesView, {
 import createGame from '../../lib/api/games/client/createGame'
 import deleteGames from '../../lib/api/games/client/deleteGames'
 import { getGames } from '../../lib/api/games/client/getGames'
+import updateGames from '../../lib/api/games/client/updateGames'
 
 const Games: NextPage = () => {
     const gamesQuery = useQuery('games', () => {
@@ -40,11 +41,34 @@ const Games: NextPage = () => {
         deleteGamesMutation([gameId])
     }
 
-    const handleEditGame: GamesViewProps['handleEditGame'] = (
-        gameId,
-        updated
+    const { mutate: editGamesMutation } = useMutation(
+        (params: {
+            gameIds: Parameters<typeof updateGames>[0]
+            body: Parameters<typeof updateGames>[1]
+        }) => {
+            return updateGames(params['gameIds'], params['body'])
+        },
+        {
+            onSuccess: (data) => {
+                gamesQuery.refetch()
+            },
+        }
+    )
+    const handleFieldEdited: GamesViewProps['handleFieldEdited'] = (
+        field,
+        newValue,
+        game
     ) => {
-        console.log('handleEditGame', gameId, updated)
+        const { id, ...gameDataExcludingGameId } = game
+        const updated: Parameters<typeof updateGames>[1] = {
+            ...gameDataExcludingGameId,
+            [field]: newValue,
+        }
+
+        editGamesMutation({
+            gameIds: [id],
+            body: updated,
+        })
     }
 
     return (
@@ -52,7 +76,7 @@ const Games: NextPage = () => {
             games={games}
             handleCreateGame={createGameMutation}
             handleDeleteGame={handleDeleteGame}
-            handleEditGame={handleEditGame}
+            handleFieldEdited={handleFieldEdited}
         />
     )
 }

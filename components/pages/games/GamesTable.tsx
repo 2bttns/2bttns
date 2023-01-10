@@ -1,29 +1,12 @@
-import { CheckIcon, CloseIcon, EditIcon } from '@chakra-ui/icons'
-import {
-    ButtonGroup,
-    ChakraProps,
-    Editable,
-    EditableInput,
-    EditablePreview,
-    EditableTextarea,
-    Flex,
-    IconButton,
-    Stack,
-    Table,
-    Tbody,
-    Td,
-    Thead,
-    Tr,
-    useEditableControls,
-    UseEditableProps,
-} from '@chakra-ui/react'
+import { Table, Tbody, Td, Thead, Tr } from '@chakra-ui/react'
 import { GameAttributes } from '../../../db/models/GameModel'
+import EditableTd from '../../EditableTd'
 
 export type GamesTableProps = {
     games: GameAttributes[]
     renderActions?: (game: GameAttributes) => React.ReactNode
     isEditable?: boolean
-    onFieldEdited: (
+    onFieldEdited?: (
         field: keyof GameAttributes,
         newValue: unknown,
         game: GameAttributes
@@ -59,6 +42,9 @@ export default function GamesTable(props: GamesTableProps) {
                         <EditableTd
                             value={game.name}
                             handleSave={(value) => {
+                                if (!onFieldEdited) {
+                                    return
+                                }
                                 onFieldEdited('name', value, game)
                             }}
                             isEditable={isEditable}
@@ -67,6 +53,9 @@ export default function GamesTable(props: GamesTableProps) {
                             value={game.description}
                             isTextarea
                             handleSave={(value) => {
+                                if (!onFieldEdited) {
+                                    return
+                                }
                                 onFieldEdited('description', value, game)
                             }}
                             isEditable={isEditable}
@@ -74,83 +63,21 @@ export default function GamesTable(props: GamesTableProps) {
                         <EditableTd
                             value={game.plugins}
                             handleSave={(value) => {
+                                if (!onFieldEdited) {
+                                    return
+                                }
                                 onFieldEdited('plugins', value, game)
                             }}
                             isEditable={isEditable}
                         />
-                        {renderActions && <Td>{renderActions(game)}</Td>}
+                        {renderActions && (
+                            <Td sx={{ verticalAlign: 'top' }}>
+                                {renderActions(game)}
+                            </Td>
+                        )}
                     </Tr>
                 ))}
             </Tbody>
         </Table>
-    )
-}
-
-export type EditableTdProps = {
-    value?: string
-    handleSave?: UseEditableProps['onSubmit']
-    isTextarea?: boolean
-    isEditable?: boolean
-    sx?: ChakraProps['sx']
-}
-
-function EditableTd(props: EditableTdProps) {
-    const { value, sx, handleSave, isTextarea, isEditable = true } = props
-
-    function EditableControls() {
-        const {
-            isEditing,
-            getSubmitButtonProps,
-            getCancelButtonProps,
-            getEditButtonProps,
-        } = useEditableControls()
-
-        return isEditing ? (
-            <ButtonGroup size="sm">
-                <IconButton
-                    icon={<CheckIcon />}
-                    aria-label="Save"
-                    {...getSubmitButtonProps()}
-                />
-                <IconButton
-                    icon={<CloseIcon />}
-                    aria-label="Cancel"
-                    {...getCancelButtonProps()}
-                />
-            </ButtonGroup>
-        ) : (
-            <Flex>
-                <IconButton
-                    size="sm"
-                    icon={<EditIcon />}
-                    aria-label="Edit"
-                    {...getEditButtonProps()}
-                />
-            </Flex>
-        )
-    }
-
-    return (
-        <Td
-            sx={{
-                verticalAlign: 'top',
-                ...sx,
-            }}
-        >
-            {!isEditable && value}
-            {isEditable && (
-                <Editable
-                    defaultValue={value || ''}
-                    isPreviewFocusable={false}
-                    onSubmit={handleSave}
-                >
-                    <Stack direction="row">
-                        <EditablePreview />
-                        {isTextarea ? <EditableTextarea /> : <EditableInput />}
-                        <EditableControls />
-                    </Stack>
-                </Editable>
-            )}
-        </Td>
     )
 }
