@@ -1,7 +1,10 @@
 import { Box, Button, Divider, Heading, Stack } from '@chakra-ui/react'
 import Head from 'next/head'
 import Link from 'next/link'
-import { GameAttributes } from '../../../db/models/GameModel'
+import {
+    GameAttributes,
+    GameCreationAttributes,
+} from '../../../db/models/GameModel'
 import GameForm, { GameFormProps } from './GameForm'
 import GamesTable from './GamesTable'
 
@@ -47,6 +50,14 @@ export default function GamesView(props: GamesViewProps) {
                     </Heading>
                     {games && (
                         <GamesTable
+                            onFieldEdited={(field, newValue, game) => {
+                                const updated = {
+                                    ...game,
+                                    [field]: newValue,
+                                } as GameAttributes
+
+                                console.log(updated)
+                            }}
                             games={games}
                             renderActions={(game) => {
                                 return (
