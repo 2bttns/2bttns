@@ -51,7 +51,7 @@ export default function GamesView(props: GamesViewProps) {
                                 return (
                                     <Stack direction="row">
                                         <Link
-                                            href={`/play?id=${game.id}`}
+                                            href={`/play?game_id=${game.id}`}
                                             passHref
                                         >
                                             <Button as="a" colorScheme="green">
