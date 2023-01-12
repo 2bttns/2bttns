@@ -17,8 +17,17 @@ export default async function handler(
              *     tags:
              *       - games
              *     summary: Get games
-             *     description: Returns an array containing every game.
+             *     description: |
+             *       Returns a list of games. If the `game_ids` query parameter is provided, only games with those IDs are returned.
+             *
+             *       Otherwise, all games are returned.
              *     parameters:
+             *       - in: query
+             *         name: game_ids
+             *         schema:
+             *           type: string
+             *           example: '1,42,777'
+             *         description: Optional comma-separated IDs of games that should be returned.
              *       - in: query
              *         name: include_lists
              *         schema:
