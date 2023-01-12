@@ -1,8 +1,8 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
-import { Includeable } from 'sequelize'
-import { gameInclude } from '../../../db/constants'
-import { GameModel, ListModel } from '../../../db/index'
-import { GameCreationAttributes } from '../../../db/models/GameModel'
+import { createGameRoute } from '../../../lib/api/games/server/createGameRoute'
+import { deleteGamesRoute } from '../../../lib/api/games/server/deleteGamesRoute'
+import { getGamesRoute } from '../../../lib/api/games/server/getGamesRoute'
+import { updateGamesRoute } from '../../../lib/api/games/server/updateGamesRoute'
 
 export default async function handler(
     req: NextApiRequest,
@@ -32,19 +32,7 @@ export default async function handler(
              */
 
             case 'GET': {
-                const include_lists = req.query.include_lists === 'true'
-                const include: Includeable[] = include_lists
-                    ? [
-                          { model: ListModel, as: gameInclude.input_list },
-                          { model: ListModel, as: gameInclude.output_list },
-                      ]
-                    : []
-                const result = await GameModel.findAll({ include })
-                return res.status(200).json({
-                    games: result.map((l) => {
-                        return l.toJSON()
-                    }),
-                })
+                return await getGamesRoute(req, res)
             }
 
             /**
@@ -71,9 +59,7 @@ export default async function handler(
              *         description: Internal error
              */
             case 'POST': {
-                const body = req.body as GameCreationAttributes
-                const result = await GameModel.create(body)
-                return res.status(201).json({ result })
+                return await createGameRoute(req, res)
             }
 
             /**
@@ -107,44 +93,32 @@ export default async function handler(
              *         description: Internal error
              */
             case 'PUT': {
-                let game_ids = []
-                try {
-                    game_ids = (req.query.game_ids as string).split(',')
-                    if (game_ids.length === 0) {
-                        throw new Error(`"game_ids" is empty`)
-                    }
-                } catch {
-                    return res.status(400).send({
-                        message: `"game_ids" must contain one or more comma-separated game IDs.`,
-                        statusCode: 400,
-                    })
-                }
+                return await updateGamesRoute(req, res)
+            }
 
-                for await (const id of game_ids) {
-                    const game = await GameModel.findOne({ where: { id } })
-                    if (game === null) {
-                        return res.status(400).send({
-                            message: `Invalid game id: ${id}`,
-                            statusCode: 400,
-                        })
-                    }
-                }
-
-                const body = req.body as GameCreationAttributes
-                const result = await GameModel.update(body, {
-                    where: { id: game_ids },
-                })
-
-                if (result[0] === 0) {
-                    return res.status(500).send({
-                        message: 'Update failed. 0 games were updated.',
-                        statusCode: 500,
-                    })
-                }
-
-                return res
-                    .status(200)
-                    .json({ message: 'Update Success', statusCode: 200 })
+            /**
+             * @swagger
+             * /api/games:
+             *   delete:
+             *     tags:
+             *       - games
+             *     summary: Delete games
+             *     description: Delete games.
+             *     parameters:
+             *       - in: query
+             *         name: game_ids
+             *         schema:
+             *           type: string
+             *         description: Comma-separated IDs of games that should be deleted.
+             *         example: '1,42,777'
+             *     responses:
+             *       200:
+             *         description: "Success (TODO: schema)"
+             *       500:
+             *         description: Internal error
+             */
+            case 'DELETE': {
+                return await deleteGamesRoute(req, res)
             }
 
             default: {
