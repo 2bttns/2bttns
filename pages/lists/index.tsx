@@ -19,10 +19,13 @@ import {
     Thead,
     Tr,
 } from '@chakra-ui/react'
+import { useQuery } from '@tanstack/react-query'
 import type { NextPage } from 'next'
 import Head from 'next/head'
 import { useRouter } from 'next/router'
 import { MouseEventHandler, useState } from 'react'
+import { ListAttributes } from '../../db/models/ListModel'
+import { getLists } from '../../lib/api/lists/client/getLists'
 
 const Lists: NextPage = () => {
     const router = useRouter()
@@ -35,12 +38,21 @@ const Lists: NextPage = () => {
     // TODO: Assign list to game
     // TODO: Dissociate from game
 
-    const handleClick: MouseEventHandler<HTMLLIElement> = (item) => {
-        console.log('item clicked: ', item.currentTarget.innerText)
-        router.push(`/lists?list_id=${item.currentTarget.innerText}`)
-    }
+    const {
+        data: lists,
+        isLoading: listsLoading,
+        error: listsError,
+    } = useQuery({
+        queryKey: ['lists'],
+        queryFn: async () => {
+            const data = await getLists()
+            return data.lists
+        },
+    })
 
-    const items = ['Item 1', 'Item 2', 'Item 3']
+    const handleSelectList = (list: ListAttributes) => {
+        router.push(`/lists?list_id=${list.id}`)
+    }
 
     // TODO: Fetch list items using list_id
     const [listItems, setListItems] = useState([
@@ -77,24 +89,37 @@ const Lists: NextPage = () => {
                         My Lists
                     </Heading>
 
+                    <Divider
+                        orientation="horizontal"
+                        sx={{ marginY: '1rem' }}
+                    />
+
                     <Stack direction="row">
                         <Stack direction="column" flex={1} maxWidth="250px">
-                            <Box>Lists</Box>
+                            <Box>
+                                <Text sx={{ fontWeight: 'bold' }}>
+                                    Select List
+                                </Text>
+                            </Box>
                             {/* TODO: Highlight list name when selected */}
                             <List>
-                                {items.map((item) => (
+                                {lists?.map((list) => (
                                     <ListItem
-                                        key={item}
-                                        onClick={handleClick}
+                                        key={list.id}
+                                        onClick={() => handleSelectList(list)}
                                         cursor="pointer"
                                     >
-                                        {item}
+                                        {list.name}
                                     </ListItem>
                                 ))}
                             </List>
                         </Stack>
                         <Stack direction="column" flex={3}>
-                            <Box>List Items</Box>
+                            <Box>
+                                <Text sx={{ fontWeight: 'bold' }}>
+                                    List Items
+                                </Text>
+                            </Box>
                             <Box
                                 sx={{
                                     maxWidth: { base: '50vw', md: '75vw' },
