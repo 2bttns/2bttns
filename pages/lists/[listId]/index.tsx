@@ -18,8 +18,14 @@ import { useQuery } from '@tanstack/react-query'
 import type { NextPage } from 'next'
 import { useRouter } from 'next/router'
 import { useState } from 'react'
+import { ListItemAttributes } from '../../../db/models/ListItemModel'
 import { getLists } from '../../../lib/api/lists/client/getLists'
 import ListsLayout from '../ListsLayout'
+
+// Type for fields to display in the table for a list's list items
+// Users will be able to add fields
+export type ListItemField = keyof ListItemAttributes & string
+
 const ListByIdPage: NextPage = () => {
     const router = useRouter()
     const { listId } = router.query as { listId: string }
@@ -27,6 +33,9 @@ const ListByIdPage: NextPage = () => {
     const redirectInvalidList = () => {
         router.push('/404')
     }
+
+    const [listItems, setListItems] = useState<ListItemAttributes[]>([])
+    const [fields, setFields] = useState<ListItemField[]>([])
 
     const {
         data: list,
@@ -37,7 +46,10 @@ const ListByIdPage: NextPage = () => {
         enabled: listId !== undefined,
         queryKey: ['lists', listId],
         queryFn: async () => {
-            const data = await getLists([listId!])
+            const data = await getLists({
+                list_ids: [listId!],
+                include_list_items: true,
+            })
             if (data.lists.length === 0) {
                 throw new Error('List not found')
             }
@@ -47,20 +59,36 @@ const ListByIdPage: NextPage = () => {
             console.error(error)
             redirectInvalidList()
         },
+        onSuccess: (list) => {
+            setListItems(list?.list_items || [])
+
+            const fields =
+                list?.list_items && list.list_items.length > 0
+                    ? (Object.keys(list.list_items[0]) as ListItemField[])
+                    : []
+
+            const fieldsWithoutDefaultFields = fields.filter(
+                (field) =>
+                    field !== 'id' &&
+                    field !== 'list_id' &&
+                    field !== 'description' &&
+                    field !== 'name'
+            )
+
+            const fieldsWithDefaultFieldsFirst: ListItemField[] = [
+                'name',
+                'description',
+                'id',
+                'list_id',
+                ...fieldsWithoutDefaultFields,
+            ]
+
+            setFields(fieldsWithDefaultFieldsFirst)
+        },
     })
 
-    // TODO: Fetch list items using list_id
-    const [listItems, setListItems] = useState([
-        { name: 'List Item 1', field1: 'Value 1' },
-        { name: 'List Item 2', field1: 'Value 2' },
-        { name: 'List Item 3', field1: 'Value 3' },
-    ])
-
-    // TODO: Get list fields from fetched list items
-    const [fields, setFields] = useState(['name', 'field1'])
-
     const handleAddField = (field: string) => {
-        setFields([...fields, field])
+        setFields([...fields, field] as ListItemField[])
         setListItems(
             listItems.map((item) => {
                 return { ...item, [field]: '' }
@@ -132,10 +160,12 @@ const ListByIdPage: NextPage = () => {
                                                 return (
                                                     <Tr key={item.name}>
                                                         {fields.map((field) => (
-                                                            <Td key={field}>
+                                                            <Td
+                                                                key={`${item.id}-${field}`}
+                                                            >
                                                                 {
                                                                     item[
-                                                                        field as keyof typeof item
+                                                                        field as keyof ListItemAttributes
                                                                     ]
                                                                 }
                                                             </Td>
