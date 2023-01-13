@@ -1,5 +1,5 @@
+import { useQuery, useMutation } from '@tanstack/react-query'
 import type { NextPage } from 'next'
-import { useMutation, useQuery } from 'react-query'
 import { GameFormValues } from '../../components/pages/games/GameForm'
 import GamesView, {
     GamesViewProps,
@@ -10,8 +10,11 @@ import { getGames } from '../../lib/api/games/client/getGames'
 import updateGames from '../../lib/api/games/client/updateGames'
 
 const Games: NextPage = () => {
-    const gamesQuery = useQuery('games', () => {
-        return getGames()
+    const gamesQuery = useQuery({
+        queryKey: ['games'],
+        queryFn: () => {
+            return getGames()
+        },
     })
     const games = gamesQuery?.data?.games
 

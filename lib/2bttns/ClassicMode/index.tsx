@@ -1,4 +1,4 @@
-import { useMutation, useQuery } from 'react-query'
+import { useMutation, useQuery } from '@tanstack/react-query'
 import ClassicButton, { ClassicButtonProps } from './ClassicButton'
 import { Item, Results } from './types'
 import use2bttnsMachine, { Use2bttnsMachineConfig } from './use2bttnsMachine'
