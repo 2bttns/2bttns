@@ -1,9 +1,8 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
 import type { NextApiRequest, NextApiResponse } from 'next'
-import { Includeable } from 'sequelize'
-import { GameModel, ListItemModel, ListModel } from '../../../db'
-import { gameInclude } from '../../../db/constants'
+import { ListItemModel, ListModel } from '../../../db'
 import { ListCreationAttributes } from '../../../db/models/ListModel'
+import { getListsRoute } from '../../../lib/api/lists/server/getListsRoute'
 
 export default async function handler(
     req: NextApiRequest,
@@ -18,7 +17,16 @@ export default async function handler(
              *     tags:
              *       - lists
              *     summary: Get lists
+             *     description: |
+             *       Returns an array of 'lists'. If the `list_ids` query parameter is provided, only lists with those IDs are returned.
+             *
+             *       Otherwise, all lists are returned.
              *     parameters:
+             *       - in: query
+             *         name: list_ids
+             *         schema:
+             *           type: string
+             *           example: '1,42,777'
              *       - in: query
              *         name: include_list_items
              *         schema:
@@ -29,7 +37,6 @@ export default async function handler(
              *         schema:
              *           type: boolean
              *         description: Set to 'true' to include input_list and output_list relations to games along with the results.
-             *     description: Returns an array containing every list.
              *     responses:
              *       200:
              *         description: "Success (TODO: schema)"
@@ -37,25 +44,7 @@ export default async function handler(
              *         description: Internal error
              */
             case 'GET': {
-                const include: Includeable[] = []
-                if (req.query.include_list_items === 'true') {
-                    include.push(ListItemModel)
-                }
-                if (req.query.include_games === 'true') {
-                    include.push(
-                        ...[
-                            { model: GameModel, as: gameInclude.input_list },
-                            { model: GameModel, as: gameInclude.output_list },
-                        ]
-                    )
-                }
-
-                const result = await ListModel.findAll({ include })
-                return res.status(200).json({
-                    lists: result.map((l) => {
-                        return l.toJSON()
-                    }),
-                })
+                return getListsRoute(req, res)
             }
 
             /**
