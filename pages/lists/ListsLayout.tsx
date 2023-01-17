@@ -155,7 +155,11 @@ export default function ListsLayout(props: ListsLayoutProps) {
                                 ))}
                             </List>
                         </Stack>
-                        <Stack direction="column" flex={3}>
+                        <Stack
+                            direction="column"
+                            flex={3}
+                            sx={{ padding: '1rem' }}
+                        >
                             {children}
                         </Stack>
                     </Stack>
