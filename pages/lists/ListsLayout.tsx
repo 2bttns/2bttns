@@ -56,7 +56,7 @@ export default function ListsLayout(props: ListsLayoutProps) {
     const currentListId = router.query.listId as string | undefined
 
     return (
-        <Box sx={{ padding: '1rem', backgroundColor: '#ddd' }}>
+        <Box sx={{ padding: '1rem', backgroundColor: '#ddd', height: '100vh' }}>
             <Head>
                 <title>{subtitle ? `${subtitle} | ` : ''}My Lists</title>
                 <meta name="description" content="My 2bttns Lists" />
@@ -66,7 +66,13 @@ export default function ListsLayout(props: ListsLayoutProps) {
             <main>
                 <Divider orientation="horizontal" sx={{ paddingY: '1rem' }} />
 
-                <Box sx={{ backgroundColor: '#fff', padding: '1rem' }}>
+                <Box
+                    sx={{
+                        backgroundColor: '#fff',
+                        padding: '1rem',
+                        minHeight: '90vh',
+                    }}
+                >
                     <Heading as="h1" size="md">
                         <Breadcrumb>
                             <BreadcrumbItem>

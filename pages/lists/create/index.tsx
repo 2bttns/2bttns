@@ -1,6 +1,7 @@
 import { Box, Text } from '@chakra-ui/react'
 import type { NextPage } from 'next'
 import { useRouter } from 'next/router'
+import CreateListForm from '../../../components/pages/lists/CreateListForm'
 import ListsLayout from '../ListsLayout'
 const Lists: NextPage = () => {
     const router = useRouter()
@@ -20,7 +21,12 @@ const Lists: NextPage = () => {
                     overflowX: 'scroll',
                 }}
             >
-                <h1>FORM</h1>
+                <CreateListForm
+                    onSubmit={(values, onSuccess) => {
+                        console.log(values)
+                        onSuccess()
+                    }}
+                />
             </Box>
         </ListsLayout>
     )
