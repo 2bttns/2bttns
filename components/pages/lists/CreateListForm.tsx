@@ -41,7 +41,7 @@ export default function ListForm(props: ListFormProps) {
                 onSubmit(values, () => {
                     toast({
                         title: 'List created.',
-                        description: 'Your List was created successfully.',
+                        description: `List "${values.name}" was created successfully.`,
                         status: 'success',
                         duration: 5000,
                         isClosable: true,
