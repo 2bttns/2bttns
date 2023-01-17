@@ -5,6 +5,7 @@ import {
     ButtonGroup,
     Code,
     Divider,
+    Stack,
     Tab,
     Table,
     TabList,
@@ -22,6 +23,7 @@ import { useMutation, useQuery } from '@tanstack/react-query'
 import type { NextPage } from 'next'
 import { useRouter } from 'next/router'
 import { useState } from 'react'
+import CustomEditable from '../../../components/CustomEditable'
 import { ListItemAttributes } from '../../../db/models/ListItemModel'
 import { deleteList } from '../../../lib/api/lists/client/deleteList'
 import { getLists } from '../../../lib/api/lists/client/getLists'
@@ -129,6 +131,16 @@ const ListByIdPage: NextPage = () => {
         deleteListMutation(listId)
     }
 
+    const listName = list?.name ?? 'Untitled List'
+    const listDescription = list?.description ?? 'No description'
+
+    const handleListMetadataEdit = (
+        field: 'name' | 'description',
+        value: string
+    ) => {
+        console.log(field, value)
+    }
+
     return (
         <ListsLayout
             subtitle={list?.name}
@@ -138,34 +150,75 @@ const ListByIdPage: NextPage = () => {
                 <Text>Loading list...</Text>
             ) : (
                 <>
-                    <Box>
-                        <Text sx={{ fontWeight: 'bold' }}>List Items</Text>
-                        <ButtonGroup sx={{ marginY: '0.5rem' }}>
-                            <Tooltip
-                                label="Edit this list"
-                                aria-label="Edit this list"
-                            >
-                                <Button colorScheme="blue" variant="outline">
-                                    <EditIcon />
-                                </Button>
-                            </Tooltip>
-                            <Tooltip
-                                label="Delete this list"
-                                aria-label="Delete this list"
-                            >
-                                <Button
-                                    colorScheme="red"
-                                    variant="outline"
-                                    onClick={() => {
-                                        handleDeleteList(listId)
+                    <Stack
+                        direction={{ base: 'column', md: 'row' }}
+                        justifyContent={{ base: 'normal', md: 'space-between' }}
+                    >
+                        <Box sx={{ marginY: '0.5rem', flex: 5 }}>
+                            <Text as="h1" sx={{ fontWeight: 'bold' }}>
+                                Name:
+                            </Text>
+                            <Text as="p">
+                                <CustomEditable
+                                    value={listName}
+                                    handleSave={(value) => {
+                                        handleListMetadataEdit('name', value)
                                     }}
+                                />
+                            </Text>
+                            <Text
+                                as="h1"
+                                sx={{ fontWeight: 'bold', marginTop: '0.5rem' }}
+                            >
+                                Description:
+                            </Text>
+                            <Text as="pre">
+                                <CustomEditable
+                                    value={listDescription}
+                                    handleSave={(value) => {
+                                        handleListMetadataEdit(
+                                            'description',
+                                            value
+                                        )
+                                    }}
+                                    isTextarea
+                                />
+                            </Text>
+                        </Box>
+                        <Box sx={{ marginY: '0.5rem', flex: 1 }}>
+                            <ButtonGroup>
+                                <Tooltip
+                                    label="Edit this list"
+                                    aria-label="Edit this list"
                                 >
-                                    <DeleteIcon />
-                                </Button>
-                            </Tooltip>
-                        </ButtonGroup>
-                    </Box>
+                                    <Button
+                                        colorScheme="blue"
+                                        variant="outline"
+                                        size="sm"
+                                    >
+                                        <EditIcon />
+                                    </Button>
+                                </Tooltip>
+                                <Tooltip
+                                    label="Delete this list"
+                                    aria-label="Delete this list"
+                                >
+                                    <Button
+                                        colorScheme="red"
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={() => {
+                                            handleDeleteList(listId)
+                                        }}
+                                    >
+                                        <DeleteIcon />
+                                    </Button>
+                                </Tooltip>
+                            </ButtonGroup>
+                        </Box>
+                    </Stack>
                     <Divider />
+                    <Text sx={{ fontWeight: 'bold' }}>List Items</Text>
                     <Box
                         sx={{
                             maxWidth: { base: '50vw', md: '75vw' },
