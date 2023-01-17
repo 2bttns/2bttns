@@ -52,6 +52,8 @@ export default function ListsLayout(props: ListsLayoutProps) {
         router.push(`/lists/${list.id}`)
     }
 
+    const currentListId = router.query.listId as string | undefined
+
     return (
         <Box sx={{ padding: '1rem', backgroundColor: '#ddd' }}>
             <Head>
@@ -132,6 +134,17 @@ export default function ListsLayout(props: ListsLayoutProps) {
                                         key={list.id}
                                         onClick={() => handleSelectList(list)}
                                         cursor="pointer"
+                                        sx={{
+                                            padding: '0.5rem',
+                                            borderBottom: '1px solid #ddd',
+                                            backgroundColor:
+                                                currentListId === list.id
+                                                    ? '#ddd'
+                                                    : '#fff',
+                                            ':hover': {
+                                                backgroundColor: '#ddd',
+                                            },
+                                        }}
                                     >
                                         {list.name}
                                     </ListItem>
