@@ -148,6 +148,7 @@ export default function ListsLayout(props: ListsLayoutProps) {
                                                 backgroundColor: '#ddd',
                                             },
                                         }}
+                                        tabIndex={0}
                                     >
                                         {list.name}
                                     </ListItem>
