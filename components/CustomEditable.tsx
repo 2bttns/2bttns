@@ -11,16 +11,29 @@ import {
     useEditableControls,
     UseEditableProps,
 } from '@chakra-ui/react'
+import { useEffect, useState } from 'react'
 
 export type CustomEditableProps = {
     value?: string
+    placeholder?: string
     handleSave?: UseEditableProps['onSubmit']
     isTextarea?: boolean
     isEditable?: boolean
 }
 
 export default function CustomEditable(props: CustomEditableProps) {
-    const { value, handleSave, isTextarea, isEditable = true } = props
+    const {
+        value,
+        placeholder = '',
+        handleSave,
+        isTextarea,
+        isEditable = true,
+    } = props
+
+    const [liveValue, setLiveValue] = useState(value)
+    useEffect(() => {
+        setLiveValue(value)
+    }, [value])
 
     function EditableControls() {
         const {
@@ -57,15 +70,25 @@ export default function CustomEditable(props: CustomEditableProps) {
 
     return (
         <>
-            {!isEditable && value}
+            {!isEditable && (value || placeholder)}
             {isEditable && (
                 <Editable
-                    defaultValue={value || ''}
+                    defaultValue={value}
+                    value={liveValue}
+                    placeholder={placeholder}
                     isPreviewFocusable={false}
                     onSubmit={handleSave}
+                    onChange={(updated) => {
+                        setLiveValue(updated)
+                    }}
                 >
                     <Stack direction="row">
-                        <EditablePreview as="pre" />
+                        <EditablePreview
+                            as="span"
+                            sx={{
+                                whiteSpace: 'pre-wrap',
+                            }}
+                        />
                         {isTextarea ? <EditableTextarea /> : <EditableInput />}
                         <EditableControls />
                     </Stack>
