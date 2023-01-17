@@ -1,7 +1,10 @@
+import { EditIcon, DeleteIcon } from '@chakra-ui/icons'
 import {
     Box,
     Button,
+    ButtonGroup,
     Code,
+    Divider,
     Tab,
     Table,
     TabList,
@@ -12,6 +15,7 @@ import {
     Td,
     Text,
     Thead,
+    Tooltip,
     Tr,
 } from '@chakra-ui/react'
 import { useQuery } from '@tanstack/react-query'
@@ -109,7 +113,26 @@ const ListByIdPage: NextPage = () => {
                 <>
                     <Box>
                         <Text sx={{ fontWeight: 'bold' }}>List Items</Text>
+                        <ButtonGroup sx={{ marginY: '0.5rem' }}>
+                            <Tooltip
+                                label="Edit this list"
+                                aria-label="Edit this list"
+                            >
+                                <Button colorScheme="blue" variant="outline">
+                                    <EditIcon />
+                                </Button>
+                            </Tooltip>
+                            <Tooltip
+                                label="Delete this list"
+                                aria-label="Delete this list"
+                            >
+                                <Button colorScheme="red" variant="outline">
+                                    <DeleteIcon />
+                                </Button>
+                            </Tooltip>
+                        </ButtonGroup>
                     </Box>
+                    <Divider />
                     <Box
                         sx={{
                             maxWidth: { base: '50vw', md: '75vw' },

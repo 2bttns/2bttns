@@ -119,6 +119,9 @@ export default function ListsLayout(props: ListsLayoutProps) {
                                     colorScheme="blue"
                                     width="100%"
                                     variant="outline"
+                                    sx={{
+                                        marginY: '0.5rem',
+                                    }}
                                     {...createListsButtonProps}
                                 >
                                     Create New List
