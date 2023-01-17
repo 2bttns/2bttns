@@ -212,18 +212,6 @@ const ListByIdPage: NextPage = () => {
                         <Box sx={{ marginY: '0.5rem', flex: 1 }}>
                             <ButtonGroup>
                                 <Tooltip
-                                    label="Edit this list"
-                                    aria-label="Edit this list"
-                                >
-                                    <Button
-                                        colorScheme="blue"
-                                        variant="outline"
-                                        size="sm"
-                                    >
-                                        <EditIcon />
-                                    </Button>
-                                </Tooltip>
-                                <Tooltip
                                     label="Delete this list"
                                     aria-label="Delete this list"
                                 >
