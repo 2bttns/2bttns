@@ -9,15 +9,13 @@ import {
 } from 'sequelize-typescript'
 import { gameForeignKeys, gameInclude } from '../constants'
 import GameModel from './GameModel'
-import ListItemModel, {
-    ListItemRelationshipCreationAttributes,
-} from './ListItemModel'
+import ListItemModel, { ListItemAttributes } from './ListItemModel'
 
 export interface ListAttributes {
     id: string
     name: string
     description?: string
-    list_items?: ListItemRelationshipCreationAttributes[]
+    list_items?: ListItemAttributes[]
 }
 
 export interface ListCreationAttributes

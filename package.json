@@ -16,6 +16,7 @@
         "axios": "^1.2.2",
         "color-hash": "^2.0.1",
         "dotenv": "^16.0.2",
+        "formik": "^2.2.9",
         "framer-motion": "^7.3.2",
         "next": "12.3.0",
         "next-swagger-doc": "^0.3.6",
