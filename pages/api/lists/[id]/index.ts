@@ -1,3 +1,4 @@
+import { DefaultResponse } from './../../../../lib/api/constants'
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { ListModel } from '../../../../db'
@@ -9,7 +10,11 @@ export default async function handler(
 ) {
     const id = req.query.id
     if (typeof id !== 'string') {
-        return res.status(400).json({ message: 'Invalid list id.' })
+        const response: DefaultResponse = {
+            message: 'Invalid list id.',
+            statusCode: 400,
+        }
+        return res.status(400).json(response)
     }
 
     try {
@@ -75,7 +80,12 @@ export default async function handler(
                     id,
                     req.body as ListCreationAttributes
                 )
-                return res.status(200).json({ message: 'Success' })
+                const response: DefaultResponse = {
+                    message: 'Success',
+                    statusCode: 200,
+                }
+
+                return res.status(200).json(response)
             }
             /**
              * @swagger
@@ -103,11 +113,27 @@ export default async function handler(
                 if (!deleted) {
                     throw new Error('Failed to delete list.')
                 }
-                return res.status(200).json({ message: 'Success' })
+
+                const response: DefaultResponse = {
+                    message: 'Success',
+                    statusCode: 200,
+                }
+                return res.status(200).json(response)
             }
         }
     } catch (error) {
-        return res.status(500).json({ message: 'Internal error' })
+        let message = 'Internal error'
+        if ('message' in (error as Error)) {
+            message = (error as Error).message
+        }
+
+        console.error(error)
+
+        const response: DefaultResponse = {
+            message,
+            statusCode: 500,
+        }
+        return res.status(500).json(response)
     }
 }
 
@@ -126,9 +152,19 @@ export async function updateListMetadataById(
     body: ListCreationAttributes
 ) {
     const { name, description } = body
-    const result = await ListModel.update(body, {
-        where: { name, description },
-    })
+
+    console.log(
+        await ListModel.findOne({
+            where: { id },
+        })
+    )
+
+    const result = await ListModel.update(
+        { name, description },
+        {
+            where: { id },
+        }
+    )
 
     if (!result || result[0] === 0) {
         throw new Error(`Failed to update list with id: ${id}`)
