@@ -19,7 +19,7 @@ import {
     Tooltip,
     Tr,
 } from '@chakra-ui/react'
-import { useMutation, useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import type { NextPage } from 'next'
 import { useRouter } from 'next/router'
 import { useState } from 'react'
@@ -27,6 +27,14 @@ import CustomEditable from '../../../components/CustomEditable'
 import { ListItemAttributes } from '../../../db/models/ListItemModel'
 import { deleteList } from '../../../lib/api/lists/client/deleteList'
 import { getLists } from '../../../lib/api/lists/client/getLists'
+import {
+    updateList,
+    UpdateListParams,
+} from '../../../lib/api/lists/client/updateList'
+import {
+    DEFAULT_LIST_DESCRIPTION,
+    DEFAULT_LIST_NAME,
+} from '../../../lib/constants'
 import ListsLayout from '../ListsLayout'
 
 // Type for fields to display in the table for a list's list items
@@ -44,6 +52,7 @@ const ListByIdPage: NextPage = () => {
     const [listItems, setListItems] = useState<ListItemAttributes[]>([])
     const [fields, setFields] = useState<ListItemField[]>([])
 
+    const queryClient = useQueryClient()
     const {
         data: list,
         isLoading: isListLoading,
@@ -103,8 +112,6 @@ const ListByIdPage: NextPage = () => {
         )
     }
 
-    const breadcrumbLabel = list ? `${list.name} (${list.id})` : ''
-
     const { mutate: deleteListMutation } = useMutation(
         async (listId: string) => {
             const result = await deleteList({
@@ -131,19 +138,41 @@ const ListByIdPage: NextPage = () => {
         deleteListMutation(listId)
     }
 
-    const listName = list?.name ?? 'Untitled List'
-    const listDescription = list?.description ?? 'No description'
+    const breadcrumbLabel = list
+        ? `${list.name || DEFAULT_LIST_NAME} (${list.id})`
+        : ''
+
+    const { mutate: updateListMutation } = useMutation(
+        async (body: UpdateListParams['body']) => {
+            const result = await updateList({
+                list_id: listId,
+                body,
+            })
+            return result
+        },
+        {
+            onSuccess: (result) => {
+                queryClient.invalidateQueries(['lists', listId])
+                queryClient.invalidateQueries(['lists'])
+            },
+            onError: (error) => {
+                console.error(error)
+            },
+        }
+    )
 
     const handleListMetadataEdit = (
         field: 'name' | 'description',
         value: string
     ) => {
-        console.log(field, value)
+        updateListMutation({
+            [field]: value,
+        })
     }
 
     return (
         <ListsLayout
-            subtitle={list?.name}
+            subtitle={list?.name || DEFAULT_LIST_NAME}
             breadcrumbs={[{ label: breadcrumbLabel, href: '#' }]}
         >
             {isListLoading || listError ? (
@@ -158,32 +187,27 @@ const ListByIdPage: NextPage = () => {
                             <Text as="h1" sx={{ fontWeight: 'bold' }}>
                                 Name:
                             </Text>
-                            <Text as="p">
-                                <CustomEditable
-                                    value={listName}
-                                    handleSave={(value) => {
-                                        handleListMetadataEdit('name', value)
-                                    }}
-                                />
-                            </Text>
+                            <CustomEditable
+                                value={list?.name}
+                                placeholder={DEFAULT_LIST_NAME}
+                                handleSave={(value) => {
+                                    handleListMetadataEdit('name', value)
+                                }}
+                            />
                             <Text
                                 as="h1"
                                 sx={{ fontWeight: 'bold', marginTop: '0.5rem' }}
                             >
                                 Description:
                             </Text>
-                            <Text as="pre">
-                                <CustomEditable
-                                    value={listDescription}
-                                    handleSave={(value) => {
-                                        handleListMetadataEdit(
-                                            'description',
-                                            value
-                                        )
-                                    }}
-                                    isTextarea
-                                />
-                            </Text>
+                            <CustomEditable
+                                value={list?.description}
+                                placeholder={DEFAULT_LIST_DESCRIPTION}
+                                handleSave={(value) => {
+                                    handleListMetadataEdit('description', value)
+                                }}
+                                isTextarea
+                            />
                         </Box>
                         <Box sx={{ marginY: '0.5rem', flex: 1 }}>
                             <ButtonGroup>

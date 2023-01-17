@@ -18,6 +18,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { ListAttributes } from '../../db/models/ListModel'
 import { getLists } from '../../lib/api/lists/client/getLists'
+import { DEFAULT_LIST_NAME } from '../../lib/constants'
 
 export type ListsLayoutProps = {
     children: React.ReactNode
@@ -150,7 +151,7 @@ export default function ListsLayout(props: ListsLayoutProps) {
                                         }}
                                         tabIndex={0}
                                     >
-                                        {list.name}
+                                        {list.name || DEFAULT_LIST_NAME}
                                     </ListItem>
                                 ))}
                             </List>
