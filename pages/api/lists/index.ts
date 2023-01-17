@@ -1,3 +1,5 @@
+import { DefaultResponse } from './../../../lib/api/constants'
+import { CreateListResponse } from './../../../lib/api/lists/server/createListRoute'
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { ListItemModel, ListModel } from '../../../db'
@@ -78,15 +80,33 @@ export default async function handler(
                 const result = await ListModel.create(body, {
                     include: [ListItemModel],
                 })
-                return res
-                    .status(200)
-                    .json({ message: 'Created', statusCode: 200, result })
+
+                const response: CreateListResponse = {
+                    message: 'Created',
+                    statusCode: 200,
+                    result,
+                }
+                return res.status(200).json(response)
             }
+
             default: {
-                return res.status(405).send({ message: 'Method not allowed' })
+                const response: DefaultResponse = {
+                    message: 'Method not allowed',
+                    statusCode: 405,
+                }
+                return res.status(405).send(response)
             }
         }
     } catch (error) {
-        return res.status(500).json({ message: 'Internal error' })
+        let message = 'Internal error'
+        if (error instanceof Error) {
+            message = error.message
+        }
+
+        const response: DefaultResponse = {
+            message,
+            statusCode: 500,
+        }
+        return res.status(500).json(response)
     }
 }

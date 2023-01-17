@@ -34,9 +34,6 @@ export default function ListForm(props: ListFormProps) {
                 if (!values.name) {
                     errors.name = 'Name is required'
                 }
-                if (!values.description) {
-                    errors.description = 'Description is required'
-                }
 
                 return errors
             }}
@@ -56,25 +53,23 @@ export default function ListForm(props: ListFormProps) {
         >
             {({ errors, isSubmitting, touched }) => (
                 <Form>
-                    <FormControl isInvalid={touched.name && !!errors.name}>
+                    <FormControl
+                        isInvalid={touched.name && !!errors.name}
+                        isRequired
+                    >
                         <FormLabel htmlFor="name">Name</FormLabel>
                         <Field as={Input} id="name" name="name" />
                         <FormHelperText color="red">
                             {(touched.name && errors.name) ?? ''}
                         </FormHelperText>
                     </FormControl>
-                    <FormControl
-                        isInvalid={touched.description && !!errors.description}
-                    >
+                    <FormControl>
                         <FormLabel htmlFor="description">Description</FormLabel>
                         <Field
                             as={Textarea}
                             id="description"
                             name="description"
                         />
-                        <FormHelperText color="red">
-                            {(touched.description && errors.description) ?? ''}
-                        </FormHelperText>
                     </FormControl>
                     <Button
                         mt={4}

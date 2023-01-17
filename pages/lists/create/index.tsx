@@ -1,10 +1,20 @@
 import { Box, Text } from '@chakra-ui/react'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import type { NextPage } from 'next'
-import { useRouter } from 'next/router'
 import CreateListForm from '../../../components/pages/lists/CreateListForm'
+import {
+    createList,
+    CreateListParams,
+} from '../../../lib/api/lists/client/createList'
 import ListsLayout from '../ListsLayout'
 const Lists: NextPage = () => {
-    const router = useRouter()
+    const queryClient = useQueryClient()
+    const { mutate: createListMutation } = useMutation(
+        async (body: CreateListParams['body']) => {
+            const results = await createList({ body })
+            return results.result
+        }
+    )
 
     return (
         <ListsLayout
@@ -22,9 +32,13 @@ const Lists: NextPage = () => {
                 }}
             >
                 <CreateListForm
-                    onSubmit={(values, onSuccess) => {
-                        console.log(values)
-                        onSuccess()
+                    onSubmit={async (values, onSuccess) => {
+                        createListMutation(values, {
+                            onSuccess: (result) => {
+                                queryClient.invalidateQueries(['lists'])
+                                onSuccess()
+                            },
+                        })
                     }}
                 />
             </Box>

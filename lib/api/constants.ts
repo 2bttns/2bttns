@@ -1,6 +1,6 @@
 export const API_URL = '/api'
 
-export type DefaultResponse = {
+export interface DefaultResponse {
     message: string
     statusCode: number
 }
