@@ -1,4 +1,4 @@
-import { EditIcon, DeleteIcon } from '@chakra-ui/icons'
+import { DeleteIcon, EditIcon } from '@chakra-ui/icons'
 import {
     Box,
     Button,
@@ -18,11 +18,12 @@ import {
     Tooltip,
     Tr,
 } from '@chakra-ui/react'
-import { useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery } from '@tanstack/react-query'
 import type { NextPage } from 'next'
 import { useRouter } from 'next/router'
 import { useState } from 'react'
 import { ListItemAttributes } from '../../../db/models/ListItemModel'
+import { deleteList } from '../../../lib/api/lists/client/deleteList'
 import { getLists } from '../../../lib/api/lists/client/getLists'
 import ListsLayout from '../ListsLayout'
 
@@ -102,6 +103,32 @@ const ListByIdPage: NextPage = () => {
 
     const breadcrumbLabel = list ? `${list.name} (${list.id})` : ''
 
+    const { mutate: deleteListMutation } = useMutation(
+        async (listId: string) => {
+            const result = await deleteList({
+                list_id: listId,
+            })
+            return result
+        },
+        {
+            onSuccess: (result) => {
+                router.push('/lists')
+            },
+            onError: (error) => {
+                console.error(error)
+            },
+        }
+    )
+
+    const handleDeleteList = (listId: string) => {
+        if (typeof window === 'undefined') return
+        const confirm = window.confirm(
+            'Please confirm that you want to delete this list. This action cannot be undone.'
+        )
+        if (!confirm) return
+        deleteListMutation(listId)
+    }
+
     return (
         <ListsLayout
             subtitle={list?.name}
@@ -126,7 +153,13 @@ const ListByIdPage: NextPage = () => {
                                 label="Delete this list"
                                 aria-label="Delete this list"
                             >
-                                <Button colorScheme="red" variant="outline">
+                                <Button
+                                    colorScheme="red"
+                                    variant="outline"
+                                    onClick={() => {
+                                        handleDeleteList(listId)
+                                    }}
+                                >
                                     <DeleteIcon />
                                 </Button>
                             </Tooltip>
