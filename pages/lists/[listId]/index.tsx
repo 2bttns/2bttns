@@ -1,4 +1,4 @@
-import { DeleteIcon, EditIcon } from '@chakra-ui/icons'
+import { DeleteIcon } from '@chakra-ui/icons'
 import {
     Box,
     Button,
@@ -188,7 +188,7 @@ const ListByIdPage: NextPage = () => {
                                 Name:
                             </Text>
                             <CustomEditable
-                                value={list?.name}
+                                value={list?.name ?? ''}
                                 placeholder={DEFAULT_LIST_NAME}
                                 handleSave={(value) => {
                                     handleListMetadataEdit('name', value)
@@ -201,7 +201,7 @@ const ListByIdPage: NextPage = () => {
                                 Description:
                             </Text>
                             <CustomEditable
-                                value={list?.description}
+                                value={list?.description ?? ''}
                                 placeholder={DEFAULT_LIST_DESCRIPTION}
                                 handleSave={(value) => {
                                     handleListMetadataEdit('description', value)
