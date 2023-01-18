@@ -6,7 +6,7 @@ import {
     createList,
     CreateListParams,
 } from '../../../lib/api/lists/client/createList'
-import ListsLayout from '../ListsLayout'
+import ListsLayout from '../../../components/pages/lists/ListsLayout'
 const Lists: NextPage = () => {
     const queryClient = useQueryClient()
     const { mutate: createListMutation } = useMutation(

@@ -7,21 +7,25 @@ import {
     ButtonProps,
     Divider,
     Heading,
+    Link as ChakraLink,
     List,
     ListItem,
     Stack,
     Text,
 } from '@chakra-ui/react'
-import { useQuery } from '@tanstack/react-query'
 import Head from 'next/head'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
-import { ListAttributes } from '../../db/models/ListModel'
-import { getLists } from '../../lib/api/lists/client/getLists'
-import { DEFAULT_LIST_NAME } from '../../lib/constants'
+import { ListAttributes } from '../../../../db/models/ListModel'
+import { DEFAULT_LIST_NAME } from '../../../../lib/constants'
 
-export type ListsLayoutProps = {
+export type ListsLayoutViewProps = {
     children: React.ReactNode
+    lists: ListAttributes[] | undefined
+    currentListId: string | undefined
+    handleSelectList: (list: ListAttributes) => void
+    listsLoading?: boolean
+    listsError?: Error | undefined
     subtitle?: string
     breadcrumbs?: BreadcrumbItem[]
     createListsButtonProps?: ButtonProps
@@ -32,28 +36,21 @@ export type BreadcrumbItem = {
     href: string
 }
 
-export default function ListsLayout(props: ListsLayoutProps) {
-    const { children, subtitle, breadcrumbs, createListsButtonProps } = props
+// TODO: Make this more generic and move to a shared location; re-use for "games" page
+export default function ListsLayoutView(props: ListsLayoutViewProps) {
+    const {
+        children,
+        subtitle,
+        lists,
+        currentListId,
+        handleSelectList,
+        listsLoading,
+        listsError,
+        breadcrumbs,
+        createListsButtonProps,
+    } = props
 
     const router = useRouter()
-
-    const {
-        data: lists,
-        isLoading: listsLoading,
-        error: listsError,
-    } = useQuery({
-        queryKey: ['lists'],
-        queryFn: async () => {
-            const data = await getLists()
-            return data.lists
-        },
-    })
-
-    const handleSelectList = (list: ListAttributes) => {
-        router.push(`/lists/${list.id}`)
-    }
-
-    const currentListId = router.query.listId as string | undefined
 
     return (
         <Box sx={{ padding: '1rem', backgroundColor: '#ddd', height: '100vh' }}>
@@ -136,8 +133,24 @@ export default function ListsLayout(props: ListsLayoutProps) {
                             </Box>
 
                             <Divider orientation="horizontal" />
-
-                            {/* TODO: Highlight list name when selected */}
+                            {listsLoading && <Text>Loading...</Text>}
+                            {listsError && (
+                                <>
+                                    <Text>
+                                        Failed to load lists.{' '}
+                                        <ChakraLink
+                                            href="/"
+                                            sx={{ color: 'blue.600' }}
+                                            onClick={(e) => {
+                                                e.preventDefault()
+                                                router.reload()
+                                            }}
+                                        >
+                                            Click here to reload the page.
+                                        </ChakraLink>
+                                    </Text>
+                                </>
+                            )}
                             <List>
                                 {lists?.map((list) => (
                                     <ListItem

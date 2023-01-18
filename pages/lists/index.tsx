@@ -1,6 +1,6 @@
 import { Box } from '@chakra-ui/react'
 import type { NextPage } from 'next'
-import ListsLayout from './ListsLayout'
+import ListsLayout from '../../components/pages/lists/ListsLayout'
 
 const Lists: NextPage = () => {
     return (

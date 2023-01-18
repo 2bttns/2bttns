@@ -35,7 +35,7 @@ import {
     DEFAULT_LIST_DESCRIPTION,
     DEFAULT_LIST_NAME,
 } from '../../../lib/constants'
-import ListsLayout from '../ListsLayout'
+import ListsLayout from '../../../components/pages/lists/ListsLayout'
 
 // Type for fields to display in the table for a list's list items
 // Users will be able to add fields
