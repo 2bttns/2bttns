@@ -1,29 +1,10 @@
-import { DeleteIcon } from '@chakra-ui/icons'
-import {
-    Box,
-    Button,
-    ButtonGroup,
-    Code,
-    Divider,
-    Stack,
-    Tab,
-    Table,
-    TabList,
-    TabPanel,
-    TabPanels,
-    Tabs,
-    Tbody,
-    Td,
-    Text,
-    Thead,
-    Tooltip,
-    Tr,
-} from '@chakra-ui/react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import type { NextPage } from 'next'
 import { useRouter } from 'next/router'
 import { useState } from 'react'
-import CustomEditable from '../../../components/CustomEditable'
+import ListByIdView, {
+    ListByIdViewProps,
+} from '../../../components/pages/lists/[listId]/ListByIdView'
 import { ListItemAttributes } from '../../../db/models/ListItemModel'
 import { deleteList } from '../../../lib/api/lists/client/deleteList'
 import { getLists } from '../../../lib/api/lists/client/getLists'
@@ -31,11 +12,7 @@ import {
     updateList,
     UpdateListParams,
 } from '../../../lib/api/lists/client/updateList'
-import {
-    DEFAULT_LIST_DESCRIPTION,
-    DEFAULT_LIST_NAME,
-} from '../../../lib/constants'
-import ListsLayout from '../../../components/pages/lists/ListsLayout'
+import { DEFAULT_LIST_NAME } from '../../../lib/constants'
 
 // Type for fields to display in the table for a list's list items
 // Users will be able to add fields
@@ -103,7 +80,7 @@ const ListByIdPage: NextPage = () => {
         },
     })
 
-    const handleAddField = (field: string) => {
+    const handleAddField: ListByIdViewProps['handleAddField'] = (field) => {
         setFields([...fields, field] as ListItemField[])
         setListItems(
             listItems.map((item) => {
@@ -122,6 +99,7 @@ const ListByIdPage: NextPage = () => {
         {
             onSuccess: (result) => {
                 router.push('/lists')
+                window.alert('List deleted successfully')
             },
             onError: (error) => {
                 console.error(error)
@@ -129,7 +107,9 @@ const ListByIdPage: NextPage = () => {
         }
     )
 
-    const handleDeleteList = (listId: string) => {
+    const handleDeleteList: ListByIdViewProps['handleDeleteList'] = (
+        listId
+    ) => {
         if (typeof window === 'undefined') return
         const confirm = window.confirm(
             'Please confirm that you want to delete this list. This action cannot be undone.'
@@ -161,153 +141,25 @@ const ListByIdPage: NextPage = () => {
         }
     )
 
-    const handleListMetadataEdit = (
-        field: 'name' | 'description',
-        value: string
-    ) => {
-        updateListMutation({
-            [field]: value,
-        })
-    }
+    const handleListMetadataEdit: ListByIdViewProps['handleListMetadataEdit'] =
+        (field, value) => {
+            updateListMutation({
+                [field]: value,
+            })
+        }
 
     return (
-        <ListsLayout
-            subtitle={list?.name || DEFAULT_LIST_NAME}
-            breadcrumbs={[{ label: breadcrumbLabel, href: '#' }]}
-        >
-            {isListLoading || listError ? (
-                <Text>Loading list...</Text>
-            ) : (
-                <>
-                    <Stack
-                        direction={{ base: 'column', md: 'row' }}
-                        justifyContent={{ base: 'normal', md: 'space-between' }}
-                    >
-                        <Box sx={{ marginY: '0.5rem', flex: 5 }}>
-                            <Text as="h1" sx={{ fontWeight: 'bold' }}>
-                                Name:
-                            </Text>
-                            <CustomEditable
-                                value={list?.name ?? ''}
-                                placeholder={DEFAULT_LIST_NAME}
-                                handleSave={(value) => {
-                                    handleListMetadataEdit('name', value)
-                                }}
-                            />
-                            <Text
-                                as="h1"
-                                sx={{ fontWeight: 'bold', marginTop: '0.5rem' }}
-                            >
-                                Description:
-                            </Text>
-                            <CustomEditable
-                                value={list?.description ?? ''}
-                                placeholder={DEFAULT_LIST_DESCRIPTION}
-                                handleSave={(value) => {
-                                    handleListMetadataEdit('description', value)
-                                }}
-                                isTextarea
-                            />
-                        </Box>
-                        <Box sx={{ marginY: '0.5rem', flex: 1 }}>
-                            <ButtonGroup>
-                                <Tooltip
-                                    label="Delete this list"
-                                    aria-label="Delete this list"
-                                >
-                                    <Button
-                                        colorScheme="red"
-                                        variant="outline"
-                                        size="sm"
-                                        onClick={() => {
-                                            handleDeleteList(listId)
-                                        }}
-                                    >
-                                        <DeleteIcon />
-                                    </Button>
-                                </Tooltip>
-                            </ButtonGroup>
-                        </Box>
-                    </Stack>
-                    <Divider />
-                    <Text sx={{ fontWeight: 'bold' }}>List Items</Text>
-                    <Box
-                        sx={{
-                            maxWidth: { base: '50vw', md: '75vw' },
-                            overflowX: 'scroll',
-                        }}
-                    >
-                        <Tabs>
-                            <TabList>
-                                <Tab>Default View</Tab>
-                                <Tab>JSON View</Tab>
-                            </TabList>
-
-                            <TabPanels>
-                                <TabPanel>
-                                    <Table variant="striped">
-                                        <Thead>
-                                            <Tr>
-                                                {fields.map((field) => (
-                                                    <Td key={field}>
-                                                        <Text
-                                                            sx={{
-                                                                fontWeight:
-                                                                    'bold',
-                                                            }}
-                                                        >
-                                                            {field}
-                                                        </Text>
-                                                    </Td>
-                                                ))}
-                                                <Td>
-                                                    <Button
-                                                        onClick={() =>
-                                                            handleAddField(
-                                                                `field${
-                                                                    fields.length +
-                                                                    1
-                                                                }`
-                                                            )
-                                                        }
-                                                    >
-                                                        Add Field
-                                                    </Button>
-                                                </Td>
-                                            </Tr>
-                                        </Thead>
-                                        <Tbody>
-                                            {listItems.map((item) => {
-                                                return (
-                                                    <Tr key={item.name}>
-                                                        {fields.map((field) => (
-                                                            <Td
-                                                                key={`${item.id}-${field}`}
-                                                            >
-                                                                {
-                                                                    item[
-                                                                        field as keyof ListItemAttributes
-                                                                    ]
-                                                                }
-                                                            </Td>
-                                                        ))}
-                                                    </Tr>
-                                                )
-                                            })}
-                                        </Tbody>
-                                    </Table>
-                                </TabPanel>
-                                <TabPanel>
-                                    {/* TODO: Use a library for displaying/editing JSON  */}
-                                    <p>JSON HERE</p>
-                                    <Code>{JSON.stringify(listItems)}</Code>
-                                </TabPanel>
-                            </TabPanels>
-                        </Tabs>
-                    </Box>
-                </>
-            )}
-        </ListsLayout>
+        <ListByIdView
+            list={list!}
+            isListLoading={isListLoading}
+            listError={listError as Error | undefined}
+            listItems={listItems}
+            fields={fields}
+            handleAddField={handleAddField}
+            handleDeleteList={handleDeleteList}
+            handleListMetadataEdit={handleListMetadataEdit}
+            breadcrumbLabel={breadcrumbLabel}
+        />
     )
 }
 
