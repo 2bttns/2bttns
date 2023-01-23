@@ -130,7 +130,6 @@ export default function ListByIdView(props: ListByIdViewProps) {
                     <Box
                         sx={{
                             maxWidth: { base: '50vw', md: '75vw' },
-                            overflowX: 'scroll',
                         }}
                     >
                         <Tabs>
@@ -141,57 +140,66 @@ export default function ListByIdView(props: ListByIdViewProps) {
 
                             <TabPanels>
                                 <TabPanel>
-                                    <Table variant="striped">
-                                        <Thead>
-                                            <Tr>
-                                                {fields.map((field) => (
-                                                    <Td key={field}>
-                                                        <Text
-                                                            sx={{
-                                                                fontWeight:
-                                                                    'bold',
-                                                            }}
-                                                        >
-                                                            {field}
-                                                        </Text>
-                                                    </Td>
-                                                ))}
-                                                <Td>
-                                                    <Button
-                                                        onClick={() =>
-                                                            handleAddField(
-                                                                `field${
-                                                                    fields.length +
-                                                                    1
-                                                                }` as ListItemField
-                                                            )
-                                                        }
-                                                    >
-                                                        Add Field
-                                                    </Button>
-                                                </Td>
-                                            </Tr>
-                                        </Thead>
-                                        <Tbody>
-                                            {listItems.map((item) => {
-                                                return (
-                                                    <Tr key={item.name}>
-                                                        {fields.map((field) => (
-                                                            <Td
-                                                                key={`${item.id}-${field}`}
+                                    <Box
+                                        sx={{
+                                            maxHeight: '50vh',
+                                            overflow: 'auto',
+                                        }}
+                                    >
+                                        <Table variant="striped">
+                                            <Thead>
+                                                <Tr>
+                                                    {fields.map((field) => (
+                                                        <Td key={field}>
+                                                            <Text
+                                                                sx={{
+                                                                    fontWeight:
+                                                                        'bold',
+                                                                }}
                                                             >
-                                                                {
-                                                                    item[
-                                                                        field as keyof ListItemAttributes
-                                                                    ]
-                                                                }
-                                                            </Td>
-                                                        ))}
-                                                    </Tr>
-                                                )
-                                            })}
-                                        </Tbody>
-                                    </Table>
+                                                                {field}
+                                                            </Text>
+                                                        </Td>
+                                                    ))}
+                                                    <Td>
+                                                        <Button
+                                                            onClick={() =>
+                                                                handleAddField(
+                                                                    `field${
+                                                                        fields.length +
+                                                                        1
+                                                                    }` as ListItemField
+                                                                )
+                                                            }
+                                                        >
+                                                            Add Field
+                                                        </Button>
+                                                    </Td>
+                                                </Tr>
+                                            </Thead>
+                                            <Tbody>
+                                                {listItems.map((item) => {
+                                                    return (
+                                                        <Tr key={item.name}>
+                                                            {fields.map(
+                                                                (field) => (
+                                                                    <Td
+                                                                        key={`${item.id}-${field}`}
+                                                                    >
+                                                                        {
+                                                                            item[
+                                                                                field as keyof ListItemAttributes
+                                                                            ]
+                                                                        }
+                                                                    </Td>
+                                                                )
+                                                            )}
+                                                        </Tr>
+                                                    )
+                                                })}
+                                            </Tbody>
+                                        </Table>
+                                    </Box>
                                 </TabPanel>
                                 <TabPanel>
                                     {/* TODO: Use a library for displaying/editing JSON  */}
