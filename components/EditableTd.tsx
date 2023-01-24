@@ -1,16 +1,19 @@
 import { ChakraProps, Td, UseEditableProps } from '@chakra-ui/react'
-import CustomEditable from './CustomEditable'
+import CustomEditable, { CustomEditableProps } from './CustomEditable'
 
-export type EditableTdProps = {
-    value?: string
-    handleSave?: UseEditableProps['onSubmit']
-    isTextarea?: boolean
-    isEditable?: boolean
+export type EditableTdProps = CustomEditableProps & {
     sx?: ChakraProps['sx']
 }
 
 export default function EditableTd(props: EditableTdProps) {
-    const { value, sx, handleSave, isTextarea, isEditable = true } = props
+    const {
+        value,
+        placeholder,
+        handleSave,
+        isTextarea,
+        isEditable = true,
+        sx,
+    } = props
 
     return (
         <Td
@@ -21,6 +24,7 @@ export default function EditableTd(props: EditableTdProps) {
         >
             <CustomEditable
                 value={value}
+                placeholder={placeholder}
                 handleSave={handleSave}
                 isTextarea={isTextarea}
                 isEditable={isEditable}

@@ -1,6 +1,7 @@
 import { Table, Tbody, Td, Text, Thead, Tr } from '@chakra-ui/react'
 import { useEffect, useRef, useState } from 'react'
 import { ListItemAttributes } from '../../../../db/models/ListItemModel'
+import EditableTd from '../../../EditableTd'
 import { ListItemField } from './ListByIdView'
 
 export type ListItemsTableProps = {
@@ -41,6 +42,7 @@ export default function ListItemsTable(props: ListItemsTableProps) {
                     top: 0,
                     backgroundColor: 'white',
                     boxShadow: '0 4px 4px rgba(0, 0, 0, 0.1)',
+                    zIndex: 1,
                 }}
             >
                 <Tr>
@@ -60,12 +62,27 @@ export default function ListItemsTable(props: ListItemsTableProps) {
             <Tbody>
                 {viewListItems.map((item) => {
                     return (
-                        <Tr key={item.id} sx={{ marginTop: '50rem' }}>
-                            {fields.map((field) => (
-                                <Td key={`${item.id}-${field}`}>
-                                    {item[field as keyof ListItemAttributes]}
-                                </Td>
-                            ))}
+                        <Tr key={item.id}>
+                            {fields.map((field) => {
+                                const value =
+                                    item[field as keyof ListItemAttributes]
+
+                                const placeholder = `No ${field}`
+
+                                return (
+                                    <EditableTd
+                                        key={`${item.id}-${field}`}
+                                        placeholder={placeholder}
+                                        value={value ?? ''}
+                                        handleSave={(value) => {
+                                            console.log(value)
+                                        }}
+                                        sx={{
+                                            minWidth: '400px',
+                                        }}
+                                    />
+                                )
+                            })}
                         </Tr>
                     )
                 })}
