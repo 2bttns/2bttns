@@ -145,6 +145,7 @@ export default function ListByIdView(props: ListByIdViewProps) {
                                 <TabPanel>
                                     <Stack direction="column">
                                         <ButtonGroup
+                                            size="sm"
                                             sx={{ marginLeft: 'auto' }}
                                         >
                                             <Button onClick={handleAddListItem}>
