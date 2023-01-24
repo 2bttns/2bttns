@@ -29,7 +29,7 @@ import {
 } from '../../../../lib/constants'
 import CustomEditable from '../../../CustomEditable'
 import ListsLayout from '../ListsLayout'
-import ListItemsTable from './ListItemsTable'
+import ListItemsTable, { ListItemsTableProps } from './ListItemsTable'
 
 // Users will be able to add fields
 export type ListItemField = keyof ListItemAttributes & string
@@ -46,7 +46,8 @@ export type ListByIdViewProps = {
     breadcrumbLabel: string
     listItems: ListItemAttributes[]
     fields: ListItemField[]
-    handleAddField: (field: ListItemField) => void
+    handleAddListItem: ListItemsTableProps['handleAddListItem']
+    handleAddField: ListItemsTableProps['handleAddField']
 }
 
 export default function ListByIdView(props: ListByIdViewProps) {
@@ -59,6 +60,7 @@ export default function ListByIdView(props: ListByIdViewProps) {
         breadcrumbLabel,
         listItems,
         fields,
+        handleAddListItem,
         handleAddField,
     } = props
 
@@ -150,6 +152,9 @@ export default function ListByIdView(props: ListByIdViewProps) {
                                         <ListItemsTable
                                             listItems={listItems}
                                             fields={fields}
+                                            handleAddListItem={
+                                                handleAddListItem
+                                            }
                                             handleAddField={handleAddField}
                                         />
                                     </Box>

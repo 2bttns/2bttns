@@ -6,6 +6,10 @@ import ListByIdView, {
     ListByIdViewProps,
 } from '../../../components/pages/lists/[listId]/ListByIdView'
 import { ListItemAttributes } from '../../../db/models/ListItemModel'
+import {
+    addListItems,
+    AddListItemParams,
+} from '../../../lib/api/lists/client/addListItem'
 import { deleteList } from '../../../lib/api/lists/client/deleteList'
 import { getLists } from '../../../lib/api/lists/client/getLists'
 import {
@@ -89,6 +93,23 @@ const ListByIdPage: NextPage = () => {
         )
     }
 
+    const { mutate: addNewListItemMutation } = useMutation({
+        mutationFn: async (params: AddListItemParams) => {
+            const response = await addListItems(params)
+            return response
+        },
+    })
+
+    const handleAddListItem = () => {
+        // Adds a new empty list item to the list
+        // The user will be able to edit the list item's fields directly via the ListItemsTable component
+        addNewListItemMutation({
+            listId,
+            listItems: [{ name: '' }],
+        })
+        queryClient.invalidateQueries(['lists', listId])
+    }
+
     const { mutate: deleteListMutation } = useMutation(
         async (listId: string) => {
             const result = await deleteList({
@@ -155,6 +176,7 @@ const ListByIdPage: NextPage = () => {
             listError={listError as Error | undefined}
             listItems={listItems}
             fields={fields}
+            handleAddListItem={handleAddListItem}
             handleAddField={handleAddField}
             handleDeleteList={handleDeleteList}
             handleListMetadataEdit={handleListMetadataEdit}

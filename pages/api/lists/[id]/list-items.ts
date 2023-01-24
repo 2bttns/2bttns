@@ -1,3 +1,4 @@
+import { DefaultResponse } from './../../../../lib/api/constants'
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { ListItemModel, ListModel, sequelize } from '../../../../db'
@@ -77,7 +78,11 @@ export default async function handler(
                     list_id,
                     req.body as ListItemCreationAttributes[]
                 )
-                return res.status(201).json({ message: 'Created' })
+                const response: DefaultResponse = {
+                    message: 'Created',
+                    statusCode: 201,
+                }
+                return res.status(response.statusCode).json(response)
             }
             /**
              * @swagger

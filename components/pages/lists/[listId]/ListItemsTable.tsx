@@ -1,5 +1,4 @@
 import {
-    Box,
     Button,
     ButtonGroup,
     Stack,
@@ -17,11 +16,12 @@ import { ListItemField } from './ListByIdView'
 export type ListItemsTableProps = {
     listItems: ListItemAttributes[]
     fields: ListItemField[]
+    handleAddListItem: () => void
     handleAddField: (field: ListItemField) => void
 }
 
 export default function ListItemsTable(props: ListItemsTableProps) {
-    const { listItems, fields, handleAddField } = props
+    const { listItems, fields, handleAddListItem, handleAddField } = props
 
     const [viewListItems, setViewListItems] = useState<ListItemAttributes[]>([])
 
@@ -44,9 +44,9 @@ export default function ListItemsTable(props: ListItemsTableProps) {
     // }
 
     return (
-        <Stack direction="column">
+        <Stack direction="column" sx={{ position: 'relative' }}>
             <ButtonGroup sx={{ marginLeft: 'auto' }}>
-                <Button>Add Item</Button>
+                <Button onClick={handleAddListItem}>Add Item</Button>
                 <Button
                     variant="outline"
                     colorScheme="blue"
@@ -78,7 +78,7 @@ export default function ListItemsTable(props: ListItemsTableProps) {
                 <Tbody>
                     {viewListItems.map((item) => {
                         return (
-                            <Tr key={item.name}>
+                            <Tr key={item.id}>
                                 {fields.map((field) => (
                                     <Td key={`${item.id}-${field}`}>
                                         {
