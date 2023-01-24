@@ -1,15 +1,5 @@
-import {
-    Button,
-    ButtonGroup,
-    Stack,
-    Table,
-    Tbody,
-    Td,
-    Text,
-    Thead,
-    Tr,
-} from '@chakra-ui/react'
-import { useEffect, useState } from 'react'
+import { Table, Tbody, Td, Text, Thead, Tr } from '@chakra-ui/react'
+import { useEffect, useRef, useState } from 'react'
 import { ListItemAttributes } from '../../../../db/models/ListItemModel'
 import { ListItemField } from './ListByIdView'
 
@@ -44,55 +34,42 @@ export default function ListItemsTable(props: ListItemsTableProps) {
     // }
 
     return (
-        <Stack direction="column" sx={{ position: 'relative' }}>
-            <ButtonGroup sx={{ marginLeft: 'auto' }}>
-                <Button onClick={handleAddListItem}>Add Item</Button>
-                <Button
-                    variant="outline"
-                    colorScheme="blue"
-                    onClick={() =>
-                        handleAddField(
-                            `field${fields.length + 1}` as ListItemField
-                        )
-                    }
-                >
-                    Add Field
-                </Button>
-            </ButtonGroup>
-            <Table variant="striped">
-                <Thead>
-                    <Tr>
-                        {fields.map((field) => (
-                            <Td key={field}>
-                                <Text
-                                    sx={{
-                                        fontWeight: 'bold',
-                                    }}
-                                >
-                                    {field}
-                                </Text>
-                            </Td>
-                        ))}
-                    </Tr>
-                </Thead>
-                <Tbody>
-                    {viewListItems.map((item) => {
-                        return (
-                            <Tr key={item.id}>
-                                {fields.map((field) => (
-                                    <Td key={`${item.id}-${field}`}>
-                                        {
-                                            item[
-                                                field as keyof ListItemAttributes
-                                            ]
-                                        }
-                                    </Td>
-                                ))}
-                            </Tr>
-                        )
-                    })}
-                </Tbody>
-            </Table>
-        </Stack>
+        <Table variant="striped">
+            <Thead
+                sx={{
+                    position: 'sticky',
+                    top: 0,
+                    backgroundColor: 'white',
+                    boxShadow: '0 4px 4px rgba(0, 0, 0, 0.1)',
+                }}
+            >
+                <Tr>
+                    {fields.map((field) => (
+                        <Td key={field}>
+                            <Text
+                                sx={{
+                                    fontWeight: 'bold',
+                                }}
+                            >
+                                {field}
+                            </Text>
+                        </Td>
+                    ))}
+                </Tr>
+            </Thead>
+            <Tbody>
+                {viewListItems.map((item) => {
+                    return (
+                        <Tr key={item.id} sx={{ marginTop: '50rem' }}>
+                            {fields.map((field) => (
+                                <Td key={`${item.id}-${field}`}>
+                                    {item[field as keyof ListItemAttributes]}
+                                </Td>
+                            ))}
+                        </Tr>
+                    )
+                })}
+            </Tbody>
+        </Table>
     )
 }

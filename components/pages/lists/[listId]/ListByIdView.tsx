@@ -143,21 +143,43 @@ export default function ListByIdView(props: ListByIdViewProps) {
 
                             <TabPanels>
                                 <TabPanel>
-                                    <Box
-                                        sx={{
-                                            maxHeight: '50vh',
-                                            overflow: 'auto',
-                                        }}
-                                    >
-                                        <ListItemsTable
-                                            listItems={listItems}
-                                            fields={fields}
-                                            handleAddListItem={
-                                                handleAddListItem
-                                            }
-                                            handleAddField={handleAddField}
-                                        />
-                                    </Box>
+                                    <Stack direction="column">
+                                        <ButtonGroup
+                                            sx={{ marginLeft: 'auto' }}
+                                        >
+                                            <Button onClick={handleAddListItem}>
+                                                Add Item
+                                            </Button>
+                                            <Button
+                                                variant="outline"
+                                                colorScheme="blue"
+                                                onClick={() =>
+                                                    handleAddField(
+                                                        `field${
+                                                            fields.length + 1
+                                                        }` as ListItemField
+                                                    )
+                                                }
+                                            >
+                                                Add Field
+                                            </Button>
+                                        </ButtonGroup>
+                                        <Box
+                                            sx={{
+                                                maxHeight: '50vh',
+                                                overflow: 'auto',
+                                            }}
+                                        >
+                                            <ListItemsTable
+                                                listItems={listItems}
+                                                fields={fields}
+                                                handleAddListItem={
+                                                    handleAddListItem
+                                                }
+                                                handleAddField={handleAddField}
+                                            />
+                                        </Box>
+                                    </Stack>
                                 </TabPanel>
                                 <TabPanel>
                                     {/* TODO: Use a library for displaying/editing JSON  */}
