@@ -11,5 +11,5 @@ sequelize.addModels([UserModel, ListModel, ListItemModel, GameModel])
 
 export async function initDb() {
     await sequelize.authenticate()
-    await sequelize.sync({ alter: true })
+    await sequelize.sync({ alter: false })
 }
