@@ -84,6 +84,62 @@ export default async function handler(
                 }
                 return res.status(response.statusCode).json(response)
             }
+
+            /**
+             * @swagger
+             * /api/lists/{id}/list-items:
+             *   put:
+             *     tags:
+             *       - list-items
+             *     summary: Update list items
+             *     description: Updates list items using a comma-separated list of list item IDs.
+             *     parameters:
+             *       - in: path
+             *         name: id
+             *         required: true
+             *         schema:
+             *           type: string
+             *         description: ID of the list to edit list items in.
+             *       - in: query
+             *         name: list_item_ids
+             *         required: true
+             *         schema:
+             *           type: string
+             *         example: 1,42,777
+             *         description: Comma-separated string of list item ID's.
+             *     requestBody:
+             *       required: true
+             *       content:
+             *         application/json:
+             *             schema:
+             *               $ref: '#/components/schemas/ListItem'
+             *             examples:
+             *               'Example Body':
+             *                 $ref: '#/components/examples/ListItemUpdateRequestBody'
+             *     responses:
+             *       200:
+             *         description: Success
+             *       500:
+             *         description: Internal error
+             */
+            case 'PUT': {
+                if (typeof req.query.list_item_ids !== 'string') {
+                    return res.status(400).json({ message: 'Invalid list id.' })
+                }
+                const list_item_ids = req.query.list_item_ids.split(',')
+
+                await updateListItems(
+                    list_id,
+                    list_item_ids,
+                    req.body as ListItemCreationAttributes
+                )
+                const response: DefaultResponse = {
+                    message: `Successfully updated ${list_item_ids.length} list items`,
+                    statusCode: 200,
+                }
+                return res.status(response.statusCode).json(response)
+            }
+
             /**
              * @swagger
              * /api/lists/{id}/list-items:
@@ -159,6 +215,27 @@ export async function createListItems(
         )
     }
     await transaction.commit()
+}
+
+export async function updateListItems(
+    list_id: string,
+    list_item_ids: string[],
+    body: ListItemCreationAttributes
+) {
+    const { id, ...allowedUpdateFields } = body
+
+    for (const list_item_id of list_item_ids) {
+        const instance = await ListItemModel.findOne({
+            where: { id: list_item_id, list_id },
+        })
+        if (!instance) {
+            throw new Error(`Failed to find list item with id: ${list_item_id}`)
+        }
+    }
+
+    await ListItemModel.update(allowedUpdateFields, {
+        where: { id: list_item_ids, list_id },
+    })
 }
 
 export async function deleteListItems(list_id: string, listItemIds: string[]) {
