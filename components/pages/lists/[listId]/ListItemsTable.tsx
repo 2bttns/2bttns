@@ -1,5 +1,5 @@
 import { Table, Tbody, Td, Text, Thead, Tr } from '@chakra-ui/react'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { ListItemAttributes } from '../../../../db/models/ListItemModel'
 import EditableTd from '../../../EditableTd'
 import { ListItemField } from './ListByIdView'
@@ -7,12 +7,15 @@ import { ListItemField } from './ListByIdView'
 export type ListItemsTableProps = {
     listItems: ListItemAttributes[]
     fields: ListItemField[]
-    handleAddListItem: () => void
-    handleAddField: (field: ListItemField) => void
+    handleEditListItem: (
+        item: ListItemAttributes,
+        field: string,
+        value: ListItemAttributes[keyof ListItemAttributes]
+    ) => void
 }
 
 export default function ListItemsTable(props: ListItemsTableProps) {
-    const { listItems, fields, handleAddListItem, handleAddField } = props
+    const { listItems, fields, handleEditListItem } = props
 
     const [viewListItems, setViewListItems] = useState<ListItemAttributes[]>([])
 
@@ -63,9 +66,9 @@ export default function ListItemsTable(props: ListItemsTableProps) {
                 {viewListItems.map((item) => {
                     return (
                         <Tr key={item.id}>
-                            {fields.map((field) => {
-                                const value =
-                                    item[field as keyof ListItemAttributes]
+                            {fields.map((f) => {
+                                const field = f as keyof ListItemAttributes
+                                const value = item[field]
 
                                 const placeholder = `No ${field}`
 
@@ -74,9 +77,13 @@ export default function ListItemsTable(props: ListItemsTableProps) {
                                         key={`${item.id}-${field}`}
                                         placeholder={placeholder}
                                         value={value ?? ''}
-                                        handleSave={(value) => {
-                                            console.log(value)
-                                        }}
+                                        handleSave={(newValue) =>
+                                            handleEditListItem(
+                                                item,
+                                                field,
+                                                newValue
+                                            )
+                                        }
                                         sx={{
                                             minWidth: '400px',
                                         }}

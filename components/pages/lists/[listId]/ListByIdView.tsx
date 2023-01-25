@@ -9,17 +9,12 @@ import {
     Divider,
     Stack,
     Tab,
-    Table,
     TabList,
     TabPanel,
     TabPanels,
     Tabs,
-    Tbody,
-    Td,
     Text,
-    Thead,
     Tooltip,
-    Tr,
 } from '@chakra-ui/react'
 import { ListItemAttributes } from '../../../../db/models/ListItemModel'
 import { ListAttributes } from '../../../../db/models/ListModel'
@@ -46,8 +41,9 @@ export type ListByIdViewProps = {
     breadcrumbLabel: string
     listItems: ListItemAttributes[]
     fields: ListItemField[]
-    handleAddListItem: ListItemsTableProps['handleAddListItem']
-    handleAddField: ListItemsTableProps['handleAddField']
+    handleAddListItem: () => void
+    handleAddField: (field: ListItemField) => void
+    handleEditListItem: ListItemsTableProps['handleEditListItem']
 }
 
 export default function ListByIdView(props: ListByIdViewProps) {
@@ -62,6 +58,7 @@ export default function ListByIdView(props: ListByIdViewProps) {
         fields,
         handleAddListItem,
         handleAddField,
+        handleEditListItem,
     } = props
 
     return (
@@ -174,10 +171,9 @@ export default function ListByIdView(props: ListByIdViewProps) {
                                             <ListItemsTable
                                                 listItems={listItems}
                                                 fields={fields}
-                                                handleAddListItem={
-                                                    handleAddListItem
+                                                handleEditListItem={
+                                                    handleEditListItem
                                                 }
-                                                handleAddField={handleAddField}
                                             />
                                         </Box>
                                     </Stack>

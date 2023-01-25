@@ -7,8 +7,8 @@ import ListByIdView, {
 } from '../../../components/pages/lists/[listId]/ListByIdView'
 import { ListItemAttributes } from '../../../db/models/ListItemModel'
 import {
-    addListItems,
     AddListItemParams,
+    addListItems,
 } from '../../../lib/api/lists/client/addListItem'
 import { deleteList } from '../../../lib/api/lists/client/deleteList'
 import { getLists } from '../../../lib/api/lists/client/getLists'
@@ -16,6 +16,10 @@ import {
     updateList,
     UpdateListParams,
 } from '../../../lib/api/lists/client/updateList'
+import {
+    updateListItems,
+    UpdateListItemsParams,
+} from '../../../lib/api/lists/client/updateListItems'
 import { DEFAULT_LIST_NAME } from '../../../lib/constants'
 
 // Type for fields to display in the table for a list's list items
@@ -80,7 +84,12 @@ const ListByIdPage: NextPage = () => {
                 ...fieldsWithoutDefaultFields,
             ]
 
-            setFields(fieldsWithDefaultFieldsFirst)
+            const fieldsToHide = ['id', 'list_id']
+            const withFieldsHidden = fieldsWithDefaultFieldsFirst.filter(
+                (field) => !fieldsToHide.includes(field)
+            )
+
+            setFields(withFieldsHidden)
         },
     })
 
@@ -100,7 +109,7 @@ const ListByIdPage: NextPage = () => {
         },
     })
 
-    const handleAddListItem = () => {
+    const handleAddListItem: ListByIdViewProps['handleAddListItem'] = () => {
         // Adds a new empty list item to the list
         // The user will be able to edit the list item's fields directly via the ListItemsTable component
         addNewListItemMutation({
@@ -169,6 +178,27 @@ const ListByIdPage: NextPage = () => {
             })
         }
 
+    const { mutate: updateListItemsMutation } = useMutation({
+        mutationFn: async (params: UpdateListItemsParams) => {
+            const response = await updateListItems(params)
+            return response
+        },
+    })
+
+    const handleEditListItem: ListByIdViewProps['handleEditListItem'] = (
+        listItem,
+        field,
+        value
+    ) => {
+        updateListItemsMutation({
+            list_id: listItem.list_id,
+            list_item_ids: [listItem.id],
+            body: {
+                [field]: value,
+            },
+        })
+    }
+
     return (
         <ListByIdView
             list={list!}
@@ -178,6 +208,7 @@ const ListByIdPage: NextPage = () => {
             fields={fields}
             handleAddListItem={handleAddListItem}
             handleAddField={handleAddField}
+            handleEditListItem={handleEditListItem}
             handleDeleteList={handleDeleteList}
             handleListMetadataEdit={handleListMetadataEdit}
             breadcrumbLabel={breadcrumbLabel}
