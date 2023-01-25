@@ -145,10 +145,14 @@ export default function ListByIdView(props: ListByIdViewProps) {
                                             size="sm"
                                             sx={{ marginLeft: 'auto' }}
                                         >
-                                            <Button onClick={handleAddListItem}>
+                                            <Button
+                                                onClick={handleAddListItem}
+                                                colorScheme="blue"
+                                            >
                                                 Add Item
                                             </Button>
-                                            <Button
+                                            {/* TODO: Add field */}
+                                            {/* <Button
                                                 variant="outline"
                                                 colorScheme="blue"
                                                 onClick={() =>
@@ -158,9 +162,10 @@ export default function ListByIdView(props: ListByIdViewProps) {
                                                         }` as ListItemField
                                                     )
                                                 }
+
                                             >
                                                 Add Field
-                                            </Button>
+                                            </Button> */}
                                         </ButtonGroup>
                                         <Box
                                             sx={{
