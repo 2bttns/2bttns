@@ -1,4 +1,5 @@
-import { Table, Tbody, Td, Text, Thead, Tr } from '@chakra-ui/react'
+import { DeleteIcon } from '@chakra-ui/icons'
+import { IconButton, Table, Tbody, Td, Text, Thead, Tr } from '@chakra-ui/react'
 import { useEffect, useState } from 'react'
 import { ListItemAttributes } from '../../../../db/models/ListItemModel'
 import EditableTd from '../../../EditableTd'
@@ -12,10 +13,12 @@ export type ListItemsTableProps = {
         field: string,
         value: ListItemAttributes[keyof ListItemAttributes]
     ) => void
+    handleDeleteListItem: (item: ListItemAttributes) => void
 }
 
 export default function ListItemsTable(props: ListItemsTableProps) {
-    const { listItems, fields, handleEditListItem } = props
+    const { listItems, fields, handleEditListItem, handleDeleteListItem } =
+        props
 
     const [viewListItems, setViewListItems] = useState<ListItemAttributes[]>([])
 
@@ -90,6 +93,15 @@ export default function ListItemsTable(props: ListItemsTableProps) {
                                     />
                                 )
                             })}
+                            <Td>
+                                <IconButton
+                                    aria-label="Delete list item"
+                                    icon={<DeleteIcon />}
+                                    variant="ghost"
+                                    colorScheme="red"
+                                    onClick={() => handleDeleteListItem(item)}
+                                />
+                            </Td>
                         </Tr>
                     )
                 })}

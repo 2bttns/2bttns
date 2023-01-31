@@ -11,6 +11,10 @@ import {
     addListItems,
 } from '../../../lib/api/lists/client/addListItem'
 import { deleteList } from '../../../lib/api/lists/client/deleteList'
+import {
+    deleteListItems,
+    DeleteListItemsParams,
+} from '../../../lib/api/lists/client/deleteListItems'
 import { getLists } from '../../../lib/api/lists/client/getLists'
 import {
     updateList,
@@ -199,6 +203,25 @@ const ListByIdPage: NextPage = () => {
         })
     }
 
+    const { mutate: deleteListItemsMutation } = useMutation({
+        mutationFn: async (params: DeleteListItemsParams) => {
+            const response = await deleteListItems(params)
+            return response
+        },
+    })
+
+    const handleDeleteListItem: ListByIdViewProps['handleDeleteListItem'] = (
+        listItem
+    ) => {
+        deleteListItemsMutation({
+            list_id: listItem.list_id,
+            list_item_ids: [listItem.id],
+        })
+        queryClient.invalidateQueries(['lists', listId])
+        queryClient.invalidateQueries(['lists'])
+        queryClient.refetchQueries(['lists'])
+    }
+
     return (
         <ListByIdView
             list={list!}
@@ -209,6 +232,7 @@ const ListByIdPage: NextPage = () => {
             handleAddListItem={handleAddListItem}
             handleAddField={handleAddField}
             handleEditListItem={handleEditListItem}
+            handleDeleteListItem={handleDeleteListItem}
             handleDeleteList={handleDeleteList}
             handleListMetadataEdit={handleListMetadataEdit}
             breadcrumbLabel={breadcrumbLabel}

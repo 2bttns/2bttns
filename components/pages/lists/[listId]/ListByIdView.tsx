@@ -44,6 +44,7 @@ export type ListByIdViewProps = {
     handleAddListItem: () => void
     handleAddField: (field: ListItemField) => void
     handleEditListItem: ListItemsTableProps['handleEditListItem']
+    handleDeleteListItem: ListItemsTableProps['handleDeleteListItem']
 }
 
 export default function ListByIdView(props: ListByIdViewProps) {
@@ -59,6 +60,7 @@ export default function ListByIdView(props: ListByIdViewProps) {
         handleAddListItem,
         handleAddField,
         handleEditListItem,
+        handleDeleteListItem,
     } = props
 
     return (
@@ -178,6 +180,9 @@ export default function ListByIdView(props: ListByIdViewProps) {
                                                 fields={fields}
                                                 handleEditListItem={
                                                     handleEditListItem
+                                                }
+                                                handleDeleteListItem={
+                                                    handleDeleteListItem
                                                 }
                                             />
                                         </Box>
