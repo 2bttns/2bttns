@@ -132,7 +132,6 @@ const ListByIdPage: NextPage = () => {
         },
         {
             onSuccess: (result) => {
-                router.push('/lists')
                 window.alert('List deleted successfully')
             },
             onError: (error) => {
@@ -149,6 +148,7 @@ const ListByIdPage: NextPage = () => {
             'Please confirm that you want to delete this list. This action cannot be undone.'
         )
         if (!confirm) return
+        router.push('/lists')
         deleteListMutation(listId)
     }
 
