@@ -140,6 +140,12 @@ export const swaggerDefinitionComponents = {
                 },
             ],
         },
+        ListItemUpdateRequestBody: {
+            value: {
+                name: 'Updated List Item',
+                description: 'This list item was updated',
+            },
+        },
         UserRequestBody: {
             value: {
                 name: 'Example User',

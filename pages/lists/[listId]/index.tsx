@@ -6,12 +6,24 @@ import ListByIdView, {
     ListByIdViewProps,
 } from '../../../components/pages/lists/[listId]/ListByIdView'
 import { ListItemAttributes } from '../../../db/models/ListItemModel'
+import {
+    AddListItemParams,
+    addListItems,
+} from '../../../lib/api/lists/client/addListItem'
 import { deleteList } from '../../../lib/api/lists/client/deleteList'
+import {
+    deleteListItems,
+    DeleteListItemsParams,
+} from '../../../lib/api/lists/client/deleteListItems'
 import { getLists } from '../../../lib/api/lists/client/getLists'
 import {
     updateList,
     UpdateListParams,
 } from '../../../lib/api/lists/client/updateList'
+import {
+    updateListItems,
+    UpdateListItemsParams,
+} from '../../../lib/api/lists/client/updateListItems'
 import { DEFAULT_LIST_NAME } from '../../../lib/constants'
 
 // Type for fields to display in the table for a list's list items
@@ -76,7 +88,12 @@ const ListByIdPage: NextPage = () => {
                 ...fieldsWithoutDefaultFields,
             ]
 
-            setFields(fieldsWithDefaultFieldsFirst)
+            const fieldsToHide = ['id', 'list_id']
+            const withFieldsHidden = fieldsWithDefaultFieldsFirst.filter(
+                (field) => !fieldsToHide.includes(field)
+            )
+
+            setFields(withFieldsHidden)
         },
     })
 
@@ -89,6 +106,23 @@ const ListByIdPage: NextPage = () => {
         )
     }
 
+    const { mutate: addNewListItemMutation } = useMutation({
+        mutationFn: async (params: AddListItemParams) => {
+            const response = await addListItems(params)
+            return response
+        },
+    })
+
+    const handleAddListItem: ListByIdViewProps['handleAddListItem'] = () => {
+        // Adds a new empty list item to the list
+        // The user will be able to edit the list item's fields directly via the ListItemsTable component
+        addNewListItemMutation({
+            listId,
+            listItems: [{ name: '' }],
+        })
+        queryClient.invalidateQueries(['lists', listId])
+    }
+
     const { mutate: deleteListMutation } = useMutation(
         async (listId: string) => {
             const result = await deleteList({
@@ -98,7 +132,6 @@ const ListByIdPage: NextPage = () => {
         },
         {
             onSuccess: (result) => {
-                router.push('/lists')
                 window.alert('List deleted successfully')
             },
             onError: (error) => {
@@ -115,6 +148,7 @@ const ListByIdPage: NextPage = () => {
             'Please confirm that you want to delete this list. This action cannot be undone.'
         )
         if (!confirm) return
+        router.push('/lists')
         deleteListMutation(listId)
     }
 
@@ -148,6 +182,46 @@ const ListByIdPage: NextPage = () => {
             })
         }
 
+    const { mutate: updateListItemsMutation } = useMutation({
+        mutationFn: async (params: UpdateListItemsParams) => {
+            const response = await updateListItems(params)
+            return response
+        },
+    })
+
+    const handleEditListItem: ListByIdViewProps['handleEditListItem'] = (
+        listItem,
+        field,
+        value
+    ) => {
+        updateListItemsMutation({
+            list_id: listItem.list_id,
+            list_item_ids: [listItem.id],
+            body: {
+                [field]: value,
+            },
+        })
+    }
+
+    const { mutate: deleteListItemsMutation } = useMutation({
+        mutationFn: async (params: DeleteListItemsParams) => {
+            const response = await deleteListItems(params)
+            return response
+        },
+    })
+
+    const handleDeleteListItem: ListByIdViewProps['handleDeleteListItem'] = (
+        listItem
+    ) => {
+        deleteListItemsMutation({
+            list_id: listItem.list_id,
+            list_item_ids: [listItem.id],
+        })
+        queryClient.invalidateQueries(['lists', listId])
+        queryClient.invalidateQueries(['lists'])
+        queryClient.refetchQueries(['lists'])
+    }
+
     return (
         <ListByIdView
             list={list!}
@@ -155,7 +229,10 @@ const ListByIdPage: NextPage = () => {
             listError={listError as Error | undefined}
             listItems={listItems}
             fields={fields}
+            handleAddListItem={handleAddListItem}
             handleAddField={handleAddField}
+            handleEditListItem={handleEditListItem}
+            handleDeleteListItem={handleDeleteListItem}
             handleDeleteList={handleDeleteList}
             handleListMetadataEdit={handleListMetadataEdit}
             breadcrumbLabel={breadcrumbLabel}

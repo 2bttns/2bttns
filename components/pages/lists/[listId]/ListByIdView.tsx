@@ -9,17 +9,12 @@ import {
     Divider,
     Stack,
     Tab,
-    Table,
     TabList,
     TabPanel,
     TabPanels,
     Tabs,
-    Tbody,
-    Td,
     Text,
-    Thead,
     Tooltip,
-    Tr,
 } from '@chakra-ui/react'
 import { ListItemAttributes } from '../../../../db/models/ListItemModel'
 import { ListAttributes } from '../../../../db/models/ListModel'
@@ -29,6 +24,7 @@ import {
 } from '../../../../lib/constants'
 import CustomEditable from '../../../CustomEditable'
 import ListsLayout from '../ListsLayout'
+import ListItemsTable, { ListItemsTableProps } from './ListItemsTable'
 
 // Users will be able to add fields
 export type ListItemField = keyof ListItemAttributes & string
@@ -45,7 +41,10 @@ export type ListByIdViewProps = {
     breadcrumbLabel: string
     listItems: ListItemAttributes[]
     fields: ListItemField[]
+    handleAddListItem: () => void
     handleAddField: (field: ListItemField) => void
+    handleEditListItem: ListItemsTableProps['handleEditListItem']
+    handleDeleteListItem: ListItemsTableProps['handleDeleteListItem']
 }
 
 export default function ListByIdView(props: ListByIdViewProps) {
@@ -58,7 +57,10 @@ export default function ListByIdView(props: ListByIdViewProps) {
         breadcrumbLabel,
         listItems,
         fields,
+        handleAddListItem,
         handleAddField,
+        handleEditListItem,
+        handleDeleteListItem,
     } = props
 
     return (
@@ -130,7 +132,6 @@ export default function ListByIdView(props: ListByIdViewProps) {
                     <Box
                         sx={{
                             maxWidth: { base: '50vw', md: '75vw' },
-                            overflowX: 'scroll',
                         }}
                     >
                         <Tabs>
@@ -141,57 +142,51 @@ export default function ListByIdView(props: ListByIdViewProps) {
 
                             <TabPanels>
                                 <TabPanel>
-                                    <Table variant="striped">
-                                        <Thead>
-                                            <Tr>
-                                                {fields.map((field) => (
-                                                    <Td key={field}>
-                                                        <Text
-                                                            sx={{
-                                                                fontWeight:
-                                                                    'bold',
-                                                            }}
-                                                        >
-                                                            {field}
-                                                        </Text>
-                                                    </Td>
-                                                ))}
-                                                <Td>
-                                                    <Button
-                                                        onClick={() =>
-                                                            handleAddField(
-                                                                `field${
-                                                                    fields.length +
-                                                                    1
-                                                                }` as ListItemField
-                                                            )
-                                                        }
-                                                    >
-                                                        Add Field
-                                                    </Button>
-                                                </Td>
-                                            </Tr>
-                                        </Thead>
-                                        <Tbody>
-                                            {listItems.map((item) => {
-                                                return (
-                                                    <Tr key={item.name}>
-                                                        {fields.map((field) => (
-                                                            <Td
-                                                                key={`${item.id}-${field}`}
-                                                            >
-                                                                {
-                                                                    item[
-                                                                        field as keyof ListItemAttributes
-                                                                    ]
-                                                                }
-                                                            </Td>
-                                                        ))}
-                                                    </Tr>
-                                                )
-                                            })}
-                                        </Tbody>
-                                    </Table>
+                                    <Stack direction="column">
+                                        <ButtonGroup
+                                            size="sm"
+                                            sx={{ marginLeft: 'auto' }}
+                                        >
+                                            <Button
+                                                onClick={handleAddListItem}
+                                                colorScheme="blue"
+                                            >
+                                                Add Item
+                                            </Button>
+                                            {/* TODO: Add field */}
+                                            {/* <Button
+                                                variant="outline"
+                                                colorScheme="blue"
+                                                onClick={() =>
+                                                    handleAddField(
+                                                        `field${
+                                                            fields.length + 1
+                                                        }` as ListItemField
+                                                    )
+                                                }
+
+                                            >
+                                                Add Field
+                                            </Button> */}
+                                        </ButtonGroup>
+                                        <Box
+                                            sx={{
+                                                maxHeight: '50vh',
+                                                overflow: 'auto',
+                                            }}
+                                        >
+                                            <ListItemsTable
+                                                listItems={listItems}
+                                                fields={fields}
+                                                handleEditListItem={
+                                                    handleEditListItem
+                                                }
+                                                handleDeleteListItem={
+                                                    handleDeleteListItem
+                                                }
+                                            />
+                                        </Box>
+                                    </Stack>
                                 </TabPanel>
                                 <TabPanel>
                                     {/* TODO: Use a library for displaying/editing JSON  */}
