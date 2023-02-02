@@ -72,6 +72,7 @@ model Game {
     updatedAt   DateTime @updatedAt
     name        String
     description String?
+    plugins     String? // Command separated list of plugins
 }
 
 model List {

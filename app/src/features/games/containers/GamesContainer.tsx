@@ -1,80 +1,42 @@
-import { api } from "../../../utils/api";
+import { api, RouterInputs } from "../../../utils/api";
+import Games from "../views/Games";
 
 export type GamesContainerProps = {};
 
 export default function GamesContainer() {
-  const hello = api.example.hello.useQuery({ text: "from tRPC" });
+  const apiUtils = api.useContext();
 
-  const gamesQuery = useQuery({
-    queryKey: ["games"],
-    queryFn: () => {
-      return getGames();
-    },
-  });
-  const games = gamesQuery?.data?.games;
+  const gamesQuery = api.games.getAll.useQuery();
 
-  const { mutate: createGameMutation } = useMutation(
-    (values: GameFormValues) => {
-      return createGame(values);
-    },
-    {
-      onSuccess: (data) => {
-        gamesQuery.refetch();
-      },
-    }
-  );
-
-  const { mutate: deleteGamesMutation } = useMutation(
-    (gameIds: string[]) => {
-      return deleteGames(gameIds);
-    },
-    {
-      onSuccess: (data) => {
-        gamesQuery.refetch();
-      },
-    }
-  );
-
-  const handleDeleteGame: GamesViewProps["handleDeleteGame"] = (gameId) => {
-    deleteGamesMutation([gameId]);
+  const gamesCreateMutation = api.games.create.useMutation();
+  const handleCreateGame = async (input: RouterInputs["games"]["create"]) => {
+    const { id, name, description } = input;
+    await gamesCreateMutation.mutateAsync({ id, name, description });
+    apiUtils.games.invalidate();
   };
 
-  const { mutate: editGamesMutation } = useMutation(
-    (params: {
-      gameIds: Parameters<typeof updateGames>[0];
-      body: Parameters<typeof updateGames>[1];
-    }) => {
-      return updateGames(params["gameIds"], params["body"]);
-    },
-    {
-      onSuccess: (data) => {
-        gamesQuery.refetch();
-      },
-    }
-  );
-  const handleFieldEdited: GamesViewProps["handleFieldEdited"] = (
-    field,
-    newValue,
-    game
+  const gamesDeleteMutation = api.games.deleteById.useMutation();
+  const handleDeleteGame = async (
+    input: RouterInputs["games"]["deleteById"]
   ) => {
-    const { id, ...gameDataExcludingGameId } = game;
-    const updated: Parameters<typeof updateGames>[1] = {
-      ...gameDataExcludingGameId,
-      [field]: newValue,
-    };
+    await gamesDeleteMutation.mutateAsync(input);
+    apiUtils.games.invalidate();
+  };
 
-    editGamesMutation({
-      gameIds: [id],
-      body: updated,
-    });
+  const updateGameMutation = api.games.updateGameById.useMutation();
+  const handleUpdateGame = async (
+    input: RouterInputs["games"]["updateGameById"]
+  ) => {
+    await updateGameMutation.mutateAsync(input);
+    apiUtils.games.invalidate();
   };
 
   return (
-    <GamesView
-      games={games}
-      handleCreateGame={createGameMutation}
+    <Games
+      games={gamesQuery.data?.games ?? []}
+      handleCreateGame={handleCreateGame}
       handleDeleteGame={handleDeleteGame}
-      handleFieldEdited={handleFieldEdited}
+      handleUpdateGame={handleUpdateGame}
     />
   );
 }
