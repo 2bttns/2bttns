@@ -24,7 +24,7 @@ export const create = publicProcedure
       id: z.string(),
     })
   )
-  .query(async ({ ctx, input }) => {
+  .mutation(async ({ ctx, input }) => {
     const examples = await ctx.prisma.example.create({
       data: {
         id: input?.id,
