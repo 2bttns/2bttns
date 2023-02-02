@@ -35,12 +35,6 @@ export default function Games(props: GamesProps) {
 
   return (
     <Box sx={{ padding: "1rem", backgroundColor: "#ddd" }}>
-      <Head>
-        <title>My Games</title>
-        <meta name="description" content="My 2bttns Games" />
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
-
       <main>
         <Box
           sx={{
