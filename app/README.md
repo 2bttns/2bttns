@@ -4,7 +4,7 @@
 
 ```bash
 $ npm install           # Install npm dependencies
-$ npm run db-sync:dev   # Prisma db setup (syncs schema migrations & seed with db)
+$ npm run db-sync:dev   # Prisma db setup (syncs schema migrations & seeds the db)
 ```
 
 ## Run the app
