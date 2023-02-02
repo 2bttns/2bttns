@@ -5,12 +5,16 @@ export const getById = publicProcedure
   .input(
     z.object({
       id: z.string(),
+      includeListItems: z.boolean().optional().default(false),
     })
   )
   .query(async ({ ctx, input }) => {
     const list = await ctx.prisma.list.findFirst({
       where: {
         id: input.id,
+      },
+      include: {
+        ListItem: input.includeListItems,
       },
     });
 
