@@ -1,4 +1,4 @@
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import ClassicButton, { ClassicButtonProps } from "./ClassicButton";
 import { Item, Results } from "./types";
 import use2bttnsMachine, { Use2bttnsMachineConfig } from "./use2bttnsMachine";
@@ -25,18 +25,6 @@ export default function ClassicMode({
   button1Props,
   button2Props,
 }: ClassicModeProps) {
-  // @TODO: Get input list based on game ID
-  const { isLoading, isError, data, error } = useQuery({
-    queryKey: ["lists"],
-    queryFn: async () => {
-      const response = await fetch("/api/lists");
-      if (!response.ok) {
-        throw new Error("Network response was not ok");
-      }
-      return response.json();
-    },
-  });
-
   // @TODO: pass proper game_id and user_id
   const submitResultsMutation = useMutation({
     mutationFn: async (newResult: Results) => {
@@ -66,14 +54,6 @@ export default function ClassicMode({
         }
       },
     });
-
-  if (isLoading) {
-    return <span>Loading...</span>;
-  }
-
-  if (isError) {
-    return <span>Error: {error instanceof Error && error.message}</span>;
-  }
 
   return children({
     button1: registerButton({

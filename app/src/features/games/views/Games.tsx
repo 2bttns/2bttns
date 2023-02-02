@@ -13,7 +13,7 @@ export type GamesProps = {
     input: RouterInputs["games"]["deleteById"]
   ) => Promise<void>;
   handleUpdateGame: (
-    input: RouterInputs["games"]["updateGameById"]
+    input: RouterInputs["games"]["updateById"]
   ) => Promise<void>;
 };
 
