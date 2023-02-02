@@ -1,4 +1,4 @@
-import { exampleRouter } from "./routers/example";
+import { exampleRouter } from "./routers/example/_index";
 import { gamesRouter } from "./routers/games";
 import { createTRPCRouter } from "./trpc";
 
