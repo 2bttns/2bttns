@@ -23,9 +23,9 @@ export default function GamesContainer() {
     apiUtils.games.invalidate();
   };
 
-  const updateGameMutation = api.games.updateGameById.useMutation();
+  const updateGameMutation = api.games.updateById.useMutation();
   const handleUpdateGame = async (
-    input: RouterInputs["games"]["updateGameById"]
+    input: RouterInputs["games"]["updateById"]
   ) => {
     await updateGameMutation.mutateAsync(input);
     apiUtils.games.invalidate();

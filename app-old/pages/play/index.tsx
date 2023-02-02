@@ -3,7 +3,6 @@ import { useQuery } from '@tanstack/react-query'
 import type { NextPage } from 'next'
 import Head from 'next/head'
 import { useRouter } from 'next/router'
-import { useEffect } from 'react'
 import ClassicMode from '../../lib/2bttns/ClassicMode'
 import { getGames } from '../../lib/api/games/client/getGames'
 

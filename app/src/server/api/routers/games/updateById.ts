@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { publicProcedure } from "../../trpc";
 
-export const updateGameById = publicProcedure
+export const updateById = publicProcedure
   .input(
     z.object({
       id: z.string(),
