@@ -8,10 +8,11 @@
     "postinstall": "prisma generate",
     "lint": "next lint",
     "start": "next start",
-    "seed": "npx prisma db seed"
+    "db-sync": "npx prisma db push",
+    "db-seed": "NODE_ENV=development prisma db seed"
   },
   "prisma": {
-    "seed": "ts-node --compiler-options {\"module\":\"CommonJS\"} prisma/seed.ts"
+    "seed": "tsx prisma/seed.ts"
   },
   "dependencies": {
     "@chakra-ui/icons": "^2.0.17",
@@ -47,6 +48,7 @@
     "eslint-config-next": "13.1.6",
     "prisma": "^4.9.0",
     "ts-node": "^10.9.1",
+    "tsx": "^3.12.2",
     "typescript": "^4.9.5"
   },
   "ct3aMetadata": {
