@@ -8,10 +8,10 @@ export const deleteById = publicProcedure
     })
   )
   .mutation(async ({ ctx, input }) => {
-    const deletedList = await ctx.prisma.list.delete({
+    const deletedGameObject = await ctx.prisma.gameObject.delete({
       where: {
         id: input.id,
       },
     });
-    return { deletedList };
+    return { deletedGameObject };
   });

@@ -5,22 +5,18 @@ export const getById = publicProcedure
   .input(
     z.object({
       id: z.string(),
-      includeListItems: z.boolean().optional().default(false),
+      includeTags: z.boolean().optional().default(false),
     })
   )
   .query(async ({ ctx, input }) => {
-    const list = await ctx.prisma.list.findFirst({
+    const gameObject = await ctx.prisma.gameObject.findFirst({
       where: {
         id: input.id,
       },
       include: {
-        ListItem: input.includeListItems,
+        Tags: input.includeTags,
       },
     });
 
-    if (!list) {
-      throw new Error(`List with id ${input.id} not found`);
-    }
-
-    return { list };
+    return { gameObject };
   });

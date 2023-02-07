@@ -7,7 +7,7 @@ export const create = publicProcedure
       id: z.string().optional(),
       name: z.string(),
       description: z.string().optional(),
-      listItems: z
+      tags: z
         .array(
           z.object({
             id: z.string().optional(),
@@ -19,18 +19,25 @@ export const create = publicProcedure
     })
   )
   .mutation(async ({ input, ctx }) => {
-    const createdList = await ctx.prisma.list.create({
+    const createdGameObject = await ctx.prisma.gameObject.create({
       data: {
         id: input.id,
         name: input.name,
         description: input.description,
-        ListItem: {
-          create: input.listItems,
+        Tags: {
+          connectOrCreate: input.tags?.map((tag) => ({
+            where: { id: tag.id },
+            create: {
+              id: tag.id,
+              name: tag.name,
+              description: tag.description,
+            },
+          })),
         },
       },
     });
 
     return {
-      createdGame: createdList,
+      createdGameObject,
     };
   });

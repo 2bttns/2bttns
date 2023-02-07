@@ -9,11 +9,12 @@ export const updateById = publicProcedure
         id: z.string().optional(),
         name: z.string().optional(),
         description: z.string().optional(),
+        tags: z.array(z.string()).optional(),
       }),
     })
   )
   .mutation(async ({ ctx, input }) => {
-    const updatedList = await ctx.prisma.list.update({
+    const updatedList = await ctx.prisma.gameObject.update({
       where: {
         id: input.id,
       },
@@ -21,6 +22,11 @@ export const updateById = publicProcedure
         id: input.data.id,
         name: input.data.name,
         description: input.data.description,
+        Tags: {
+          connect: input.data.tags?.map((tag) => ({
+            id: tag,
+          })),
+        },
       },
     });
 
