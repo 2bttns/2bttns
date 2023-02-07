@@ -72,26 +72,28 @@ model Game {
     updatedAt   DateTime @updatedAt
     name        String
     description String?
-    plugins     String? // Command separated list of plugins
+    plugins     String? // Comma separated list of plugins
+
+    InputTags Tag[]
 }
 
-model List {
+model GameObject {
     id          String   @id @default(cuid())
     createdAt   DateTime @default(now())
     updatedAt   DateTime @updatedAt
     name        String
     description String?
 
-    ListItem ListItem[]
+    Tags Tag[]
 }
 
-model ListItem {
+model Tag {
     id          String   @id @default(cuid())
     createdAt   DateTime @default(now())
     updatedAt   DateTime @updatedAt
     name        String
     description String?
 
-    listId String
-    list   List   @relation(fields: [listId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+    GameObjects  GameObject[]
+    InputToGames Game[]
 }
