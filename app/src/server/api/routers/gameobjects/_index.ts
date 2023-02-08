@@ -5,7 +5,7 @@ import { getAll } from "./getAll";
 import { getById } from "./getById";
 import { updateById } from "./updateById";
 
-export const listsRouter = createTRPCRouter({
+export const gameObjectsRouter = createTRPCRouter({
   create,
   getAll,
   getById,
