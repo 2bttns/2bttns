@@ -9,6 +9,7 @@ import {
   Tbody,
   Td,
   Text,
+  Tfoot,
   Th,
   Thead,
   Tr,
@@ -20,7 +21,7 @@ import {
   PaginationState,
   useReactTable,
 } from "@tanstack/react-table";
-import { useMemo, useState } from "react";
+import { HTMLProps, useEffect, useMemo, useRef, useState } from "react";
 import { api, RouterOutputs } from "../../../utils/api";
 
 const columnHelper =
@@ -62,17 +63,44 @@ export default function GameObjectsContainer() {
   });
   const { pageIndex, pageSize } = pagination;
 
+  const [rowSelection, setRowSelection] = useState({});
+  const [globalFilter, setGlobalFilter] = useState("");
+
   const gameObjectsQuery = api.gameObjects.getAll.useQuery(
-    { includeTags: true, skip: pageIndex * pageSize, take: pageSize },
     {
-      onSuccess: (data) => {
-        console.log(data);
-      },
+      includeTags: true,
+      skip: pageIndex * pageSize,
+      take: pageSize,
+      filter: globalFilter
+        ? {
+            mode: "OR",
+            id: { contains: globalFilter },
+            name: { contains: globalFilter },
+            tag: { contains: globalFilter },
+          }
+        : undefined,
+    },
+    {
       keepPreviousData: true,
     }
   );
 
-  const gameObjectsCountQuery = api.gameObjects.getCount.useQuery();
+  const gameObjectsCountQuery = api.gameObjects.getCount.useQuery(
+    {
+      filter: globalFilter
+        ? {
+            mode: "OR",
+            id: { contains: globalFilter },
+            name: { contains: globalFilter },
+            tag: { contains: globalFilter },
+          }
+        : undefined,
+    },
+    {
+      keepPreviousData: true,
+    }
+  );
+
   const pageCount = useMemo(() => {
     if (!gameObjectsCountQuery.data) return 0;
     return Math.ceil(gameObjectsCountQuery.data.count / pageSize);
@@ -84,11 +112,14 @@ export default function GameObjectsContainer() {
     pageCount,
     state: {
       pagination,
+      rowSelection,
     },
-    onPaginationChange: setPagination,
     getCoreRowModel: getCoreRowModel(),
+    onPaginationChange: setPagination,
     manualPagination: true,
     debugTable: true,
+    enableRowSelection: true,
+    onRowSelectionChange: setRowSelection,
   });
 
   return (
@@ -109,6 +140,13 @@ export default function GameObjectsContainer() {
           overflow: "auto",
         }}
       >
+        <div>
+          <input
+            value={globalFilter ?? ""}
+            onChange={(e) => setGlobalFilter(e.target.value)}
+            placeholder="Search all columns..."
+          />
+        </div>
         <Table>
           <Thead>
             {table.getHeaderGroups().map((headerGroup) => (
@@ -148,6 +186,20 @@ export default function GameObjectsContainer() {
               );
             })}
           </Tbody>
+          <Tfoot>
+            <Tr>
+              <Td>
+                <IndeterminateCheckbox
+                  {...{
+                    checked: table.getIsAllPageRowsSelected(),
+                    indeterminate: table.getIsSomePageRowsSelected(),
+                    onChange: table.getToggleAllPageRowsSelectedHandler(),
+                  }}
+                />
+              </Td>
+              <Td>Page Rows ({table.getRowModel().rows.length})</Td>
+            </Tr>
+          </Tfoot>
         </Table>
       </Box>
 
@@ -229,4 +281,19 @@ export default function GameObjectsContainer() {
       </Stack>
     </Box>
   );
+}
+
+function IndeterminateCheckbox(
+  props: { indeterminate?: boolean } & HTMLProps<HTMLInputElement>
+) {
+  const { indeterminate, ...rest } = props;
+  const ref = useRef<HTMLInputElement>(null!);
+
+  useEffect(() => {
+    if (typeof indeterminate === "boolean") {
+      ref.current.indeterminate = !rest.checked && indeterminate;
+    }
+  }, [ref, indeterminate]);
+
+  return <input type="checkbox" ref={ref} {...rest} />;
 }
