@@ -7,11 +7,13 @@ export const getAll = publicProcedure
       .object({
         take: z.number().optional().default(10),
         skip: z.number().optional(),
-        filter: z.object({
-          id: z.array(z.string()).optional(),
-          name: z.array(z.string()).optional(),
-          tag: z.array(z.string()).optional(),
-        }),
+        filter: z
+          .object({
+            id: z.array(z.string()).optional(),
+            name: z.array(z.string()).optional(),
+            tag: z.array(z.string()).optional(),
+          })
+          .optional(),
         includeTags: z.boolean().optional().default(false),
       })
       .optional()
