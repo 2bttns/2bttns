@@ -1,4 +1,18 @@
-import { Box } from "@chakra-ui/react";
+import {
+  Box,
+  Button,
+  ButtonGroup,
+  Input,
+  Select,
+  Stack,
+  Table,
+  Tbody,
+  Td,
+  Text,
+  Th,
+  Thead,
+  Tr,
+} from "@chakra-ui/react";
 import {
   createColumnHelper,
   flexRender,
@@ -54,7 +68,7 @@ export default function GameObjectsContainer() {
       onSuccess: (data) => {
         console.log(data);
       },
-      // keepPreviousData: true,
+      keepPreviousData: true,
     }
   );
 
@@ -74,7 +88,6 @@ export default function GameObjectsContainer() {
     onPaginationChange: setPagination,
     getCoreRowModel: getCoreRowModel(),
     manualPagination: true,
-    // getPaginationRowModel: getPaginationRowModel(), // If only doing manual pagination, you don't need this
     debugTable: true,
   });
 
@@ -91,117 +104,129 @@ export default function GameObjectsContainer() {
         sx={{
           backgroundColor: "gray.100",
           borderRadius: "2px",
+          width: "100%",
+          height: "75%",
+          overflow: "auto",
         }}
       >
-        <div className="p-2">
-          <div className="h-2" />
-          <table>
-            <thead>
-              {table.getHeaderGroups().map((headerGroup) => (
-                <tr key={headerGroup.id}>
-                  {headerGroup.headers.map((header) => {
+        <Table>
+          <Thead>
+            {table.getHeaderGroups().map((headerGroup) => (
+              <Tr key={headerGroup.id}>
+                {headerGroup.headers.map((header) => {
+                  return (
+                    <Th key={header.id} colSpan={header.colSpan}>
+                      {header.isPlaceholder ? null : (
+                        <div>
+                          {flexRender(
+                            header.column.columnDef.header,
+                            header.getContext()
+                          )}
+                        </div>
+                      )}
+                    </Th>
+                  );
+                })}
+              </Tr>
+            ))}
+          </Thead>
+          <Tbody>
+            {table.getRowModel().rows.map((row) => {
+              return (
+                <Tr key={row.id}>
+                  {row.getVisibleCells().map((cell) => {
                     return (
-                      <th key={header.id} colSpan={header.colSpan}>
-                        {header.isPlaceholder ? null : (
-                          <div>
-                            {flexRender(
-                              header.column.columnDef.header,
-                              header.getContext()
-                            )}
-                          </div>
+                      <Td key={cell.id}>
+                        {flexRender(
+                          cell.column.columnDef.cell,
+                          cell.getContext()
                         )}
-                      </th>
+                      </Td>
                     );
                   })}
-                </tr>
-              ))}
-            </thead>
-            <tbody>
-              {table.getRowModel().rows.map((row) => {
-                return (
-                  <tr key={row.id}>
-                    {row.getVisibleCells().map((cell) => {
-                      return (
-                        <td key={cell.id}>
-                          {flexRender(
-                            cell.column.columnDef.cell,
-                            cell.getContext()
-                          )}
-                        </td>
-                      );
-                    })}
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-          <div className="h-2" />
-          <div className="flex items-center gap-2">
-            <button
-              className="border rounded p-1"
+                </Tr>
+              );
+            })}
+          </Tbody>
+        </Table>
+      </Box>
+
+      <Stack
+        direction="row"
+        sx={{
+          borderRadius: "2px",
+          padding: "1rem",
+          height: "25%",
+          width: "100%",
+          justifyContent: "end",
+          alignItems: "start",
+        }}
+      >
+        <Stack direction="row" spacing="1rem" alignItems="center">
+          <ButtonGroup>
+            <Button
               onClick={() => table.setPageIndex(0)}
               disabled={!table.getCanPreviousPage()}
             >
               {"<<"}
-            </button>
-            <button
-              className="border rounded p-1"
+            </Button>
+            <Button
               onClick={() => table.previousPage()}
               disabled={!table.getCanPreviousPage()}
             >
               {"<"}
-            </button>
-            <button
-              className="border rounded p-1"
+            </Button>
+            <Button
               onClick={() => table.nextPage()}
               disabled={!table.getCanNextPage()}
             >
               {">"}
-            </button>
-            <button
-              className="border rounded p-1"
+            </Button>
+            <Button
               onClick={() => table.setPageIndex(table.getPageCount() - 1)}
               disabled={!table.getCanNextPage()}
             >
               {">>"}
-            </button>
-            <span className="flex items-center gap-1">
-              <div>Page</div>
+            </Button>
+          </ButtonGroup>
+          <Stack direction="row">
+            <Text>
+              Page{" "}
               <strong>
                 {table.getState().pagination.pageIndex + 1} of{" "}
                 {table.getPageCount()}
               </strong>
-            </span>
-            <span className="flex items-center gap-1">
-              | Go to page:
-              <input
-                type="number"
-                defaultValue={table.getState().pagination.pageIndex + 1}
-                onChange={(e) => {
-                  const page = e.target.value ? Number(e.target.value) - 1 : 0;
-                  table.setPageIndex(page);
-                }}
-                className="border p-1 rounded w-16"
-              />
-            </span>
-            <select
-              value={table.getState().pagination.pageSize}
+            </Text>
+            <Text>Go to page:</Text>
+            <Input
+              type="number"
+              defaultValue={table.getState().pagination.pageIndex + 1}
               onChange={(e) => {
-                table.setPageSize(Number(e.target.value));
+                let page = e.target.value ? Number(e.target.value) - 1 : 0;
+                table.setPageIndex(page);
               }}
-            >
-              {[10, 20, 30, 40, 50].map((pageSize) => (
-                <option key={pageSize} value={pageSize}>
-                  Show {pageSize}
-                </option>
-              ))}
-            </select>
-            {gameObjectsQuery.isFetching ? "Loading..." : null}
-          </div>
+              sx={{ width: "64px" }}
+            />
+          </Stack>
+          <Select
+            value={table.getState().pagination.pageSize}
+            onChange={(e) => {
+              table.setPageSize(Number(e.target.value));
+            }}
+            sx={{
+              backgroundColor: "gray.100",
+            }}
+          >
+            {[10, 20, 30, 40, 50].map((pageSize) => (
+              <option key={pageSize} value={pageSize}>
+                Show {pageSize}
+              </option>
+            ))}
+          </Select>
+          {gameObjectsQuery.isFetching ? "Loading..." : null}
           <div>{table.getRowModel().rows.length} Rows</div>
-          <pre>{JSON.stringify(pagination, null, 2)}</pre>
-        </div>
-      </Box>
+        </Stack>
+      </Stack>
     </Box>
   );
 }
