@@ -66,6 +66,8 @@ export default function GameObjectsContainer() {
   });
   const { pageIndex, pageSize } = pagination;
 
+  useEffect(() => {}, [pageIndex]);
+
   const [rowSelection, setRowSelection] = useState({});
   const [globalFilter, setGlobalFilter] = useState("");
 
@@ -108,6 +110,22 @@ export default function GameObjectsContainer() {
     if (!gameObjectsCountQuery.data) return 0;
     return Math.ceil(gameObjectsCountQuery.data.count / pageSize);
   }, [gameObjectsCountQuery.data, pagination.pageSize]);
+
+  useEffect(() => {
+    // If the page index is out of bounds, reset it to the last page
+    if (pageIndex >= pageCount) {
+      setPagination((prev) => ({ ...prev, pageIndex: pageCount - 1 }));
+      return;
+    }
+
+    // Otherwise, if the page index is less than 0, reset it to 0
+    // Only do this if the page count is greater than 0; or else, we'll get stuck in an infinite loop from the queries
+    if (pageCount === 0) return;
+    if (pageIndex < 0) {
+      setPagination((prev) => ({ ...prev, pageIndex: 0 }));
+      return;
+    }
+  }, [pageCount, pageIndex]);
 
   const table = useReactTable({
     data: gameObjectsQuery.data?.gameObjects ?? [],
