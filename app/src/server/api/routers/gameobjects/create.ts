@@ -24,7 +24,7 @@ export const create = publicProcedure
         id: input.id,
         name: input.name,
         description: input.description,
-        Tags: {
+        tags: {
           connectOrCreate: input.tags?.map((tag) => ({
             where: { id: tag.id },
             create: {

@@ -14,7 +14,7 @@ export const getById = publicProcedure
         id: input.id,
       },
       include: {
-        Tags: input.includeTags,
+        tags: input.includeTags,
       },
     });
 

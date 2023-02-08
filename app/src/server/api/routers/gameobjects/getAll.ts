@@ -23,13 +23,13 @@ export const getAll = publicProcedure
       take: input?.take,
       skip: input?.skip,
       where: {
-        id: {
+        id: input?.filter?.id && {
           in: input?.filter?.id,
         },
-        name: {
+        name: input?.filter?.name && {
           in: input?.filter?.name,
         },
-        Tags: {
+        tags: input?.filter?.tag && {
           some: {
             id: {
               in: input?.filter?.tag,
@@ -38,7 +38,7 @@ export const getAll = publicProcedure
         },
       },
       include: {
-        Tags: input?.includeTags,
+        tags: input?.includeTags,
       },
     });
     return { gameObjects };

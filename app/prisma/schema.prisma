@@ -74,7 +74,7 @@ model Game {
     description String?
     plugins     String? // Comma separated list of plugins
 
-    InputTags Tag[]
+    inputTags Tag[]
 }
 
 model GameObject {
@@ -84,7 +84,7 @@ model GameObject {
     name        String
     description String?
 
-    Tags Tag[]
+    tags Tag[]
 }
 
 model Tag {
@@ -94,6 +94,6 @@ model Tag {
     name        String
     description String?
 
-    GameObjects  GameObject[]
-    InputToGames Game[]
+    gameObjects  GameObject[]
+    inputToGames Game[]
 }
