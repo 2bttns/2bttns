@@ -1,8 +1,11 @@
+import { SearchIcon } from "@chakra-ui/icons";
 import {
   Box,
   Button,
   ButtonGroup,
   Input,
+  InputGroup,
+  InputLeftElement,
   Select,
   Stack,
   Table,
@@ -140,13 +143,22 @@ export default function GameObjectsContainer() {
           overflow: "auto",
         }}
       >
-        <div>
-          <input
-            value={globalFilter ?? ""}
-            onChange={(e) => setGlobalFilter(e.target.value)}
-            placeholder="Search all columns..."
-          />
-        </div>
+        <Stack direction="row" sx={{ padding: "1rem" }}>
+          <InputGroup>
+            <InputLeftElement
+              pointerEvents="none"
+              color="gray.300"
+              fontSize="1.2em"
+            >
+              <SearchIcon />
+            </InputLeftElement>
+            <Input
+              value={globalFilter ?? ""}
+              onChange={(e) => setGlobalFilter(e.target.value)}
+              placeholder="Search by name, id, or tag"
+            />
+          </InputGroup>
+        </Stack>
         <Table>
           <Thead>
             {table.getHeaderGroups().map((headerGroup) => (
