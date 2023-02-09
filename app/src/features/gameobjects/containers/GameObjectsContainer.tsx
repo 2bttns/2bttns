@@ -25,48 +25,95 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import { HTMLProps, useEffect, useMemo, useRef, useState } from "react";
-import { api, RouterOutputs } from "../../../utils/api";
+import { api, RouterInputs, RouterOutputs } from "../../../utils/api";
+import CustomEditable from "../../shared/components/CustomEditable";
 
 const columnHelper =
   createColumnHelper<
     RouterOutputs["gameObjects"]["getAll"]["gameObjects"][0]
   >();
 
-const columns = [
-  columnHelper.accessor("id", {
-    cell: (info) => info.getValue(),
-  }),
-  columnHelper.accessor("name", {
-    cell: (info) => info.getValue(),
-  }),
-  columnHelper.accessor("description", {
-    cell: (info) => info.getValue(),
-  }),
-  columnHelper.accessor("tags", {
-    cell: (info) => {
-      if (!info.getValue() || info.getValue().length === 0) return "No tags";
-      return info
-        .getValue()
-        .map((tag) => tag.name)
-        .join(", ");
-    },
-  }),
-  columnHelper.accessor("createdAt", {
-    cell: (info) => info.getValue().toLocaleString(),
-  }),
-  columnHelper.accessor("updatedAt", {
-    cell: (info) => info.getValue().toLocaleString(),
-  }),
-];
-
 export default function GameObjectsContainer() {
+  const updateGameObjectMutation = api.gameObjects.updateById.useMutation();
+
+  const handleUpdateGameObject = async (
+    id: string,
+    data: RouterInputs["gameObjects"]["updateById"]["data"]
+  ) => {
+    try {
+      await updateGameObjectMutation.mutateAsync({ id, data });
+    } catch (error) {
+      window.alert("Failed to update game object");
+      console.error(error);
+    }
+  };
+
+  const columns = useMemo(
+    () => [
+      columnHelper.accessor("id", {
+        cell: (info) => (
+          <CustomEditable
+            value={info.getValue()}
+            placeholder="No ID"
+            handleSave={(nextValue) =>
+              handleUpdateGameObject(info.row.original.id, {
+                id: nextValue,
+              })
+            }
+          />
+        ),
+      }),
+      columnHelper.accessor("name", {
+        cell: (info) => (
+          <CustomEditable
+            value={info.getValue()}
+            placeholder="No name"
+            handleSave={(nextValue) =>
+              handleUpdateGameObject(info.row.original.id, {
+                name: nextValue,
+              })
+            }
+          />
+        ),
+      }),
+      columnHelper.accessor("description", {
+        cell: (info) => (
+          <CustomEditable
+            value={info.getValue() ?? ""}
+            placeholder="No description"
+            handleSave={(nextValue) =>
+              handleUpdateGameObject(info.row.original.id, {
+                description: nextValue,
+              })
+            }
+          />
+        ),
+      }),
+      columnHelper.accessor("tags", {
+        cell: (info) => {
+          if (!info.getValue() || info.getValue().length === 0)
+            return "No tags";
+          return info
+            .getValue()
+            .map((tag) => tag.name)
+            .join(", ");
+        },
+      }),
+      columnHelper.accessor("createdAt", {
+        cell: (info) => info.getValue().toLocaleString(),
+      }),
+      columnHelper.accessor("updatedAt", {
+        cell: (info) => info.getValue().toLocaleString(),
+      }),
+    ],
+    []
+  );
+
   const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: 0,
     pageSize: 10,
   });
   const { pageIndex, pageSize } = pagination;
-
-  useEffect(() => {}, [pageIndex]);
 
   const [rowSelection, setRowSelection] = useState({});
   const [globalFilter, setGlobalFilter] = useState("");
