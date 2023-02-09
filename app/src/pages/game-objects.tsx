@@ -1,3 +1,4 @@
+import { Box } from "@chakra-ui/react";
 import type { NextPage } from "next";
 import Head from "next/head";
 import GameObjectsTableContainer from "../features/gameobjects/containers/GameObjectsTableContainer";
@@ -6,11 +7,13 @@ const Lists: NextPage = () => {
   return (
     <>
       <Head>
-        <title>My Game Objects | 2bttns</title>
-        <meta name="description" content="Lists" />
+        <title>Game Objects | 2bttns</title>
+        <meta name="description" content="Game object management panel" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <GameObjectsTableContainer />
+      <Box width="100vw" height="100vh" backgroundColor="white">
+        <GameObjectsTableContainer />
+      </Box>
     </>
   );
 };
