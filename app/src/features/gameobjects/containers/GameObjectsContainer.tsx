@@ -1,8 +1,9 @@
-import { SearchIcon } from "@chakra-ui/icons";
+import { DeleteIcon, SearchIcon } from "@chakra-ui/icons";
 import {
   Box,
   Button,
   ButtonGroup,
+  IconButton,
   Input,
   InputGroup,
   InputLeftElement,
@@ -15,9 +16,11 @@ import {
   Tfoot,
   Th,
   Thead,
+  Tooltip,
   Tr,
 } from "@chakra-ui/react";
 import {
+  ColumnDef,
   createColumnHelper,
   flexRender,
   getCoreRowModel,
@@ -28,10 +31,10 @@ import { HTMLProps, useEffect, useMemo, useRef, useState } from "react";
 import { api, RouterInputs, RouterOutputs } from "../../../utils/api";
 import CustomEditable from "../../shared/components/CustomEditable";
 
-const columnHelper =
-  createColumnHelper<
-    RouterOutputs["gameObjects"]["getAll"]["gameObjects"][0]
-  >();
+export type GameObjectData =
+  RouterOutputs["gameObjects"]["getAll"]["gameObjects"][0];
+
+const columnHelper = createColumnHelper<GameObjectData>();
 
 export default function GameObjectsContainer() {
   const [pagination, setPagination] = useState<PaginationState>({
@@ -88,7 +91,7 @@ export default function GameObjectsContainer() {
     await gameObjectsQuery.refetch();
   };
 
-  const columns = useMemo(
+  const columns = useMemo<ColumnDef<GameObjectData, any>[]>(
     () => [
       columnHelper.accessor("id", {
         cell: (info) => (
@@ -135,7 +138,7 @@ export default function GameObjectsContainer() {
             return "No tags";
           return info
             .getValue()
-            .map((tag) => tag.name)
+            .map((tag: GameObjectData["tags"][0]) => tag.name)
             .join(", ");
         },
       }),
@@ -143,6 +146,29 @@ export default function GameObjectsContainer() {
         header: "Last Updated",
         cell: (info) => info.getValue().toLocaleString(),
       }),
+      {
+        id: "actions",
+        header: "",
+        cell: (info) => {
+          const { id } = info.row.original;
+          return (
+            <ButtonGroup width="100%" justifyContent="end">
+              <Tooltip label={`Delete`} placement="top">
+                <IconButton
+                  colorScheme="red"
+                  onClick={async () => {
+                    console.log("Delete", id);
+                  }}
+                  icon={<DeleteIcon />}
+                  aria-label={`Delete gameobject with ID: ${id}`}
+                  size="sm"
+                  variant="outline"
+                />
+              </Tooltip>
+            </ButtonGroup>
+          );
+        },
+      },
     ],
     []
   );
