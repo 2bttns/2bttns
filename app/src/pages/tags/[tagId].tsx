@@ -1,4 +1,11 @@
-import { Code } from "@chakra-ui/react";
+import {
+  Button,
+  ButtonGroup,
+  Code,
+  Divider,
+  Heading,
+  Stack,
+} from "@chakra-ui/react";
 import { NextPage } from "next";
 import Head from "next/head";
 import { useRouter } from "next/router";
@@ -31,6 +38,15 @@ const TagByIdPage: NextPage = () => {
       utils.tags.invalidate();
     } catch (error) {
       window.alert("Error updating tag. See console for details.");
+      console.error(error);
+    }
+  };
+
+  const handleDeleteTag = async () => {
+    try {
+      console.log("Deleting tag with id: ", tagId);
+    } catch (error) {
+      window.alert("Error deleting tag. See console for details.");
       console.error(error);
     }
   };
@@ -77,21 +93,42 @@ const TagByIdPage: NextPage = () => {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <TagsLayoutContainer selectedTag={tag}>
-        <h1>Tag Details</h1>
-        <CustomEditable
-          value={tag?.name || ""}
-          placeholder="Untitled Tag"
-          handleSave={async (value) => {
-            handleUpdateTag({ id: tag.id, data: { name: value } });
-          }}
-        />
-        <CustomEditable
-          value={tag?.description || ""}
-          placeholder="No description"
-          handleSave={async (value) => {
-            handleUpdateTag({ id: tag.id, data: { description: value } });
-          }}
-        />
+        <Stack direction="column" spacing="1rem" sx={{ padding: "1rem" }}>
+          <Heading size="xl">
+            <CustomEditable
+              value={tag?.name || ""}
+              placeholder="Untitled Tag"
+              handleSave={async (value) => {
+                handleUpdateTag({ id: tag.id, data: { name: value } });
+              }}
+            />
+          </Heading>
+
+          <CustomEditable
+            isTextarea
+            value={tag?.description || ""}
+            placeholder="No description"
+            handleSave={async (value) => {
+              handleUpdateTag({ id: tag.id, data: { description: value } });
+            }}
+          />
+          <Divider />
+
+          <Heading size="md" color="red.500">
+            DANGER ZONE
+          </Heading>
+          <ButtonGroup>
+            <Button
+              colorScheme="red"
+              aria-label="Delete tag"
+              variant="outline"
+              size="sm"
+              onClick={handleDeleteTag}
+            >
+              Delete Tag
+            </Button>
+          </ButtonGroup>
+        </Stack>
       </TagsLayoutContainer>
     </>
   );
