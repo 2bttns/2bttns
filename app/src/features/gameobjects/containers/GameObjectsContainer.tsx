@@ -107,6 +107,18 @@ export default function GameObjectsContainer() {
     }
   };
 
+  const createGameObjectMutation = api.gameObjects.create.useMutation();
+  const handleCreateGameObject = async (name: string) => {
+    try {
+      await createGameObjectMutation.mutateAsync({ name });
+      await gameObjectsCountQuery.refetch();
+      await gameObjectsQuery.refetch();
+    } catch (error) {
+      window.alert("Error creating game object\n See console for details");
+      console.error(error);
+    }
+  };
+
   const columns = useMemo<ColumnDef<GameObjectData, any>[]>(
     () => [
       columnHelper.accessor("id", {
@@ -284,6 +296,10 @@ export default function GameObjectsContainer() {
                   icon={<AddIcon />}
                   aria-label="Create new item"
                   size="sm"
+                  onClick={() => {
+                    if (!globalFilter) return;
+                    handleCreateGameObject(globalFilter);
+                  }}
                 />
               </Tooltip>
             </InputRightElement>
