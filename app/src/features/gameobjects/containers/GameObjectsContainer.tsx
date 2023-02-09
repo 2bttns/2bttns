@@ -40,12 +40,7 @@ export default function GameObjectsContainer() {
     id: string,
     data: RouterInputs["gameObjects"]["updateById"]["data"]
   ) => {
-    try {
-      await updateGameObjectMutation.mutateAsync({ id, data });
-    } catch (error) {
-      window.alert("Failed to update game object");
-      console.error(error);
-    }
+    await updateGameObjectMutation.mutateAsync({ id, data });
   };
 
   const columns = useMemo(
@@ -55,7 +50,7 @@ export default function GameObjectsContainer() {
           <CustomEditable
             value={info.getValue()}
             placeholder="No ID"
-            handleSave={(nextValue) =>
+            handleSave={async (nextValue) =>
               handleUpdateGameObject(info.row.original.id, {
                 id: nextValue,
               })
@@ -68,7 +63,7 @@ export default function GameObjectsContainer() {
           <CustomEditable
             value={info.getValue()}
             placeholder="No name"
-            handleSave={(nextValue) =>
+            handleSave={async (nextValue) =>
               handleUpdateGameObject(info.row.original.id, {
                 name: nextValue,
               })
@@ -81,7 +76,7 @@ export default function GameObjectsContainer() {
           <CustomEditable
             value={info.getValue() ?? ""}
             placeholder="No description"
-            handleSave={(nextValue) =>
+            handleSave={async (nextValue) =>
               handleUpdateGameObject(info.row.original.id, {
                 description: nextValue,
               })

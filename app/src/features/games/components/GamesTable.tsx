@@ -38,7 +38,7 @@ export default function GamesTable(props: GamesTableProps) {
             <EditableTd
               value={game.name}
               placeholder="Untitled"
-              handleSave={(value) => {
+              handleSave={async (value) => {
                 if (!onFieldEdited) {
                   return;
                 }
@@ -50,7 +50,7 @@ export default function GamesTable(props: GamesTableProps) {
               value={game.description ?? ""}
               placeholder="No description"
               isTextarea
-              handleSave={(value) => {
+              handleSave={async (value) => {
                 if (!onFieldEdited) {
                   return;
                 }
@@ -61,7 +61,7 @@ export default function GamesTable(props: GamesTableProps) {
             <EditableTd
               value={game.plugins ?? ""}
               placeholder="No plugins"
-              handleSave={(value) => {
+              handleSave={async (value) => {
                 if (!onFieldEdited) {
                   return;
                 }

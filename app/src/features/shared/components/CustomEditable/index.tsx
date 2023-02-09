@@ -9,14 +9,13 @@ import {
   IconButton,
   Stack,
   useEditableControls,
-  UseEditableProps,
 } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
 
 export type CustomEditableProps = {
   value?: string;
   placeholder?: string;
-  handleSave?: UseEditableProps["onSubmit"];
+  handleSave?: (nextValue: string) => Promise<void>;
   isTextarea?: boolean;
   isEditable?: boolean;
 };
@@ -68,6 +67,17 @@ export default function CustomEditable(props: CustomEditableProps) {
     );
   }
 
+  const handleSubmit = (nextValue: string) => {
+    if (!handleSave) {
+      return;
+    }
+    handleSave(nextValue).catch((error) => {
+      window.alert("Error: " + error);
+      // If there's an error, revert the input back to the original value
+      setLiveValue(value);
+    });
+  };
+
   return (
     <>
       {!isEditable && (value || placeholder)}
@@ -77,7 +87,7 @@ export default function CustomEditable(props: CustomEditableProps) {
           value={liveValue}
           placeholder={placeholder}
           isPreviewFocusable={false}
-          onSubmit={handleSave}
+          onSubmit={handleSubmit}
           onChange={(updated) => {
             setLiveValue(updated);
           }}
