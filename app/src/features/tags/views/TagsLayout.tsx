@@ -37,7 +37,7 @@ export default function TagsLayout(props: TagsLayoutProps) {
             const { id, name } = tag;
             return (
               <option key={id} value={id}>
-                {name}
+                {name || "Untitled Tag"}
               </option>
             );
           })}
