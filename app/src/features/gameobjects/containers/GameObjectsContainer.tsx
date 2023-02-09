@@ -1,4 +1,4 @@
-import { DeleteIcon, SearchIcon } from "@chakra-ui/icons";
+import { AddIcon, DeleteIcon, SearchIcon } from "@chakra-ui/icons";
 import {
   Box,
   Button,
@@ -7,6 +7,8 @@ import {
   Input,
   InputGroup,
   InputLeftElement,
+  InputRightElement,
+  Kbd,
   Select,
   Stack,
   Table,
@@ -256,8 +258,38 @@ export default function GameObjectsContainer() {
               onChange={(e) => setGlobalFilter(e.target.value)}
               placeholder="Search by name, id, or tag"
             />
+            <InputRightElement fontSize="1.2em">
+              <Tooltip
+                label={
+                  <Stack
+                    direction="column"
+                    alignItems="center"
+                    justifyContent="center"
+                    spacing="0"
+                    padding="0.5rem"
+                  >
+                    <div>Create new item with input as name</div>
+                    <div>
+                      <Kbd backgroundColor="gray.900">shift</Kbd>
+                      <span>+</span>
+                      <Kbd backgroundColor="gray.900">enter</Kbd>
+                    </div>
+                  </Stack>
+                }
+                placement="bottom-end"
+                hasArrow
+              >
+                <IconButton
+                  colorScheme="blue"
+                  icon={<AddIcon />}
+                  aria-label="Create new item"
+                  size="sm"
+                />
+              </Tooltip>
+            </InputRightElement>
           </InputGroup>
         </Stack>
+
         <Table>
           <Thead>
             {table.getHeaderGroups().map((headerGroup) => (
