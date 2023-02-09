@@ -1,7 +1,6 @@
 import { AddIcon, DeleteIcon, SearchIcon } from "@chakra-ui/icons";
 import {
   Box,
-  Button,
   ButtonGroup,
   IconButton,
   Input,
@@ -9,22 +8,12 @@ import {
   InputLeftElement,
   InputRightElement,
   Kbd,
-  Select,
   Stack,
-  Table,
-  Tbody,
-  Td,
-  Text,
-  Tfoot,
-  Th,
-  Thead,
   Tooltip,
-  Tr,
 } from "@chakra-ui/react";
 import {
   ColumnDef,
   createColumnHelper,
-  flexRender,
   getCoreRowModel,
   PaginationState,
   useReactTable,
@@ -32,13 +21,18 @@ import {
 import { HTMLProps, useEffect, useMemo, useRef, useState } from "react";
 import { api, RouterInputs, RouterOutputs } from "../../../utils/api";
 import CustomEditable from "../../shared/components/CustomEditable";
+import GameObjectsTable from "../views/GameObjectsTable";
 
 export type GameObjectData =
   RouterOutputs["gameObjects"]["getAll"]["gameObjects"][0];
 
 const columnHelper = createColumnHelper<GameObjectData>();
 
-export default function GameObjectsContainer() {
+export type GameObjectsTableContainerProps = {};
+
+export default function GameObjectsTableContainer(
+  props: GameObjectsTableContainerProps
+) {
   const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: 0,
     pageSize: 10,
@@ -239,216 +233,69 @@ export default function GameObjectsContainer() {
   });
 
   return (
-    <Box
-      sx={{
-        backgroundColor: "gray.500",
-        width: "100vw",
-        height: "100vh",
-        padding: "1rem",
-      }}
-    >
-      <Box
-        sx={{
-          backgroundColor: "gray.100",
-          borderRadius: "2px",
-          width: "100%",
-          height: "75%",
-          overflow: "auto",
-        }}
-      >
-        <Stack direction="row" sx={{ padding: "1rem" }}>
-          <InputGroup>
-            <InputLeftElement
-              pointerEvents="none"
-              color="gray.300"
-              fontSize="1.2em"
+    <Box>
+      <Stack direction="row" sx={{ padding: "1rem" }}>
+        <InputGroup>
+          <InputLeftElement
+            pointerEvents="none"
+            color="gray.300"
+            fontSize="1.2em"
+          >
+            <SearchIcon />
+          </InputLeftElement>
+          <Input
+            value={globalFilter ?? ""}
+            onChange={(e) => setGlobalFilter(e.target.value)}
+            placeholder="Search by name, id, or tag"
+            onKeyUp={(e) => {
+              if (e.key === "Enter" && e.shiftKey) {
+                if (!globalFilter) return;
+                handleCreateGameObject(globalFilter);
+              }
+            }}
+          />
+          <InputRightElement fontSize="1.2em">
+            <Tooltip
+              label={
+                <Stack
+                  direction="column"
+                  alignItems="center"
+                  justifyContent="center"
+                  spacing="0"
+                  padding="0.5rem"
+                >
+                  <div>Create new item with input as name</div>
+                  <div>
+                    <Kbd backgroundColor="gray.900">shift</Kbd>
+                    <span>+</span>
+                    <Kbd backgroundColor="gray.900">enter</Kbd>
+                  </div>
+                </Stack>
+              }
+              placement="bottom-end"
+              hasArrow
             >
-              <SearchIcon />
-            </InputLeftElement>
-            <Input
-              value={globalFilter ?? ""}
-              onChange={(e) => setGlobalFilter(e.target.value)}
-              placeholder="Search by name, id, or tag"
-              onKeyUp={(e) => {
-                if (e.key === "Enter" && e.shiftKey) {
+              <IconButton
+                colorScheme="blue"
+                icon={<AddIcon />}
+                aria-label="Create new item"
+                size="sm"
+                onClick={() => {
                   if (!globalFilter) return;
                   handleCreateGameObject(globalFilter);
-                }
-              }}
-            />
-            <InputRightElement fontSize="1.2em">
-              <Tooltip
-                label={
-                  <Stack
-                    direction="column"
-                    alignItems="center"
-                    justifyContent="center"
-                    spacing="0"
-                    padding="0.5rem"
-                  >
-                    <div>Create new item with input as name</div>
-                    <div>
-                      <Kbd backgroundColor="gray.900">shift</Kbd>
-                      <span>+</span>
-                      <Kbd backgroundColor="gray.900">enter</Kbd>
-                    </div>
-                  </Stack>
-                }
-                placement="bottom-end"
-                hasArrow
-              >
-                <IconButton
-                  colorScheme="blue"
-                  icon={<AddIcon />}
-                  aria-label="Create new item"
-                  size="sm"
-                  onClick={() => {
-                    if (!globalFilter) return;
-                    handleCreateGameObject(globalFilter);
-                  }}
-                />
-              </Tooltip>
-            </InputRightElement>
-          </InputGroup>
-        </Stack>
-
-        <Table>
-          <Thead>
-            {table.getHeaderGroups().map((headerGroup) => (
-              <Tr key={headerGroup.id}>
-                {headerGroup.headers.map((header) => {
-                  return (
-                    <Th key={header.id} colSpan={header.colSpan}>
-                      {header.isPlaceholder ? null : (
-                        <div>
-                          {flexRender(
-                            header.column.columnDef.header,
-                            header.getContext()
-                          )}
-                        </div>
-                      )}
-                    </Th>
-                  );
-                })}
-              </Tr>
-            ))}
-          </Thead>
-          <Tbody>
-            {table.getRowModel().rows.map((row) => {
-              return (
-                <Tr key={row.id}>
-                  {row.getVisibleCells().map((cell) => {
-                    return (
-                      <Td key={cell.id}>
-                        {flexRender(
-                          cell.column.columnDef.cell,
-                          cell.getContext()
-                        )}
-                      </Td>
-                    );
-                  })}
-                </Tr>
-              );
-            })}
-          </Tbody>
-          <Tfoot>
-            <Tr>
-              <Td>
-                <IndeterminateCheckbox
-                  {...{
-                    checked: table.getIsAllPageRowsSelected(),
-                    indeterminate: table.getIsSomePageRowsSelected(),
-                    onChange: table.getToggleAllPageRowsSelectedHandler(),
-                  }}
-                />
-              </Td>
-              <Td>Page Rows ({table.getRowModel().rows.length})</Td>
-            </Tr>
-          </Tfoot>
-        </Table>
-      </Box>
-
-      <Stack
-        direction="row"
-        sx={{
-          borderRadius: "2px",
-          padding: "1rem",
-          height: "25%",
-          width: "100%",
-          justifyContent: "end",
-          alignItems: "start",
-        }}
-      >
-        <Stack direction="row" spacing="1rem" alignItems="center" width="50%">
-          <ButtonGroup>
-            <Button
-              onClick={() => table.setPageIndex(0)}
-              disabled={!table.getCanPreviousPage()}
-            >
-              {"<<"}
-            </Button>
-            <Button
-              onClick={() => table.previousPage()}
-              disabled={!table.getCanPreviousPage()}
-            >
-              {"<"}
-            </Button>
-            <Select
-              defaultValue={table.getState().pagination.pageIndex + 1}
-              value={table.getState().pagination.pageIndex + 1}
-              onChange={(e) => {
-                let page = e.target.value ? Number(e.target.value) - 1 : 0;
-                table.setPageIndex(page);
-              }}
-              sx={{
-                backgroundColor: "gray.100",
-                minWidth: "150px",
-              }}
-            >
-              {Array.from({ length: pageCount }).map((_, i) => (
-                <option key={i + 1} value={i + 1}>
-                  Page{" "}
-                  <strong>
-                    {i + 1} of {pageCount}
-                  </strong>
-                </option>
-              ))}
-            </Select>
-            <Button
-              onClick={() => table.nextPage()}
-              disabled={!table.getCanNextPage()}
-            >
-              {">"}
-            </Button>
-            <Button
-              onClick={() => table.setPageIndex(table.getPageCount() - 1)}
-              disabled={!table.getCanNextPage()}
-            >
-              {">>"}
-            </Button>
-          </ButtonGroup>
-
-          <Select
-            value={table.getState().pagination.pageSize}
-            onChange={(e) => {
-              table.setPageSize(Number(e.target.value));
-            }}
-            sx={{
-              backgroundColor: "gray.100",
-            }}
-          >
-            {[10, 20, 30, 40, 50].map((pageSize) => (
-              <option key={pageSize} value={pageSize}>
-                Show {pageSize}
-              </option>
-            ))}
-          </Select>
-          {gameObjectsQuery.isFetching ? "Loading..." : null}
-          <Text sx={{ minWidth: "64px" }}>
-            {table.getRowModel().rows.length} Rows
-          </Text>
-        </Stack>
+                }}
+              />
+            </Tooltip>
+          </InputRightElement>
+        </InputGroup>
       </Stack>
+      <GameObjectsTable
+        columns={columns}
+        gameObjects={gameObjectsQuery.data?.gameObjects ?? []}
+        onPaginationChange={setPagination}
+        pagination={pagination}
+        pageCount={pageCount}
+      />
     </Box>
   );
 }

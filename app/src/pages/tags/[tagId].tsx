@@ -5,10 +5,12 @@ import {
   Divider,
   Heading,
   Stack,
+  Text,
 } from "@chakra-ui/react";
 import { NextPage } from "next";
 import Head from "next/head";
 import { useRouter } from "next/router";
+import GameObjectsTableContainer from "../../features/gameobjects/containers/GameObjectsTableContainer";
 import CustomEditable from "../../features/shared/components/CustomEditable";
 import TagsLayoutContainer from "../../features/tags/containers/TagsLayoutContainer";
 import { api, RouterInputs } from "../../utils/api";
@@ -114,7 +116,6 @@ const TagByIdPage: NextPage = () => {
               }}
             />
           </Heading>
-
           <CustomEditable
             isTextarea
             value={tag?.description || ""}
@@ -124,7 +125,10 @@ const TagByIdPage: NextPage = () => {
             }}
           />
           <Divider />
-
+          <Heading size="md">Tagged Game Objects</Heading>
+          <Text>TABLE HERE</Text>
+          <GameObjectsTableContainer />
+          <Divider />
           <Heading size="md" color="red.500">
             DANGER ZONE
           </Heading>

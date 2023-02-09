@@ -1,6 +1,6 @@
 import type { NextPage } from "next";
 import Head from "next/head";
-import GameObjectsContainer from "../features/gameobjects/containers/GameObjectsContainer";
+import GameObjectsTableContainer from "../features/gameobjects/containers/GameObjectsTableContainer";
 
 const Lists: NextPage = () => {
   return (
@@ -10,7 +10,7 @@ const Lists: NextPage = () => {
         <meta name="description" content="Lists" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <GameObjectsContainer />
+      <GameObjectsTableContainer />
     </>
   );
 };
