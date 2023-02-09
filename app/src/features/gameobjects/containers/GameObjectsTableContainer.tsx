@@ -1,4 +1,4 @@
-import { AddIcon, DeleteIcon, SearchIcon } from "@chakra-ui/icons";
+import { AddIcon, SearchIcon } from "@chakra-ui/icons";
 import {
   Box,
   ButtonGroup,
@@ -11,6 +11,7 @@ import {
   Stack,
   Tooltip,
 } from "@chakra-ui/react";
+import { Tag } from "@prisma/client";
 import {
   ColumnDef,
   createColumnHelper,
@@ -26,11 +27,16 @@ export type GameObjectData =
 
 const columnHelper = createColumnHelper<GameObjectData>();
 
-export type GameObjectsTableContainerProps = {};
+export type GameObjectsTableContainerProps = {
+  tags?: Tag["id"][];
+  additionalActions?: (gameObjectData: GameObjectData) => React.ReactNode;
+};
 
 export default function GameObjectsTableContainer(
   props: GameObjectsTableContainerProps
 ) {
+  const { tags, additionalActions } = props;
+
   const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: 0,
     pageSize: 10,
@@ -49,7 +55,7 @@ export default function GameObjectsTableContainer(
             mode: "OR",
             id: { contains: globalFilter },
             name: { contains: globalFilter },
-            tag: { contains: globalFilter },
+            tag: { contains: globalFilter, in: tags },
           }
         : undefined,
     },
@@ -86,18 +92,6 @@ export default function GameObjectsTableContainer(
     await utils.gameObjects.invalidate();
   };
 
-  const deleteGameObjectMutation = api.gameObjects.deleteById.useMutation();
-
-  const handleDeleteGameObject = async (id: string) => {
-    try {
-      await deleteGameObjectMutation.mutateAsync({ id });
-      await utils.gameObjects.invalidate();
-    } catch (error) {
-      window.alert("Error deleting game object\n See console for details");
-      console.error(error);
-    }
-  };
-
   const createGameObjectMutation = api.gameObjects.create.useMutation();
   const handleCreateGameObject = async (name: string) => {
     try {
@@ -109,8 +103,8 @@ export default function GameObjectsTableContainer(
     }
   };
 
-  const columns = useMemo<ColumnDef<GameObjectData, any>[]>(
-    () => [
+  const columns = useMemo<ColumnDef<GameObjectData, any>[]>(() => {
+    const items: ColumnDef<GameObjectData, any>[] = [
       columnHelper.accessor("id", {
         cell: (info) => (
           <CustomEditable
@@ -164,32 +158,25 @@ export default function GameObjectsTableContainer(
         header: "Last Updated",
         cell: (info) => info.getValue().toLocaleString(),
       }),
-      {
+    ];
+
+    if (additionalActions) {
+      items.push({
         id: "actions",
         header: "",
         cell: (info) => {
           const { id } = info.row.original;
           return (
             <ButtonGroup width="100%" justifyContent="end">
-              <Tooltip label={`Delete`} placement="top">
-                <IconButton
-                  colorScheme="red"
-                  onClick={() => {
-                    handleDeleteGameObject(id);
-                  }}
-                  icon={<DeleteIcon />}
-                  aria-label={`Delete gameobject with ID: ${id}`}
-                  size="sm"
-                  variant="outline"
-                />
-              </Tooltip>
+              {additionalActions(info.row.original)}
             </ButtonGroup>
           );
         },
-      },
-    ],
-    []
-  );
+      });
+    }
+
+    return items;
+  }, []);
 
   const pageCount = useMemo(() => {
     if (!gameObjectsCountQuery.data) return 0;

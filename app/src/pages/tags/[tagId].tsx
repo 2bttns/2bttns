@@ -1,11 +1,13 @@
+import { AddIcon } from "@chakra-ui/icons";
 import {
   Button,
   ButtonGroup,
   Code,
   Divider,
   Heading,
+  IconButton,
   Stack,
-  Text,
+  Tooltip,
 } from "@chakra-ui/react";
 import { NextPage } from "next";
 import Head from "next/head";
@@ -126,8 +128,25 @@ const TagByIdPage: NextPage = () => {
           />
           <Divider />
           <Heading size="md">Tagged Game Objects</Heading>
-          <Text>TABLE HERE</Text>
-          <GameObjectsTableContainer />
+          <GameObjectsTableContainer
+            tags={undefined}
+            additionalActions={(gameObjectData) => (
+              <>
+                <Tooltip label={`Apply Tag`} placement="top">
+                  <IconButton
+                    colorScheme="green"
+                    onClick={() => {
+                      console.log("Apply Tag");
+                    }}
+                    icon={<AddIcon />}
+                    aria-label={`Apply tag to ID: ${gameObjectData.id}`}
+                    size="sm"
+                    variant="outline"
+                  />
+                </Tooltip>
+              </>
+            )}
+          />
           <Divider />
           <Heading size="md" color="red.500">
             DANGER ZONE
