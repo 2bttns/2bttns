@@ -1,17 +1,38 @@
-import { Select, Stack } from "@chakra-ui/react";
+import { Button, Select, Stack } from "@chakra-ui/react";
+import { api } from "../../../utils/api";
 
 export type TagsContainerProps = {};
 
 export default function TagsContainer(props: TagsContainerProps) {
+  const getTagsQuery = api.tags.getAll.useQuery();
+
+  const createTagMutation = api.tags.create.useMutation();
+  const handleCreateTag = async () => {
+    try {
+      await createTagMutation.mutateAsync({ name: "New Tag" });
+      await getTagsQuery.refetch();
+    } catch (error) {
+      window.alert("Error creating tag. See console for details.");
+      console.error(error);
+    }
+  };
+
   return (
     <Stack direction="row">
       <Stack flex={1} minWidth="128px">
         <h1>Tags</h1>
-        <h2>Create New Tag</h2>
+        <Button variant="outline" colorScheme="blue" onClick={handleCreateTag}>
+          Create New Tag
+        </Button>
         <Select>
-          {[1, 2, 3].map((tag) => (
-            <option value={tag}>{tag}</option>
-          ))}
+          {getTagsQuery.data?.tags.map((tag) => {
+            const { id, name } = tag;
+            return (
+              <option key={id} value={id}>
+                {name}
+              </option>
+            );
+          })}
         </Select>
       </Stack>
       <Stack flex={5}>
