@@ -14,9 +14,7 @@ import {
 import {
   ColumnDef,
   createColumnHelper,
-  getCoreRowModel,
   PaginationState,
-  useReactTable,
 } from "@tanstack/react-table";
 import { useEffect, useMemo, useState } from "react";
 import { api, RouterInputs, RouterOutputs } from "../../../utils/api";
@@ -214,19 +212,6 @@ export default function GameObjectsTableContainer(
       return;
     }
   }, [pageCount, pageIndex]);
-
-  const table = useReactTable({
-    data: gameObjectsQuery.data?.gameObjects ?? [],
-    columns,
-    pageCount,
-    state: {
-      pagination,
-    },
-    getCoreRowModel: getCoreRowModel(),
-    onPaginationChange: setPagination,
-    manualPagination: true,
-    debugTable: true,
-  });
 
   return (
     <Box>
