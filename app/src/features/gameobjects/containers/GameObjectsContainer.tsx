@@ -34,6 +34,50 @@ const columnHelper =
   >();
 
 export default function GameObjectsContainer() {
+  const [pagination, setPagination] = useState<PaginationState>({
+    pageIndex: 0,
+    pageSize: 10,
+  });
+  const { pageIndex, pageSize } = pagination;
+
+  const [rowSelection, setRowSelection] = useState({});
+  const [globalFilter, setGlobalFilter] = useState("");
+
+  const gameObjectsQuery = api.gameObjects.getAll.useQuery(
+    {
+      includeTags: true,
+      skip: pageIndex * pageSize,
+      take: pageSize,
+      filter: globalFilter
+        ? {
+            mode: "OR",
+            id: { contains: globalFilter },
+            name: { contains: globalFilter },
+            tag: { contains: globalFilter },
+          }
+        : undefined,
+    },
+    {
+      keepPreviousData: true,
+    }
+  );
+
+  const gameObjectsCountQuery = api.gameObjects.getCount.useQuery(
+    {
+      filter: globalFilter
+        ? {
+            mode: "OR",
+            id: { contains: globalFilter },
+            name: { contains: globalFilter },
+            tag: { contains: globalFilter },
+          }
+        : undefined,
+    },
+    {
+      keepPreviousData: true,
+    }
+  );
+
   const updateGameObjectMutation = api.gameObjects.updateById.useMutation();
 
   const handleUpdateGameObject = async (
@@ -41,6 +85,7 @@ export default function GameObjectsContainer() {
     data: RouterInputs["gameObjects"]["updateById"]["data"]
   ) => {
     await updateGameObjectMutation.mutateAsync({ id, data });
+    await gameObjectsQuery.refetch();
   };
 
   const columns = useMemo(
@@ -102,50 +147,6 @@ export default function GameObjectsContainer() {
       }),
     ],
     []
-  );
-
-  const [pagination, setPagination] = useState<PaginationState>({
-    pageIndex: 0,
-    pageSize: 10,
-  });
-  const { pageIndex, pageSize } = pagination;
-
-  const [rowSelection, setRowSelection] = useState({});
-  const [globalFilter, setGlobalFilter] = useState("");
-
-  const gameObjectsQuery = api.gameObjects.getAll.useQuery(
-    {
-      includeTags: true,
-      skip: pageIndex * pageSize,
-      take: pageSize,
-      filter: globalFilter
-        ? {
-            mode: "OR",
-            id: { contains: globalFilter },
-            name: { contains: globalFilter },
-            tag: { contains: globalFilter },
-          }
-        : undefined,
-    },
-    {
-      keepPreviousData: true,
-    }
-  );
-
-  const gameObjectsCountQuery = api.gameObjects.getCount.useQuery(
-    {
-      filter: globalFilter
-        ? {
-            mode: "OR",
-            id: { contains: globalFilter },
-            name: { contains: globalFilter },
-            tag: { contains: globalFilter },
-          }
-        : undefined,
-    },
-    {
-      keepPreviousData: true,
-    }
   );
 
   const pageCount = useMemo(() => {
