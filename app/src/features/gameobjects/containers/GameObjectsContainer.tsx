@@ -269,6 +269,12 @@ export default function GameObjectsContainer() {
               value={globalFilter ?? ""}
               onChange={(e) => setGlobalFilter(e.target.value)}
               placeholder="Search by name, id, or tag"
+              onKeyUp={(e) => {
+                if (e.key === "Enter" && e.shiftKey) {
+                  if (!globalFilter) return;
+                  handleCreateGameObject(globalFilter);
+                }
+              }}
             />
             <InputRightElement fontSize="1.2em">
               <Tooltip
