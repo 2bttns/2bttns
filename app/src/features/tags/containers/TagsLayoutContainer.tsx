@@ -10,7 +10,7 @@ export type TagsLayoutContainerProps = {
 export default function TagsLayoutContainer(props: TagsLayoutContainerProps) {
   const { children, selectedTag } = props;
 
-  const getTagsQuery = api.tags.getAll.useQuery();
+  const getTagsQuery = api.tags.getAll.useQuery({}, { keepPreviousData: true });
 
   const createTagMutation = api.tags.create.useMutation();
   const handleCreateTag = async () => {

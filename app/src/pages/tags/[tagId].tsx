@@ -1,13 +1,16 @@
-import { Code, Text } from "@chakra-ui/react";
+import { Code } from "@chakra-ui/react";
 import { NextPage } from "next";
 import Head from "next/head";
 import { useRouter } from "next/router";
+import CustomEditable from "../../features/shared/components/CustomEditable";
 import TagsLayoutContainer from "../../features/tags/containers/TagsLayoutContainer";
-import { api } from "../../utils/api";
+import { api, RouterInputs } from "../../utils/api";
 
 const TagByIdPage: NextPage = () => {
   const router = useRouter();
   const { tagId } = router.query;
+
+  const utils = api.useContext();
 
   const getTagByIdQuery = api.tags.getById.useQuery(
     { id: tagId as string },
@@ -17,8 +20,20 @@ const TagByIdPage: NextPage = () => {
       onError: (error) => {
         console.error(error);
       },
+      keepPreviousData: true,
     }
   );
+
+  const updateTagMutation = api.tags.updateById.useMutation();
+  const handleUpdateTag = async (input: RouterInputs["tags"]["updateById"]) => {
+    try {
+      await updateTagMutation.mutateAsync(input);
+      utils.tags.invalidate();
+    } catch (error) {
+      window.alert("Error updating tag. See console for details.");
+      console.error(error);
+    }
+  };
 
   if (getTagByIdQuery.isFetching) {
     return (
@@ -63,8 +78,20 @@ const TagByIdPage: NextPage = () => {
       </Head>
       <TagsLayoutContainer selectedTag={tag}>
         <h1>Tag Details</h1>
-        <Text>{tag?.name}</Text>
-        <Text>{tag?.description}</Text>
+        <CustomEditable
+          value={tag?.name || ""}
+          placeholder="Untitled Tag"
+          handleSave={async (value) => {
+            handleUpdateTag({ id: tag.id, data: { name: value } });
+          }}
+        />
+        <CustomEditable
+          value={tag?.description || ""}
+          placeholder="No description"
+          handleSave={async (value) => {
+            handleUpdateTag({ id: tag.id, data: { description: value } });
+          }}
+        />
       </TagsLayoutContainer>
     </>
   );
