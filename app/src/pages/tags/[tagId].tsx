@@ -1,13 +1,10 @@
-import { AddIcon } from "@chakra-ui/icons";
 import {
   Button,
   ButtonGroup,
   Code,
   Divider,
   Heading,
-  IconButton,
   Stack,
-  Tooltip,
 } from "@chakra-ui/react";
 import { NextPage } from "next";
 import Head from "next/head";
@@ -15,11 +12,12 @@ import { useRouter } from "next/router";
 import GameObjectsTableContainer from "../../features/gameobjects/containers/GameObjectsTableContainer";
 import CustomEditable from "../../features/shared/components/CustomEditable";
 import TagsLayoutContainer from "../../features/tags/containers/TagsLayoutContainer";
+import ToggleTagButton from "../../features/tags/containers/ToggleTagButton";
 import { api, RouterInputs } from "../../utils/api";
 
 const TagByIdPage: NextPage = () => {
   const router = useRouter();
-  const { tagId } = router.query;
+  const tagId = router.query.tagId as string;
 
   const utils = api.useContext();
 
@@ -132,18 +130,10 @@ const TagByIdPage: NextPage = () => {
             tags={undefined}
             additionalActions={(gameObjectData) => (
               <>
-                <Tooltip label={`Apply Tag`} placement="top">
-                  <IconButton
-                    colorScheme="green"
-                    onClick={() => {
-                      console.log("Apply Tag");
-                    }}
-                    icon={<AddIcon />}
-                    aria-label={`Apply tag to ID: ${gameObjectData.id}`}
-                    size="sm"
-                    variant="outline"
-                  />
-                </Tooltip>
+                <ToggleTagButton
+                  gameObjectId={gameObjectData.id}
+                  tagId={tagId}
+                />
               </>
             )}
           />
