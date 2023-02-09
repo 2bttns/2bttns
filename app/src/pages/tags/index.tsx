@@ -1,6 +1,6 @@
 import { NextPage } from "next";
 import Head from "next/head";
-import TagsContainer from "../features/tags/containers/TagsContainer";
+import TagsLayoutContainer from "../../features/tags/containers/TagsLayoutContainer";
 
 const TagsPage: NextPage = () => {
   return (
@@ -10,7 +10,9 @@ const TagsPage: NextPage = () => {
         <meta name="description" content="My 2bttns Games" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <TagsContainer />
+      <TagsLayoutContainer>
+        <h1>No tag selected</h1>
+      </TagsLayoutContainer>
     </>
   );
 };

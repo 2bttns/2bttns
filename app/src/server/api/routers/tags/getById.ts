@@ -14,5 +14,9 @@ export const getById = publicProcedure
       },
     });
 
+    if (!tag) {
+      throw new Error(`Tag with id='${input.id}' not found`);
+    }
+
     return { tag };
   });
