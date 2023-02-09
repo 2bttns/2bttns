@@ -88,7 +88,21 @@ export default function GameObjectsContainer() {
     data: RouterInputs["gameObjects"]["updateById"]["data"]
   ) => {
     await updateGameObjectMutation.mutateAsync({ id, data });
+    await gameObjectsCountQuery.refetch();
     await gameObjectsQuery.refetch();
+  };
+
+  const deleteGameObjectMutation = api.gameObjects.deleteById.useMutation();
+
+  const handleDeleteGameObject = async (id: string) => {
+    try {
+      await deleteGameObjectMutation.mutateAsync({ id });
+      await gameObjectsCountQuery.refetch();
+      await gameObjectsQuery.refetch();
+    } catch (error) {
+      window.alert("Error deleting game object\n See console for details");
+      console.error(error);
+    }
   };
 
   const columns = useMemo<ColumnDef<GameObjectData, any>[]>(
@@ -156,8 +170,8 @@ export default function GameObjectsContainer() {
               <Tooltip label={`Delete`} placement="top">
                 <IconButton
                   colorScheme="red"
-                  onClick={async () => {
-                    console.log("Delete", id);
+                  onClick={() => {
+                    handleDeleteGameObject(id);
                   }}
                   icon={<DeleteIcon />}
                   aria-label={`Delete gameobject with ID: ${id}`}
