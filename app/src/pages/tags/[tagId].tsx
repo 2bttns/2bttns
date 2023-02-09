@@ -19,10 +19,30 @@ const TagByIdPage: NextPage = () => {
 
   const utils = api.useContext();
 
+  const deleteTagMutation = api.tags.deleteById.useMutation();
+  const handleDeleteTag = async () => {
+    try {
+      const prompt = window.prompt(
+        `Are you sure you want to delete this tag? \n\nType "DELETE" to confirm.`
+      );
+      if (prompt !== "DELETE") {
+        window.alert("Cancelled");
+        return;
+      }
+      if (typeof tagId !== "string") throw new Error("Invalid tag ID");
+      await deleteTagMutation.mutateAsync({ id: tagId });
+      router.push("/tags");
+      utils.tags.invalidate();
+    } catch (error) {
+      window.alert("Error deleting tag. See console for details.");
+      console.error(error);
+    }
+  };
+
   const getTagByIdQuery = api.tags.getById.useQuery(
     { id: tagId as string },
     {
-      enabled: !!tagId,
+      enabled: !!tagId || deleteTagMutation.status !== "loading",
       retry: false,
       onError: (error) => {
         console.error(error);
@@ -38,15 +58,6 @@ const TagByIdPage: NextPage = () => {
       utils.tags.invalidate();
     } catch (error) {
       window.alert("Error updating tag. See console for details.");
-      console.error(error);
-    }
-  };
-
-  const handleDeleteTag = async () => {
-    try {
-      console.log("Deleting tag with id: ", tagId);
-    } catch (error) {
-      window.alert("Error deleting tag. See console for details.");
       console.error(error);
     }
   };
