@@ -9,21 +9,22 @@ export type TagsLayoutContainerProps = {
 
 export default function TagsLayoutContainer(props: TagsLayoutContainerProps) {
   const { children, selectedTag } = props;
+  const router = useRouter();
 
   const getTagsQuery = api.tags.getAll.useQuery({}, { keepPreviousData: true });
 
   const createTagMutation = api.tags.create.useMutation();
   const handleCreateTag = async () => {
     try {
-      await createTagMutation.mutateAsync({ name: "New Tag" });
+      const result = await createTagMutation.mutateAsync({ name: "New Tag" });
       await getTagsQuery.refetch();
+      router.push(`/tags/${result.createdTag.id}`);
     } catch (error) {
       window.alert("Error creating tag. See console for details.");
       console.error(error);
     }
   };
 
-  const router = useRouter();
   const onTagSelect: TagsLayoutProps["onTagSelect"] = (tagId) => {
     router.push(`/tags/${tagId}`);
   };
