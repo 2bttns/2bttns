@@ -58,6 +58,8 @@ export default function GameObjectsTableContainer(
     }
   );
 
+  const utils = api.useContext();
+
   const gameObjectsCountQuery = api.gameObjects.getCount.useQuery(
     {
       filter: globalFilter
@@ -81,8 +83,7 @@ export default function GameObjectsTableContainer(
     data: RouterInputs["gameObjects"]["updateById"]["data"]
   ) => {
     await updateGameObjectMutation.mutateAsync({ id, data });
-    await gameObjectsCountQuery.refetch();
-    await gameObjectsQuery.refetch();
+    await utils.gameObjects.invalidate();
   };
 
   const deleteGameObjectMutation = api.gameObjects.deleteById.useMutation();
@@ -90,8 +91,7 @@ export default function GameObjectsTableContainer(
   const handleDeleteGameObject = async (id: string) => {
     try {
       await deleteGameObjectMutation.mutateAsync({ id });
-      await gameObjectsCountQuery.refetch();
-      await gameObjectsQuery.refetch();
+      await utils.gameObjects.invalidate();
     } catch (error) {
       window.alert("Error deleting game object\n See console for details");
       console.error(error);
@@ -102,8 +102,7 @@ export default function GameObjectsTableContainer(
   const handleCreateGameObject = async (name: string) => {
     try {
       await createGameObjectMutation.mutateAsync({ name });
-      await gameObjectsCountQuery.refetch();
-      await gameObjectsQuery.refetch();
+      await utils.gameObjects.invalidate();
     } catch (error) {
       window.alert("Error creating game object\n See console for details");
       console.error(error);
