@@ -18,7 +18,7 @@ import {
   PaginationState,
   useReactTable,
 } from "@tanstack/react-table";
-import { HTMLProps, useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { api, RouterInputs, RouterOutputs } from "../../../utils/api";
 import CustomEditable from "../../shared/components/CustomEditable";
 import GameObjectsTable from "../views/GameObjectsTable";
@@ -39,7 +39,6 @@ export default function GameObjectsTableContainer(
   });
   const { pageIndex, pageSize } = pagination;
 
-  const [rowSelection, setRowSelection] = useState({});
   const [globalFilter, setGlobalFilter] = useState("");
 
   const gameObjectsQuery = api.gameObjects.getAll.useQuery(
@@ -222,14 +221,11 @@ export default function GameObjectsTableContainer(
     pageCount,
     state: {
       pagination,
-      rowSelection,
     },
     getCoreRowModel: getCoreRowModel(),
     onPaginationChange: setPagination,
     manualPagination: true,
     debugTable: true,
-    enableRowSelection: true,
-    onRowSelectionChange: setRowSelection,
   });
 
   return (
@@ -298,19 +294,4 @@ export default function GameObjectsTableContainer(
       />
     </Box>
   );
-}
-
-function IndeterminateCheckbox(
-  props: { indeterminate?: boolean } & HTMLProps<HTMLInputElement>
-) {
-  const { indeterminate, ...rest } = props;
-  const ref = useRef<HTMLInputElement>(null!);
-
-  useEffect(() => {
-    if (typeof indeterminate === "boolean") {
-      ref.current.indeterminate = !rest.checked && indeterminate;
-    }
-  }, [ref, indeterminate]);
-
-  return <input type="checkbox" ref={ref} {...rest} />;
 }
