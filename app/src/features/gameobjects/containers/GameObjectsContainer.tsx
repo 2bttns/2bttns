@@ -139,10 +139,8 @@ export default function GameObjectsContainer() {
             .join(", ");
         },
       }),
-      columnHelper.accessor("createdAt", {
-        cell: (info) => info.getValue().toLocaleString(),
-      }),
       columnHelper.accessor("updatedAt", {
+        header: "Last Updated",
         cell: (info) => info.getValue().toLocaleString(),
       }),
     ],
