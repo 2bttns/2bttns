@@ -10,9 +10,9 @@ import { NextPage } from "next";
 import Head from "next/head";
 import { useRouter } from "next/router";
 import { useMemo, useState } from "react";
-import GameObjectsTableContainer, {
-  GameObjectsTableContainerProps,
-} from "../../features/gameobjects/containers/GameObjectsTableContainer";
+import GameObjectsTable, {
+  GameObjectsTableProps,
+} from "../../features/gameobjects/containers/GameObjectsTable";
 import CustomEditable from "../../features/shared/components/CustomEditable";
 import TagFilterToggles, {
   TagFilter,
@@ -104,7 +104,7 @@ const TagByIdPage: NextPage = () => {
     return [];
   }, [tagFilter]);
 
-  const handleGameObjectCreated: GameObjectsTableContainerProps["onGameObjectCreated"] =
+  const handleGameObjectCreated: GameObjectsTableProps["onGameObjectCreated"] =
     async (gameObjectId) => {
       try {
         await updateTagMutation.mutateAsync({
@@ -184,7 +184,7 @@ const TagByIdPage: NextPage = () => {
             setFilter={setTagFilter}
             allAndNoneToggles
           />
-          <GameObjectsTableContainer
+          <GameObjectsTable
             tag={{
               include: tagsToFilterGameObjectsBy?.map((tag) => tag.id) || [],
               exclude: excludeTags,

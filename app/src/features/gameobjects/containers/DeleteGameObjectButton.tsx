@@ -1,7 +1,7 @@
 import { DeleteIcon } from "@chakra-ui/icons";
 import { IconButton, Tooltip } from "@chakra-ui/react";
 import { api } from "../../../utils/api";
-import { GameObjectData } from "./GameObjectsTableContainer";
+import { GameObjectData } from "./GameObjectsTable";
 
 export type DeleteGameObjectButtonProps = {
   gameObjectId: GameObjectData["id"];

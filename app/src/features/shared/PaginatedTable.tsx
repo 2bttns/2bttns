@@ -23,14 +23,10 @@ import {
   SortingState,
   useReactTable,
 } from "@tanstack/react-table";
-import { RouterOutputs } from "../../../utils/api";
 
-export type GameObjectData =
-  RouterOutputs["gameObjects"]["getAll"]["gameObjects"][0];
-
-export type GameObjectsTableProps = {
-  gameObjects: GameObjectData[];
-  columns: ColumnDef<GameObjectData, any>[];
+export type PaginatedTableProps<T> = {
+  data: T[];
+  columns: ColumnDef<T, any>[];
   pageCount: number;
   pagination: PaginationState;
   onPaginationChange: OnChangeFn<PaginationState>;
@@ -39,9 +35,9 @@ export type GameObjectsTableProps = {
   onSortingChange?: OnChangeFn<SortingState>;
 };
 
-export default function GameObjectsTable(props: GameObjectsTableProps) {
+export default function PaginatedTable<T>(props: PaginatedTableProps<T>) {
   const {
-    gameObjects,
+    data,
     columns,
     pageCount,
     pagination,
@@ -51,7 +47,7 @@ export default function GameObjectsTable(props: GameObjectsTableProps) {
   } = props;
 
   const table = useReactTable({
-    data: gameObjects,
+    data: data,
     columns,
     pageCount,
     state: {

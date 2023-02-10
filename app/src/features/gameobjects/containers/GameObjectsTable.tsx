@@ -22,7 +22,7 @@ import { useEffect, useMemo, useState } from "react";
 import { tagFilter } from "../../../server/api/routers/gameobjects/getAll";
 import { api, RouterInputs, RouterOutputs } from "../../../utils/api";
 import CustomEditable from "../../shared/components/CustomEditable";
-import GameObjectsTable from "../views/GameObjectsTable";
+import PaginatedTable from "../../shared/PaginatedTable";
 import TagMultiSelect, { TagOption } from "./TagMultiSelect";
 
 export type GameObjectData =
@@ -30,15 +30,13 @@ export type GameObjectData =
 
 const columnHelper = createColumnHelper<GameObjectData>();
 
-export type GameObjectsTableContainerProps = {
+export type GameObjectsTableProps = {
   tag?: typeof tagFilter._type;
   onGameObjectCreated?: (gameObjectId: string) => Promise<void>;
   additionalActions?: (gameObjectData: GameObjectData) => React.ReactNode;
 };
 
-export default function GameObjectsTableContainer(
-  props: GameObjectsTableContainerProps
-) {
+export default function GameObjectsTable(props: GameObjectsTableProps) {
   const { tag, onGameObjectCreated, additionalActions } = props;
 
   const [pagination, setPagination] = useState<PaginationState>({
@@ -306,9 +304,9 @@ export default function GameObjectsTableContainer(
           </InputRightElement>
         </InputGroup>
       </Stack>
-      <GameObjectsTable
+      <PaginatedTable
         columns={columns}
-        gameObjects={gameObjectsQuery.data?.gameObjects ?? []}
+        data={gameObjectsQuery.data?.gameObjects ?? []}
         onPaginationChange={setPagination}
         pagination={pagination}
         pageCount={pageCount}

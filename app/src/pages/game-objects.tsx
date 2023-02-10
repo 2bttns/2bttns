@@ -2,7 +2,7 @@ import { Box } from "@chakra-ui/react";
 import type { NextPage } from "next";
 import Head from "next/head";
 import DeleteGameObjectButton from "../features/gameobjects/containers/DeleteGameObjectButton";
-import GameObjectsTableContainer from "../features/gameobjects/containers/GameObjectsTableContainer";
+import GameObjectsTable from "../features/gameobjects/containers/GameObjectsTable";
 
 const Lists: NextPage = () => {
   return (
@@ -18,7 +18,7 @@ const Lists: NextPage = () => {
         backgroundColor="white"
         overflow="hidden"
       >
-        <GameObjectsTableContainer
+        <GameObjectsTable
           additionalActions={(gameObjectData) => (
             <>
               <DeleteGameObjectButton gameObjectId={gameObjectData.id} />
