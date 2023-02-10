@@ -14,7 +14,7 @@ export const updateById = publicProcedure
     })
   )
   .mutation(async ({ ctx, input }) => {
-    const updatedList = await ctx.prisma.gameObject.update({
+    const updatedGameObject = await ctx.prisma.gameObject.update({
       where: {
         id: input.id,
       },
@@ -31,6 +31,6 @@ export const updateById = publicProcedure
     });
 
     return {
-      updatedList,
+      updatedGameObject,
     };
   });

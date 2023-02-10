@@ -15,7 +15,7 @@ export const updateById = publicProcedure
     })
   )
   .mutation(async ({ ctx, input }) => {
-    const updatedList = await ctx.prisma.tag.update({
+    const updatedTag = await ctx.prisma.tag.update({
       where: {
         id: input.id,
       },
@@ -35,6 +35,6 @@ export const updateById = publicProcedure
     });
 
     return {
-      updatedList,
+      updatedTag,
     };
   });
