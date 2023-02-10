@@ -166,9 +166,11 @@ const TagByIdPage: NextPage = () => {
             allAndNoneToggles
           />
           <GameObjectsTableContainer
-            includeTags={tagsToFilterGameObjectsBy?.map((tag) => tag.id) || []}
-            includeUntagged={includeUntagged}
-            excludeTags={excludeTags}
+            tag={{
+              include: tagsToFilterGameObjectsBy?.map((tag) => tag.id) || [],
+              exclude: excludeTags,
+              includeUntagged,
+            }}
             additionalActions={(gameObjectData) => (
               <>
                 <ToggleTagButton

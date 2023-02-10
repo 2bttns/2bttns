@@ -12,7 +12,6 @@ import {
   Tag as ChakraTag,
   Tooltip,
 } from "@chakra-ui/react";
-import { Tag } from "@prisma/client";
 import {
   ColumnDef,
   createColumnHelper,
@@ -20,6 +19,7 @@ import {
 } from "@tanstack/react-table";
 import NextLink from "next/link";
 import { useEffect, useMemo, useState } from "react";
+import { tagFilter } from "../../../server/api/routers/gameobjects/getAll";
 import { api, RouterInputs, RouterOutputs } from "../../../utils/api";
 import CustomEditable from "../../shared/components/CustomEditable";
 import GameObjectsTable from "../views/GameObjectsTable";
@@ -30,17 +30,14 @@ export type GameObjectData =
 const columnHelper = createColumnHelper<GameObjectData>();
 
 export type GameObjectsTableContainerProps = {
-  includeTags?: Tag["id"][];
-  excludeTags?: Tag["id"][];
-  includeUntagged?: boolean;
+  tag?: typeof tagFilter._type;
   additionalActions?: (gameObjectData: GameObjectData) => React.ReactNode;
 };
 
 export default function GameObjectsTableContainer(
   props: GameObjectsTableContainerProps
 ) {
-  const { includeTags, excludeTags, includeUntagged, additionalActions } =
-    props;
+  const { tag, additionalActions } = props;
 
   const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: 0,
@@ -60,18 +57,10 @@ export default function GameObjectsTableContainer(
             mode: "OR",
             id: { contains: globalFilter },
             name: { contains: globalFilter },
-            tag: {
-              include: includeTags,
-              exclude: excludeTags,
-              includeUntagged,
-            },
+            tag,
           }
         : {
-            tag: {
-              include: includeTags,
-              exclude: excludeTags,
-              includeUntagged,
-            },
+            tag,
           },
     },
     {
@@ -88,18 +77,10 @@ export default function GameObjectsTableContainer(
             mode: "OR",
             id: { contains: globalFilter },
             name: { contains: globalFilter },
-            tag: {
-              include: includeTags,
-              exclude: excludeTags,
-              includeUntagged,
-            },
+            tag,
           }
         : {
-            tag: {
-              include: includeTags,
-              exclude: excludeTags,
-              includeUntagged,
-            },
+            tag,
           },
     },
     {

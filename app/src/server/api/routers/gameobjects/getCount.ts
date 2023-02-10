@@ -6,6 +6,12 @@ const filter = z.object({
   contains: z.string().optional(),
 });
 
+const tagFilter = z.object({
+  include: z.array(z.string()).optional(),
+  exclude: z.array(z.string()).optional(),
+  includeUntagged: z.boolean().optional().default(false),
+});
+
 export const getCount = publicProcedure
   .input(
     z
@@ -15,11 +21,7 @@ export const getCount = publicProcedure
             mode: z.enum(["AND", "OR"]).optional(),
             id: filter.optional(),
             name: filter.optional(),
-            tag: z.object({
-              include: z.array(z.string()).optional(),
-              exclude: z.array(z.string()).optional(),
-              includeUntagged: z.boolean().optional().default(false),
-            }),
+            tag: tagFilter.optional(),
           })
           .optional(),
       })
@@ -47,37 +49,41 @@ export const getCount = publicProcedure
                 ]
               : undefined,
           },
-          {
-            OR: [
-              {
-                AND: [
+          input?.filter?.tag
+            ? {
+                OR: [
                   {
-                    tags: {
-                      some: {
-                        id: {
-                          in: input?.filter?.tag?.include,
+                    AND: [
+                      {
+                        tags: {
+                          some: {
+                            id: {
+                              in: input?.filter?.tag?.include,
+                            },
+                          },
                         },
                       },
-                    },
+                      {
+                        tags: {
+                          none: {
+                            id: {
+                              in: input?.filter?.tag?.exclude,
+                            },
+                          },
+                        },
+                      },
+                    ],
                   },
                   {
                     tags: {
-                      none: {
-                        id: {
-                          in: input?.filter?.tag?.exclude,
-                        },
-                      },
+                      none: input?.filter?.tag?.includeUntagged
+                        ? {}
+                        : undefined,
                     },
                   },
                 ],
-              },
-              {
-                tags: {
-                  none: input?.filter?.tag?.includeUntagged ? {} : undefined,
-                },
-              },
-            ],
-          },
+              }
+            : {},
         ],
       },
     });

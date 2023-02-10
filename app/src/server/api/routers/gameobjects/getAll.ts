@@ -6,6 +6,12 @@ const filter = z.object({
   contains: z.string().optional(),
 });
 
+export const tagFilter = z.object({
+  include: z.array(z.string()).optional(),
+  exclude: z.array(z.string()).optional(),
+  includeUntagged: z.boolean().optional().default(false),
+});
+
 export const getAll = publicProcedure
   .input(
     z
@@ -17,11 +23,7 @@ export const getAll = publicProcedure
             mode: z.enum(["AND", "OR"]).optional(),
             id: filter.optional(),
             name: filter.optional(),
-            tag: z.object({
-              include: z.array(z.string()).optional(),
-              exclude: z.array(z.string()).optional(),
-              includeUntagged: z.boolean().optional().default(false),
-            }),
+            tag: tagFilter.optional(),
           })
           .optional(),
         includeTags: z.boolean().optional().default(false),
@@ -29,9 +31,6 @@ export const getAll = publicProcedure
       .optional()
   )
   .query(async ({ ctx, input }) => {
-    console.log("FOO");
-    console.log(input?.filter);
-
     const gameObjects = await ctx.prisma.gameObject.findMany({
       take: input?.take,
       skip: input?.skip,
@@ -55,37 +54,41 @@ export const getAll = publicProcedure
                 ]
               : undefined,
           },
-          {
-            OR: [
-              {
-                AND: [
+          input?.filter?.tag
+            ? {
+                OR: [
                   {
-                    tags: {
-                      some: {
-                        id: {
-                          in: input?.filter?.tag?.include,
+                    AND: [
+                      {
+                        tags: {
+                          some: {
+                            id: {
+                              in: input?.filter?.tag?.include,
+                            },
+                          },
                         },
                       },
-                    },
+                      {
+                        tags: {
+                          none: {
+                            id: {
+                              in: input?.filter?.tag?.exclude,
+                            },
+                          },
+                        },
+                      },
+                    ],
                   },
                   {
                     tags: {
-                      none: {
-                        id: {
-                          in: input?.filter?.tag?.exclude,
-                        },
-                      },
+                      none: input?.filter?.tag?.includeUntagged
+                        ? {}
+                        : undefined,
                     },
                   },
                 ],
-              },
-              {
-                tags: {
-                  none: input?.filter?.tag?.includeUntagged ? {} : undefined,
-                },
-              },
-            ],
-          },
+              }
+            : {},
         ],
       },
       include: {
