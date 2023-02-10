@@ -9,7 +9,7 @@ import {
 import { NextPage } from "next";
 import Head from "next/head";
 import { useRouter } from "next/router";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import GameObjectsTableContainer from "../../features/gameobjects/containers/GameObjectsTableContainer";
 import CustomEditable from "../../features/shared/components/CustomEditable";
 import TagFilterToggles, {
@@ -68,6 +68,7 @@ const TagByIdPage: NextPage = () => {
     }
   };
 
+  const tagsQuery = api.tags.getAll.useQuery();
   const [tagFilter, setTagFilter] = useState<TagFilter>({
     Applied: {
       tagName: "Applied",
@@ -80,6 +81,13 @@ const TagByIdPage: NextPage = () => {
       colorScheme: "red",
     },
   });
+
+  const tagsToFilterGameObjectsBy = useMemo(() => {
+    return tagsQuery.data?.tags.filter((tag) => {
+      if (tag.id === tagId && tagFilter["Applied"]!.on) return true;
+      return tagFilter["Not Applied"]!.on;
+    });
+  }, [tagsQuery.data, tagFilter, tagId]);
 
   if (getTagByIdQuery.isFetching) {
     return (
@@ -149,7 +157,7 @@ const TagByIdPage: NextPage = () => {
             allAndNoneToggles
           />
           <GameObjectsTableContainer
-            tags={undefined}
+            tags={tagsToFilterGameObjectsBy?.map((tag) => tag.id) || []}
             additionalActions={(gameObjectData) => (
               <>
                 <ToggleTagButton

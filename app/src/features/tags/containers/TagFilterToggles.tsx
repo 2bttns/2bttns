@@ -1,4 +1,4 @@
-import { Button, ButtonGroup, ButtonProps, Code } from "@chakra-ui/react";
+import { Button, ButtonGroup, ButtonProps } from "@chakra-ui/react";
 import { Dispatch, SetStateAction } from "react";
 
 export type TagFilter = {
@@ -45,9 +45,9 @@ export default function TagFilterToggles(props: TagFilterTogglesProps) {
           <>
             <Button
               key="All"
-              colorScheme="blue"
+              colorScheme="blackAlpha"
               onClick={() => handleToggleAll(true)}
-              variant={areAllOn ? "solid" : "outline"}
+              variant={areAllOn ? "solid" : "ghost"}
             >
               All
             </Button>
@@ -55,7 +55,7 @@ export default function TagFilterToggles(props: TagFilterTogglesProps) {
               key="None"
               colorScheme="blackAlpha"
               onClick={() => handleToggleAll(false)}
-              variant={areAllOff ? "solid" : "outline"}
+              variant={areAllOff ? "solid" : "ghost"}
             >
               None
             </Button>
@@ -84,7 +84,6 @@ export default function TagFilterToggles(props: TagFilterTogglesProps) {
           );
         })}
       </ButtonGroup>
-      <Code>{JSON.stringify(filter, null, 2)}</Code>
     </>
   );
 }
