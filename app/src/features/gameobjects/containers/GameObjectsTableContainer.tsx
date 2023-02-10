@@ -48,6 +48,14 @@ export default function GameObjectsTableContainer(
   const { pageIndex, pageSize } = pagination;
   const [globalFilter, setGlobalFilter] = useState("");
   const [sorting, setSorting] = useState<SortingState>([]);
+  const getSort = (id: keyof GameObjectData) => {
+    const result = sorting.find((s) => s.id === id);
+    if (result === undefined) {
+      return undefined;
+    }
+
+    return result.desc ? "desc" : "asc";
+  };
 
   const gameObjectsQuery = api.gameObjects.getAll.useQuery(
     {
@@ -64,6 +72,13 @@ export default function GameObjectsTableContainer(
         : {
             tag,
           },
+      sort: {
+        id: getSort("id"),
+        name: getSort("name"),
+        description: getSort("description"),
+        tags: getSort("tags"),
+        updatedAt: getSort("updatedAt"),
+      },
     },
     {
       keepPreviousData: true,
@@ -136,7 +151,6 @@ export default function GameObjectsTableContainer(
           />
         ),
         enableSorting: true,
-        enableMultiSort: true,
       }),
       columnHelper.accessor("name", {
         cell: (info) => (
@@ -151,7 +165,6 @@ export default function GameObjectsTableContainer(
           />
         ),
         enableSorting: true,
-        enableMultiSort: true,
       }),
       columnHelper.accessor("description", {
         cell: (info) => (
@@ -165,6 +178,7 @@ export default function GameObjectsTableContainer(
             }
           />
         ),
+        enableSorting: true,
       }),
       columnHelper.accessor("tags", {
         cell: (info) => {
@@ -189,13 +203,11 @@ export default function GameObjectsTableContainer(
           );
         },
         enableSorting: true,
-        enableMultiSort: true,
       }),
       columnHelper.accessor("updatedAt", {
         header: "Last Updated",
         cell: (info) => info.getValue().toLocaleString(),
         enableSorting: true,
-        enableMultiSort: true,
       }),
     ];
 

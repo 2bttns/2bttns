@@ -63,7 +63,6 @@ export default function GameObjectsTable(props: GameObjectsTableProps) {
     onPaginationChange,
     manualPagination: true,
     enableSorting: true,
-    enableMultiSort: true,
     manualSorting: true,
     onSortingChange,
     debugTable: true,
@@ -89,13 +88,13 @@ export default function GameObjectsTable(props: GameObjectsTableProps) {
                       {header.isPlaceholder ? null : (
                         <Box
                           sx={{
-                            pointer: header.column.getCanSort()
-                              ? "cursor"
+                            cursor: header.column.getCanSort()
+                              ? "pointer"
                               : "default",
                           }}
                           onClick={() => {
                             if (!header.column.getCanSort()) return;
-                            header.column.toggleSorting(undefined, true);
+                            header.column.toggleSorting();
                           }}
                         >
                           {flexRender(

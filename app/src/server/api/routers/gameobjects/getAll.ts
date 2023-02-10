@@ -12,6 +12,8 @@ export const tagFilter = z.object({
   includeUntagged: z.boolean().optional().default(false),
 });
 
+export const sort = z.enum(["asc", "desc"]);
+
 export const getAll = publicProcedure
   .input(
     z
@@ -27,6 +29,15 @@ export const getAll = publicProcedure
           })
           .optional(),
         includeTags: z.boolean().optional().default(false),
+        sort: z
+          .object({
+            id: sort.optional(),
+            name: sort.optional(),
+            description: sort.optional(),
+            tags: sort.optional(),
+            updatedAt: sort.optional(),
+          })
+          .optional(),
       })
       .optional()
   )
@@ -93,6 +104,17 @@ export const getAll = publicProcedure
       },
       include: {
         tags: input?.includeTags,
+      },
+      orderBy: {
+        id: input?.sort?.id,
+        name: input?.sort?.name,
+        description: input?.sort?.description,
+        tags: input?.sort?.tags
+          ? {
+              _count: input.sort.tags,
+            }
+          : undefined,
+        updatedAt: input?.sort?.updatedAt,
       },
     });
     return { gameObjects };
