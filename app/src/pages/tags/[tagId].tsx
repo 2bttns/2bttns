@@ -56,6 +56,7 @@ const TagByIdPage: NextPage = () => {
         console.error(error);
       },
       keepPreviousData: true,
+      refetchOnWindowFocus: false,
     }
   );
 
@@ -70,7 +71,10 @@ const TagByIdPage: NextPage = () => {
     }
   };
 
-  const tagsQuery = api.tags.getAll.useQuery();
+  const tagsQuery = api.tags.getAll.useQuery(
+    {},
+    { refetchOnWindowFocus: false }
+  );
   const [tagFilter, setTagFilter] = useState<TagFilter>({
     Applied: {
       tagName: "Applied",

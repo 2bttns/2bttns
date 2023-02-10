@@ -66,6 +66,7 @@ export default function GameObjectsTableContainer(
     },
     {
       keepPreviousData: true,
+      refetchOnWindowFocus: false,
     }
   );
 
@@ -86,6 +87,7 @@ export default function GameObjectsTableContainer(
     },
     {
       keepPreviousData: true,
+      refetchOnWindowFocus: false,
     }
   );
 
