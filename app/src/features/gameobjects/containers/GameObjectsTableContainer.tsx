@@ -173,7 +173,7 @@ export default function GameObjectsTableContainer(
             return "No tags";
           return info
             .getValue()
-            .map((tag: GameObjectData["tags"][0]) => tag.name)
+            .map((tag: GameObjectData["tags"][0]) => tag.name || "Untitled Tag")
             .join(", ");
         },
       }),
