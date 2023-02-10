@@ -9,8 +9,12 @@ import {
 import { NextPage } from "next";
 import Head from "next/head";
 import { useRouter } from "next/router";
+import { useState } from "react";
 import GameObjectsTableContainer from "../../features/gameobjects/containers/GameObjectsTableContainer";
 import CustomEditable from "../../features/shared/components/CustomEditable";
+import TagFilterToggles, {
+  TagFilter,
+} from "../../features/tags/containers/TagFilterToggles";
 import TagsLayoutContainer from "../../features/tags/containers/TagsLayoutContainer";
 import ToggleTagButton from "../../features/tags/containers/ToggleTagButton";
 import { api, RouterInputs } from "../../utils/api";
@@ -63,6 +67,19 @@ const TagByIdPage: NextPage = () => {
       console.error(error);
     }
   };
+
+  const [tagFilter, setTagFilter] = useState<TagFilter>({
+    Applied: {
+      tagName: "Applied",
+      on: true,
+      colorScheme: "green",
+    },
+    "Not Applied": {
+      tagName: "Not Applied",
+      on: false,
+      colorScheme: "red",
+    },
+  });
 
   if (getTagByIdQuery.isFetching) {
     return (
@@ -126,6 +143,11 @@ const TagByIdPage: NextPage = () => {
           />
           <Divider />
           <Heading size="md">Tagged Game Objects</Heading>
+          <TagFilterToggles
+            filter={tagFilter}
+            setFilter={setTagFilter}
+            allAndNoneToggles
+          />
           <GameObjectsTableContainer
             tags={undefined}
             additionalActions={(gameObjectData) => (
