@@ -31,13 +31,14 @@ const columnHelper = createColumnHelper<GameObjectData>();
 
 export type GameObjectsTableContainerProps = {
   tag?: typeof tagFilter._type;
+  onGameObjectCreated?: (gameObjectId: string) => Promise<void>;
   additionalActions?: (gameObjectData: GameObjectData) => React.ReactNode;
 };
 
 export default function GameObjectsTableContainer(
   props: GameObjectsTableContainerProps
 ) {
-  const { tag, additionalActions } = props;
+  const { tag, onGameObjectCreated, additionalActions } = props;
 
   const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: 0,
@@ -101,7 +102,10 @@ export default function GameObjectsTableContainer(
   const createGameObjectMutation = api.gameObjects.create.useMutation();
   const handleCreateGameObject = async (name: string) => {
     try {
-      await createGameObjectMutation.mutateAsync({ name });
+      const result = await createGameObjectMutation.mutateAsync({ name });
+      if (onGameObjectCreated) {
+        await onGameObjectCreated(result.createdGameObject.id);
+      }
       await utils.gameObjects.invalidate();
     } catch (error) {
       window.alert("Error creating game object\n See console for details");

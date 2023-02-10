@@ -10,7 +10,9 @@ import { NextPage } from "next";
 import Head from "next/head";
 import { useRouter } from "next/router";
 import { useMemo, useState } from "react";
-import GameObjectsTableContainer from "../../features/gameobjects/containers/GameObjectsTableContainer";
+import GameObjectsTableContainer, {
+  GameObjectsTableContainerProps,
+} from "../../features/gameobjects/containers/GameObjectsTableContainer";
 import CustomEditable from "../../features/shared/components/CustomEditable";
 import TagFilterToggles, {
   TagFilter,
@@ -98,6 +100,19 @@ const TagByIdPage: NextPage = () => {
     return [];
   }, [tagFilter]);
 
+  const handleGameObjectCreated: GameObjectsTableContainerProps["onGameObjectCreated"] =
+    async (gameObjectId) => {
+      try {
+        await updateTagMutation.mutateAsync({
+          id: tagId,
+          data: { addGameObjects: [gameObjectId] },
+        });
+      } catch (error) {
+        window.alert("Error creating game object. See console for details.");
+        console.error(error);
+      }
+    };
+
   if (getTagByIdQuery.isFetching) {
     return (
       <>
@@ -171,6 +186,7 @@ const TagByIdPage: NextPage = () => {
               exclude: excludeTags,
               includeUntagged,
             }}
+            onGameObjectCreated={handleGameObjectCreated}
             additionalActions={(gameObjectData) => (
               <>
                 <ToggleTagButton
