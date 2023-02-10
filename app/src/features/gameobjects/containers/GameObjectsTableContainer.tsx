@@ -185,7 +185,7 @@ export default function GameObjectsTableContainer(
           const tags = (info.getValue() as Tag[]) || undefined;
           const selected: TagOption[] =
             tags?.map((tag: Tag) => ({
-              label: tag.name,
+              label: tag.name || "Untitled Tag",
               value: tag.id,
             })) || [];
 
