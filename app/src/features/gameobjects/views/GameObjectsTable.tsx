@@ -23,7 +23,6 @@ import {
   SortingState,
   useReactTable,
 } from "@tanstack/react-table";
-import { useEffect } from "react";
 import { RouterOutputs } from "../../../utils/api";
 
 export type GameObjectData =
@@ -50,10 +49,6 @@ export default function GameObjectsTable(props: GameObjectsTableProps) {
     sorting,
     onSortingChange,
   } = props;
-
-  useEffect(() => {
-    console.log(sorting);
-  }, [sorting]);
 
   const table = useReactTable({
     data: gameObjects,
