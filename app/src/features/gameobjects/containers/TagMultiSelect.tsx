@@ -1,4 +1,10 @@
-import { Box, Tag as ChakraTag } from "@chakra-ui/react";
+import {
+  Box,
+  Checkbox,
+  HStack,
+  Tag as ChakraTag,
+  Tooltip,
+} from "@chakra-ui/react";
 import { Tag } from "@prisma/client";
 import NextLink from "next/link";
 import { useMemo } from "react";
@@ -26,11 +32,13 @@ export default function TagMultiSelect(props: TagMultiSelectProps) {
   const options: Option[] = useMemo(() => {
     if (!tagsQuery.data?.tags) return [];
 
-    return tagsQuery.data.tags.map((tag) => ({
-      value: tag.id,
-      label: tag.name || "Untitled Tag",
-    }));
-  }, [tagsQuery.data]);
+    return tagsQuery.data.tags
+      .map((tag) => ({
+        value: tag.id,
+        label: tag.name || "Untitled Tag",
+      }))
+      .sort((a, b) => a.label.localeCompare(b.label));
+  }, [tagsQuery]);
 
   const setSelected = async (nextValue: Option[]) => {
     const nextOptions = nextValue.map((option) => option.value as string);
@@ -44,23 +52,89 @@ export default function TagMultiSelect(props: TagMultiSelectProps) {
         value={selected}
         onChange={setSelected}
         labelledBy="Select"
+        hasSelectAll={false}
+        ClearSelectedIcon={null}
+        ItemRenderer={(item: {
+          option: TagOption;
+          checked: boolean;
+          onClick: () => void;
+        }) => {
+          const { option, checked, onClick } = item;
+          return <Item option={option} checked={checked} onClick={onClick} />;
+        }}
         valueRenderer={(selected) => {
-          return selected.map((option) => {
-            return (
-              <NextLink href={`/tags/${option.value}`}>
+          const sorted = selected.sort((a, b) =>
+            a.label.localeCompare(b.label)
+          );
+
+          const firstItem = sorted[0];
+          if (!firstItem) return "No Tags Applied";
+
+          return (
+            <>
+              <Tooltip
+                label={`Click to view ${firstItem.label}`}
+                placement="top"
+                hasArrow
+              >
+                <NextLink href={`/tags/${firstItem.value}`}>
+                  <ChakraTag
+                    size="sm"
+                    variant="solid"
+                    colorScheme={"green"}
+                    mr={1}
+                  >
+                    {firstItem.label}
+                  </ChakraTag>
+                </NextLink>
+              </Tooltip>
+              {selected.length - 1 > 0 && (
                 <ChakraTag
                   size="sm"
-                  variant="solid"
+                  variant="outline"
                   colorScheme={"green"}
                   mr={1}
                 >
-                  {option.label}
+                  + {selected.length - 1} More
                 </ChakraTag>
-              </NextLink>
-            );
-          });
+              )}
+            </>
+          );
         }}
       />
     </Box>
+  );
+}
+
+type ItemProps = {
+  option: TagOption;
+  checked: boolean;
+  onClick: () => void;
+};
+
+function Item(props: ItemProps) {
+  const { option, checked, onClick } = props;
+  return (
+    <HStack justifyContent="space-between">
+      <Tooltip label={`Click to view ${option.label}`} placement="top" hasArrow>
+        <NextLink href={`/tags/${option.value}`}>
+          <ChakraTag
+            size="sm"
+            variant={checked ? "solid" : "outline"}
+            colorScheme={checked ? "green" : "gray"}
+            mr={1}
+          >
+            {option.label}
+          </ChakraTag>
+        </NextLink>
+      </Tooltip>
+      <Checkbox
+        animation="none"
+        isChecked={checked}
+        onChange={onClick}
+        backgroundColor="white"
+        colorScheme="green"
+      />
+    </HStack>
   );
 }

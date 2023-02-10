@@ -171,14 +171,16 @@ export default function GameObjectsTableContainer(
             })) || [];
 
           return (
-            <TagMultiSelect
-              selected={selected}
-              onChange={(nextTags) => {
-                handleUpdateGameObject(info.row.original.id, {
-                  tags: nextTags,
-                });
-              }}
-            />
+            <Box width="256px">
+              <TagMultiSelect
+                selected={selected}
+                onChange={(nextTags) => {
+                  handleUpdateGameObject(info.row.original.id, {
+                    tags: nextTags,
+                  });
+                }}
+              />
+            </Box>
           );
         },
       }),
@@ -227,7 +229,7 @@ export default function GameObjectsTableContainer(
   }, [pageCount, pageIndex]);
 
   return (
-    <Box>
+    <Box height="100%">
       <Stack direction="row" sx={{ padding: "1rem" }}>
         <InputGroup>
           <InputLeftElement

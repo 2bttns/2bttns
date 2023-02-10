@@ -12,7 +12,12 @@ const Lists: NextPage = () => {
         <meta name="description" content="Game object management panel" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <Box width="100vw" height="100vh" backgroundColor="white">
+      <Box
+        width="100vw"
+        height="100vh"
+        backgroundColor="white"
+        overflow="hidden"
+      >
         <GameObjectsTableContainer
           additionalActions={(gameObjectData) => (
             <>
