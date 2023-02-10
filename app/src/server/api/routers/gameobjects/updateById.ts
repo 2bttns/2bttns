@@ -23,9 +23,7 @@ export const updateById = publicProcedure
         name: input.data.name,
         description: input.data.description,
         tags: {
-          connect: input.data.tags?.map((tag) => ({
-            id: tag,
-          })),
+          set: input.data.tags?.map((tag) => ({ id: tag })),
         },
       },
     });

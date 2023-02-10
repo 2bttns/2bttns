@@ -35,6 +35,7 @@
     "nextjs-cors": "^2.1.2",
     "react": "18.2.0",
     "react-dom": "18.2.0",
+    "react-multi-select-component": "^4.3.4",
     "superjson": "1.9.1",
     "swagger-ui-react": "^4.15.5",
     "trpc-openapi": "^1.1.2",

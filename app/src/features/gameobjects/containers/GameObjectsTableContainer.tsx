@@ -9,20 +9,20 @@ import {
   InputRightElement,
   Kbd,
   Stack,
-  Tag as ChakraTag,
   Tooltip,
 } from "@chakra-ui/react";
+import { Tag } from "@prisma/client";
 import {
   ColumnDef,
   createColumnHelper,
   PaginationState,
 } from "@tanstack/react-table";
-import NextLink from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { tagFilter } from "../../../server/api/routers/gameobjects/getAll";
 import { api, RouterInputs, RouterOutputs } from "../../../utils/api";
 import CustomEditable from "../../shared/components/CustomEditable";
 import GameObjectsTable from "../views/GameObjectsTable";
+import TagMultiSelect, { TagOption } from "./TagMultiSelect";
 
 export type GameObjectData =
   RouterOutputs["gameObjects"]["getAll"]["gameObjects"][0];
@@ -97,8 +97,13 @@ export default function GameObjectsTableContainer(
     id: string,
     data: RouterInputs["gameObjects"]["updateById"]["data"]
   ) => {
-    await updateGameObjectMutation.mutateAsync({ id, data });
-    await utils.gameObjects.invalidate();
+    try {
+      await updateGameObjectMutation.mutateAsync({ id, data });
+      await utils.gameObjects.invalidate();
+    } catch (error) {
+      console.error(error);
+      window.alert("Error updating tag\n See console for details");
+    }
   };
 
   const createGameObjectMutation = api.gameObjects.create.useMutation();
@@ -158,27 +163,22 @@ export default function GameObjectsTableContainer(
       }),
       columnHelper.accessor("tags", {
         cell: (info) => {
-          if (!info.getValue() || info.getValue().length === 0)
-            return "No tags";
+          const tags = (info.getValue() as Tag[]) || undefined;
+          const selected: TagOption[] =
+            tags?.map((tag: Tag) => ({
+              label: tag.name,
+              value: tag.id,
+            })) || [];
+
           return (
-            <Box>
-              {info.getValue().map((tag: GameObjectData["tags"][0]) => {
-                if (!tag) return null;
-                return (
-                  <NextLink href={`/tags/${tag.id}`}>
-                    <ChakraTag
-                      size="sm"
-                      variant="solid"
-                      colorScheme={"green"}
-                      mr={1}
-                      mb={1}
-                    >
-                      {tag.name || tag.id}
-                    </ChakraTag>
-                  </NextLink>
-                );
-              })}
-            </Box>
+            <TagMultiSelect
+              selected={selected}
+              onChange={(nextTags) => {
+                handleUpdateGameObject(info.row.original.id, {
+                  tags: nextTags,
+                });
+              }}
+            />
           );
         },
       }),
@@ -193,7 +193,6 @@ export default function GameObjectsTableContainer(
         id: "actions",
         header: "",
         cell: (info) => {
-          const { id } = info.row.original;
           return (
             <ButtonGroup width="100%" justifyContent="end">
               {additionalActions(info.row.original)}
