@@ -1,5 +1,6 @@
 import { Table, Tbody, Td, Thead, Tr } from "@chakra-ui/react";
 import { Game } from "@prisma/client";
+import TagMultiSelect from "../../gameobjects/containers/TagMultiSelect";
 import EditableTd from "../../shared/components/CustomEditable/EditableTd";
 
 export type GamesTableProps = {
@@ -69,6 +70,9 @@ export default function GamesTable(props: GamesTableProps) {
               }}
               isEditable={isEditable}
             />
+            <Td sx={{ verticalAlign: "top" }}>
+              <TagMultiSelect onChange={console.log} selected={[]} />
+            </Td>
             {renderActions && (
               <Td sx={{ verticalAlign: "top" }}>{renderActions(game)}</Td>
             )}

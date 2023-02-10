@@ -1,0 +1,83 @@
+import { AddIcon, SearchIcon } from "@chakra-ui/icons";
+import {
+  IconButton,
+  Input,
+  InputGroup,
+  InputLeftElement,
+  InputRightElement,
+  Kbd,
+  Stack,
+  Tooltip,
+} from "@chakra-ui/react";
+
+export type SearchAndCreateBar = {
+  value: string | undefined;
+  onChange: (search: string) => void;
+  onCreate?: (name: string) => void;
+};
+
+// Input for updating a search string state variable
+// Has a button to create a new game object with the search string as the name, if a create function is provided
+export default function SearchAndCreateBar(props: SearchAndCreateBar) {
+  const { value, onChange, onCreate } = props;
+
+  const handleCreate = () => {
+    if (!value) return;
+    if (!onCreate) return;
+    onCreate(value);
+  };
+
+  return (
+    <Stack direction="row" sx={{ padding: "1rem" }}>
+      <InputGroup>
+        <InputLeftElement
+          pointerEvents="none"
+          color="gray.300"
+          fontSize="1.2em"
+        >
+          <SearchIcon />
+        </InputLeftElement>
+        <Input
+          value={value ?? ""}
+          onChange={(e) => onChange(e.target.value)}
+          placeholder="Search by name or id"
+          onKeyUp={(e) => {
+            if (e.key === "Enter" && e.shiftKey) {
+              handleCreate();
+            }
+          }}
+        />
+        <InputRightElement fontSize="1.2em">
+          <Tooltip
+            label={
+              <Stack
+                direction="column"
+                alignItems="center"
+                justifyContent="center"
+                spacing="0"
+                padding="0.5rem"
+              >
+                <div>Create new item with input as name!</div>
+                <div>
+                  <Kbd backgroundColor="gray.900">shift</Kbd>
+                  <span>+</span>
+                  <Kbd backgroundColor="gray.900">enter</Kbd>
+                </div>
+              </Stack>
+            }
+            placement="bottom-end"
+            hasArrow
+          >
+            <IconButton
+              colorScheme="blue"
+              icon={<AddIcon />}
+              aria-label="Create new item"
+              size="sm"
+              onClick={handleCreate}
+            />
+          </Tooltip>
+        </InputRightElement>
+      </InputGroup>
+    </Stack>
+  );
+}

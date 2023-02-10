@@ -1,16 +1,4 @@
-import { AddIcon, SearchIcon } from "@chakra-ui/icons";
-import {
-  Box,
-  ButtonGroup,
-  IconButton,
-  Input,
-  InputGroup,
-  InputLeftElement,
-  InputRightElement,
-  Kbd,
-  Stack,
-  Tooltip,
-} from "@chakra-ui/react";
+import { Box, ButtonGroup } from "@chakra-ui/react";
 import { Tag } from "@prisma/client";
 import {
   ColumnDef,
@@ -22,7 +10,8 @@ import { useEffect, useMemo, useState } from "react";
 import { tagFilter } from "../../../server/api/routers/gameobjects/getAll";
 import { api, RouterInputs, RouterOutputs } from "../../../utils/api";
 import CustomEditable from "../../shared/components/CustomEditable";
-import PaginatedTable from "../../shared/PaginatedTable";
+import PaginatedTable from "../../shared/components/CustomEditable/Table/PaginatedTable";
+import SearchAndCreateBar from "../../shared/components/CustomEditable/Table/SearchAndCreateBar";
 import TagMultiSelect, { TagOption } from "./TagMultiSelect";
 
 export type GameObjectData =
@@ -249,61 +238,11 @@ export default function GameObjectsTable(props: GameObjectsTableProps) {
 
   return (
     <Box height="100%">
-      <Stack direction="row" sx={{ padding: "1rem" }}>
-        <InputGroup>
-          <InputLeftElement
-            pointerEvents="none"
-            color="gray.300"
-            fontSize="1.2em"
-          >
-            <SearchIcon />
-          </InputLeftElement>
-          <Input
-            value={globalFilter ?? ""}
-            onChange={(e) => setGlobalFilter(e.target.value)}
-            placeholder="Search by name or id"
-            onKeyUp={(e) => {
-              if (e.key === "Enter" && e.shiftKey) {
-                if (!globalFilter) return;
-                handleCreateGameObject(globalFilter);
-              }
-            }}
-          />
-          <InputRightElement fontSize="1.2em">
-            <Tooltip
-              label={
-                <Stack
-                  direction="column"
-                  alignItems="center"
-                  justifyContent="center"
-                  spacing="0"
-                  padding="0.5rem"
-                >
-                  <div>Create new item with input as name</div>
-                  <div>
-                    <Kbd backgroundColor="gray.900">shift</Kbd>
-                    <span>+</span>
-                    <Kbd backgroundColor="gray.900">enter</Kbd>
-                  </div>
-                </Stack>
-              }
-              placement="bottom-end"
-              hasArrow
-            >
-              <IconButton
-                colorScheme="blue"
-                icon={<AddIcon />}
-                aria-label="Create new item"
-                size="sm"
-                onClick={() => {
-                  if (!globalFilter) return;
-                  handleCreateGameObject(globalFilter);
-                }}
-              />
-            </Tooltip>
-          </InputRightElement>
-        </InputGroup>
-      </Stack>
+      <SearchAndCreateBar
+        value={globalFilter}
+        onChange={setGlobalFilter}
+        onCreate={handleCreateGameObject}
+      />
       <PaginatedTable
         columns={columns}
         data={gameObjectsQuery.data?.gameObjects ?? []}
