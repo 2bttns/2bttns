@@ -22,6 +22,7 @@ export const updateById = publicProcedure
         id: input.data.id,
         name: input.data.name,
         description: input.data.description,
+        updatedAt: new Date(), // Explicit update of updatedAt; otherwise tags.set won't trigger the default updatedAt update
         tags: {
           set: input.data.tags?.map((tag) => ({ id: tag })),
         },
