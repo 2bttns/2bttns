@@ -17,10 +17,13 @@ import {
   ColumnDef,
   flexRender,
   getCoreRowModel,
+  getSortedRowModel,
   OnChangeFn,
   PaginationState,
+  SortingState,
   useReactTable,
 } from "@tanstack/react-table";
+import { useEffect } from "react";
 import { RouterOutputs } from "../../../utils/api";
 
 export type GameObjectData =
@@ -32,11 +35,25 @@ export type GameObjectsTableProps = {
   pageCount: number;
   pagination: PaginationState;
   onPaginationChange: OnChangeFn<PaginationState>;
+
+  sorting?: SortingState;
+  onSortingChange?: OnChangeFn<SortingState>;
 };
 
 export default function GameObjectsTable(props: GameObjectsTableProps) {
-  const { gameObjects, columns, pageCount, pagination, onPaginationChange } =
-    props;
+  const {
+    gameObjects,
+    columns,
+    pageCount,
+    pagination,
+    onPaginationChange,
+    sorting,
+    onSortingChange,
+  } = props;
+
+  useEffect(() => {
+    console.log(sorting);
+  }, [sorting]);
 
   const table = useReactTable({
     data: gameObjects,
@@ -44,12 +61,17 @@ export default function GameObjectsTable(props: GameObjectsTableProps) {
     pageCount,
     state: {
       pagination,
+      sorting,
     },
     getCoreRowModel: getCoreRowModel(),
+    getSortedRowModel: getSortedRowModel(),
     onPaginationChange,
     manualPagination: true,
+    enableSorting: true,
+    enableMultiSort: true,
+    manualSorting: true,
+    onSortingChange,
     debugTable: true,
-    enableRowSelection: true,
   });
 
   return (
@@ -70,12 +92,26 @@ export default function GameObjectsTable(props: GameObjectsTableProps) {
                   return (
                     <Th key={header.id} colSpan={header.colSpan}>
                       {header.isPlaceholder ? null : (
-                        <div>
+                        <Box
+                          sx={{
+                            pointer: header.column.getCanSort()
+                              ? "cursor"
+                              : "default",
+                          }}
+                          onClick={() => {
+                            if (!header.column.getCanSort()) return;
+                            header.column.toggleSorting(undefined, true);
+                          }}
+                        >
                           {flexRender(
                             header.column.columnDef.header,
                             header.getContext()
                           )}
-                        </div>
+                          {{
+                            asc: " 🔼",
+                            desc: " 🔽",
+                          }[header.column.getIsSorted() as string] ?? null}
+                        </Box>
                       )}
                     </Th>
                   );

@@ -16,6 +16,7 @@ import {
   ColumnDef,
   createColumnHelper,
   PaginationState,
+  SortingState,
 } from "@tanstack/react-table";
 import { useEffect, useMemo, useState } from "react";
 import { tagFilter } from "../../../server/api/routers/gameobjects/getAll";
@@ -45,8 +46,8 @@ export default function GameObjectsTableContainer(
     pageSize: 10,
   });
   const { pageIndex, pageSize } = pagination;
-
   const [globalFilter, setGlobalFilter] = useState("");
+  const [sorting, setSorting] = useState<SortingState>([]);
 
   const gameObjectsQuery = api.gameObjects.getAll.useQuery(
     {
@@ -134,6 +135,8 @@ export default function GameObjectsTableContainer(
             }
           />
         ),
+        enableSorting: true,
+        enableMultiSort: true,
       }),
       columnHelper.accessor("name", {
         cell: (info) => (
@@ -147,6 +150,8 @@ export default function GameObjectsTableContainer(
             }
           />
         ),
+        enableSorting: true,
+        enableMultiSort: true,
       }),
       columnHelper.accessor("description", {
         cell: (info) => (
@@ -183,10 +188,14 @@ export default function GameObjectsTableContainer(
             </Box>
           );
         },
+        enableSorting: true,
+        enableMultiSort: true,
       }),
       columnHelper.accessor("updatedAt", {
         header: "Last Updated",
         cell: (info) => info.getValue().toLocaleString(),
+        enableSorting: true,
+        enableMultiSort: true,
       }),
     ];
 
@@ -291,6 +300,8 @@ export default function GameObjectsTableContainer(
         onPaginationChange={setPagination}
         pagination={pagination}
         pageCount={pageCount}
+        sorting={sorting}
+        onSortingChange={setSorting}
       />
     </Box>
   );
