@@ -17,7 +17,11 @@ export const getAll = publicProcedure
             mode: z.enum(["AND", "OR"]).optional(),
             id: filter.optional(),
             name: filter.optional(),
-            tag: filter.optional(),
+            tag: z.object({
+              include: z.array(z.string()).optional(),
+              exclude: z.array(z.string()).optional(),
+              includeUntagged: z.boolean().optional().default(false),
+            }),
           })
           .optional(),
         includeTags: z.boolean().optional().default(false),
@@ -25,37 +29,64 @@ export const getAll = publicProcedure
       .optional()
   )
   .query(async ({ ctx, input }) => {
-    console.log(input);
+    console.log("FOO");
+    console.log(input?.filter);
+
     const gameObjects = await ctx.prisma.gameObject.findMany({
       take: input?.take,
       skip: input?.skip,
       where: {
-        [input?.filter?.mode ?? "AND"]: input?.filter?.mode
-          ? [
+        AND: [
+          {
+            [input?.filter?.mode ?? "AND"]: input?.filter?.mode
+              ? [
+                  {
+                    id: {
+                      in: input?.filter?.id?.in,
+                      contains: input?.filter?.id?.contains,
+                    },
+                  },
+                  {
+                    name: {
+                      in: input?.filter?.name?.in,
+                      contains: input?.filter?.name?.contains,
+                    },
+                  },
+                ]
+              : undefined,
+          },
+          {
+            OR: [
               {
-                id: {
-                  in: input?.filter?.id?.in,
-                  contains: input?.filter?.id?.contains,
-                },
-              },
-              {
-                name: {
-                  in: input?.filter?.name?.in,
-                  contains: input?.filter?.name?.contains,
-                },
+                AND: [
+                  {
+                    tags: {
+                      some: {
+                        id: {
+                          in: input?.filter?.tag?.include,
+                        },
+                      },
+                    },
+                  },
+                  {
+                    tags: {
+                      none: {
+                        id: {
+                          in: input?.filter?.tag?.exclude,
+                        },
+                      },
+                    },
+                  },
+                ],
               },
               {
                 tags: {
-                  some: {
-                    name: {
-                      in: input?.filter?.tag?.in,
-                      contains: input?.filter?.tag?.contains,
-                    },
-                  },
+                  none: input?.filter?.tag?.includeUntagged ? {} : undefined,
                 },
               },
-            ]
-          : undefined,
+            ],
+          },
+        ],
       },
       include: {
         tags: input?.includeTags,

@@ -28,14 +28,17 @@ export type GameObjectData =
 const columnHelper = createColumnHelper<GameObjectData>();
 
 export type GameObjectsTableContainerProps = {
-  tags?: Tag["id"][];
+  includeTags?: Tag["id"][];
+  excludeTags?: Tag["id"][];
+  includeUntagged?: boolean;
   additionalActions?: (gameObjectData: GameObjectData) => React.ReactNode;
 };
 
 export default function GameObjectsTableContainer(
   props: GameObjectsTableContainerProps
 ) {
-  const { tags, additionalActions } = props;
+  const { includeTags, excludeTags, includeUntagged, additionalActions } =
+    props;
 
   const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: 0,
@@ -55,9 +58,19 @@ export default function GameObjectsTableContainer(
             mode: "OR",
             id: { contains: globalFilter },
             name: { contains: globalFilter },
-            tag: { contains: globalFilter, in: tags },
+            tag: {
+              include: includeTags,
+              exclude: excludeTags,
+              includeUntagged,
+            },
           }
-        : undefined,
+        : {
+            tag: {
+              include: includeTags,
+              exclude: excludeTags,
+              includeUntagged,
+            },
+          },
     },
     {
       keepPreviousData: true,
@@ -73,9 +86,19 @@ export default function GameObjectsTableContainer(
             mode: "OR",
             id: { contains: globalFilter },
             name: { contains: globalFilter },
-            tag: { contains: globalFilter },
+            tag: {
+              include: includeTags,
+              exclude: excludeTags,
+              includeUntagged,
+            },
           }
-        : undefined,
+        : {
+            tag: {
+              include: includeTags,
+              exclude: excludeTags,
+              includeUntagged,
+            },
+          },
     },
     {
       keepPreviousData: true,

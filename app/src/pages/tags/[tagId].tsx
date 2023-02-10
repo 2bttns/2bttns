@@ -89,6 +89,15 @@ const TagByIdPage: NextPage = () => {
     });
   }, [tagsQuery.data, tagFilter, tagId]);
 
+  const includeUntagged = tagFilter["Not Applied"]!.on;
+
+  const excludeTags = useMemo(() => {
+    if (tagFilter["Not Applied"]!.on && !tagFilter["Applied"]!.on) {
+      return [tagId];
+    }
+    return [];
+  }, [tagFilter]);
+
   if (getTagByIdQuery.isFetching) {
     return (
       <>
@@ -157,7 +166,9 @@ const TagByIdPage: NextPage = () => {
             allAndNoneToggles
           />
           <GameObjectsTableContainer
-            tags={tagsToFilterGameObjectsBy?.map((tag) => tag.id) || []}
+            includeTags={tagsToFilterGameObjectsBy?.map((tag) => tag.id) || []}
+            includeUntagged={includeUntagged}
+            excludeTags={excludeTags}
             additionalActions={(gameObjectData) => (
               <>
                 <ToggleTagButton
