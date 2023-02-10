@@ -9,6 +9,7 @@ import {
   InputRightElement,
   Kbd,
   Stack,
+  Tag as ChakraTag,
   Tooltip,
 } from "@chakra-ui/react";
 import { Tag } from "@prisma/client";
@@ -17,6 +18,7 @@ import {
   createColumnHelper,
   PaginationState,
 } from "@tanstack/react-table";
+import NextLink from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { api, RouterInputs, RouterOutputs } from "../../../utils/api";
 import CustomEditable from "../../shared/components/CustomEditable";
@@ -171,10 +173,26 @@ export default function GameObjectsTableContainer(
         cell: (info) => {
           if (!info.getValue() || info.getValue().length === 0)
             return "No tags";
-          return info
-            .getValue()
-            .map((tag: GameObjectData["tags"][0]) => tag.name || "Untitled Tag")
-            .join(", ");
+          return (
+            <Box>
+              {info.getValue().map((tag: GameObjectData["tags"][0]) => {
+                if (!tag) return null;
+                return (
+                  <NextLink href={`/tags/${tag.id}`}>
+                    <ChakraTag
+                      size="sm"
+                      variant="solid"
+                      colorScheme={"green"}
+                      mr={1}
+                      mb={1}
+                    >
+                      {tag.name || tag.id}
+                    </ChakraTag>
+                  </NextLink>
+                );
+              })}
+            </Box>
+          );
         },
       }),
       columnHelper.accessor("updatedAt", {
@@ -236,7 +254,7 @@ export default function GameObjectsTableContainer(
           <Input
             value={globalFilter ?? ""}
             onChange={(e) => setGlobalFilter(e.target.value)}
-            placeholder="Search by name, id, or tag"
+            placeholder="Search by name or id"
             onKeyUp={(e) => {
               if (e.key === "Enter" && e.shiftKey) {
                 if (!globalFilter) return;
