@@ -6,12 +6,13 @@ import {
   PaginationState,
   SortingState,
 } from "@tanstack/react-table";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { tagFilter } from "../../../server/api/routers/gameobjects/getAll";
 import { api, RouterInputs, RouterOutputs } from "../../../utils/api";
 import CustomEditable from "../../shared/components/CustomEditable";
-import PaginatedTable from "../../shared/components/CustomEditable/Table/PaginatedTable";
-import SearchAndCreateBar from "../../shared/components/CustomEditable/Table/SearchAndCreateBar";
+import PaginatedTable from "../../shared/components/CustomEditable/Table/containers/PaginatedTable";
+import SearchAndCreateBar from "../../shared/components/CustomEditable/Table/containers/SearchAndCreateBar";
+import usePageCount from "../../shared/components/CustomEditable/Table/hooks/usePageCount";
 import TagMultiSelect, { TagOption } from "./TagMultiSelect";
 
 export type GameObjectData =
@@ -33,6 +34,7 @@ export default function GameObjectsTable(props: GameObjectsTableProps) {
     pageSize: 10,
   });
   const { pageIndex, pageSize } = pagination;
+
   const [globalFilter, setGlobalFilter] = useState("");
   const [sorting, setSorting] = useState<SortingState>([]);
   const getSort = (id: keyof GameObjectData) => {
@@ -93,6 +95,12 @@ export default function GameObjectsTable(props: GameObjectsTableProps) {
       refetchOnWindowFocus: false,
     }
   );
+
+  const { pageCount } = usePageCount({
+    pagination,
+    setPagination,
+    itemCount: gameObjectsCountQuery.data?.count ?? 0,
+  });
 
   const updateGameObjectMutation = api.gameObjects.updateById.useMutation();
 
@@ -214,27 +222,6 @@ export default function GameObjectsTable(props: GameObjectsTableProps) {
 
     return items;
   }, []);
-
-  const pageCount = useMemo(() => {
-    if (!gameObjectsCountQuery.data) return 0;
-    return Math.ceil(gameObjectsCountQuery.data.count / pageSize);
-  }, [gameObjectsCountQuery.data, pagination.pageSize]);
-
-  useEffect(() => {
-    // If the page index is out of bounds, reset it to the last page
-    if (pageIndex >= pageCount) {
-      setPagination((prev) => ({ ...prev, pageIndex: pageCount - 1 }));
-      return;
-    }
-
-    // Otherwise, if the page index is less than 0, reset it to 0
-    // Only do this if the page count is greater than 0; or else, we'll get stuck in an infinite loop from the queries
-    if (pageCount === 0) return;
-    if (pageIndex < 0) {
-      setPagination((prev) => ({ ...prev, pageIndex: 0 }));
-      return;
-    }
-  }, [pageCount, pageIndex]);
 
   return (
     <Box height="100%">
