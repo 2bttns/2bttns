@@ -1,7 +1,7 @@
 import { Text } from "@chakra-ui/react";
 import { GameObject } from "@prisma/client";
 import { TRPCClientErrorLike } from "@trpc/client";
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { api } from "../../../utils/api";
 import Play from "../views/Play";
 
@@ -13,13 +13,25 @@ export type PlayContainerProps = {
 export default function PlayContainer(props: PlayContainerProps) {
   const { gameId, handleInvalidGame } = props;
 
+  const utils = api.useContext();
+  const [initCacheCleared, setCacheCleared] = useState(false);
+  useEffect(() => {
+    // Clear games query cache on first load; otherwise game objects may be stale
+    if (initCacheCleared) return;
+    (async () => {
+      await utils.games.invalidate();
+      setCacheCleared(true);
+    })();
+  }, [utils]);
+
   // TODO: Get round-specific game object; not all game objects
   const gamesQuery = api.games.getById.useQuery(
     { id: gameId!, includeGameObjects: true },
     {
       retry: false,
-      enabled: gameId !== undefined,
+      enabled: gameId !== undefined && initCacheCleared,
       onError: handleInvalidGame,
+      cacheTime: 0,
     }
   );
 
