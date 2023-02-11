@@ -1,0 +1,64 @@
+{
+  "name": "app",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "build": "next build",
+    "dev": "next dev",
+    "postinstall": "prisma generate",
+    "lint": "next lint",
+    "start": "next start",
+    "db-sync:dev": "npx prisma migrate dev",
+    "db-seed": "NODE_ENV=development prisma db seed"
+  },
+  "prisma": {
+    "seed": "tsx prisma/seed.ts"
+  },
+  "dependencies": {
+    "@chakra-ui/icons": "^2.0.17",
+    "@chakra-ui/react": "^2.4.9",
+    "@emotion/react": "^11.10.5",
+    "@emotion/styled": "^11.10.5",
+    "@next-auth/prisma-adapter": "^1.0.5",
+    "@prisma/client": "^4.9.0",
+    "@tanstack/react-query": "^4.20.0",
+    "@tanstack/react-table": "^8.7.9",
+    "@trpc/client": "^10.9.0",
+    "@trpc/next": "^10.9.0",
+    "@trpc/react-query": "^10.9.0",
+    "@trpc/server": "^10.9.0",
+    "@xstate/react": "^3.1.1",
+    "color-hash": "^2.0.2",
+    "framer-motion": "^9.0.0",
+    "next": "13.1.6",
+    "next-auth": "^4.19.0",
+    "nextjs-cors": "^2.1.2",
+    "react": "18.2.0",
+    "react-dom": "18.2.0",
+    "react-multi-select-component": "^4.3.4",
+    "superjson": "1.9.1",
+    "swagger-ui-react": "^4.15.5",
+    "trpc-openapi": "^1.1.2",
+    "use-fit-text": "^2.4.0",
+    "xstate": "^4.35.4",
+    "zod": "^3.20.2"
+  },
+  "devDependencies": {
+    "@types/color-hash": "^1.0.2",
+    "@types/node": "^18.11.18",
+    "@types/react": "^18.0.26",
+    "@types/react-dom": "^18.0.10",
+    "@types/swagger-ui-react": "^4.11.0",
+    "@typescript-eslint/eslint-plugin": "^5.47.1",
+    "@typescript-eslint/parser": "^5.47.1",
+    "eslint": "^8.30.0",
+    "eslint-config-next": "13.1.6",
+    "prisma": "^4.9.0",
+    "ts-node": "^10.9.1",
+    "tsx": "^3.12.2",
+    "typescript": "^4.9.5"
+  },
+  "ct3aMetadata": {
+    "initVersion": "7.4.0"
+  }
+}
