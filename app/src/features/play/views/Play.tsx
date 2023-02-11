@@ -1,14 +1,14 @@
 import { Code, Heading, Stack, Text } from "@chakra-ui/react";
-import { Game, ListItem } from "@prisma/client";
+import { Game, GameObject } from "@prisma/client";
 import ClassicMode from "../../2bttns/ClassicMode";
 
 export type PlayProps = {
   game: Game;
-  listItems: ListItem[];
+  gameObjects: GameObject[];
 };
 
 export default function Play(props: PlayProps) {
-  const { game, listItems } = props;
+  const { game, gameObjects } = props;
   return (
     <>
       {/* TODO: swap out game modes if a frontend plugin is active for the game (e.g. Tinder-style) */}
@@ -23,7 +23,8 @@ export default function Play(props: PlayProps) {
         {game?.name}
       </Heading>
       <ClassicMode
-        items={listItems}
+        items={gameObjects}
+        renderItem={(item) => item.name}
         hotkeys={{
           first: ["w", "ArrowUp"],
           second: ["s", "ArrowDown"],

@@ -10,21 +10,26 @@ export type RenderPropParams = {
   isFinished: ReturnType<typeof use2bttnsMachine>["isFinished"];
 };
 
-export type ClassicModeProps = {
-  items: Item[];
+export type ClassicModeProps<T extends Item> = {
+  // TODO: Replace Item type with GameObject type
+  items: T[];
   children: (params: RenderPropParams) => JSX.Element;
   hotkeys?: Use2bttnsMachineConfig["hotkeys"];
   button1Props?: Partial<ClassicButtonProps>;
   button2Props?: Partial<ClassicButtonProps>;
+
+  // TODO: Allow for custom ReactNode rendering of items
+  renderItem?: (item: T) => string;
 };
 
-export default function ClassicMode({
+export default function ClassicMode<T extends Item>({
   items,
   hotkeys,
   children,
   button1Props,
   button2Props,
-}: ClassicModeProps) {
+  renderItem = (item) => item.id,
+}: ClassicModeProps<T>) {
   // @TODO: pass proper game_id and user_id
   const submitResultsMutation = useMutation({
     mutationFn: async (newResult: Results) => {
@@ -60,7 +65,9 @@ export default function ClassicMode({
       button: "first",
       buttonComponent: (
         <ClassicButton hotkey={hotkeys?.first[0]} {...button1Props}>
-          {current_options.first?.id || ""}
+          {current_options.first
+            ? renderItem(current_options.first as any)
+            : ""}
         </ClassicButton>
       ),
     }),
@@ -68,7 +75,9 @@ export default function ClassicMode({
       button: "second",
       buttonComponent: (
         <ClassicButton hotkey={hotkeys?.second[0]} {...button2Props}>
-          {current_options.second?.id || ""}
+          {current_options.second
+            ? renderItem(current_options.second as any)
+            : ""}
         </ClassicButton>
       ),
     }),
