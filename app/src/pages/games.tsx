@@ -1,16 +1,16 @@
 import { NextPage } from "next";
 import Head from "next/head";
-import GamesContainer from "../features/games/containers/GamesContainer";
+import GamesTable from "../features/games/components/GamesTable";
 
 const GamesPage: NextPage = () => {
   return (
     <>
       <Head>
-        <title>My Games | 2bttns</title>
-        <meta name="description" content="My 2bttns Games" />
+        <title>Games | 2bttns</title>
+        <meta name="description" content="Game management panel" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <GamesContainer />
+      <GamesTable />
     </>
   );
 };

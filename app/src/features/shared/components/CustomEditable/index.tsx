@@ -72,9 +72,13 @@ export default function CustomEditable(props: CustomEditableProps) {
       return;
     }
     handleSave(nextValue).catch((error) => {
-      window.alert("Error: " + error);
       // If there's an error, revert the input back to the original value
       setLiveValue(value);
+
+      console.error("Failed to save value", error);
+      window.alert(
+        `Invalid Update -- Reverting to previous value\n\n ${error.message}`
+      );
     });
   };
 

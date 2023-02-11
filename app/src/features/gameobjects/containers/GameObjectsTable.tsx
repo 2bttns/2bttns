@@ -7,12 +7,12 @@ import {
   SortingState,
 } from "@tanstack/react-table";
 import { useMemo, useState } from "react";
-import { tagFilter } from "../../../server/api/routers/gameobjects/getAll";
+import { tagFilter } from "../../../server/shared/z";
 import { api, RouterInputs, RouterOutputs } from "../../../utils/api";
 import CustomEditable from "../../shared/components/CustomEditable";
-import PaginatedTable from "../../shared/components/CustomEditable/Table/containers/PaginatedTable";
-import SearchAndCreateBar from "../../shared/components/CustomEditable/Table/containers/SearchAndCreateBar";
-import usePageCount from "../../shared/components/CustomEditable/Table/hooks/usePageCount";
+import PaginatedTable from "../../shared/components/Table/containers/PaginatedTable";
+import SearchAndCreateBar from "../../shared/components/Table/containers/SearchAndCreateBar";
+import usePageCount from "../../shared/components/Table/hooks/usePageCount";
 import TagMultiSelect, { TagOption } from "./TagMultiSelect";
 
 export type GameObjectData =
@@ -28,6 +28,8 @@ export type GameObjectsTableProps = {
 
 export default function GameObjectsTable(props: GameObjectsTableProps) {
   const { tag, onGameObjectCreated, additionalActions } = props;
+
+  const utils = api.useContext();
 
   const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: 0,
@@ -75,8 +77,6 @@ export default function GameObjectsTable(props: GameObjectsTableProps) {
     }
   );
 
-  const utils = api.useContext();
-
   const gameObjectsCountQuery = api.gameObjects.getCount.useQuery(
     {
       filter: globalFilter
@@ -112,8 +112,9 @@ export default function GameObjectsTable(props: GameObjectsTableProps) {
       await updateGameObjectMutation.mutateAsync({ id, data });
       await utils.gameObjects.invalidate();
     } catch (error) {
-      console.error(error);
-      window.alert("Error updating tag\n See console for details");
+      // This will be caught by CustomEditable component using this function
+      // it will revert the value to the previous value when it receives an error
+      throw error;
     }
   };
 
@@ -126,7 +127,7 @@ export default function GameObjectsTable(props: GameObjectsTableProps) {
       }
       await utils.gameObjects.invalidate();
     } catch (error) {
-      window.alert("Error creating game object\n See console for details");
+      window.alert("Error creating Game Object\n See console for details");
       console.error(error);
     }
   };

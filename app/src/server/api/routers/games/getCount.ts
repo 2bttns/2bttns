@@ -1,13 +1,11 @@
 import { z } from "zod";
-import { sort, tagFilter, textFilter } from "../../../shared/z";
+import { tagFilter, textFilter } from "../../../shared/z";
 import { publicProcedure } from "../../trpc";
 
-export const getAll = publicProcedure
+export const getCount = publicProcedure
   .input(
     z
       .object({
-        take: z.number().optional().default(10),
-        skip: z.number().optional(),
         filter: z
           .object({
             mode: z.enum(["AND", "OR"]).optional(),
@@ -16,23 +14,11 @@ export const getAll = publicProcedure
             tag: tagFilter.optional(),
           })
           .optional(),
-        includeTags: z.boolean().optional().default(false),
-        sort: z
-          .object({
-            id: sort.optional(),
-            name: sort.optional(),
-            description: sort.optional(),
-            inputTags: sort.optional(),
-            updatedAt: sort.optional(),
-          })
-          .optional(),
       })
       .optional()
   )
   .query(async ({ ctx, input }) => {
-    const games = await ctx.prisma.game.findMany({
-      take: input?.take,
-      skip: input?.skip,
+    const count = await ctx.prisma.game.count({
       where: {
         AND: [
           {
@@ -90,20 +76,7 @@ export const getAll = publicProcedure
             : {},
         ],
       },
-      include: {
-        inputTags: input?.includeTags,
-      },
-      orderBy: {
-        id: input?.sort?.id,
-        name: input?.sort?.name,
-        description: input?.sort?.description,
-        inputTags: input?.sort?.inputTags
-          ? {
-              _count: input.sort.inputTags,
-            }
-          : undefined,
-        updatedAt: input?.sort?.updatedAt,
-      },
     });
-    return { games };
+
+    return { count };
   });

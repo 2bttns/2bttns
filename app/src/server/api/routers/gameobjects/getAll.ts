@@ -1,18 +1,6 @@
 import { z } from "zod";
+import { sort, tagFilter, textFilter } from "../../../shared/z";
 import { publicProcedure } from "../../trpc";
-
-const filter = z.object({
-  in: z.array(z.string()).optional(),
-  contains: z.string().optional(),
-});
-
-export const tagFilter = z.object({
-  include: z.array(z.string()).optional(),
-  exclude: z.array(z.string()).optional(),
-  includeUntagged: z.boolean().optional().default(false),
-});
-
-export const sort = z.enum(["asc", "desc"]);
 
 export const getAll = publicProcedure
   .input(
@@ -23,8 +11,8 @@ export const getAll = publicProcedure
         filter: z
           .object({
             mode: z.enum(["AND", "OR"]).optional(),
-            id: filter.optional(),
-            name: filter.optional(),
+            id: textFilter.optional(),
+            name: textFilter.optional(),
             tag: tagFilter.optional(),
           })
           .optional(),

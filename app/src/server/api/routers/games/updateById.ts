@@ -9,12 +9,12 @@ export const updateById = publicProcedure
         id: z.string().optional(),
         name: z.string().optional(),
         description: z.string().optional(),
-        plugins: z.string().optional(),
+        inputTags: z.array(z.string()).optional(),
       }),
     })
   )
   .mutation(async ({ ctx, input }) => {
-    const updatedGame = await ctx.prisma.game.update({
+    const updatedGameObject = await ctx.prisma.game.update({
       where: {
         id: input.id,
       },
@@ -22,11 +22,14 @@ export const updateById = publicProcedure
         id: input.data.id,
         name: input.data.name,
         description: input.data.description,
-        plugins: input.data.plugins,
+        updatedAt: new Date(), // Explicit update of updatedAt; otherwise inputTags.set won't trigger the default updatedAt update
+        inputTags: {
+          set: input.data.inputTags?.map((tag) => ({ id: tag })),
+        },
       },
     });
 
     return {
-      updatedGame,
+      updatedGameObject,
     };
   });
