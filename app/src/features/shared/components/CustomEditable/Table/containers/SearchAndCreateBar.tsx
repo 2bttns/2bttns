@@ -10,7 +10,7 @@ import {
   Tooltip,
 } from "@chakra-ui/react";
 
-export type SearchAndCreateBar = {
+export type SearchAndCreateBarProps = {
   value: string | undefined;
   onChange: (search: string) => void;
   onCreate?: (name: string) => void;
@@ -18,7 +18,7 @@ export type SearchAndCreateBar = {
 
 // Input for updating a search string state variable
 // Has a button to create a new game object with the search string as the name, if a create function is provided
-export default function SearchAndCreateBar(props: SearchAndCreateBar) {
+export default function SearchAndCreateBar(props: SearchAndCreateBarProps) {
   const { value, onChange, onCreate } = props;
 
   const handleCreate = () => {
