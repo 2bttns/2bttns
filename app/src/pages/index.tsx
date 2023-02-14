@@ -2,7 +2,6 @@ import { Box, Button, Heading, Text, VStack } from "@chakra-ui/react";
 import { type NextPage } from "next";
 import { signIn, signOut, useSession } from "next-auth/react";
 import Head from "next/head";
-
 import { api } from "../utils/api";
 
 const Home: NextPage = () => {
