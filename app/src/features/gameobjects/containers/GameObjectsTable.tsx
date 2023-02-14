@@ -233,7 +233,7 @@ export default function GameObjectsTable(props: GameObjectsTableProps) {
           onChange={setGlobalFilter}
           onCreate={handleCreateGameObject}
         />
-        <CsvImport />
+        <CsvImport parentTags={tag?.include} />
       </HStack>
       <PaginatedTable
         columns={columns}

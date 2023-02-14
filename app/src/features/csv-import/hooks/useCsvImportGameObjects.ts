@@ -25,6 +25,7 @@ export type ImportGameObjectsOptions = {
 export default function useCsvImportGameObjects(
   options?: UseCsvImportGameObjectsOptions
 ) {
+  const utils = api.useContext();
   const createGameObjectMutation = api.gameObjects.create.useMutation();
 
   const importGameObjects = async ({
@@ -49,6 +50,10 @@ export default function useCsvImportGameObjects(
         failed.push({ line, error: error as Error });
       }
     });
+
+    if (created.length > 0) {
+      await utils.gameObjects.invalidate();
+    }
 
     return { created, failed };
   };
