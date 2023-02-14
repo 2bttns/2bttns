@@ -46,6 +46,7 @@ export default function SearchAndCreateBar(props: SearchAndCreateBarProps) {
               handleCreate();
             }
           }}
+          bgColor="gray.200"
         />
         <InputRightElement fontSize="1.2em">
           <Tooltip
