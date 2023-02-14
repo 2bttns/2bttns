@@ -86,6 +86,11 @@ const TagByIdPage: NextPage = () => {
       on: false,
       colorScheme: "red",
     },
+    Untagged: {
+      tagName: "Untagged",
+      on: false,
+      colorScheme: "blackAlpha",
+    },
   });
 
   const tagsToFilterGameObjectsBy = useMemo(() => {
@@ -95,7 +100,7 @@ const TagByIdPage: NextPage = () => {
     });
   }, [tagsQuery.data, tagFilter, tagId]);
 
-  const includeUntagged = tagFilter["Not Applied"]!.on;
+  const includeUntagged = tagFilter["Untagged"]!.on;
 
   const excludeTags = useMemo(() => {
     if (tagFilter["Not Applied"]!.on && !tagFilter["Applied"]!.on) {
