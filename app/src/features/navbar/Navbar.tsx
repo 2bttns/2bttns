@@ -7,8 +7,9 @@ export const NAVBAR_HEIGHT_PX = "64px";
 
 const links = [
   { href: "/", label: "Home" },
-  { href: "/game-objects", label: "Game Objects" },
   { href: "/games", label: "Games" },
+  { href: "/game-objects", label: "Game Objects" },
+  { href: "/tags", label: "Tags" },
 ];
 
 export default function Navbar(props: Navbar) {
@@ -21,6 +22,7 @@ export default function Navbar(props: Navbar) {
       paddingX="1rem"
       backgroundColor="blue.900"
       color="gray.200"
+      spacing="1rem"
     >
       {links.map((link) => (
         <NextLink href={link.href} key={link.href}>
