@@ -19,8 +19,8 @@ export default function TagsLayout(props: TagsLayoutProps) {
   } = props;
 
   return (
-    <Stack direction="row">
-      <Stack flex={1} minWidth="128px">
+    <Stack direction="row" width="100%" height="100%">
+      <Stack flex={1} minWidth="128px" height="100%">
         <h1>Tags</h1>
         <Button variant="outline" colorScheme="blue" onClick={handleCreateTag}>
           Create New Tag
@@ -43,7 +43,9 @@ export default function TagsLayout(props: TagsLayoutProps) {
           })}
         </Select>
       </Stack>
-      <Stack flex={5}>{children}</Stack>
+      <Stack flex={5} height="100%" overflow="scroll">
+        {children}
+      </Stack>
     </Stack>
   );
 }
