@@ -8,7 +8,7 @@ export type LayoutProps = {
 export default function Layout(props: LayoutProps) {
   const { children } = props;
   return (
-    <Box width="100vw" height="100vh" backgroundColor="white">
+    <Box width="100vw" height="100vh" backgroundColor="gray.300">
       <Navbar />
       <Box
         width="100vw"

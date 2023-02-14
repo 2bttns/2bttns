@@ -15,7 +15,13 @@ export default function Navbar(props: Navbar) {
   const {} = props;
 
   return (
-    <HStack width="100%" height={NAVBAR_HEIGHT_PX} paddingX="1rem">
+    <HStack
+      width="100%"
+      height={NAVBAR_HEIGHT_PX}
+      paddingX="1rem"
+      backgroundColor="blue.900"
+      color="gray.200"
+    >
       {links.map((link) => (
         <NextLink href={link.href} key={link.href}>
           <Box key={link.href}>{link.label}</Box>
