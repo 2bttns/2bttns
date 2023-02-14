@@ -1,5 +1,5 @@
 import { ArrowForwardIcon, DeleteIcon } from "@chakra-ui/icons";
-import { Box, Heading, IconButton, Tooltip } from "@chakra-ui/react";
+import { Heading, IconButton, Tooltip } from "@chakra-ui/react";
 import { NextPage } from "next";
 import Head from "next/head";
 import { useRouter } from "next/router";
@@ -29,14 +29,7 @@ const GamesPage: NextPage = () => {
   };
 
   return (
-    <Box
-      sx={{
-        padding: "1rem",
-        width: "100vw",
-        height: "100vh",
-        overflow: "hidden",
-      }}
-    >
+    <>
       <Head>
         <title>Games | 2bttns</title>
         <meta name="description" content="Game management panel" />
@@ -80,7 +73,7 @@ const GamesPage: NextPage = () => {
           );
         }}
       />
-    </Box>
+    </>
   );
 };
 
