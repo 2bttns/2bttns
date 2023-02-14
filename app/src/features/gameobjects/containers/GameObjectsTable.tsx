@@ -1,4 +1,4 @@
-import { Box, ButtonGroup } from "@chakra-ui/react";
+import { Box, ButtonGroup, HStack } from "@chakra-ui/react";
 import { Tag } from "@prisma/client";
 import {
   ColumnDef,
@@ -9,6 +9,7 @@ import {
 import { useMemo, useState } from "react";
 import { tagFilter } from "../../../server/shared/z";
 import { api, RouterInputs, RouterOutputs } from "../../../utils/api";
+import CsvImport from "../../csv-import/CsvImport";
 import CustomEditable from "../../shared/components/CustomEditable";
 import PaginatedTable from "../../shared/components/Table/containers/PaginatedTable";
 import SearchAndCreateBar from "../../shared/components/Table/containers/SearchAndCreateBar";
@@ -226,11 +227,14 @@ export default function GameObjectsTable(props: GameObjectsTableProps) {
 
   return (
     <Box height="100%">
-      <SearchAndCreateBar
-        value={globalFilter}
-        onChange={setGlobalFilter}
-        onCreate={handleCreateGameObject}
-      />
+      <HStack width="100%">
+        <SearchAndCreateBar
+          value={globalFilter}
+          onChange={setGlobalFilter}
+          onCreate={handleCreateGameObject}
+        />
+        <CsvImport />
+      </HStack>
       <PaginatedTable
         columns={columns}
         data={gameObjectsQuery.data?.gameObjects ?? []}

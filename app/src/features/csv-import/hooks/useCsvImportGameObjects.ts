@@ -4,6 +4,19 @@ import csvParse from "../utils/csvParse";
 
 export type UseCsvImportGameObjectsOptions = {};
 
+const validator = z.object({
+  id: z.string().optional(),
+  name: z.string(),
+});
+
+export type Created = typeof validator._type;
+export type Failed = { line: any; error: Error };
+
+export type ImportResult = {
+  created: Created[];
+  failed: Failed[];
+};
+
 export type ImportGameObjectsOptions = {
   file: File;
   parentTags?: string[];
@@ -17,16 +30,11 @@ export default function useCsvImportGameObjects(
   const importGameObjects = async ({
     file,
     parentTags,
-  }: ImportGameObjectsOptions) => {
+  }: ImportGameObjectsOptions): Promise<ImportResult> => {
     const tags = parentTags?.map((tagId) => ({ id: tagId }));
 
-    const validator = z.object({
-      id: z.string().optional(),
-      name: z.string(),
-    });
-
-    const created: typeof validator._type[] = [];
-    const failed: { line: any; error: Error }[] = [];
+    const created: Created[] = [];
+    const failed: Failed[] = [];
     await csvParse(file, async (line) => {
       try {
         // TODO: Support custom fields
@@ -42,12 +50,7 @@ export default function useCsvImportGameObjects(
       }
     });
 
-    const alert = `[csvImport] ${created.length} game objects created. ${failed.length} failed.`;
-    console.info(alert);
-    console.info("CREATED:", created);
-    console.info("FAILED:", failed);
-    if (typeof window === "undefined") return;
-    window.alert(`${alert} See console for details.`);
+    return { created, failed };
   };
 
   return { importGameObjects };

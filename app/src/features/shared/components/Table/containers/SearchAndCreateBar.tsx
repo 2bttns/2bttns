@@ -28,7 +28,7 @@ export default function SearchAndCreateBar(props: SearchAndCreateBarProps) {
   };
 
   return (
-    <Stack direction="row" sx={{ padding: "1rem" }}>
+    <Stack direction="row" width="100%">
       <InputGroup>
         <InputLeftElement
           pointerEvents="none"
