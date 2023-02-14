@@ -11,8 +11,6 @@ export const create = publicProcedure
         .array(
           z.object({
             id: z.string().optional(),
-            name: z.string(),
-            description: z.string().optional(),
           })
         )
         .optional(),
@@ -25,13 +23,8 @@ export const create = publicProcedure
         name: input.name,
         description: input.description,
         tags: {
-          connectOrCreate: input.tags?.map((tag) => ({
-            where: { id: tag.id },
-            create: {
-              id: tag.id,
-              name: tag.name,
-              description: tag.description,
-            },
+          connect: input.tags?.map((tag) => ({
+            id: tag.id,
           })),
         },
       },

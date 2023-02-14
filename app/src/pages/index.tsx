@@ -2,7 +2,7 @@ import { Box, Button, Heading, Text, VStack } from "@chakra-ui/react";
 import { type NextPage } from "next";
 import { signIn, signOut, useSession } from "next-auth/react";
 import Head from "next/head";
-
+import CsvImport from "../features/csv-import/CsvImport";
 import { api } from "../utils/api";
 
 const Home: NextPage = () => {
@@ -29,6 +29,8 @@ const Home: NextPage = () => {
             {hello.data ? hello.data.greeting : "Loading tRPC query..."}
           </Text>
           <AuthShowcase />
+
+          <CsvImport />
         </Box>
       </VStack>
     </>
