@@ -32,6 +32,7 @@ export default function TagsLayout(props: TagsLayoutProps) {
           }}
           placeholder="Select a tag"
           value={selectedTag?.id}
+          bgColor="gray.200"
         >
           {tags.map((tag) => {
             const { id, name } = tag;

@@ -168,7 +168,7 @@ export default function PaginatedTable<T>(props: PaginatedTableProps<T>) {
                 table.setPageIndex(page);
               }}
               sx={{
-                backgroundColor: "gray.100",
+                backgroundColor: "gray.200",
                 minWidth: "150px",
               }}
             >
@@ -201,7 +201,7 @@ export default function PaginatedTable<T>(props: PaginatedTableProps<T>) {
               table.setPageSize(Number(e.target.value));
             }}
             sx={{
-              backgroundColor: "gray.100",
+              backgroundColor: "gray.200",
             }}
           >
             {[10, 20, 30, 40, 50].map((pageSize) => (
