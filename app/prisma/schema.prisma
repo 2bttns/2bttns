@@ -65,7 +65,6 @@ model VerificationToken {
     @@unique([identifier, token])
 }
 
-// TODO: Relations between Games and Lists (input & output lists)
 model Game {
     id          String   @id @default(cuid())
     createdAt   DateTime @default(now())
@@ -96,4 +95,14 @@ model Tag {
 
     gameObjects  GameObject[]
     inputToGames Game[]
+}
+
+// Secret keys for dev app access
+model Secret {
+    id          String   @id @default(cuid())
+    createdAt   DateTime @default(now())
+    updatedAt   DateTime @updatedAt
+    name        String?
+    description String?
+    secret      String
 }

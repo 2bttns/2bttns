@@ -10,6 +10,7 @@ const links = [
   { href: "/games", label: "Games" },
   { href: "/game-objects", label: "Game Objects" },
   { href: "/tags", label: "Tags" },
+  { href: "/settings", label: "Settings" },
 ];
 
 export default function Navbar(props: Navbar) {
