@@ -1,4 +1,4 @@
-import { DeleteIcon } from "@chakra-ui/icons";
+import { DeleteIcon, RepeatIcon } from "@chakra-ui/icons";
 import {
   Box,
   Heading,
@@ -18,6 +18,21 @@ export type SettingsPage = {};
 
 export default function SettingsPage() {
   const utils = api.useContext();
+
+  const updateSecretMutation = api.secrets.updateById.useMutation();
+  const regenerateSecret = async (id: Secret["id"]) => {
+    try {
+      await updateSecretMutation.mutateAsync({
+        id,
+        generateNewSecret: true,
+      });
+      await utils.secrets.getAll.invalidate();
+    } catch (error) {
+      console.error(error);
+      window.alert("Error regenerating secret\n See console for details");
+    }
+  };
+
   const deleteSecretMutation = api.secrets.deleteById.useMutation();
   const handleDeleteSecret = async (id: Secret["id"]) => {
     try {
@@ -47,6 +62,18 @@ export default function SettingsPage() {
                     const { id } = secretData;
                     return (
                       <>
+                        <Tooltip label={`Regenerate Secret`} placement="top">
+                          <IconButton
+                            colorScheme="blue"
+                            onClick={() => {
+                              regenerateSecret(id);
+                            }}
+                            icon={<RepeatIcon />}
+                            aria-label={`Regenerate secret`}
+                            size="sm"
+                            variant="outline"
+                          />
+                        </Tooltip>
                         <Tooltip label={`Delete`} placement="top">
                           <IconButton
                             colorScheme="red"

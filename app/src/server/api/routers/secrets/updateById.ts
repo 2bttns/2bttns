@@ -6,11 +6,13 @@ export const updateById = publicProcedure
   .input(
     z.object({
       id: z.string(),
-      data: z.object({
-        id: z.string().optional(),
-        name: z.string().optional(),
-        description: z.string().optional(),
-      }),
+      data: z
+        .object({
+          id: z.string().optional(),
+          name: z.string().optional(),
+          description: z.string().optional(),
+        })
+        .optional(),
       generateNewSecret: z.boolean().optional().default(false),
     })
   )
@@ -20,9 +22,9 @@ export const updateById = publicProcedure
         id: input.id,
       },
       data: {
-        id: input.data.id,
-        name: input.data.name,
-        description: input.data.description,
+        id: input.data?.id,
+        name: input.data?.name,
+        description: input.data?.description,
         secret: input.generateNewSecret ? generateSecret() : undefined,
       },
     });
