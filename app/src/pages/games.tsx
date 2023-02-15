@@ -52,7 +52,7 @@ const GamesPage: NextPage = () => {
                     handlePlayGame(id);
                   }}
                   icon={<ArrowForwardIcon />}
-                  aria-label={`Delete game with ID: ${id}`}
+                  aria-label={`Play game with ID: ${id}`}
                   size="sm"
                   variant="outline"
                 />
