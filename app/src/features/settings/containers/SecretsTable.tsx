@@ -1,5 +1,4 @@
-import { Box, ButtonGroup, HStack } from "@chakra-ui/react";
-import { Tag } from "@prisma/client";
+import { Box, Button, ButtonGroup, HStack, Text } from "@chakra-ui/react";
 import {
   ColumnDef,
   createColumnHelper,
@@ -8,19 +7,17 @@ import {
 } from "@tanstack/react-table";
 import { useMemo, useState } from "react";
 import { api, RouterInputs, RouterOutputs } from "../../../utils/api";
-import CsvImport from "../../csv-import/CsvImport";
 import CustomEditable from "../../shared/components/CustomEditable";
 import PaginatedTable from "../../shared/components/Table/containers/PaginatedTable";
 import SearchAndCreateBar from "../../shared/components/Table/containers/SearchAndCreateBar";
 import usePageCount from "../../shared/components/Table/hooks/usePageCount";
 
-export type GameObjectData =
-  RouterOutputs["gameObjects"]["getAll"]["gameObjects"][0];
+export type SecretData = RouterOutputs["secrets"]["getAll"]["secrets"][0];
 
-const columnHelper = createColumnHelper<GameObjectData>();
+const columnHelper = createColumnHelper<SecretData>();
 
 export type SecretsTableProps = {
-  additionalActions?: (gameObjectData: GameObjectData) => React.ReactNode;
+  additionalActions?: (secretData: SecretData) => React.ReactNode;
 };
 
 export default function SecretsTable(props: SecretsTableProps) {
@@ -36,7 +33,7 @@ export default function SecretsTable(props: SecretsTableProps) {
 
   const [globalFilter, setGlobalFilter] = useState("");
   const [sorting, setSorting] = useState<SortingState>([]);
-  const getSort = (id: keyof GameObjectData) => {
+  const getSort = (id: keyof SecretData) => {
     const result = sorting.find((s) => s.id === id);
     if (result === undefined) {
       return undefined;
@@ -45,9 +42,8 @@ export default function SecretsTable(props: SecretsTableProps) {
     return result.desc ? "desc" : "asc";
   };
 
-  const gameObjectsQuery = api.gameObjects.getAll.useQuery(
+  const secretsQuery = api.secrets.getAll.useQuery(
     {
-      includeTags: true,
       skip: pageIndex * pageSize,
       take: pageSize,
       filter: globalFilter
@@ -55,16 +51,13 @@ export default function SecretsTable(props: SecretsTableProps) {
             mode: "OR",
             id: { contains: globalFilter },
             name: { contains: globalFilter },
-            tag,
           }
-        : {
-            tag,
-          },
+        : undefined,
       sort: {
         id: getSort("id"),
         name: getSort("name"),
         description: getSort("description"),
-        tags: getSort("tags"),
+        secret: getSort("secret"),
         updatedAt: getSort("updatedAt"),
       },
     },
@@ -74,18 +67,15 @@ export default function SecretsTable(props: SecretsTableProps) {
     }
   );
 
-  const gameObjectsCountQuery = api.gameObjects.getCount.useQuery(
+  const secretsCountQuery = api.secrets.getCount.useQuery(
     {
       filter: globalFilter
         ? {
             mode: "OR",
             id: { contains: globalFilter },
             name: { contains: globalFilter },
-            tag,
           }
-        : {
-            tag,
-          },
+        : undefined,
     },
     {
       keepPreviousData: true,
@@ -96,18 +86,17 @@ export default function SecretsTable(props: SecretsTableProps) {
   const { pageCount } = usePageCount({
     pagination,
     setPagination,
-    itemCount: gameObjectsCountQuery.data?.count ?? 0,
+    itemCount: secretsCountQuery.data?.count ?? 0,
   });
 
-  const updateGameObjectMutation = api.gameObjects.updateById.useMutation();
+  const updateSecretMutation = api.secrets.updateById.useMutation();
 
-  const handleUpdateGameObject = async (
-    id: string,
-    data: RouterInputs["gameObjects"]["updateById"]["data"]
+  const handleUpdateSecret = async (
+    input: RouterInputs["secrets"]["updateById"]
   ) => {
     try {
-      await updateGameObjectMutation.mutateAsync({ id, data });
-      await utils.gameObjects.invalidate();
+      await updateSecretMutation.mutateAsync(input);
+      await utils.secrets.invalidate();
     } catch (error) {
       // This will be caught by CustomEditable component using this function
       // it will revert the value to the previous value when it receives an error
@@ -115,30 +104,30 @@ export default function SecretsTable(props: SecretsTableProps) {
     }
   };
 
-  const createGameObjectMutation = api.gameObjects.create.useMutation();
-  const handleCreateGameObject = async (name: string) => {
+  const createSecretMutation = api.secrets.create.useMutation();
+  const handleCreateSecret = async () => {
     try {
-      const result = await createGameObjectMutation.mutateAsync({ name });
-      if (onGameObjectCreated) {
-        await onGameObjectCreated(result.createdGameObject.id);
-      }
-      await utils.gameObjects.invalidate();
+      await createSecretMutation.mutateAsync({});
+      await utils.secrets.invalidate();
     } catch (error) {
-      window.alert("Error creating Game Object\n See console for details");
+      window.alert("Error creating Secret\n See console for details");
       console.error(error);
     }
   };
 
-  const columns = useMemo<ColumnDef<GameObjectData, any>[]>(() => {
-    const items: ColumnDef<GameObjectData, any>[] = [
+  const columns = useMemo<ColumnDef<SecretData, any>[]>(() => {
+    const items: ColumnDef<SecretData, any>[] = [
       columnHelper.accessor("id", {
         cell: (info) => (
           <CustomEditable
-            value={info.getValue()}
+            value={info.getValue() ?? ""}
             placeholder="No ID"
             handleSave={async (nextValue) =>
-              handleUpdateGameObject(info.row.original.id, {
-                id: nextValue,
+              handleUpdateSecret({
+                id: info.row.original.id,
+                data: {
+                  id: nextValue,
+                },
               })
             }
           />
@@ -148,11 +137,14 @@ export default function SecretsTable(props: SecretsTableProps) {
       columnHelper.accessor("name", {
         cell: (info) => (
           <CustomEditable
-            value={info.getValue()}
+            value={info.getValue() ?? ""}
             placeholder="No name"
             handleSave={async (nextValue) =>
-              handleUpdateGameObject(info.row.original.id, {
-                name: nextValue,
+              handleUpdateSecret({
+                id: info.row.original.id,
+                data: {
+                  name: nextValue,
+                },
               })
             }
           />
@@ -165,33 +157,23 @@ export default function SecretsTable(props: SecretsTableProps) {
             value={info.getValue() ?? ""}
             placeholder="No description"
             handleSave={async (nextValue) =>
-              handleUpdateGameObject(info.row.original.id, {
-                description: nextValue,
+              handleUpdateSecret({
+                id: info.row.original.id,
+                data: {
+                  description: nextValue,
+                },
               })
             }
           />
         ),
         enableSorting: true,
       }),
-      columnHelper.accessor("tags", {
+      columnHelper.accessor("secret", {
         cell: (info) => {
-          const tags = (info.getValue() as Tag[]) || undefined;
-          const selected: TagOption[] =
-            tags?.map((tag: Tag) => ({
-              label: tag.name || "Untitled Tag",
-              value: tag.id,
-            })) || [];
-
           return (
-            <Box width="256px">
-              <TagMultiSelect
-                selected={selected}
-                onChange={(nextTags) => {
-                  handleUpdateGameObject(info.row.original.id, {
-                    tags: nextTags,
-                  });
-                }}
-              />
+            <Box>
+              {/* TODO: hide the secret with a reveal ui */}
+              <Text>{info.row.original.secret ?? ""}</Text>
             </Box>
           );
         },
@@ -223,9 +205,13 @@ export default function SecretsTable(props: SecretsTableProps) {
 
   return (
     <Box height="100%">
+      <HStack width="100%">
+        <SearchAndCreateBar value={globalFilter} onChange={setGlobalFilter} />
+        <Button onClick={handleCreateSecret}>Create New Secret</Button>
+      </HStack>
       <PaginatedTable
         columns={columns}
-        data={gameObjectsQuery.data?.gameObjects ?? []}
+        data={secretsQuery.data?.secrets ?? []}
         onPaginationChange={setPagination}
         pagination={pagination}
         pageCount={pageCount}
