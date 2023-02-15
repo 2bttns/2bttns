@@ -48,36 +48,38 @@ export default function SearchAndCreateBar(props: SearchAndCreateBarProps) {
           }}
           bgColor="gray.200"
         />
-        <InputRightElement fontSize="1.2em">
-          <Tooltip
-            label={
-              <Stack
-                direction="column"
-                alignItems="center"
-                justifyContent="center"
-                spacing="0"
-                padding="0.5rem"
-              >
-                <div>Create new item with input as name!</div>
-                <div>
-                  <Kbd backgroundColor="gray.900">shift</Kbd>
-                  <span>+</span>
-                  <Kbd backgroundColor="gray.900">enter</Kbd>
-                </div>
-              </Stack>
-            }
-            placement="bottom-end"
-            hasArrow
-          >
-            <IconButton
-              colorScheme="blue"
-              icon={<AddIcon />}
-              aria-label="Create new item"
-              size="sm"
-              onClick={handleCreate}
-            />
-          </Tooltip>
-        </InputRightElement>
+        {onCreate && (
+          <InputRightElement fontSize="1.2em">
+            <Tooltip
+              label={
+                <Stack
+                  direction="column"
+                  alignItems="center"
+                  justifyContent="center"
+                  spacing="0"
+                  padding="0.5rem"
+                >
+                  <div>Create new item with input as name!</div>
+                  <div>
+                    <Kbd backgroundColor="gray.900">shift</Kbd>
+                    <span>+</span>
+                    <Kbd backgroundColor="gray.900">enter</Kbd>
+                  </div>
+                </Stack>
+              }
+              placement="bottom-end"
+              hasArrow
+            >
+              <IconButton
+                colorScheme="blue"
+                icon={<AddIcon />}
+                aria-label="Create new item"
+                size="sm"
+                onClick={handleCreate}
+              />
+            </Tooltip>
+          </InputRightElement>
+        )}
       </InputGroup>
     </Stack>
   );

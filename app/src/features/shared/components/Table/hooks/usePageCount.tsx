@@ -19,13 +19,15 @@ export default function usePageCount(params: UsePageCountParams) {
   useEffect(() => {
     // If the page index is out of bounds, reset it to the last page
     if (pageIndex >= pageCount) {
-      setPagination((prev) => ({ ...prev, pageIndex: pageCount - 1 }));
+      let newPageIndex = pageCount - 1;
+      setPagination((prev) => ({ ...prev, pageIndex: newPageIndex }));
       return;
     }
 
+    if (pageCount === 0) return;
+
     // Otherwise, if the page index is less than 0, reset it to 0
     // Only do this if the page count is greater than 0; or else, we'll get stuck in an infinite loop from the queries
-    if (pageCount === 0) return;
     if (pageIndex < 0) {
       setPagination((prev) => ({ ...prev, pageIndex: 0 }));
       return;
