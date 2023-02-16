@@ -6,8 +6,8 @@ export default async function handler(
   res: NextApiResponse
 ) {
   try {
-    const gameId = req.query.gameId as string;
-    const userId = req.query.userId as string;
+    const gameId = req.query.game_id as string;
+    const userId = req.query.user_id as string;
 
     const url = twobttnsController.generatePlayUrl({ gameId, userId });
     const urlParse = new URL(url);
