@@ -5,7 +5,7 @@
   "main": "dist/index.js",
   "types": "types/index.d.ts",
   "scripts": {
-    "build": "tsc",
+    "build": "rm -rf dist && rm -rf types && tsc",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
