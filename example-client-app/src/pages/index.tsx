@@ -12,6 +12,7 @@ export default function Home() {
   useEffect(() => {
     const twobttnsController = new twobttns.Controller({
       secret: "OVTGng6GC4kT2zGINR/brqO1AaVam+EcTvX/74CmzH4=",
+      url: "localhost:3001",
     });
   }, []);
 
