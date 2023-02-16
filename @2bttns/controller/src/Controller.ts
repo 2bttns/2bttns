@@ -1,18 +1,23 @@
+import jwt from "jsonwebtoken";
 import { Fetcher } from "openapi-typescript-fetch";
 import { paths } from "../2bttns-api";
 
 export type ControllerConfig = {
+  appId: string; // e.g. Favorite Activities
   secret: string; // e.g. OVTGng6GC4kT2zGINR/brqO1AaVam+EcTvX/74CmzH4=
   url: string; // e.g. "localhost:3001"
 };
 
 export default class Controller {
+  appId: string;
+  secret: string;
+  url: string;
   api: ReturnType<typeof Fetcher.for<paths>>;
 
-  url: string;
-
   constructor(config: ControllerConfig) {
-    const { secret, url } = config;
+    const { appId, secret, url } = config;
+    this.appId = appId;
+    this.secret = secret;
     this.url = url;
 
     this.api = Fetcher.for<paths>();
@@ -23,11 +28,28 @@ export default class Controller {
     console.info(`[2bttns] Controller initialized ${secret} ${url}`);
   }
 
-  async playGame({ gameId, userId }: { gameId: string; userId: string }) {
-    if (typeof window === "undefined") {
-      throw new Error("Cannot play game on server");
-    }
+  generateUserToken({ userId }: { userId: string }) {
+    const token = jwt.sign({ userId }, this.secret, {
+      expiresIn: "1h",
+    });
+    return token;
+  }
 
-    window.location.href = `${this.url}/play/${gameId}/${userId}`;
+  decodeUserToken({ token }: { token: string }) {
+    const decoded = jwt.verify(token, this.secret);
+    const decodedObj = decoded as { userId: string };
+    if (!decodedObj.userId) {
+      throw new Error("Invalid token: no userId");
+    }
+    return decodedObj;
+  }
+
+  generatePlayUrl({ gameId, userId }: { gameId: string; userId: string }) {
+    const token = this.generateUserToken({ userId });
+    const queryBuilder = new URLSearchParams();
+    queryBuilder.append("game_id", gameId);
+    queryBuilder.append("app_id", this.appId);
+    queryBuilder.append("jwt", token);
+    return `${this.url}/play?${queryBuilder.toString()}`;
   }
 }

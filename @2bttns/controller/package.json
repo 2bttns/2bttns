@@ -12,10 +12,12 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "@types/jsonwebtoken": "^9.0.1",
     "openapi-typescript": "^6.1.0",
     "typescript": "^4.9.5"
   },
   "dependencies": {
+    "jsonwebtoken": "^9.0.0",
     "openapi-typescript-fetch": "^1.1.3"
   }
 }
