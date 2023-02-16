@@ -6,5 +6,10 @@ export type ControllerConfig = {
 };
 export default class Controller {
     api: ReturnType<typeof Fetcher.for<paths>>;
+    url: string;
     constructor(config: ControllerConfig);
+    playGame({ gameId, userId }: {
+        gameId: string;
+        userId: string;
+    }): Promise<void>;
 }

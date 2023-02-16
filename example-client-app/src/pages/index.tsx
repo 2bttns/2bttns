@@ -12,7 +12,7 @@ export default function Home() {
   useEffect(() => {
     const twobttnsController = new twobttns.Controller({
       secret: "OVTGng6GC4kT2zGINR/brqO1AaVam+EcTvX/74CmzH4=",
-      url: "http://localhost:3001/api",
+      url: "http://localhost:3001",
     });
 
     const test = twobttnsController.api
@@ -22,6 +22,8 @@ export default function Home() {
     test({ text: "hello" }).then((res) => {
       console.log(res);
     });
+
+    twobttnsController.playGame({ gameId: "test", userId: "test" });
   }, []);
 
   return (
