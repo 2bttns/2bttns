@@ -1,2 +1,9 @@
-export { default as greeting } from "./greeting";
-export { default as sayHelloWorld } from "./sayHelloWorld";
+import Controller from "./Controller";
+import greeting from "./greeting";
+import sayHelloWorld from "./sayHelloWorld";
+
+export default {
+  Controller,
+  greeting,
+  sayHelloWorld,
+};

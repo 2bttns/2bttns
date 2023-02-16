@@ -4,14 +4,15 @@ import Head from "next/head";
 import Image from "next/image";
 import { useEffect } from "react";
 
-import { greeting, sayHelloWorld } from "@2bttns/controller";
+import twobttns from "@2bttns/controller";
 
 const inter = Inter({ subsets: ["latin"] });
 
 export default function Home() {
   useEffect(() => {
-    sayHelloWorld();
-    console.log(greeting("Mate"));
+    const twobttnsController = new twobttns.Controller({
+      secret: "OVTGng6GC4kT2zGINR/brqO1AaVam+EcTvX/74CmzH4=",
+    });
   }, []);
 
   return (
