@@ -10,8 +10,6 @@ export default async function handler(
     const userId = req.query.user_id as string;
 
     const url = twobttnsController.generatePlayUrl({ gameId, userId });
-    const urlParse = new URL(url);
-    console.log(urlParse.searchParams);
     return res.redirect(url);
   } catch (error) {
     if (error instanceof Error) {
