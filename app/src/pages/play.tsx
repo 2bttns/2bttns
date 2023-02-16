@@ -1,20 +1,39 @@
-import type { NextPage } from "next";
+import type { GetServerSideProps, NextPage } from "next";
 import Head from "next/head";
-import { useRouter } from "next/router";
-import PlayContainer, {
-  PlayContainerProps,
-} from "../features/play/containers/PlayContainer";
+import PlayContainer from "../features/play/containers/PlayContainer";
+import { prisma } from "../server/db";
 
-const Play: NextPage = () => {
-  const router = useRouter();
-  const gameId = router.query.game_id as string | undefined;
+type ReturnType = {
+  gameId: string;
+};
 
-  const handleInvalidGame: PlayContainerProps["handleInvalidGame"] = (
-    error
-  ) => {
-    console.error(error);
-    router.push("/404");
+export const getServerSideProps: GetServerSideProps<ReturnType> = async (
+  context
+) => {
+  const url = `${context.req.headers.host}${context.req.url}`;
+  const urlObj = new URL(url);
+  const gameId = urlObj.searchParams.get("game_id");
+
+  try {
+    await prisma.game.findFirstOrThrow({ where: { id: gameId ?? undefined } });
+  } catch (error) {
+    return {
+      redirect: {
+        destination: "/404",
+        permanent: false,
+      },
+    };
+  }
+
+  return {
+    props: {
+      gameId: gameId ?? "",
+    },
   };
+};
+
+const Play: NextPage<ReturnType> = (props) => {
+  const { gameId } = props;
 
   return (
     <>
@@ -26,7 +45,7 @@ const Play: NextPage = () => {
         />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <PlayContainer gameId={gameId} handleInvalidGame={handleInvalidGame} />
+      <PlayContainer gameId={gameId} />
     </>
   );
 };

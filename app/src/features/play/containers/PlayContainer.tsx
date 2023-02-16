@@ -1,17 +1,15 @@
 import { Text } from "@chakra-ui/react";
 import { GameObject } from "@prisma/client";
-import { TRPCClientErrorLike } from "@trpc/client";
 import { useEffect, useMemo, useState } from "react";
 import { api } from "../../../utils/api";
 import Play from "../views/Play";
 
 export type PlayContainerProps = {
   gameId: string | undefined;
-  handleInvalidGame: (error: TRPCClientErrorLike<any>) => void;
 };
 
 export default function PlayContainer(props: PlayContainerProps) {
-  const { gameId, handleInvalidGame } = props;
+  const { gameId } = props;
 
   const utils = api.useContext();
   const [initCacheCleared, setCacheCleared] = useState(false);
@@ -30,7 +28,6 @@ export default function PlayContainer(props: PlayContainerProps) {
     {
       retry: false,
       enabled: gameId !== undefined && initCacheCleared,
-      onError: handleInvalidGame,
       cacheTime: 0,
     }
   );
