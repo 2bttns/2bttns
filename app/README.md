@@ -39,6 +39,10 @@ For local development, when configuring the OAuth app, set the homepage URL and 
 
 ### Admin Allow List
 
-By default, the admin allow list is empty -- hence, users who attempt to log in will see an "Access Denied" error.
+Users who are not in the admin allow list and attempt to log in will see an "Access Denied" error.
 
-New admin users can be granted access by adding the emails associated with their GitHub accounts to `app/adminAllowList.json`.
+To configure the admin allow list...
+
+1. Copy the `adminAllowList.json.example` file to a new `adminAllowList.json` file, if it doesn't already exist.
+
+2. Add the emails associated with the GitHub accounts you want to grant access to.
