@@ -4,10 +4,10 @@
   "private": true,
   "scripts": {
     "build": "next build",
-    "dev": "next dev",
+    "dev": "next dev -p 3001",
     "postinstall": "prisma generate",
     "lint": "next lint",
-    "start": "next start",
+    "start": "next start -p 3001",
     "db-sync:dev": "npx prisma migrate dev",
     "db-seed": "NODE_ENV=development prisma db seed"
   },
