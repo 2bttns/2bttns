@@ -1,7 +1,9 @@
 import { Box, HStack } from "@chakra-ui/react";
 import NextLink from "next/link";
 
-export type Navbar = {};
+export type Navbar = {
+  additionalContent?: React.ReactNode;
+};
 
 export const NAVBAR_HEIGHT_PX = "64px";
 
@@ -15,7 +17,7 @@ const links = [
 ];
 
 export default function Navbar(props: Navbar) {
-  const {} = props;
+  const { additionalContent } = props;
 
   return (
     <HStack
@@ -24,13 +26,16 @@ export default function Navbar(props: Navbar) {
       paddingX="1rem"
       backgroundColor="blue.900"
       color="gray.200"
-      spacing="1rem"
+      justifyContent="space-between"
     >
-      {links.map((link) => (
-        <NextLink href={link.href} key={link.href}>
-          <Box key={link.href}>{link.label}</Box>
-        </NextLink>
-      ))}
+      <HStack spacing="1rem">
+        {links.map((link) => (
+          <NextLink href={link.href} key={link.href}>
+            <Box key={link.href}>{link.label}</Box>
+          </NextLink>
+        ))}
+      </HStack>
+      <Box>{additionalContent}</Box>
     </HStack>
   );
 }

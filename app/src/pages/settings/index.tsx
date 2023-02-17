@@ -42,8 +42,6 @@ export type SettingsPage = {};
 export default function SettingsPage(props: SettingsPageProps) {
   const { session } = props;
 
-  console.log(session);
-
   const utils = api.useContext();
 
   const updateSecretMutation = api.secrets.updateById.useMutation();
