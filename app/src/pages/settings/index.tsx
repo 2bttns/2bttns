@@ -11,12 +11,39 @@ import {
   Tooltip,
 } from "@chakra-ui/react";
 import { Secret } from "@prisma/client";
+import { GetServerSideProps } from "next";
+import { Session } from "next-auth";
 import SecretsTable from "../../features/settings/containers/SecretsTable";
 import { api } from "../../utils/api";
+import getSessionWithSignInRedirect from "../../utils/getSessionWithSignInRedirect";
+
+export type SettingsPageProps = {
+  session: Session;
+};
+
+export const getServerSideProps: GetServerSideProps = async (context) => {
+  const { session, redirect } = await getSessionWithSignInRedirect(context);
+
+  if (!session && redirect) {
+    return {
+      redirect,
+    };
+  }
+
+  return {
+    props: {
+      session,
+    },
+  };
+};
 
 export type SettingsPage = {};
 
-export default function SettingsPage() {
+export default function SettingsPage(props: SettingsPageProps) {
+  const { session } = props;
+
+  console.log(session);
+
   const utils = api.useContext();
 
   const updateSecretMutation = api.secrets.updateById.useMutation();
