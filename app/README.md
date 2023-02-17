@@ -16,3 +16,29 @@ $ npm run db-sync:dev   # Prisma db setup (syncs schema migrations & seeds the d
 ```bash
 $ npm run dev           # Start the app
 ```
+
+---
+
+## Admin Login
+
+### GitHub OAuth
+
+2bttns uses GitHub OAuth through NextAuth to authenticate 2bttns admin users.
+
+To set up GitHub OAuth, set the following credentials in your `.env` file:
+
+```
+# Next Auth GitHub Provider
+GITHUB_ID="<YOUR_GITHUB_ID>"
+GITHUB_SECRET="<YOUR_GITHUB_SECRET>"
+```
+
+You can get these credentials by creating a new OAuth app in your GitHub account/organization settings -- https://github.com/settings/apps.
+
+For local development, when configuring the OAuth app, set the homepage URL and callback URL to `http://localhost:3001` (or a custom port you've configured).
+
+### Admin Allow List
+
+By default, the admin allow list is empty -- hence, users who attempt to log in will see an "Access Denied" error.
+
+New admin users can be granted access by adding the emails associated with their GitHub accounts to `app/adminAllowList.json`.
