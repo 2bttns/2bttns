@@ -40,8 +40,6 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 export type SettingsPage = {};
 
 export default function SettingsPage(props: SettingsPageProps) {
-  const { session } = props;
-
   const utils = api.useContext();
 
   const updateSecretMutation = api.secrets.updateById.useMutation();
