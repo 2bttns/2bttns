@@ -1,10 +1,32 @@
 import { Box } from "@chakra-ui/react";
-import type { NextPage } from "next";
+import type { GetServerSideProps, NextPage } from "next";
+import { Session } from "next-auth";
 import Head from "next/head";
 import DeleteGameObjectButton from "../features/gameobjects/containers/DeleteGameObjectButton";
 import GameObjectsTable from "../features/gameobjects/containers/GameObjectsTable";
+import getSessionWithSignInRedirect from "../utils/getSessionWithSignInRedirect";
 
-const Lists: NextPage = () => {
+export type GameObjectsPageProps = {
+  session: Session;
+};
+
+export const getServerSideProps: GetServerSideProps = async (context) => {
+  const { session, redirect } = await getSessionWithSignInRedirect(context);
+
+  if (!session && redirect) {
+    return {
+      redirect,
+    };
+  }
+
+  return {
+    props: {
+      session,
+    },
+  };
+};
+
+const GameObjects: NextPage<GameObjectsPageProps> = (props) => {
   return (
     <>
       <Head>
@@ -25,4 +47,4 @@ const Lists: NextPage = () => {
   );
 };
 
-export default Lists;
+export default GameObjects;
