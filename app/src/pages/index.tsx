@@ -1,8 +1,30 @@
 import { Heading, Text, VStack } from "@chakra-ui/react";
-import { type NextPage } from "next";
+import { GetServerSideProps, type NextPage } from "next";
+import { Session } from "next-auth";
 import Head from "next/head";
+import getSessionWithSignInRedirect from "../utils/getSessionWithSignInRedirect";
 
-const Home: NextPage = () => {
+export type HomePageProps = {
+  session: Session;
+};
+
+export const getServerSideProps: GetServerSideProps = async (context) => {
+  const { session, redirect } = await getSessionWithSignInRedirect(context);
+
+  if (!session && redirect) {
+    return {
+      redirect,
+    };
+  }
+
+  return {
+    props: {
+      session,
+    },
+  };
+};
+
+const Home: NextPage<HomePageProps> = (props) => {
   return (
     <>
       <Head>
