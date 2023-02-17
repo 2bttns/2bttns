@@ -1,8 +1,30 @@
-import { NextPage } from "next";
+import { GetServerSideProps, NextPage } from "next";
+import { Session } from "next-auth";
 import Head from "next/head";
 import TagsLayoutContainer from "../../features/tags/containers/TagsLayoutContainer";
+import getSessionWithSignInRedirect from "../../utils/getSessionWithSignInRedirect";
 
-const TagsPage: NextPage = () => {
+export type TagsPageProps = {
+  session: Session;
+};
+
+export const getServerSideProps: GetServerSideProps = async (context) => {
+  const { session, redirect } = await getSessionWithSignInRedirect(context);
+
+  if (!session && redirect) {
+    return {
+      redirect,
+    };
+  }
+
+  return {
+    props: {
+      session,
+    },
+  };
+};
+
+const TagsPage: NextPage<TagsPageProps> = (props) => {
   return (
     <>
       <Head>

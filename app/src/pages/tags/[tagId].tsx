@@ -6,7 +6,8 @@ import {
   Heading,
   Stack,
 } from "@chakra-ui/react";
-import { NextPage } from "next";
+import { GetServerSideProps, NextPage } from "next";
+import { Session } from "next-auth";
 import Head from "next/head";
 import { useRouter } from "next/router";
 import { useMemo, useState } from "react";
@@ -20,8 +21,29 @@ import TagFilterToggles, {
 import TagsLayoutContainer from "../../features/tags/containers/TagsLayoutContainer";
 import ToggleTagButton from "../../features/tags/containers/ToggleTagButton";
 import { api, RouterInputs } from "../../utils/api";
+import getSessionWithSignInRedirect from "../../utils/getSessionWithSignInRedirect";
 
-const TagByIdPage: NextPage = () => {
+export type TagByIdPageProps = {
+  session: Session;
+};
+
+export const getServerSideProps: GetServerSideProps = async (context) => {
+  const { session, redirect } = await getSessionWithSignInRedirect(context);
+
+  if (!session && redirect) {
+    return {
+      redirect,
+    };
+  }
+
+  return {
+    props: {
+      session,
+    },
+  };
+};
+
+const TagByIdPage: NextPage<TagByIdPageProps> = (props) => {
   const router = useRouter();
   const tagId = router.query.tagId as string;
 
