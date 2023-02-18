@@ -1,23 +1,17 @@
 import { Box, HStack } from "@chakra-ui/react";
 import NextLink from "next/link";
 
-export type Navbar = {
+export type NavbarLink = { href: string; label: string };
+
+export type NavbarProps = {
+  links: NavbarLink[];
   additionalContent?: React.ReactNode;
 };
 
 export const NAVBAR_HEIGHT_PX = "64px";
 
-const links = [
-  { href: "/", label: "Home" },
-  { href: "/games", label: "Games" },
-  { href: "/game-objects", label: "Game Objects" },
-  { href: "/tags", label: "Tags" },
-  { href: "/settings", label: "Settings" },
-  { href: "/docs", label: "Docs" },
-];
-
-export default function Navbar(props: Navbar) {
-  const { additionalContent } = props;
+export default function Navbar(props: NavbarProps) {
+  const { links, additionalContent } = props;
 
   return (
     <HStack
