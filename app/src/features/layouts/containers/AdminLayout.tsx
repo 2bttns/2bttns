@@ -1,12 +1,12 @@
 import { Box } from "@chakra-ui/react";
-import AdminNavbar from "../navbar/containers/AdminNavbar";
-import { NAVBAR_HEIGHT_PX } from "../navbar/views/Navbar";
+import AdminNavbar from "../../navbar/containers/AdminNavbar";
+import { NAVBAR_HEIGHT_PX } from "../../navbar/views/Navbar";
 
-export type LayoutProps = {
+export type AdminLayoutProps = {
   children: React.ReactNode;
 };
 
-export default function Layout(props: LayoutProps) {
+export default function AdminLayout(props: AdminLayoutProps) {
   const { children } = props;
 
   return (

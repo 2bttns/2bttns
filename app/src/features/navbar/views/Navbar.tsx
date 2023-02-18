@@ -4,14 +4,14 @@ import NextLink from "next/link";
 export type NavbarLink = { href: string; label: string };
 
 export type NavbarProps = {
-  links: NavbarLink[];
+  links?: NavbarLink[];
   additionalContent?: React.ReactNode;
 };
 
 export const NAVBAR_HEIGHT_PX = "64px";
 
 export default function Navbar(props: NavbarProps) {
-  const { links, additionalContent } = props;
+  const { links = [], additionalContent } = props;
 
   return (
     <HStack

@@ -3,6 +3,8 @@ import type { GetServerSideProps } from "next";
 import { getSession } from "next-auth/react";
 import Head from "next/head";
 import { z } from "zod";
+import AdminLayout from "../features/layouts/containers/AdminLayout";
+import UserLayout from "../features/layouts/containers/UserLayout";
 import PlayContainer from "../features/play/containers/PlayContainer";
 import { prisma } from "../server/db";
 import { NextPageWithLayout } from "./_app";
@@ -93,7 +95,7 @@ const Play: NextPageWithLayout<ReturnType> = (props) => {
   const { gameId, userId, isAdmin } = props;
 
   return (
-    <>
+    <Layout isAdmin={isAdmin} userId={userId}>
       <Head>
         <title>Play 2bttns</title>
         <meta
@@ -102,16 +104,35 @@ const Play: NextPageWithLayout<ReturnType> = (props) => {
         />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <h1>
-        userId: {userId}
-        {isAdmin ? " (Admin)" : null}
-      </h1>
       <PlayContainer gameId={gameId} />
-    </>
+    </Layout>
   );
 };
 
 export default Play;
+
+type LayoutProps = {
+  children: React.ReactNode;
+  userId: string;
+  isAdmin: boolean;
+};
+function Layout(props: LayoutProps) {
+  const { children, isAdmin, userId } = props;
+
+  if (isAdmin) {
+    return <AdminLayout>{children}</AdminLayout>;
+  }
+
+  return (
+    <UserLayout
+      navbarProps={{
+        additionalContent: <h1>Playing 2bttns | User: {userId}</h1>,
+      }}
+    >
+      {children}
+    </UserLayout>
+  );
+}
 
 Play.getLayout = (page) => {
   return page;
