@@ -1,10 +1,11 @@
 import jwt from "jsonwebtoken";
-import type { GetServerSideProps, NextPage } from "next";
+import type { GetServerSideProps } from "next";
 import { getSession } from "next-auth/react";
 import Head from "next/head";
 import { z } from "zod";
 import PlayContainer from "../features/play/containers/PlayContainer";
 import { prisma } from "../server/db";
+import { NextPageWithLayout } from "./_app";
 
 const jwtSchema = z.object({
   userId: z.string(),
@@ -88,7 +89,7 @@ export const getServerSideProps: GetServerSideProps<ReturnType> = async (
   }
 };
 
-const Play: NextPage<ReturnType> = (props) => {
+const Play: NextPageWithLayout<ReturnType> = (props) => {
   const { gameId, userId, isAdmin } = props;
 
   return (
@@ -111,3 +112,7 @@ const Play: NextPage<ReturnType> = (props) => {
 };
 
 export default Play;
+
+Play.getLayout = (page) => {
+  return page;
+};
