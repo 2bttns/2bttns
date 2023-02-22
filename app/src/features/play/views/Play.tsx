@@ -1,14 +1,17 @@
 import { Code, Heading, Stack, Text } from "@chakra-ui/react";
 import { Game, GameObject } from "@prisma/client";
 import ClassicMode from "../../2bttns/ClassicMode";
+import { Use2bttnsMachineConfig } from "../../2bttns/ClassicMode/use2bttnsMachine";
 
 export type PlayProps = {
   game: Game;
   gameObjects: GameObject[];
+  onFinish: Use2bttnsMachineConfig["onFinish"];
 };
 
 export default function Play(props: PlayProps) {
-  const { game, gameObjects } = props;
+  const { game, gameObjects, onFinish } = props;
+
   return (
     <>
       {/* TODO: swap out game modes if a frontend plugin is active for the game (e.g. Tinder-style) */}
@@ -29,6 +32,7 @@ export default function Play(props: PlayProps) {
           first: ["w", "ArrowUp"],
           second: ["s", "ArrowDown"],
         }}
+        onFinish={onFinish}
       >
         {({ button1, button2, isFinished, context }) => {
           return (

@@ -1,6 +1,5 @@
-import { useMutation } from "@tanstack/react-query";
 import ClassicButton, { ClassicButtonProps } from "./ClassicButton";
-import { Item, Results } from "./types";
+import { Item } from "./types";
 import use2bttnsMachine, { Use2bttnsMachineConfig } from "./use2bttnsMachine";
 
 export type RenderPropParams = {
@@ -20,6 +19,8 @@ export type ClassicModeProps<T extends Item> = {
 
   // TODO: Allow for custom ReactNode rendering of items
   renderItem?: (item: T) => string;
+
+  onFinish: Use2bttnsMachineConfig["onFinish"];
 };
 
 export default function ClassicMode<T extends Item>({
@@ -29,35 +30,13 @@ export default function ClassicMode<T extends Item>({
   button1Props,
   button2Props,
   renderItem = (item) => item.id,
+  onFinish,
 }: ClassicModeProps<T>) {
-  // @TODO: pass proper game_id and user_id
-  const submitResultsMutation = useMutation({
-    mutationFn: async (newResult: Results) => {
-      const response = await fetch(`/api/games/${2}/round-results/${2}`, {
-        method: "POST",
-        body: JSON.stringify(newResult),
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-      if (!response.ok) {
-        throw new Error("Network response was not ok");
-      }
-      return response.json();
-    },
-  });
-
   const { registerButton, current_options, isFinished, context } =
     use2bttnsMachine({
       items,
       hotkeys,
-      onFinish: async (results) => {
-        try {
-          await submitResultsMutation.mutateAsync(results);
-        } catch (error) {
-          console.error(error);
-        }
-      },
+      onFinish,
     });
 
   return children({

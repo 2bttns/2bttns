@@ -5,6 +5,7 @@ import { getAll } from "./getAll";
 import { getById } from "./getById";
 import { getCount } from "./getCount";
 import { updateById } from "./updateById";
+import { upsertPlayerScore } from "./upsertPlayerScore";
 
 export const gameObjectsRouter = createTRPCRouter({
   create,
@@ -13,4 +14,5 @@ export const gameObjectsRouter = createTRPCRouter({
   getById,
   deleteById,
   updateById,
+  upsertPlayerScore,
 });
