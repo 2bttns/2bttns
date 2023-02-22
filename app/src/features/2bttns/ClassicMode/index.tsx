@@ -30,22 +30,9 @@ export default function ClassicMode<T extends Item>({
   button2Props,
   renderItem = (item) => item.id,
 }: ClassicModeProps<T>) {
-  // @TODO: pass proper game_id and user_id
-  const submitResultsMutation = useMutation({
-    mutationFn: async (newResult: Results) => {
-      const response = await fetch(`/api/games/${2}/round-results/${2}`, {
-        method: "POST",
-        body: JSON.stringify(newResult),
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-      if (!response.ok) {
-        throw new Error("Network response was not ok");
-      }
-      return response.json();
-    },
-  });
+  const submitResults: Use2bttnsMachineConfig["onFinish"] = async (results) => {
+    console.log(":: 2bttns - Results:", results);
+  };
 
   const { registerButton, current_options, isFinished, context } =
     use2bttnsMachine({
@@ -53,7 +40,7 @@ export default function ClassicMode<T extends Item>({
       hotkeys,
       onFinish: async (results) => {
         try {
-          await submitResultsMutation.mutateAsync(results);
+          await submitResults(results);
         } catch (error) {
           console.error(error);
         }
