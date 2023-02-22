@@ -109,10 +109,10 @@ model Secret {
 }
 
 model Player {
-    id          String        @id @default(cuid())
+    id          String        @id
     createdAt   DateTime      @default(now())
     updatedAt   DateTime      @updatedAt
-    name        String
+    name        String?
     PlayerScore PlayerScore[]
 }
 
@@ -124,6 +124,6 @@ model PlayerScore {
     playerId     String
     gameObjectId String
 
-    Player     Player     @relation(fields: [playerId], references: [id])
+    Player     Player     @relation(fields: [playerId], references: [id], onDelete: Cascade)
     gameObject GameObject @relation(fields: [gameObjectId], references: [id], onDelete: Cascade)
 }
