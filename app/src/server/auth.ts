@@ -1,11 +1,13 @@
+import { PrismaAdapter } from "@next-auth/prisma-adapter";
+import fs from "fs";
 import type { GetServerSidePropsContext } from "next";
 import {
   getServerSession,
-  type NextAuthOptions,
   type DefaultSession,
+  type NextAuthOptions,
 } from "next-auth";
-import DiscordProvider from "next-auth/providers/discord";
-import { PrismaAdapter } from "@next-auth/prisma-adapter";
+import GitHubProvider from "next-auth/providers/github";
+import path from "path";
 import { env } from "../env/server.mjs";
 import { prisma } from "./db";
 
@@ -37,6 +39,20 @@ declare module "next-auth" {
  **/
 export const authOptions: NextAuthOptions = {
   callbacks: {
+    async signIn({ user }) {
+      try {
+        const adminAllowList = fs.readFileSync(
+          path.resolve("adminAllowList.json"),
+          "utf8"
+        );
+        const adminAllowListArray = JSON.parse(adminAllowList);
+        return adminAllowListArray.includes(user.email);
+      } catch (error) {
+        console.error(error);
+        return false;
+      }
+    },
+
     session({ session, user }) {
       if (session.user) {
         session.user.id = user.id;
@@ -47,9 +63,9 @@ export const authOptions: NextAuthOptions = {
   },
   adapter: PrismaAdapter(prisma),
   providers: [
-    DiscordProvider({
-      clientId: env.DISCORD_CLIENT_ID,
-      clientSecret: env.DISCORD_CLIENT_SECRET,
+    GitHubProvider({
+      clientId: env.GITHUB_ID,
+      clientSecret: env.GITHUB_SECRET,
     }),
     /**
      * ...add more providers here

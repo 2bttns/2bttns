@@ -1,12 +1,34 @@
 import { ArrowForwardIcon, DeleteIcon } from "@chakra-ui/icons";
 import { Heading, IconButton, Tooltip } from "@chakra-ui/react";
-import { NextPage } from "next";
+import { GetServerSideProps, NextPage } from "next";
+import { Session } from "next-auth";
 import Head from "next/head";
 import { useRouter } from "next/router";
 import GamesTable from "../features/games/components/GamesTable";
 import { api, RouterInputs } from "../utils/api";
+import getSessionWithSignInRedirect from "../utils/getSessionWithSignInRedirect";
 
-const GamesPage: NextPage = () => {
+export type GamesPageProps = {
+  session: Session;
+};
+
+export const getServerSideProps: GetServerSideProps = async (context) => {
+  const { session, redirect } = await getSessionWithSignInRedirect(context);
+
+  if (!session && redirect) {
+    return {
+      redirect,
+    };
+  }
+
+  return {
+    props: {
+      session,
+    },
+  };
+};
+
+const GamesPage: NextPage<GamesPageProps> = (props) => {
   const utils = api.useContext();
 
   const router = useRouter();
