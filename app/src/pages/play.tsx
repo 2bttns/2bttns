@@ -1,3 +1,17 @@
+import {
+  Badge,
+  Button,
+  Modal,
+  ModalBody,
+  ModalCloseButton,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
+  ModalOverlay,
+  useDisclosure,
+  VStack,
+} from "@chakra-ui/react";
+import { Game, Player } from "@prisma/client";
 import jwt from "jsonwebtoken";
 import type { GetServerSideProps } from "next";
 import { getSession } from "next-auth/react";
@@ -7,6 +21,7 @@ import AdminLayout from "../features/layouts/containers/AdminLayout";
 import UserLayout from "../features/layouts/containers/UserLayout";
 import PlayContainer from "../features/play/containers/PlayContainer";
 import { prisma } from "../server/db";
+import { api } from "../utils/api";
 import { NextPageWithLayout } from "./_app";
 
 const jwtSchema = z.object({
@@ -104,6 +119,7 @@ const Play: NextPageWithLayout<ReturnType> = (props) => {
         />
         <link rel="icon" href="/favicon.ico" />
       </Head>
+      <ScoresModal gameId={gameId} playerId={userId} />
       <PlayContainer gameId={gameId} playerId={userId} />
     </Layout>
   );
@@ -137,3 +153,60 @@ function Layout(props: LayoutProps) {
 Play.getLayout = (page) => {
   return page;
 };
+
+type ScoresModalProps = {
+  gameId: Game["id"];
+  playerId: Player["id"];
+};
+
+function ScoresModal({ gameId, playerId }: ScoresModalProps) {
+  const scoresQuery = api.games.getPlayerScores.useQuery(
+    {
+      game_id: gameId,
+      player_id: playerId,
+    },
+    {
+      cacheTime: 0,
+    }
+  );
+
+  const { isOpen, onOpen, onClose } = useDisclosure();
+
+  const handleOpen = () => {
+    scoresQuery.refetch();
+    onOpen();
+  };
+
+  return (
+    <>
+      <Button onClick={handleOpen}>My Scores [Debug]</Button>
+
+      <Modal isOpen={isOpen} onClose={onClose}>
+        <ModalOverlay />
+        <ModalContent maxHeight={"500px"} overflowY="auto">
+          <ModalHeader>My Scores - {gameId}</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody>
+            <VStack>
+              {scoresQuery.data?.playerScores.map((score) => {
+                return (
+                  <Badge>
+                    <>
+                      {score.gameObjectId} = {score.score}
+                    </>
+                  </Badge>
+                );
+              })}
+            </VStack>
+          </ModalBody>
+
+          <ModalFooter>
+            <Button colorScheme="blue" mr={3} onClick={onClose}>
+              Close
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
+    </>
+  );
+}
