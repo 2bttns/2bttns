@@ -49,3 +49,16 @@ To configure the admin allow list...
 1. Copy the `adminAllowList.json.example` file to a new `adminAllowList.json` file, if it doesn't already exist.
 
 2. Add the emails associated with the GitHub accounts you want to grant access to.
+
+### Next Auth Secret
+
+2bttns uses Next Auth to authenticate users, and requires a NEXTAUTH_SECRET environment variable in the `.env` file:
+
+```
+# app/.env
+# Next Auth
+# You can generate a new secret on the command line with:
+# openssl rand -base64 32
+# https://next-auth.js.org/configuration/options#secret
+NEXTAUTH_SECRET="<secret>"
+```
