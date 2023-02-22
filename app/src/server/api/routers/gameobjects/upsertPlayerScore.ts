@@ -18,7 +18,11 @@ export const upsertPlayerScore = publicProcedure
     });
 
     if (!player) {
-      throw new Error("Player not found");
+      await ctx.prisma.player.create({
+        data: {
+          id: input.playerId,
+        },
+      });
     }
 
     const gameObject = await ctx.prisma.gameObject.findUnique({

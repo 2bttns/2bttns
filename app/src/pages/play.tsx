@@ -104,7 +104,7 @@ const Play: NextPageWithLayout<ReturnType> = (props) => {
         />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <PlayContainer gameId={gameId} />
+      <PlayContainer gameId={gameId} playerId={userId} />
     </Layout>
   );
 };

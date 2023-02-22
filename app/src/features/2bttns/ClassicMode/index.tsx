@@ -1,6 +1,5 @@
-import { useMutation } from "@tanstack/react-query";
 import ClassicButton, { ClassicButtonProps } from "./ClassicButton";
-import { Item, Results } from "./types";
+import { Item } from "./types";
 import use2bttnsMachine, { Use2bttnsMachineConfig } from "./use2bttnsMachine";
 
 export type RenderPropParams = {
@@ -20,6 +19,8 @@ export type ClassicModeProps<T extends Item> = {
 
   // TODO: Allow for custom ReactNode rendering of items
   renderItem?: (item: T) => string;
+
+  onFinish: Use2bttnsMachineConfig["onFinish"];
 };
 
 export default function ClassicMode<T extends Item>({
@@ -29,22 +30,13 @@ export default function ClassicMode<T extends Item>({
   button1Props,
   button2Props,
   renderItem = (item) => item.id,
+  onFinish,
 }: ClassicModeProps<T>) {
-  const submitResults: Use2bttnsMachineConfig["onFinish"] = async (results) => {
-    console.log(":: 2bttns - Results:", results);
-  };
-
   const { registerButton, current_options, isFinished, context } =
     use2bttnsMachine({
       items,
       hotkeys,
-      onFinish: async (results) => {
-        try {
-          await submitResults(results);
-        } catch (error) {
-          console.error(error);
-        }
-      },
+      onFinish,
     });
 
   return children({

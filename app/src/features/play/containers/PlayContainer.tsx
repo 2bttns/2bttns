@@ -1,15 +1,17 @@
 import { Text } from "@chakra-ui/react";
-import { GameObject } from "@prisma/client";
+import { Game, GameObject, Player } from "@prisma/client";
 import { useEffect, useMemo, useState } from "react";
 import { api } from "../../../utils/api";
+import { Use2bttnsMachineConfig } from "../../2bttns/ClassicMode/use2bttnsMachine";
 import Play from "../views/Play";
 
 export type PlayContainerProps = {
-  gameId: string | undefined;
+  gameId: Game["id"];
+  playerId: Player["id"];
 };
 
 export default function PlayContainer(props: PlayContainerProps) {
-  const { gameId } = props;
+  const { gameId, playerId } = props;
 
   const utils = api.useContext();
   const [initCacheCleared, setCacheCleared] = useState(false);
@@ -24,10 +26,10 @@ export default function PlayContainer(props: PlayContainerProps) {
 
   // TODO: Get round-specific game object; not all game objects
   const gamesQuery = api.games.getById.useQuery(
-    { id: gameId!, includeGameObjects: true },
+    { id: gameId, includeGameObjects: true },
     {
       retry: false,
-      enabled: gameId !== undefined && initCacheCleared,
+      enabled: initCacheCleared,
       cacheTime: 0,
     }
   );
@@ -40,6 +42,32 @@ export default function PlayContainer(props: PlayContainerProps) {
     return gameObjects;
   }, [gamesQuery.data]);
 
+  const processGameResultsMutation = api.games.processGameResults.useMutation();
+  const handleSubmitResults: Use2bttnsMachineConfig["onFinish"] = async (
+    results
+  ) => {
+    try {
+      console.info(":: 2bttns - Results:", results);
+      const result = await processGameResultsMutation.mutateAsync({
+        playerId,
+        results: results.map((r) => {
+          return {
+            not_picked: {
+              gameObjectId: r.not_picked.id,
+            },
+            picked: {
+              gameObjectId: r.picked.id,
+            },
+          };
+        }),
+      });
+
+      console.info(":: 2bttns - Result:", result);
+    } catch (error) {
+      console.error(":: 2bttns - Error:", error);
+    }
+  };
+
   if (gamesQuery.isLoading) {
     return <Text>Loading game...</Text>;
   }
@@ -48,5 +76,11 @@ export default function PlayContainer(props: PlayContainerProps) {
     return null;
   }
 
-  return <Play game={gamesQuery.data.game} gameObjects={gameObjects} />;
+  return (
+    <Play
+      game={gamesQuery.data.game}
+      gameObjects={gameObjects}
+      onFinish={handleSubmitResults}
+    />
+  );
 }

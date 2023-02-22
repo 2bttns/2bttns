@@ -1,3 +1,4 @@
+import { processGameResults } from "./processGameResults";
 import { createTRPCRouter } from "../../trpc";
 import { create } from "./create";
 import { deleteById } from "./deleteById";
@@ -13,4 +14,5 @@ export const gamesRouter = createTRPCRouter({
   getById,
   deleteById,
   updateById,
+  processGameResults,
 });
