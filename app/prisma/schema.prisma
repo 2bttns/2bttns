@@ -117,13 +117,14 @@ model Player {
 }
 
 model PlayerScore {
-    id           String   @id @default(cuid())
     createdAt    DateTime @default(now())
     updatedAt    DateTime @updatedAt
     score        Decimal
     playerId     String
     gameObjectId String
 
-    Player     Player     @relation(fields: [playerId], references: [id], onDelete: Cascade)
+    player     Player     @relation(fields: [playerId], references: [id], onDelete: Cascade)
     gameObject GameObject @relation(fields: [gameObjectId], references: [id], onDelete: Cascade)
+
+    @@id([playerId, gameObjectId])
 }
