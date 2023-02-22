@@ -83,7 +83,8 @@ model GameObject {
     name        String
     description String?
 
-    tags Tag[]
+    tags        Tag[]
+    PlayerScore PlayerScore[]
 }
 
 model Tag {
@@ -105,4 +106,24 @@ model Secret {
     name        String?
     description String?
     secret      String
+}
+
+model Player {
+    id          String        @id @default(cuid())
+    createdAt   DateTime      @default(now())
+    updatedAt   DateTime      @updatedAt
+    name        String
+    PlayerScore PlayerScore[]
+}
+
+model PlayerScore {
+    id           String   @id @default(cuid())
+    createdAt    DateTime @default(now())
+    updatedAt    DateTime @updatedAt
+    score        Decimal
+    playerId     String
+    gameObjectId String
+
+    Player     Player     @relation(fields: [playerId], references: [id])
+    gameObject GameObject @relation(fields: [gameObjectId], references: [id], onDelete: Cascade)
 }
