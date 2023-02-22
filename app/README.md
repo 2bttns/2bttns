@@ -36,7 +36,7 @@ GITHUB_SECRET="<YOUR_GITHUB_SECRET>"
 You can get these credentials by creating a new OAuth app via...
 
 - a) Your GitHub account - `https://github.com/settings/developers`
-- b) Your GitHub Organization - `https://github.com/organizations/<your-organization>/settings/applications/2114572`
+- b) Your GitHub organization - `https://github.com/organizations/<your-organization>/settings/applications/2114572`
 
 For local development, when configuring the OAuth app, set the homepage URL to `http://localhost:3001` and set the callback url to `http://localhost:3001/api/auth/callback/github` (or use a custom port you've configured).
 
