@@ -10,16 +10,18 @@ import {
   DrawerHeader,
   DrawerOverlay,
   IconButton,
-  Input,
+  Select,
   Tooltip,
   useDisclosure,
 } from "@chakra-ui/react";
+import { GameObject } from "@prisma/client";
 import type { GetServerSideProps, NextPage } from "next";
 import { Session } from "next-auth";
 import Head from "next/head";
 import React from "react";
 import DeleteGameObjectButton from "../features/gameobjects/containers/DeleteGameObjectButton";
 import GameObjectsTable from "../features/gameobjects/containers/GameObjectsTable";
+import { api } from "../utils/api";
 import getSessionWithSignInRedirect from "../utils/getSessionWithSignInRedirect";
 
 export type GameObjectsPageProps = {
@@ -54,7 +56,7 @@ const GameObjects: NextPage<GameObjectsPageProps> = (props) => {
         <GameObjectsTable
           additionalActions={(gameObjectData) => (
             <>
-              <EditRelationshipsDrawer />
+              <EditRelationshipsDrawer gameObjectId={gameObjectData.id} />
               <DeleteGameObjectButton gameObjectId={gameObjectData.id} />
             </>
           )}
@@ -66,19 +68,44 @@ const GameObjects: NextPage<GameObjectsPageProps> = (props) => {
 
 export default GameObjects;
 
-function EditRelationshipsDrawer() {
+export type EditRelationshipsDrawerProps = {
+  gameObjectId: GameObject["id"];
+};
+
+function EditRelationshipsDrawer(props: EditRelationshipsDrawerProps) {
+  const { gameObjectId } = props;
+
   const { isOpen, onOpen, onClose } = useDisclosure();
   const btnRef = React.useRef<HTMLButtonElement | null>(null);
-  const title = "Edit Relationships";
+
+  const gameObjectQuery = api.gameObjects.getById.useQuery(
+    {
+      id: gameObjectId,
+    },
+    {
+      enabled: isOpen,
+    }
+  );
+
+  const label = "Edit Relationships";
+  const title = `${label} - ${gameObjectQuery.data?.gameObject?.id}`;
+
+  if (gameObjectQuery.isFetching) {
+    return null;
+  }
+
+  if (gameObjectQuery.isError) {
+    return <div>Failed to load game object</div>;
+  }
 
   return (
     <>
-      <Tooltip label={title} placement="top">
+      <Tooltip label={label} placement="top">
         <IconButton
           ref={btnRef}
           colorScheme="teal"
           onClick={onOpen}
-          aria-label={title}
+          aria-label={label}
           size="sm"
         >
           <LinkIcon />
@@ -89,7 +116,7 @@ function EditRelationshipsDrawer() {
         placement="right"
         onClose={onClose}
         finalFocusRef={btnRef}
-        size="xl"
+        size="full"
       >
         <DrawerOverlay />
         <DrawerContent>
@@ -97,12 +124,19 @@ function EditRelationshipsDrawer() {
           <DrawerHeader>{title}</DrawerHeader>
 
           <DrawerBody>
-            Lorem ipsum dolor sit amet consectetur adipisicing elit. Enim minima
-            cum sapiente maiores, libero inventore nam eum itaque ad beatae
-            incidunt iste perspiciatis nesciunt cupiditate animi quia
-            repellendus veniam cumque iusto! Animi doloremque reiciendis,
-            repellat dolore tenetur voluptas natus quia porro recusandae iure
-            esse ullam eaque assumenda enim rerum odio.
+            <Box width="100%" height="100%" overflow="none">
+              <GameObjectsTable
+                additionalActions={(gameObjectData) => (
+                  <>
+                    <Select sx={{ width: "64px" }}>
+                      <option value="1">1</option>
+                      <option value="2">2</option>
+                      <option value="3">3</option>
+                    </Select>
+                  </>
+                )}
+              />
+            </Box>
           </DrawerBody>
 
           <DrawerFooter>
