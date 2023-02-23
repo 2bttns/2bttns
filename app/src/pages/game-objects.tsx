@@ -196,13 +196,23 @@ function RelateGameObjects(props: RelateGameObjectsProps) {
     return relationshipsQuery.data?.relationship?.weightId ?? "NONE";
   }, [relationshipsQuery.data]);
 
-  // TODO: Upsert relationship upon selection
   const upsertRelationshipMutation =
     api.gameObjects.upsertRelationship.useMutation();
 
+  const deleteRelationshipMutation =
+    api.gameObjects.deleteRelationship.useMutation();
+
   const handleChange: RadioGroupProps["onChange"] = async (id) => {
     if (id === "NONE") {
-      // TODO: Delete relationship upon selection of NONE
+      await deleteRelationshipMutation.mutateAsync({
+        fromGameObjectId,
+        toGameObjectId,
+      });
+
+      await utils.gameObjects.getRelationship.invalidate({
+        fromGameObjectId,
+        toGameObjectId,
+      });
       return;
     }
 
