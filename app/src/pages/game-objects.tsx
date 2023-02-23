@@ -2,6 +2,7 @@ import { LinkIcon } from "@chakra-ui/icons";
 import {
   Box,
   Button,
+  ButtonGroup,
   Drawer,
   DrawerBody,
   DrawerCloseButton,
@@ -10,7 +11,6 @@ import {
   DrawerHeader,
   DrawerOverlay,
   IconButton,
-  Select,
   Tooltip,
   useDisclosure,
 } from "@chakra-ui/react";
@@ -141,17 +141,29 @@ function EditRelationshipsDrawer(props: EditRelationshipsDrawerProps) {
               <GameObjectsTable
                 additionalActions={(gameObjectData) => (
                   <>
-                    <Select
-                      sx={{ width: "256px" }}
-                      disabled={!hasWeights}
-                      placeholder={hasWeights ? "Select Weight" : "No Weights"}
-                    >
+                    {/* <ButtonGroup size="sm" variant="ghost">
+                      <Button>NONE</Button>
                       {weightsQuery.data?.weights.map((weight) => (
-                        <option key={weight.id} value={weight.id}>
+                        <Button key={weight.id}>
                           {weight.name ?? "Untitled Weight"}
-                        </option>
+                        </Button>
                       ))}
-                    </Select>
+                    </ButtonGroup> */}
+
+                    <RadioGroup
+                      options={[
+                        { id: "NONE", name: "NONE" },
+                        ...(weightsQuery.data?.weights.map((weight) => ({
+                          id: weight.id,
+                          name: weight.name ?? "Untitled Weight",
+                        })) ?? []),
+                      ]}
+                      selected="NONE"
+                      onChange={(value) => {
+                        console.log(value);
+                      }}
+                      // TODO: Default value based on existing relationships
+                    />
                   </>
                 )}
               />
@@ -166,5 +178,35 @@ function EditRelationshipsDrawer(props: EditRelationshipsDrawerProps) {
         </DrawerContent>
       </Drawer>
     </>
+  );
+}
+
+// Step 2: Use the `useRadioGroup` hook to control a group of custom radios.
+export type RadioGroupProps = {
+  options: { id: string; name: string }[];
+  selected: string;
+  onChange: (id: string) => void;
+};
+
+function RadioGroup(props: RadioGroupProps) {
+  const { options, selected, onChange } = props;
+
+  return (
+    <ButtonGroup size="sm">
+      {options.map(({ id, name }) => {
+        return (
+          <Button
+            key={id}
+            variant={id === selected ? "solid" : "ghost"}
+            onClick={() => {
+              if (id === selected) return;
+              onChange(id);
+            }}
+          >
+            {name}
+          </Button>
+        );
+      })}
+    </ButtonGroup>
   );
 }
