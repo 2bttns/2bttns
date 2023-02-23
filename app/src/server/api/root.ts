@@ -3,6 +3,7 @@ import { gameObjectsRouter } from "./routers/gameobjects/_index";
 import { gamesRouter } from "./routers/games/_index";
 import { secretsRouter } from "./routers/secrets/_index";
 import { tagsRouter } from "./routers/tags/_index";
+import { weightsRouter } from "./routers/weights/_index";
 import { createTRPCRouter } from "./trpc";
 
 /**
@@ -16,6 +17,7 @@ export const appRouter = createTRPCRouter({
   gameObjects: gameObjectsRouter,
   tags: tagsRouter,
   secrets: secretsRouter,
+  weights: weightsRouter,
 });
 
 // export type definition of API
