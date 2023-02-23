@@ -18,7 +18,7 @@ import { GameObject } from "@prisma/client";
 import type { GetServerSideProps, NextPage } from "next";
 import { Session } from "next-auth";
 import Head from "next/head";
-import React from "react";
+import React, { useMemo } from "react";
 import DeleteGameObjectButton from "../features/gameobjects/containers/DeleteGameObjectButton";
 import GameObjectsTable from "../features/gameobjects/containers/GameObjectsTable";
 import { api } from "../utils/api";
@@ -87,8 +87,6 @@ function EditRelationshipsDrawer(props: EditRelationshipsDrawerProps) {
     }
   );
 
-  const weightsQuery = api.weights.getAll.useQuery(null, { enabled: isOpen });
-
   const label = "Edit Relationships";
   const title = `${label} - ${gameObjectQuery.data?.gameObject?.id}`;
 
@@ -99,17 +97,6 @@ function EditRelationshipsDrawer(props: EditRelationshipsDrawerProps) {
   if (gameObjectQuery.isError) {
     return <div>Failed to load game object</div>;
   }
-
-  if (weightsQuery.isFetching) {
-    return null;
-  }
-
-  if (weightsQuery.isError) {
-    return <div>Failed to load weights</div>;
-  }
-
-  const hasWeights =
-    weightsQuery.data?.weights && weightsQuery.data?.weights.length > 0;
 
   return (
     <>
@@ -141,28 +128,9 @@ function EditRelationshipsDrawer(props: EditRelationshipsDrawerProps) {
               <GameObjectsTable
                 additionalActions={(gameObjectData) => (
                   <>
-                    {/* <ButtonGroup size="sm" variant="ghost">
-                      <Button>NONE</Button>
-                      {weightsQuery.data?.weights.map((weight) => (
-                        <Button key={weight.id}>
-                          {weight.name ?? "Untitled Weight"}
-                        </Button>
-                      ))}
-                    </ButtonGroup> */}
-
-                    <RadioGroup
-                      options={[
-                        { id: "NONE", name: "NONE" },
-                        ...(weightsQuery.data?.weights.map((weight) => ({
-                          id: weight.id,
-                          name: weight.name ?? "Untitled Weight",
-                        })) ?? []),
-                      ]}
-                      selected="NONE"
-                      onChange={(value) => {
-                        console.log(value);
-                      }}
-                      // TODO: Default value based on existing relationships
+                    <RelateGameObjects
+                      fromGameObjectId={gameObjectId}
+                      toGameObjectId={gameObjectData.id}
                     />
                   </>
                 )}
@@ -208,5 +176,51 @@ function RadioGroup(props: RadioGroupProps) {
         );
       })}
     </ButtonGroup>
+  );
+}
+
+export type RelateGameObjectsProps = {
+  fromGameObjectId: GameObject["id"];
+  toGameObjectId: GameObject["id"];
+};
+
+function RelateGameObjects(props: RelateGameObjectsProps) {
+  const { fromGameObjectId, toGameObjectId } = props;
+
+  const relationshipsQuery = api.gameObjects.getRelationship.useQuery({
+    fromGameObjectId,
+    toGameObjectId,
+  });
+  const selected = useMemo(() => {
+    return relationshipsQuery.data?.relationship?.weightId ?? "NONE";
+  }, [relationshipsQuery.data]);
+
+  // TODO: Upsert relationship upon selection
+  // TODO: Delete relationship upon selection of NONE
+
+  const weightsQuery = api.weights.getAll.useQuery(null);
+  if (weightsQuery.isFetching) {
+    return null;
+  }
+
+  if (weightsQuery.isError) {
+    return <div>Failed to load weights</div>;
+  }
+
+  return (
+    <RadioGroup
+      options={[
+        { id: "NONE", name: "NONE" },
+        ...(weightsQuery.data?.weights.map((weight) => ({
+          id: weight.id,
+          name: weight.name ?? "Untitled Weight",
+        })) ?? []),
+      ]}
+      selected={selected}
+      onChange={(value) => {
+        console.log(value);
+      }}
+      // TODO: Default value based on existing relationships
+    />
   );
 }
