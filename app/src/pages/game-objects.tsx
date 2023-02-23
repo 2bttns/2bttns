@@ -87,6 +87,8 @@ function EditRelationshipsDrawer(props: EditRelationshipsDrawerProps) {
     }
   );
 
+  const weightsQuery = api.weights.getAll.useQuery(null, { enabled: isOpen });
+
   const label = "Edit Relationships";
   const title = `${label} - ${gameObjectQuery.data?.gameObject?.id}`;
 
@@ -97,6 +99,17 @@ function EditRelationshipsDrawer(props: EditRelationshipsDrawerProps) {
   if (gameObjectQuery.isError) {
     return <div>Failed to load game object</div>;
   }
+
+  if (weightsQuery.isFetching) {
+    return null;
+  }
+
+  if (weightsQuery.isError) {
+    return <div>Failed to load weights</div>;
+  }
+
+  const hasWeights =
+    weightsQuery.data?.weights && weightsQuery.data?.weights.length > 0;
 
   return (
     <>
@@ -128,10 +141,16 @@ function EditRelationshipsDrawer(props: EditRelationshipsDrawerProps) {
               <GameObjectsTable
                 additionalActions={(gameObjectData) => (
                   <>
-                    <Select sx={{ width: "64px" }}>
-                      <option value="1">1</option>
-                      <option value="2">2</option>
-                      <option value="3">3</option>
+                    <Select
+                      sx={{ width: "256px" }}
+                      disabled={!hasWeights}
+                      placeholder={hasWeights ? "Select Weight" : "No Weights"}
+                    >
+                      {weightsQuery.data?.weights.map((weight) => (
+                        <option key={weight.id} value={weight.id}>
+                          {weight.name ?? "Untitled Weight"}
+                        </option>
+                      ))}
                     </Select>
                   </>
                 )}
