@@ -1,11 +1,12 @@
 import { z } from "zod";
 import { publicProcedure } from "../../trpc";
 
+// Creates/updates a relationship in both directions, meaning two records are created/updated.
 export const upsertRelationship = publicProcedure
   .input(
     z.object({
-      fromGameObjectId: z.string(),
-      toGameObjectId: z.string(),
+      gameObjectId1: z.string(),
+      gameObjectId2: z.string(),
       weightId: z.string(),
     })
   )
@@ -20,43 +21,47 @@ export const upsertRelationship = publicProcedure
       throw new Error("Weight not found");
     }
 
-    const fromGameObject = await ctx.prisma.gameObject.findFirst({
+    if (input.gameObjectId1 === input.gameObjectId2) {
+      throw new Error("Cannot create relationship to self");
+    }
+
+    const gameObject1 = await ctx.prisma.gameObject.findFirst({
       where: {
-        id: input.fromGameObjectId,
+        id: input.gameObjectId1,
       },
     });
 
-    if (!fromGameObject) {
-      throw new Error("From GameObject not found");
+    if (!gameObject1) {
+      throw new Error("GameObject 1 not found");
     }
 
-    const toGameObject = await ctx.prisma.gameObject.findFirst({
+    const gameObject2 = await ctx.prisma.gameObject.findFirst({
       where: {
-        id: input.toGameObjectId,
+        id: input.gameObjectId2,
       },
     });
 
-    if (!toGameObject) {
-      throw new Error("To GameObject not found");
+    if (!gameObject2) {
+      throw new Error("GameObject 2 not found");
     }
 
-    const upsertedRelationship = await ctx.prisma.gameObjectRelationship.upsert(
-      {
+    const results = await ctx.prisma.$transaction([
+      ctx.prisma.gameObjectRelationship.upsert({
         where: {
           fromGameObjectId_toGameObjectId: {
-            fromGameObjectId: input.fromGameObjectId,
-            toGameObjectId: input.toGameObjectId,
+            fromGameObjectId: input.gameObjectId1,
+            toGameObjectId: input.gameObjectId2,
           },
         },
         create: {
           fromGameObject: {
             connect: {
-              id: input.fromGameObjectId,
+              id: input.gameObjectId1,
             },
           },
           toGameObject: {
             connect: {
-              id: input.toGameObjectId,
+              id: input.gameObjectId2,
             },
           },
           weight: {
@@ -72,8 +77,40 @@ export const upsertRelationship = publicProcedure
             },
           },
         },
-      }
-    );
+      }),
+      ctx.prisma.gameObjectRelationship.upsert({
+        where: {
+          fromGameObjectId_toGameObjectId: {
+            fromGameObjectId: input.gameObjectId2,
+            toGameObjectId: input.gameObjectId1,
+          },
+        },
+        create: {
+          fromGameObject: {
+            connect: {
+              id: input.gameObjectId2,
+            },
+          },
+          toGameObject: {
+            connect: {
+              id: input.gameObjectId1,
+            },
+          },
+          weight: {
+            connect: {
+              id: input.weightId,
+            },
+          },
+        },
+        update: {
+          weight: {
+            connect: {
+              id: input.weightId,
+            },
+          },
+        },
+      }),
+    ]);
 
-    return { upsertedRelationship };
+    return { results };
   });

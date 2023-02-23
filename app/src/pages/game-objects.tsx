@@ -129,8 +129,8 @@ function EditRelationshipsDrawer(props: EditRelationshipsDrawerProps) {
                 additionalActions={(gameObjectData) => (
                   <>
                     <RelateGameObjects
-                      fromGameObjectId={gameObjectId}
-                      toGameObjectId={gameObjectData.id}
+                      gameObjectId1={gameObjectId}
+                      gameObjectId2={gameObjectData.id}
                     />
                   </>
                 )}
@@ -180,17 +180,17 @@ function RadioGroup(props: RadioGroupProps) {
 }
 
 export type RelateGameObjectsProps = {
-  fromGameObjectId: GameObject["id"];
-  toGameObjectId: GameObject["id"];
+  gameObjectId1: GameObject["id"];
+  gameObjectId2: GameObject["id"];
 };
 
 function RelateGameObjects(props: RelateGameObjectsProps) {
-  const { fromGameObjectId, toGameObjectId } = props;
+  const { gameObjectId1, gameObjectId2 } = props;
 
   const utils = api.useContext();
   const relationshipsQuery = api.gameObjects.getRelationship.useQuery({
-    fromGameObjectId,
-    toGameObjectId,
+    fromGameObjectId: gameObjectId1,
+    toGameObjectId: gameObjectId2,
   });
   const selected = useMemo(() => {
     return relationshipsQuery.data?.relationship?.weightId ?? "NONE";
@@ -205,27 +205,27 @@ function RelateGameObjects(props: RelateGameObjectsProps) {
   const handleChange: RadioGroupProps["onChange"] = async (id) => {
     if (id === "NONE") {
       await deleteRelationshipMutation.mutateAsync({
-        fromGameObjectId,
-        toGameObjectId,
+        gameObjectId1,
+        gameObjectId2,
       });
 
       await utils.gameObjects.getRelationship.invalidate({
-        fromGameObjectId,
-        toGameObjectId,
+        fromGameObjectId: gameObjectId1,
+        toGameObjectId: gameObjectId2,
       });
       return;
     }
 
     try {
       await upsertRelationshipMutation.mutateAsync({
-        fromGameObjectId,
-        toGameObjectId,
+        gameObjectId1,
+        gameObjectId2,
         weightId: id,
       });
 
       await utils.gameObjects.getRelationship.invalidate({
-        fromGameObjectId,
-        toGameObjectId,
+        fromGameObjectId: gameObjectId1,
+        toGameObjectId: gameObjectId2,
       });
     } catch (error) {
       console.error(error);
@@ -250,6 +250,9 @@ function RelateGameObjects(props: RelateGameObjectsProps) {
     })) ?? []),
   ];
 
+  if (gameObjectId1 === gameObjectId2) {
+    return null;
+  }
   return (
     <RadioGroup options={options} selected={selected} onChange={handleChange} />
   );
