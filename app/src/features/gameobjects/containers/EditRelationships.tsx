@@ -89,14 +89,20 @@ function EditRelationshipsDrawer(props: EditRelationshipsDrawerProps) {
         <DrawerBody>
           <Box width="100%" height="100%" overflow="none">
             <GameObjectsTable
-              additionalActions={(gameObjectData) => (
-                <>
-                  <RelateGameObjects
-                    gameObjectId1={gameObjectId}
-                    gameObjectId2={gameObjectData.id}
-                  />
-                </>
-              )}
+              additionalColumns={[
+                {
+                  id: "Relationships",
+                  header: "Relationship Weight",
+                  cell: (info) => {
+                    return (
+                      <RelateGameObjects
+                        gameObjectId1={gameObjectId}
+                        gameObjectId2={info.row.original.id}
+                      />
+                    );
+                  },
+                },
+              ]}
             />
           </Box>
         </DrawerBody>

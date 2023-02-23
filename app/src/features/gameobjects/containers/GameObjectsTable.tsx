@@ -19,16 +19,18 @@ import TagMultiSelect, { TagOption } from "./TagMultiSelect";
 export type GameObjectData =
   RouterOutputs["gameObjects"]["getAll"]["gameObjects"][0];
 
-const columnHelper = createColumnHelper<GameObjectData>();
+export const columnHelper = createColumnHelper<GameObjectData>();
 
 export type GameObjectsTableProps = {
   tag?: typeof tagFilter._type;
   onGameObjectCreated?: (gameObjectId: string) => Promise<void>;
+  additionalColumns?: ColumnDef<GameObjectData>[];
   additionalActions?: (gameObjectData: GameObjectData) => React.ReactNode;
 };
 
 export default function GameObjectsTable(props: GameObjectsTableProps) {
-  const { tag, onGameObjectCreated, additionalActions } = props;
+  const { tag, onGameObjectCreated, additionalColumns, additionalActions } =
+    props;
 
   const utils = api.useContext();
 
@@ -207,6 +209,10 @@ export default function GameObjectsTable(props: GameObjectsTableProps) {
         enableSorting: true,
       }),
     ];
+
+    if (additionalColumns) {
+      items.push(...additionalColumns);
+    }
 
     if (additionalActions) {
       items.push({
