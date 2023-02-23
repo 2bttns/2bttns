@@ -187,6 +187,7 @@ export type RelateGameObjectsProps = {
 function RelateGameObjects(props: RelateGameObjectsProps) {
   const { fromGameObjectId, toGameObjectId } = props;
 
+  const utils = api.useContext();
   const relationshipsQuery = api.gameObjects.getRelationship.useQuery({
     fromGameObjectId,
     toGameObjectId,
@@ -196,7 +197,31 @@ function RelateGameObjects(props: RelateGameObjectsProps) {
   }, [relationshipsQuery.data]);
 
   // TODO: Upsert relationship upon selection
-  // TODO: Delete relationship upon selection of NONE
+  const upsertRelationshipMutation =
+    api.gameObjects.upsertRelationship.useMutation();
+
+  const handleChange: RadioGroupProps["onChange"] = async (id) => {
+    if (id === "NONE") {
+      // TODO: Delete relationship upon selection of NONE
+      return;
+    }
+
+    try {
+      await upsertRelationshipMutation.mutateAsync({
+        fromGameObjectId,
+        toGameObjectId,
+        weightId: id,
+      });
+
+      await utils.gameObjects.getRelationship.invalidate({
+        fromGameObjectId,
+        toGameObjectId,
+      });
+    } catch (error) {
+      console.error(error);
+      window.alert("Failed to relate game objects. See console for details.");
+    }
+  };
 
   const weightsQuery = api.weights.getAll.useQuery(null);
   if (weightsQuery.isFetching) {
@@ -207,20 +232,15 @@ function RelateGameObjects(props: RelateGameObjectsProps) {
     return <div>Failed to load weights</div>;
   }
 
+  const options: RadioGroupProps["options"] = [
+    { id: "NONE", name: "NONE" },
+    ...(weightsQuery.data?.weights.map((weight) => ({
+      id: weight.id,
+      name: weight.name ?? "Untitled Weight",
+    })) ?? []),
+  ];
+
   return (
-    <RadioGroup
-      options={[
-        { id: "NONE", name: "NONE" },
-        ...(weightsQuery.data?.weights.map((weight) => ({
-          id: weight.id,
-          name: weight.name ?? "Untitled Weight",
-        })) ?? []),
-      ]}
-      selected={selected}
-      onChange={(value) => {
-        console.log(value);
-      }}
-      // TODO: Default value based on existing relationships
-    />
+    <RadioGroup options={options} selected={selected} onChange={handleChange} />
   );
 }
