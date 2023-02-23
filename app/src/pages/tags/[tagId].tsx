@@ -11,6 +11,7 @@ import { Session } from "next-auth";
 import Head from "next/head";
 import { useRouter } from "next/router";
 import { useMemo, useState } from "react";
+import EditRelationships from "../../features/gameobjects/containers/EditRelationships";
 import GameObjectsTable, {
   GameObjectsTableProps,
 } from "../../features/gameobjects/containers/GameObjectsTable";
@@ -220,6 +221,7 @@ const TagByIdPage: NextPage<TagByIdPageProps> = (props) => {
             onGameObjectCreated={handleGameObjectCreated}
             additionalActions={(gameObjectData) => (
               <>
+                <EditRelationships gameObjectId={gameObjectData.id} />
                 <ToggleTagButton
                   gameObjectId={gameObjectData.id}
                   tagId={tagId}
