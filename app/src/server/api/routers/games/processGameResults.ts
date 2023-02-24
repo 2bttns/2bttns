@@ -51,7 +51,7 @@ export const processGameResults = publicProcedure
         },
       },
       include: {
-        ToGameObjectRelationship: {
+        FromGameObjectRelationship: {
           include: {
             weight: true,
             toGameObject: true,
@@ -66,8 +66,8 @@ export const processGameResults = publicProcedure
       Map<GameObject["id"], Weight>
     >();
     resultGameObjects.forEach((gameObject) => {
-      gameObject.ToGameObjectRelationship.forEach((relationship) => {
-        relatedGameObjectIds.add(relationship.fromGameObjectId);
+      gameObject.FromGameObjectRelationship.forEach((relationship) => {
+        relatedGameObjectIds.add(relationship.toGameObjectId);
 
         if (!relatedGameObjectsMap.has(gameObject.id)) {
           relatedGameObjectsMap.set(
@@ -78,7 +78,7 @@ export const processGameResults = publicProcedure
 
         relatedGameObjectsMap
           .get(gameObject.id)
-          ?.set(relationship.fromGameObjectId, relationship.weight);
+          ?.set(relationship.toGameObjectId, relationship.weight);
       });
     });
 
