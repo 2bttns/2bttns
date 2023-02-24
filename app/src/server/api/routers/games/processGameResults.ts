@@ -31,7 +31,7 @@ export const processGameResults = publicProcedure
     });
 
     if (!player) {
-      await prisma.player.create({
+      await ctx.prisma.player.create({
         data: {
           id: input.playerId,
         },
@@ -129,7 +129,7 @@ export const processGameResults = publicProcedure
       });
     });
 
-    await prisma.$transaction([
+    await ctx.prisma.$transaction([
       ...Array.from(scoresMap.entries()).map(([gameObjectId, score]) => {
         const existingPlayerScore = existingPlayerScoresMap.get(gameObjectId);
         if (existingPlayerScore) {
@@ -165,7 +165,7 @@ export const processGameResults = publicProcedure
     ]);
 
     // normalize scores
-    const playerScores = await prisma.playerScore.findMany({
+    const playerScores = await ctx.prisma.playerScore.findMany({
       where: {
         playerId: input.playerId,
       },
@@ -175,7 +175,7 @@ export const processGameResults = publicProcedure
       ...playerScores.map((playerScore) => playerScore.score.toNumber())
     );
 
-    const allPlayerScoresNormalized = await prisma.$transaction(
+    const allPlayerScoresNormalized = await ctx.prisma.$transaction(
       playerScores.map((playerScore) => {
         const normalizedScore = playerScore.score.toNumber() / maxScore;
         return prisma.playerScore.update({
