@@ -103,7 +103,6 @@ export const getRanked = publicProcedure
             playerScore.score.toNumber() *
             relationship.weight.weight.toNumber();
           score += toAdd;
-          console.log(relationship.toGameObject.name, toAdd);
         }
         rankedOutputsMap.set(relationship.toGameObject.id, {
           gameObject: relationship.toGameObject,
