@@ -5,6 +5,7 @@ import { deleteRelationship } from "./deleteRelationship";
 import { getAll } from "./getAll";
 import { getById } from "./getById";
 import { getCount } from "./getCount";
+import { getRanked } from "./getRanked";
 import { getRelationship } from "./getRelationship";
 import { updateById } from "./updateById";
 import { upsertPlayerScore } from "./upsertPlayerScore";
@@ -21,4 +22,5 @@ export const gameObjectsRouter = createTRPCRouter({
   getRelationship,
   upsertRelationship,
   deleteRelationship,
+  getRanked,
 });
