@@ -105,5 +105,6 @@ export const getAll = publicProcedure
         updatedAt: input?.sort?.updatedAt,
       },
     });
+
     return { games };
   });

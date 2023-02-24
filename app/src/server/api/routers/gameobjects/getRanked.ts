@@ -1,132 +1,129 @@
-import {
-  GameObject,
-  GameObjectRelationship,
-  PlayerScore,
-  Weight,
-} from "@prisma/client";
+import { Decimal } from "@prisma/client/runtime";
+import { TRPCError } from "@trpc/server";
 import { z } from "zod";
+import { prisma } from "../../../db";
 import { publicProcedure } from "../../trpc";
 
 export const getRanked = publicProcedure
   .input(
     z.object({
       playerId: z.string(),
-      outputTags: z.array(z.string()),
       inputTags: z.array(z.string()),
+      outputTag: z.string(),
     })
   )
   .query(async ({ ctx, input }) => {
-    const outputGameObjects = await ctx.prisma.gameObject.findMany({
+    const player = await prisma.player.findUnique({
       where: {
-        tags: {
-          some: {
-            id: {
-              in: input?.outputTags,
-            },
-          },
+        id: input.playerId,
+      },
+    });
+    if (!player) {
+      throw new TRPCError({
+        code: "BAD_REQUEST",
+        message: `Player not found: "${input.playerId}"`,
+      });
+    }
+
+    const inputTags = await prisma.tag.findMany({
+      where: {
+        id: {
+          in: input.inputTags,
         },
       },
     });
 
-    const outputGameObjectIds = outputGameObjects.map(
-      (gameObject) => gameObject.id
-    );
+    if (inputTags.length !== input.inputTags.length) {
+      const missingTags = input.inputTags.filter(
+        (inputTag) => !inputTags.some((tag) => tag.id === inputTag)
+      );
+      throw new TRPCError({
+        code: "BAD_REQUEST",
+        message: `Input tags not found: ${missingTags
+          .map((t) => `"${t}"`)
+          .join(", ")}`,
+      });
+    }
 
+    const tags = await prisma.tag.findUnique({
+      where: {
+        id: input.outputTag,
+      },
+    });
+
+    if (!tags) {
+      throw new TRPCError({
+        code: "BAD_REQUEST",
+        message: `Output tag not found: "${input.outputTag}"`,
+      });
+    }
+
+    // TODO: Weight output rankings based on input tag weights
     const playerScores = await ctx.prisma.playerScore.findMany({
       where: {
         playerId: input.playerId,
         gameObject: {
           tags: {
             some: {
-              id: {
-                in: input?.inputTags,
-              },
-            },
-          },
-          FromGameObjectRelationship: {
-            some: {
-              toGameObjectId: {
-                in: outputGameObjectIds,
-              },
+              id: input.outputTag,
             },
           },
         },
       },
-      include: {
-        gameObject: true,
+      select: {
+        score: true,
+        gameObject: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
       },
       orderBy: {
         score: "desc",
       },
     });
 
-    const outputRelationships =
-      await ctx.prisma.gameObjectRelationship.findMany({
-        where: {
-          toGameObjectId: {
-            in: outputGameObjectIds,
-          },
-        },
-        include: {
-          weight: true,
-          toGameObject: true,
-        },
-      });
-
-    const rankedOutputsMap = new Map<
-      GameObject["id"],
-      {
-        gameObject: GameObject;
-        score: number;
-      }
-    >();
-    outputRelationships.forEach(
-      (
-        relationship: GameObjectRelationship & {
-          weight: Weight;
-          toGameObject: GameObject;
-        }
-      ) => {
-        const playerScore = playerScores.find(
-          (playerScore) =>
-            playerScore.gameObjectId === relationship.fromGameObjectId
-        ) as
-          | (PlayerScore & {
-              gameObject: GameObject;
-            })
-          | undefined;
-
-        let score =
-          rankedOutputsMap.get(relationship.toGameObject.id)?.score ?? 0;
-        if (playerScore) {
-          const toAdd =
-            playerScore.score.toNumber() *
-            relationship.weight.weight.toNumber();
-          score += toAdd;
-        }
-        rankedOutputsMap.set(relationship.toGameObject.id, {
-          gameObject: relationship.toGameObject,
-          score,
-        });
-      }
-    );
-
-    outputGameObjects.forEach((gameObject: GameObject) => {
-      if (rankedOutputsMap.has(gameObject.id)) return;
-      rankedOutputsMap.set(gameObject.id, {
-        gameObject,
-        score: 0,
-      });
-    });
-
-    const rankedOutputs = Array.from(rankedOutputsMap.entries())
-      .map(([gameObjectId, { gameObject, score }]) => ({
-        gameObjectId,
-        name: gameObject.name,
+    const playerScoreMap = new Map<string, typeof playerScores[0]>();
+    for (const { gameObject, score } of playerScores) {
+      playerScoreMap.set(gameObject.id, {
         gameObject,
         score,
+      });
+    }
+
+    const unscoredGameObjects = await ctx.prisma.gameObject.findMany({
+      where: {
+        tags: {
+          some: {
+            id: input.outputTag,
+          },
+        },
+        NOT: {
+          id: {
+            in: [...playerScoreMap.keys()],
+          },
+        },
+      },
+      select: {
+        id: true,
+        name: true,
+      },
+    });
+
+    for (const gameObject of unscoredGameObjects) {
+      playerScoreMap.set(gameObject.id, {
+        gameObject,
+        score: new Decimal(0),
+      });
+    }
+
+    const results = [...playerScoreMap.values()]
+      .map(({ gameObject, score }) => ({
+        gameObject,
+        score: score.toNumber(),
       }))
       .sort((a, b) => b.score - a.score);
 
-    return { rankedOutputs, outputRelationships, playerScores };
+    return { results };
   });
