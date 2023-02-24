@@ -1,5 +1,6 @@
-import { PlayerScore } from "@prisma/client";
+import { GameObjectRelationship, PlayerScore, Weight } from "@prisma/client";
 import { z } from "zod";
+import normalizeScores from "../../../shared/normalizeScores";
 import { publicProcedure } from "../../trpc";
 
 export const upsertPlayerScore = publicProcedure
@@ -45,32 +46,95 @@ export const upsertPlayerScore = publicProcedure
         },
       });
 
-    const playerScore = await ctx.prisma.playerScore.upsert({
+    const targetGameObject = await ctx.prisma.gameObject.findFirst({
       where: {
-        playerId_gameObjectId: {
-          playerId: input.playerId,
-          gameObjectId: input.gameObjectId,
-        },
-      },
-      update: {
-        score: existingPlayerScore!.score.toNumber() + input.score,
-      },
-      create: {
-        player: {
-          connect: {
-            id: input.playerId,
+        FromGameObjectRelationship: {
+          some: {
+            fromGameObjectId: input.gameObjectId,
           },
         },
-        gameObject: {
-          connect: {
-            id: input.gameObjectId,
+      },
+      include: {
+        FromGameObjectRelationship: {
+          include: {
+            weight: true,
           },
         },
-        score: input.score,
       },
     });
 
+    const relationships: (GameObjectRelationship & {
+      weight: Weight;
+    })[] = targetGameObject?.FromGameObjectRelationship ?? [];
+
+    await ctx.prisma.$transaction([
+      ctx.prisma.playerScore.upsert({
+        where: {
+          playerId_gameObjectId: {
+            playerId: input.playerId,
+            gameObjectId: input.gameObjectId,
+          },
+        },
+        update: {
+          score: existingPlayerScore!.score.toNumber() + input.score,
+        },
+        create: {
+          player: {
+            connect: {
+              id: input.playerId,
+            },
+          },
+          gameObject: {
+            connect: {
+              id: input.gameObjectId,
+            },
+          },
+          score: input.score,
+        },
+      }),
+      ...relationships.map((relationship) => {
+        const updatedRelationshipsScore =
+          relationship.weight.weight.toNumber() * input.score;
+
+        return ctx.prisma.playerScore.upsert({
+          where: {
+            playerId_gameObjectId: {
+              playerId: input.playerId,
+              gameObjectId: relationship.toGameObjectId,
+            },
+          },
+
+          update: {
+            score: updatedRelationshipsScore,
+          },
+          create: {
+            player: {
+              connect: {
+                id: input.playerId,
+              },
+            },
+            gameObject: {
+              connect: {
+                id: relationship.toGameObjectId,
+              },
+            },
+            score: updatedRelationshipsScore,
+          },
+        });
+      }),
+    ]);
+
+    const { allPlayerScoresNormalized } = await normalizeScores(input.playerId);
+
+    const resultScores = allPlayerScoresNormalized.filter(
+      (score) =>
+        score.gameObjectId === input.gameObjectId ||
+        relationships.some(
+          (relationship) => relationship.toGameObjectId === score.gameObjectId
+        )
+    );
+
     return {
-      playerScore,
+      resultScores,
     };
   });

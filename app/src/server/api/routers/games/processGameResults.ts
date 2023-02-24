@@ -1,6 +1,7 @@
 import { GameObject, PlayerScore, Weight } from "@prisma/client";
 import { performance } from "perf_hooks";
 import { z } from "zod";
+import normalizeScores from "../../../shared/normalizeScores";
 import { publicProcedure } from "../../trpc";
 
 const choiceItemSchema = z.object({
@@ -163,34 +164,7 @@ export const processGameResults = publicProcedure
       }),
     ]);
 
-    // normalize scores
-    const playerScores = await ctx.prisma.playerScore.findMany({
-      where: {
-        playerId: input.playerId,
-      },
-    });
-
-    const maxScore = Math.max(
-      ...playerScores.map((playerScore) => playerScore.score.toNumber())
-    );
-
-    const allPlayerScoresNormalized = await ctx.prisma.$transaction(
-      playerScores.map((playerScore) => {
-        const normalizedScore = playerScore.score.toNumber() / maxScore;
-        return ctx.prisma.playerScore.update({
-          where: {
-            playerId_gameObjectId: {
-              playerId: input.playerId,
-              gameObjectId: playerScore.gameObjectId,
-            },
-          },
-          data: {
-            score: normalizedScore,
-          },
-        });
-      })
-    );
-
+    const { allPlayerScoresNormalized } = await normalizeScores(input.playerId);
     const resultScores = allPlayerScoresNormalized.filter((playerScore) => {
       return scoresMap.has(playerScore.gameObjectId);
     });
