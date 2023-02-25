@@ -6,7 +6,7 @@ const GamesPage: NextPageWithLayout = (props) => {
   const getRankedQuery = api.gameObjects.getRanked.useQuery(
     {
       playerId: "clehkzn9j0000mixv1sjif9ir",
-      inputTags: ["clehrvbvy000amixvw1l8himg", "clehsdbm3002amixvffx5oj1w"],
+      inputTags: ["clehrvbvy000amixvw1l8himg"],
       outputTag: "clehsdbm3002amixvffx5oj1w",
     },
     {
