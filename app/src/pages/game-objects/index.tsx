@@ -41,7 +41,7 @@ const GameObjects: NextPage<GameObjectsPageProps> = (props) => {
           additionalTopBarContent={<CsvImport />}
           additionalActions={({ id, name }) => (
             <>
-              <ManageGameObjectButton gameObjectId={id} gameObjectName={name} />
+              <ManageGameObjectButton gameObjectId={id} />
               <DeleteGameObjectButton gameObjectId={id} />
             </>
           )}

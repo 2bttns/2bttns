@@ -5,18 +5,22 @@ import { GameObjectData } from "./GameObjectsTable";
 
 export type DeleteGameObjectButtonProps = {
   gameObjectId: GameObjectData["id"];
+  onDeleted?: () => void;
 };
 
 export default function DeleteGameObjectButton(
   props: DeleteGameObjectButtonProps
 ) {
-  const { gameObjectId } = props;
+  const { gameObjectId, onDeleted } = props;
 
   const utils = api.useContext();
   const deleteGameObjectMutation = api.gameObjects.deleteById.useMutation();
   const handleDeleteGameObject = async () => {
     try {
       await deleteGameObjectMutation.mutateAsync({ id: gameObjectId });
+      if (onDeleted) {
+        onDeleted();
+      }
       await utils.gameObjects.invalidate();
     } catch (error) {
       window.alert("Error deleting game object\n See console for details");

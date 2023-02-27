@@ -5,23 +5,17 @@ import { GameObjectData } from "./GameObjectsTable";
 
 export type ManageGameObjectButtonProps = {
   gameObjectId: GameObjectData["id"];
-  gameObjectName?: GameObjectData["name"];
 };
 
 export default function ManageGameObjectButton(
   props: ManageGameObjectButtonProps
 ) {
-  const { gameObjectId, gameObjectName } = props;
+  const { gameObjectId } = props;
 
   const href = `/game-objects/${gameObjectId}`;
 
   return (
-    <Tooltip
-      label={`Manage${
-        gameObjectName ? ` "${gameObjectName}"` : ` Game Object`
-      }`}
-      placement="top"
-    >
+    <Tooltip label="Manage" placement="top">
       <NextLink href={href}>
         <IconButton
           colorScheme="blue"
