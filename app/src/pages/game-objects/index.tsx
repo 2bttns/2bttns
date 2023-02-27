@@ -37,9 +37,9 @@ const GameObjects: NextPage<GameObjectsPageProps> = (props) => {
       </Head>
       <Box width="100%" height="100%" overflow="scroll">
         <GameObjectsTable
-          additionalActions={({ id }) => (
+          additionalActions={({ id, name }) => (
             <>
-              <ManageGameObjectButton gameObjectId={id} />
+              <ManageGameObjectButton gameObjectId={id} gameObjectName={name} />
               <DeleteGameObjectButton gameObjectId={id} />
             </>
           )}

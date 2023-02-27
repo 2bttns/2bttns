@@ -109,9 +109,9 @@ const GameObjectById: NextPage<GameObjectByIdPageProps> = (props) => {
               },
             },
           ]}
-          additionalActions={({ id }) => (
+          additionalActions={({ id, name }) => (
             <>
-              <ManageGameObjectButton gameObjectId={id} />
+              <ManageGameObjectButton gameObjectId={id} gameObjectName={name} />
             </>
           )}
         />

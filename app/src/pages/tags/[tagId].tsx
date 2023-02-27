@@ -219,10 +219,13 @@ const TagByIdPage: NextPage<TagByIdPageProps> = (props) => {
               includeUntagged,
             }}
             onGameObjectCreated={handleGameObjectCreated}
-            additionalActions={({ id }) => (
+            additionalActions={({ id, name }) => (
               <>
                 <ToggleTagButton gameObjectId={id} tagId={tagId} />
-                <ManageGameObjectButton gameObjectId={id} />
+                <ManageGameObjectButton
+                  gameObjectId={id}
+                  gameObjectName={name}
+                />
               </>
             )}
           />
