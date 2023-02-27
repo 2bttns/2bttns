@@ -8,6 +8,7 @@ import {
   Heading,
   Text,
 } from "@chakra-ui/react";
+import { Tag } from "@prisma/client";
 import type { GetServerSideProps, NextPage } from "next";
 import { Session } from "next-auth";
 import Head from "next/head";
@@ -15,6 +16,9 @@ import { useRouter } from "next/router";
 import GameObjectsTable from "../../features/gameobjects/containers/GameObjectsTable";
 import ManageGameObjectButton from "../../features/gameobjects/containers/ManageGameObjectButton";
 import RelateGameObjects from "../../features/gameobjects/containers/RelateGameObjects";
+import TagMultiSelect, {
+  TagOption,
+} from "../../features/gameobjects/containers/TagMultiSelect";
 import { NAVBAR_HEIGHT_PX } from "../../features/navbar/views/Navbar";
 import CustomEditable from "../../features/shared/components/CustomEditable";
 import { api, RouterInputs } from "../../utils/api";
@@ -39,14 +43,19 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   };
 };
 
+const GAME_OBJECT_DETAILS_HEIGHT_PX = "200px";
+
 const GameObjectById: NextPage<GameObjectByIdPageProps> = (props) => {
   const router = useRouter();
   const gameObjectId = router.query.id as string;
 
   return (
     <>
-      <Box width="100%" height={`calc(100vh - ${NAVBAR_HEIGHT_PX} - 128px)`}>
-        <Box height="128px">
+      <Box
+        width="100%"
+        height={`calc(100vh - ${NAVBAR_HEIGHT_PX} - ${GAME_OBJECT_DETAILS_HEIGHT_PX})`}
+      >
+        <Box height={GAME_OBJECT_DETAILS_HEIGHT_PX}>
           <GameObjectDetails gameObjectId={gameObjectId} />
           <Divider />
         </Box>
@@ -87,6 +96,7 @@ function GameObjectDetails(props: GameObjectDetailsProps) {
   const gameObjectQuery = api.gameObjects.getById.useQuery(
     {
       id: gameObjectId,
+      includeTags: true,
     },
     {
       onError: (error) => {
@@ -111,6 +121,12 @@ function GameObjectDetails(props: GameObjectDetailsProps) {
       window.alert("Error updating game object. See console for details.");
     }
   };
+
+  const selected: TagOption[] =
+    gameObject?.tags?.map((tag: Tag) => ({
+      label: tag.name || "Untitled Tag",
+      value: tag.id,
+    })) || [];
 
   if (!gameObject) return null;
 
@@ -164,6 +180,18 @@ function GameObjectDetails(props: GameObjectDetailsProps) {
           });
         }}
       />
+      <Box marginTop="1rem">
+        <TagMultiSelect
+          selected={selected}
+          onChange={(nextTags) => {
+            handleUpdateGameObject({
+              id: gameObject.id,
+              data: { tags: nextTags },
+            });
+          }}
+          isEditable
+        />
+      </Box>
     </Box>
   );
 }
