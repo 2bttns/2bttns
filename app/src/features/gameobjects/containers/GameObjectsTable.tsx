@@ -26,11 +26,17 @@ export type GameObjectsTableProps = {
   onGameObjectCreated?: (gameObjectId: string) => Promise<void>;
   additionalColumns?: ColumnDef<GameObjectData>[];
   additionalActions?: (gameObjectData: GameObjectData) => React.ReactNode;
+  gameObjectsToExclude?: GameObjectData["id"][];
 };
 
 export default function GameObjectsTable(props: GameObjectsTableProps) {
-  const { tag, onGameObjectCreated, additionalColumns, additionalActions } =
-    props;
+  const {
+    tag,
+    onGameObjectCreated,
+    additionalColumns,
+    additionalActions,
+    gameObjectsToExclude,
+  } = props;
 
   const utils = api.useContext();
 
@@ -73,6 +79,7 @@ export default function GameObjectsTable(props: GameObjectsTableProps) {
         tags: getSort("tags"),
         updatedAt: getSort("updatedAt"),
       },
+      excludeGameObjects: gameObjectsToExclude,
     },
     {
       keepPreviousData: true,
@@ -92,6 +99,7 @@ export default function GameObjectsTable(props: GameObjectsTableProps) {
         : {
             tag,
           },
+      excludeGameObjects: gameObjectsToExclude,
     },
     {
       keepPreviousData: true,
@@ -229,7 +237,7 @@ export default function GameObjectsTable(props: GameObjectsTableProps) {
     }
 
     return items;
-  }, []);
+  }, [gameObjectsToExclude]);
 
   return (
     <Box height="100%">

@@ -2,10 +2,10 @@ import { Box } from "@chakra-ui/react";
 import type { GetServerSideProps, NextPage } from "next";
 import { Session } from "next-auth";
 import Head from "next/head";
-import DeleteGameObjectButton from "../features/gameobjects/containers/DeleteGameObjectButton";
-import EditRelationships from "../features/gameobjects/containers/EditRelationships";
-import GameObjectsTable from "../features/gameobjects/containers/GameObjectsTable";
-import getSessionWithSignInRedirect from "../utils/getSessionWithSignInRedirect";
+import DeleteGameObjectButton from "../../features/gameobjects/containers/DeleteGameObjectButton";
+import GameObjectsTable from "../../features/gameobjects/containers/GameObjectsTable";
+import ManageGameObjectButton from "../../features/gameobjects/containers/ManageGameObjectButton";
+import getSessionWithSignInRedirect from "../../utils/getSessionWithSignInRedirect";
 
 export type GameObjectsPageProps = {
   session: Session;
@@ -37,10 +37,10 @@ const GameObjects: NextPage<GameObjectsPageProps> = (props) => {
       </Head>
       <Box width="100%" height="100%" overflow="scroll">
         <GameObjectsTable
-          additionalActions={(gameObjectData) => (
+          additionalActions={({ id }) => (
             <>
-              <EditRelationships gameObjectId={gameObjectData.id} />
-              <DeleteGameObjectButton gameObjectId={gameObjectData.id} />
+              <ManageGameObjectButton gameObjectId={id} />
+              <DeleteGameObjectButton gameObjectId={id} />
             </>
           )}
         />

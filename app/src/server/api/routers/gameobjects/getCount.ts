@@ -14,6 +14,7 @@ export const getCount = publicProcedure
             tag: tagFilter.optional(),
           })
           .optional(),
+        excludeGameObjects: z.array(z.string()).optional().default([]),
       })
       .optional()
   )
@@ -74,6 +75,11 @@ export const getCount = publicProcedure
                 ],
               }
             : {},
+          {
+            id: {
+              notIn: input?.excludeGameObjects,
+            },
+          },
         ],
       },
     });

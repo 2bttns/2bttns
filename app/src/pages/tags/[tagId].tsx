@@ -11,10 +11,10 @@ import { Session } from "next-auth";
 import Head from "next/head";
 import { useRouter } from "next/router";
 import { useMemo, useState } from "react";
-import EditRelationships from "../../features/gameobjects/containers/EditRelationships";
 import GameObjectsTable, {
   GameObjectsTableProps,
 } from "../../features/gameobjects/containers/GameObjectsTable";
+import ManageGameObjectButton from "../../features/gameobjects/containers/ManageGameObjectButton";
 import CustomEditable from "../../features/shared/components/CustomEditable";
 import TagFilterToggles, {
   TagFilter,
@@ -219,13 +219,10 @@ const TagByIdPage: NextPage<TagByIdPageProps> = (props) => {
               includeUntagged,
             }}
             onGameObjectCreated={handleGameObjectCreated}
-            additionalActions={(gameObjectData) => (
+            additionalActions={({ id }) => (
               <>
-                <EditRelationships gameObjectId={gameObjectData.id} />
-                <ToggleTagButton
-                  gameObjectId={gameObjectData.id}
-                  tagId={tagId}
-                />
+                <ToggleTagButton gameObjectId={id} tagId={tagId} />
+                <ManageGameObjectButton gameObjectId={id} />
               </>
             )}
           />

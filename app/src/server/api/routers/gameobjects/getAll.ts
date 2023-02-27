@@ -26,6 +26,7 @@ export const getAll = publicProcedure
             updatedAt: sort.optional(),
           })
           .optional(),
+        excludeGameObjects: z.array(z.string()).optional().default([]),
       })
       .optional()
   )
@@ -88,6 +89,11 @@ export const getAll = publicProcedure
                 ],
               }
             : {},
+          {
+            id: {
+              notIn: input?.excludeGameObjects,
+            },
+          },
         ],
       },
       include: {
