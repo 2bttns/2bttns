@@ -9,7 +9,6 @@ import {
 import { useMemo, useState } from "react";
 import { tagFilter } from "../../../server/shared/z";
 import { api, RouterInputs, RouterOutputs } from "../../../utils/api";
-import CsvImport from "../../csv-import/CsvImport";
 import CustomEditable from "../../shared/components/CustomEditable";
 import PaginatedTable from "../../shared/components/Table/containers/PaginatedTable";
 import SearchAndCreateBar from "../../shared/components/Table/containers/SearchAndCreateBar";
@@ -27,6 +26,8 @@ export type GameObjectsTableProps = {
   additionalColumns?: ColumnDef<GameObjectData>[];
   additionalActions?: (gameObjectData: GameObjectData) => React.ReactNode;
   gameObjectsToExclude?: GameObjectData["id"][];
+  additionalTopBarContent?: React.ReactNode;
+  editable?: boolean;
 };
 
 export default function GameObjectsTable(props: GameObjectsTableProps) {
@@ -36,6 +37,8 @@ export default function GameObjectsTable(props: GameObjectsTableProps) {
     additionalColumns,
     additionalActions,
     gameObjectsToExclude,
+    additionalTopBarContent,
+    editable = true,
   } = props;
 
   const utils = api.useContext();
@@ -155,6 +158,7 @@ export default function GameObjectsTable(props: GameObjectsTableProps) {
                 id: nextValue,
               })
             }
+            isEditable={editable}
           />
         ),
         enableSorting: true,
@@ -169,6 +173,7 @@ export default function GameObjectsTable(props: GameObjectsTableProps) {
                 name: nextValue,
               })
             }
+            isEditable={editable}
           />
         ),
         enableSorting: true,
@@ -183,6 +188,7 @@ export default function GameObjectsTable(props: GameObjectsTableProps) {
                 description: nextValue,
               })
             }
+            isEditable={editable}
           />
         ),
         enableSorting: true,
@@ -205,6 +211,7 @@ export default function GameObjectsTable(props: GameObjectsTableProps) {
                     tags: nextTags,
                   });
                 }}
+                isEditable={editable}
               />
             </Box>
           );
@@ -247,7 +254,7 @@ export default function GameObjectsTable(props: GameObjectsTableProps) {
           onChange={setGlobalFilter}
           onCreate={handleCreateGameObject}
         />
-        <CsvImport parentTags={tag?.include} />
+        {additionalTopBarContent}
       </HStack>
       <PaginatedTable
         columns={columns}

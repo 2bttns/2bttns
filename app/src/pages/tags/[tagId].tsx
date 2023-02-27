@@ -11,6 +11,7 @@ import { Session } from "next-auth";
 import Head from "next/head";
 import { useRouter } from "next/router";
 import { useMemo, useState } from "react";
+import CsvImport from "../../features/csv-import/CsvImport";
 import GameObjectsTable, {
   GameObjectsTableProps,
 } from "../../features/gameobjects/containers/GameObjectsTable";
@@ -125,6 +126,10 @@ const TagByIdPage: NextPage<TagByIdPageProps> = (props) => {
 
   const includeUntagged = tagFilter["Untagged"]!.on;
 
+  const includeTags = useMemo(() => {
+    return tagsToFilterGameObjectsBy?.map((tag) => tag.id) || [];
+  }, [tagsToFilterGameObjectsBy]);
+
   const excludeTags = useMemo(() => {
     if (tagFilter["Not Applied"]!.on && !tagFilter["Applied"]!.on) {
       return [tagId];
@@ -214,11 +219,12 @@ const TagByIdPage: NextPage<TagByIdPageProps> = (props) => {
           />
           <GameObjectsTable
             tag={{
-              include: tagsToFilterGameObjectsBy?.map((tag) => tag.id) || [],
+              include: includeTags,
               exclude: excludeTags,
               includeUntagged,
             }}
             onGameObjectCreated={handleGameObjectCreated}
+            additionalTopBarContent={<CsvImport parentTags={[tagId]} />}
             additionalActions={({ id, name }) => (
               <>
                 <ToggleTagButton gameObjectId={id} tagId={tagId} />

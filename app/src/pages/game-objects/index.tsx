@@ -2,6 +2,7 @@ import { Box } from "@chakra-ui/react";
 import type { GetServerSideProps, NextPage } from "next";
 import { Session } from "next-auth";
 import Head from "next/head";
+import CsvImport from "../../features/csv-import/CsvImport";
 import DeleteGameObjectButton from "../../features/gameobjects/containers/DeleteGameObjectButton";
 import GameObjectsTable from "../../features/gameobjects/containers/GameObjectsTable";
 import ManageGameObjectButton from "../../features/gameobjects/containers/ManageGameObjectButton";
@@ -37,6 +38,7 @@ const GameObjects: NextPage<GameObjectsPageProps> = (props) => {
       </Head>
       <Box width="100%" height="100%" overflow="scroll">
         <GameObjectsTable
+          additionalTopBarContent={<CsvImport />}
           additionalActions={({ id, name }) => (
             <>
               <ManageGameObjectButton gameObjectId={id} gameObjectName={name} />
