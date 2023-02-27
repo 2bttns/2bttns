@@ -4,22 +4,23 @@ import {
   Breadcrumb,
   BreadcrumbItem,
   BreadcrumbLink,
+  Divider,
   Heading,
   Text,
 } from "@chakra-ui/react";
-import { GameObject } from "@prisma/client";
 import type { GetServerSideProps, NextPage } from "next";
 import { Session } from "next-auth";
 import Head from "next/head";
-import { useEffect, useState } from "react";
+import { useRouter } from "next/router";
 import GameObjectsTable from "../../features/gameobjects/containers/GameObjectsTable";
 import ManageGameObjectButton from "../../features/gameobjects/containers/ManageGameObjectButton";
 import RelateGameObjects from "../../features/gameobjects/containers/RelateGameObjects";
-import { prisma } from "../../server/db";
+import { NAVBAR_HEIGHT_PX } from "../../features/navbar/views/Navbar";
+import CustomEditable from "../../features/shared/components/CustomEditable";
+import { api, RouterInputs } from "../../utils/api";
 import getSessionWithSignInRedirect from "../../utils/getSessionWithSignInRedirect";
 
 export type GameObjectByIdPageProps = {
-  gameObject: GameObject;
   session: Session;
 };
 
@@ -31,41 +32,90 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     };
   }
 
-  try {
-    const id = context.params?.id;
-    const gameObject = await prisma.gameObject.findUnique({
-      where: {
-        id: id as string,
-      },
-    });
-    if (!gameObject) {
-      throw new Error(`Game object with id ${id} not found`);
-    }
-    return {
-      props: {
-        // Parse & stringify to serialize all Prisma fields properly (particularly dates)
-        gameObject: JSON.parse(JSON.stringify(gameObject)),
-        session,
-      },
-    };
-  } catch (error) {
-    console.error(error);
-  }
   return {
-    notFound: true,
+    props: {
+      session,
+    },
   };
 };
 
 const GameObjectById: NextPage<GameObjectByIdPageProps> = (props) => {
-  const [gameObject, setGameObject] = useState(props.gameObject);
-  useEffect(() => {
-    setGameObject(props.gameObject);
-  }, [props]);
-
-  const name = gameObject.name ?? "Untitled GameObject";
+  const router = useRouter();
+  const gameObjectId = router.query.id as string;
 
   return (
     <>
+      <Box width="100%" height={`calc(100vh - ${NAVBAR_HEIGHT_PX} - 128px)`}>
+        <Box height="128px">
+          <GameObjectDetails gameObjectId={gameObjectId} />
+          <Divider />
+        </Box>
+
+        <GameObjectsTable
+          gameObjectsToExclude={[gameObjectId]}
+          additionalColumns={[
+            {
+              id: "Relationships",
+              header: "Relationship Weight",
+              cell: (info) => {
+                return (
+                  <RelateGameObjects
+                    gameObjectId1={gameObjectId}
+                    gameObjectId2={info.row.original.id}
+                  />
+                );
+              },
+            },
+          ]}
+          additionalActions={({ id, name }) => (
+            <>
+              <ManageGameObjectButton gameObjectId={id} gameObjectName={name} />
+            </>
+          )}
+        />
+      </Box>
+    </>
+  );
+};
+
+type GameObjectDetailsProps = {
+  gameObjectId: string;
+};
+
+function GameObjectDetails(props: GameObjectDetailsProps) {
+  const { gameObjectId } = props;
+  const gameObjectQuery = api.gameObjects.getById.useQuery(
+    {
+      id: gameObjectId,
+    },
+    {
+      onError: (error) => {
+        console.error(error);
+        window.alert("Error loading game object. See console for details.");
+      },
+    }
+  );
+  const gameObject = gameObjectQuery.data?.gameObject;
+  const name = gameObject?.name ?? "Untitled Game Object";
+
+  const utils = api.useContext();
+  const updateGameObjectMutation = api.gameObjects.updateById.useMutation();
+  const handleUpdateGameObject = async (
+    input: RouterInputs["gameObjects"]["updateById"]
+  ) => {
+    try {
+      await updateGameObjectMutation.mutateAsync(input);
+      await utils.gameObjects.invalidate();
+    } catch (error) {
+      console.error(error);
+      window.alert("Error updating game object. See console for details.");
+    }
+  };
+
+  if (!gameObject) return null;
+
+  return (
+    <Box marginY="1rem">
       <Head>
         <title>{name} - GameObjects | 2bttns</title>
         <meta name="description" content="Manage Game Object" />
@@ -83,7 +133,7 @@ const GameObjectById: NextPage<GameObjectByIdPageProps> = (props) => {
 
         <BreadcrumbItem isCurrentPage>
           <BreadcrumbLink href={`/game-objects/${gameObject.id}`}>
-            {name}
+            {name || "Untitled Game Object"}
             <Text color="blue.500" display="inline">
               {" "}
               ({gameObject.id})
@@ -91,33 +141,31 @@ const GameObjectById: NextPage<GameObjectByIdPageProps> = (props) => {
           </BreadcrumbLink>
         </BreadcrumbItem>
       </Breadcrumb>
-
-      <Box width="100%" height="100%" overflow="scroll">
-        <GameObjectsTable
-          gameObjectsToExclude={[gameObject.id]}
-          additionalColumns={[
-            {
-              id: "Relationships",
-              header: "Relationship Weight",
-              cell: (info) => {
-                return (
-                  <RelateGameObjects
-                    gameObjectId1={gameObject.id}
-                    gameObjectId2={info.row.original.id}
-                  />
-                );
-              },
-            },
-          ]}
-          additionalActions={({ id, name }) => (
-            <>
-              <ManageGameObjectButton gameObjectId={id} gameObjectName={name} />
-            </>
-          )}
+      <Heading size="xl">
+        <CustomEditable
+          value={gameObject.name ?? ""}
+          placeholder="Untitled Game Object"
+          handleSave={async (value) => {
+            handleUpdateGameObject({
+              id: gameObject.id,
+              data: { name: value },
+            });
+          }}
         />
-      </Box>
-    </>
+      </Heading>
+      <CustomEditable
+        isTextarea
+        value={gameObject.description ?? ""}
+        placeholder="No description"
+        handleSave={async (value) => {
+          handleUpdateGameObject({
+            id: gameObject.id,
+            data: { description: value },
+          });
+        }}
+      />
+    </Box>
   );
-};
+}
 
 export default GameObjectById;
