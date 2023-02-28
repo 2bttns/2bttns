@@ -1,7 +1,19 @@
-import { Box, Heading, HStack, Text, VStack } from "@chakra-ui/react";
+import { ChevronRightIcon } from "@chakra-ui/icons";
+import {
+  Box,
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  Heading,
+  HStack,
+  Text,
+  VStack,
+} from "@chakra-ui/react";
 import { Game } from "@prisma/client";
 import type { GetServerSideProps, NextPage } from "next";
 import { Session } from "next-auth";
+import { useRouter } from "next/router";
+import DeleteGameButton from "../../features/games/containers/DeleteGameButton";
 import CustomEditable from "../../features/shared/components/CustomEditable";
 import GameInputTagsMultiSelect from "../../features/tags/containers/GameInputTagsMultiSelect";
 import { prisma } from "../../server/db";
@@ -78,6 +90,11 @@ function GameDetails(props: GameDetailsProps) {
     await utils.games.getById.invalidate({ id: input.id });
   };
 
+  const router = useRouter();
+  const onDeleted = () => {
+    router.push("/games");
+  };
+
   if (gameQuery.isLoading || !gameQuery.data) {
     return null;
   }
@@ -87,8 +104,55 @@ function GameDetails(props: GameDetailsProps) {
   }
 
   return (
-    <Box>
-      <Heading>Game {gameId}</Heading>
+    <Box width="100%">
+      <HStack justifyContent="space-between">
+        <Breadcrumb
+          spacing="4px"
+          separator={<ChevronRightIcon color="gray.500" />}
+          marginBottom="1rem"
+        >
+          <BreadcrumbItem>
+            <BreadcrumbLink href="/games">Games</BreadcrumbLink>
+          </BreadcrumbItem>
+
+          <BreadcrumbItem isCurrentPage>
+            <BreadcrumbLink href={`/games/${gameId}`}>
+              {gameQuery.data.game.name || "Untitled Game"}
+              <Text color="blue.500" display="inline">
+                {" "}
+                ({gameId})
+              </Text>
+            </BreadcrumbLink>
+          </BreadcrumbItem>
+        </Breadcrumb>
+
+        <DeleteGameButton gameId={gameId} onDeleted={onDeleted} />
+      </HStack>
+
+      <Heading size="xl">
+        <CustomEditable
+          value={gameQuery.data.game.name ?? ""}
+          placeholder="Untitled Game"
+          handleSave={async (value) => {
+            handleUpdateGame({
+              id: gameId,
+              data: { name: value },
+            });
+          }}
+        />
+      </Heading>
+      <CustomEditable
+        isTextarea
+        value={gameQuery.data.game.description ?? ""}
+        placeholder="No description"
+        handleSave={async (value) => {
+          handleUpdateGame({
+            id: gameId,
+            data: { description: value },
+          });
+        }}
+      />
+
       <Text>Configure</Text>
       <HStack>
         <Text fontWeight="bold"># Items Per Round:</Text>

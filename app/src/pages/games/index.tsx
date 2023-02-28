@@ -1,10 +1,11 @@
-import { ArrowForwardIcon, DeleteIcon, SettingsIcon } from "@chakra-ui/icons";
+import { ArrowForwardIcon, SettingsIcon } from "@chakra-ui/icons";
 import { Heading, IconButton, Tooltip } from "@chakra-ui/react";
 import { GetServerSideProps, NextPage } from "next";
 import { Session } from "next-auth";
 import Head from "next/head";
 import { useRouter } from "next/router";
-import GamesTable from "../../features/games/components/GamesTable";
+import DeleteGameButton from "../../features/games/containers/DeleteGameButton";
+import GamesTable from "../../features/games/containers/GamesTable";
 import { api, RouterInputs } from "../../utils/api";
 import getSessionWithSignInRedirect from "../../utils/getSessionWithSignInRedirect";
 
@@ -95,18 +96,7 @@ const GamesPage: NextPage<GamesPageProps> = (props) => {
                   variant="outline"
                 />
               </Tooltip>
-              <Tooltip label={`Delete`} placement="top">
-                <IconButton
-                  colorScheme="red"
-                  onClick={() => {
-                    handleDeleteGame({ id });
-                  }}
-                  icon={<DeleteIcon />}
-                  aria-label={`Delete game with ID: ${id}`}
-                  size="sm"
-                  variant="outline"
-                />
-              </Tooltip>
+              <DeleteGameButton gameId={id} />
             </>
           );
         }}
