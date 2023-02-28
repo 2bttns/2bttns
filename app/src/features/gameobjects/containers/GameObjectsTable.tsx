@@ -1,4 +1,4 @@
-import { Box, ButtonGroup, HStack } from "@chakra-ui/react";
+import { Box, HStack } from "@chakra-ui/react";
 import { Tag } from "@prisma/client";
 import {
   ColumnDef,
@@ -20,11 +20,16 @@ export type GameObjectData =
 
 export const columnHelper = createColumnHelper<GameObjectData>();
 
+export type AdditionalColumns = {
+  columns: ColumnDef<GameObjectData>[];
+  // The dependencies of the columns. If any of these change, the columns will be re-created.
+  dependencies: any[];
+};
+
 export type GameObjectsTableProps = {
   tag?: typeof tagFilter._type;
   onGameObjectCreated?: (gameObjectId: string) => Promise<void>;
-  additionalColumns?: ColumnDef<GameObjectData>[];
-  additionalActions?: (gameObjectData: GameObjectData) => React.ReactNode;
+  additionalColumns?: AdditionalColumns;
   gameObjectsToExclude?: GameObjectData["id"][];
   additionalTopBarContent?: React.ReactNode;
   editable?: boolean;
@@ -35,13 +40,13 @@ export default function GameObjectsTable(props: GameObjectsTableProps) {
     tag,
     onGameObjectCreated,
     additionalColumns,
-    additionalActions,
     gameObjectsToExclude,
     additionalTopBarContent,
     editable = true,
   } = props;
 
   const utils = api.useContext();
+  console.log(gameObjectsToExclude);
 
   const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: 0,
@@ -234,29 +239,11 @@ export default function GameObjectsTable(props: GameObjectsTableProps) {
     ];
 
     if (additionalColumns) {
-      items.push(...additionalColumns);
-    }
-
-    if (additionalActions) {
-      items.push({
-        id: "actions",
-        header: "",
-        cell: (info) => {
-          return (
-            <ButtonGroup width="100%" justifyContent="end">
-              {additionalActions(info.row.original)}
-            </ButtonGroup>
-          );
-        },
-      });
+      items.push(...additionalColumns.columns);
     }
 
     return items;
-  }, [
-    editable,
-    JSON.stringify(additionalColumns),
-    JSON.stringify(additionalActions),
-  ]);
+  }, [editable, ...(additionalColumns ? additionalColumns.dependencies : [])]);
 
   return (
     <Box height="100%">

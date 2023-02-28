@@ -4,6 +4,7 @@ import {
   Breadcrumb,
   BreadcrumbItem,
   BreadcrumbLink,
+  ButtonGroup,
   Divider,
   Heading,
   HStack,
@@ -15,7 +16,9 @@ import { Session } from "next-auth";
 import Head from "next/head";
 import { useRouter } from "next/router";
 import DeleteGameObjectButton from "../../features/gameobjects/containers/DeleteGameObjectButton";
-import GameObjectsTable from "../../features/gameobjects/containers/GameObjectsTable";
+import GameObjectsTable, {
+  AdditionalColumns,
+} from "../../features/gameobjects/containers/GameObjectsTable";
 import ManageGameObjectButton from "../../features/gameobjects/containers/ManageGameObjectButton";
 import RelateGameObjects from "../../features/gameobjects/containers/RelateGameObjects";
 import TagMultiSelect, {
@@ -97,30 +100,48 @@ const GameObjectById: NextPage<GameObjectByIdPageProps> = (props) => {
             exclude: tagFilter.results.excludeTags,
             includeUntagged: tagFilter.results.includeUntagged,
           }}
-          additionalColumns={[
-            {
-              id: "Relationships",
-              header: "Relationship Weight",
-              cell: (info) => {
-                return (
-                  <RelateGameObjects
-                    gameObjectId1={gameObjectId}
-                    gameObjectId2={info.row.original.id}
-                  />
-                );
-              },
-            },
-          ]}
-          additionalActions={({ id }) => (
-            <>
-              <ManageGameObjectButton gameObjectId={id} />
-            </>
-          )}
+          additionalColumns={getAdditionalColumns(gameObjectId)}
         />
       </Box>
     </>
   );
 };
+
+function getAdditionalColumns(
+  gameObjectId: GameObject["id"]
+): AdditionalColumns {
+  return {
+    columns: [
+      {
+        id: "Relationships",
+        header: "Relationship Weight",
+        cell: (info) => {
+          return (
+            <RelateGameObjects
+              gameObjectId1={gameObjectId}
+              gameObjectId2={info.row.original.id}
+            />
+          );
+        },
+      },
+      {
+        id: "actions",
+        header: "",
+        cell: (info) => {
+          return (
+            <ButtonGroup width="100%" justifyContent="end">
+              <ManageGameObjectButton gameObjectId={info.row.original.id} />
+            </ButtonGroup>
+          );
+        },
+      },
+    ],
+
+    // Re-render the table the game objects table when these change
+    // Without this, relationship weights might not update correctly when navigating to another game object's page
+    dependencies: [gameObjectId],
+  };
+}
 
 type GameObjectDetailsProps = {
   gameObjectId: string;

@@ -1,10 +1,12 @@
-import { Box } from "@chakra-ui/react";
+import { Box, ButtonGroup } from "@chakra-ui/react";
 import type { GetServerSideProps, NextPage } from "next";
 import { Session } from "next-auth";
 import Head from "next/head";
 import CsvImport from "../../features/csv-import/CsvImport";
 import DeleteGameObjectButton from "../../features/gameobjects/containers/DeleteGameObjectButton";
-import GameObjectsTable from "../../features/gameobjects/containers/GameObjectsTable";
+import GameObjectsTable, {
+  AdditionalColumns,
+} from "../../features/gameobjects/containers/GameObjectsTable";
 import ManageGameObjectButton from "../../features/gameobjects/containers/ManageGameObjectButton";
 import TagFilterToggles from "../../features/tags/containers/TagFilterToggles";
 import useAllTagFilters from "../../features/tags/hooks/useAllTagFilters";
@@ -56,16 +58,35 @@ const GameObjects: NextPage<GameObjectsPageProps> = (props) => {
             includeUntagged: tagFilter.results.includeUntagged,
           }}
           additionalTopBarContent={<CsvImport />}
-          additionalActions={({ id, name }) => (
-            <>
-              <ManageGameObjectButton gameObjectId={id} />
-              <DeleteGameObjectButton gameObjectId={id} />
-            </>
-          )}
+          additionalColumns={getAdditionalColumns()}
         />
       </Box>
     </>
   );
 };
+
+function getAdditionalColumns(): AdditionalColumns {
+  return {
+    columns: [
+      {
+        id: "actions",
+        header: "",
+        cell: (info) => {
+          const { id } = info.row.original;
+          return (
+            <ButtonGroup width="100%" justifyContent="end">
+              <ManageGameObjectButton gameObjectId={id} />
+              <DeleteGameObjectButton gameObjectId={id} />
+            </ButtonGroup>
+          );
+        },
+      },
+    ],
+
+    // Re-render the table the game objects table when these change
+    // Without this, relationship weights might not update correctly when navigating to another game object's page
+    dependencies: [],
+  };
+}
 
 export default GameObjects;

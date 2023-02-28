@@ -83,7 +83,7 @@ export default function RelateGameObjects(props: RelateGameObjectsProps) {
   ];
 
   if (gameObjectId1 === gameObjectId2) {
-    return null;
+    return <>SAME</>;
   }
   return (
     <RadioGroup options={options} selected={selected} onChange={handleChange} />
