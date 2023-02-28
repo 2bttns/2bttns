@@ -228,10 +228,7 @@ const TagByIdPage: NextPage<TagByIdPageProps> = (props) => {
             additionalActions={({ id, name }) => (
               <>
                 <ToggleTagButton gameObjectId={id} tagId={tagId} />
-                <ManageGameObjectButton
-                  gameObjectId={id}
-                  gameObjectName={name}
-                />
+                <ManageGameObjectButton gameObjectId={id} />
               </>
             )}
           />
