@@ -1,4 +1,4 @@
-import { ArrowForwardIcon, DeleteIcon } from "@chakra-ui/icons";
+import { ArrowForwardIcon, DeleteIcon, SettingsIcon } from "@chakra-ui/icons";
 import { Heading, IconButton, Tooltip } from "@chakra-ui/react";
 import { GetServerSideProps, NextPage } from "next";
 import { Session } from "next-auth";
@@ -35,6 +35,10 @@ const GamesPage: NextPage<GamesPageProps> = (props) => {
 
   const handlePlayGame = (gameId: string) => {
     router.push(`/play?game_id=${gameId}`);
+  };
+
+  const handleManageGameRedirect = (gameId: string) => {
+    router.push(`/games/${gameId}`);
   };
 
   const deleteGameMutation = api.games.deleteById.useMutation();
@@ -74,6 +78,18 @@ const GamesPage: NextPage<GamesPageProps> = (props) => {
                     handlePlayGame(id);
                   }}
                   icon={<ArrowForwardIcon />}
+                  aria-label={`Play game with ID: ${id}`}
+                  size="sm"
+                  variant="solid"
+                />
+              </Tooltip>
+              <Tooltip label={`Manage`} placement="top">
+                <IconButton
+                  colorScheme="blue"
+                  onClick={() => {
+                    handleManageGameRedirect(id);
+                  }}
+                  icon={<SettingsIcon />}
                   aria-label={`Play game with ID: ${id}`}
                   size="sm"
                   variant="outline"
