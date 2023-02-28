@@ -4,9 +4,9 @@ import { GetServerSideProps, NextPage } from "next";
 import { Session } from "next-auth";
 import Head from "next/head";
 import { useRouter } from "next/router";
-import GamesTable from "../features/games/components/GamesTable";
-import { api, RouterInputs } from "../utils/api";
-import getSessionWithSignInRedirect from "../utils/getSessionWithSignInRedirect";
+import GamesTable from "../../features/games/components/GamesTable";
+import { api, RouterInputs } from "../../utils/api";
+import getSessionWithSignInRedirect from "../../utils/getSessionWithSignInRedirect";
 
 export type GamesPageProps = {
   session: Session;
