@@ -60,10 +60,18 @@ export default function GameObjectsTable(props: GameObjectsTableProps) {
     return result.desc ? "desc" : "asc";
   };
 
+  const skip = useMemo(() => {
+    let result = pageIndex * pageSize;
+    if (result < 0) {
+      result = 0;
+    }
+    return result;
+  }, [pageIndex, pageSize]);
+
   const gameObjectsQuery = api.gameObjects.getAll.useQuery(
     {
       includeTags: true,
-      skip: pageIndex * pageSize,
+      skip: skip,
       take: pageSize,
       filter: globalFilter
         ? {
@@ -244,7 +252,11 @@ export default function GameObjectsTable(props: GameObjectsTableProps) {
     }
 
     return items;
-  }, [gameObjectsToExclude]);
+  }, [
+    editable,
+    JSON.stringify(additionalColumns),
+    JSON.stringify(additionalActions),
+  ]);
 
   return (
     <Box height="100%">

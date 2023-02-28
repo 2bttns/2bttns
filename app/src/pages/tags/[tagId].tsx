@@ -225,7 +225,7 @@ const TagByIdPage: NextPage<TagByIdPageProps> = (props) => {
             }}
             onGameObjectCreated={handleGameObjectCreated}
             additionalTopBarContent={<CsvImport parentTags={[tagId]} />}
-            additionalActions={({ id, name }) => (
+            additionalActions={({ id }) => (
               <>
                 <ToggleTagButton gameObjectId={id} tagId={tagId} />
                 <ManageGameObjectButton gameObjectId={id} />

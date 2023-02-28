@@ -18,7 +18,6 @@ export default function RelateGameObjects(props: RelateGameObjectsProps) {
   });
 
   useEffect(() => {
-    console.log("RelateGameObjects useEffect");
     utils.gameObjects.getRelationship.invalidate({
       fromGameObjectId: gameObjectId1,
       toGameObjectId: gameObjectId2,

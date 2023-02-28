@@ -23,6 +23,8 @@ import TagMultiSelect, {
 } from "../../features/gameobjects/containers/TagMultiSelect";
 import { NAVBAR_HEIGHT_PX } from "../../features/navbar/views/Navbar";
 import CustomEditable from "../../features/shared/components/CustomEditable";
+import TagFilterToggles from "../../features/tags/containers/TagFilterToggles";
+import useAllTagFilters from "../../features/tags/hooks/useAllTagFilters";
 import { prisma } from "../../server/db";
 import { api, RouterInputs } from "../../utils/api";
 import getSessionWithSignInRedirect from "../../utils/getSessionWithSignInRedirect";
@@ -66,6 +68,8 @@ const GAME_OBJECT_DETAILS_HEIGHT_PX = "200px";
 const GameObjectById: NextPage<GameObjectByIdPageProps> = (props) => {
   const { gameObjectId } = props;
 
+  const tagFilter = useAllTagFilters();
+
   return (
     <>
       <Box
@@ -77,8 +81,22 @@ const GameObjectById: NextPage<GameObjectByIdPageProps> = (props) => {
           <Divider />
         </Box>
 
+        <Box marginY="1rem">
+          <TagFilterToggles
+            filter={tagFilter.state.tagFilter}
+            setFilter={tagFilter.state.setTagFilter}
+            allowMultiple
+            allAndNoneToggles
+          />
+        </Box>
+
         <GameObjectsTable
           gameObjectsToExclude={[gameObjectId]}
+          tag={{
+            include: tagFilter.results.includeTags,
+            exclude: tagFilter.results.excludeTags,
+            includeUntagged: tagFilter.results.includeUntagged,
+          }}
           additionalColumns={[
             {
               id: "Relationships",
@@ -93,7 +111,7 @@ const GameObjectById: NextPage<GameObjectByIdPageProps> = (props) => {
               },
             },
           ]}
-          additionalActions={({ id, name }) => (
+          additionalActions={({ id }) => (
             <>
               <ManageGameObjectButton gameObjectId={id} />
             </>
