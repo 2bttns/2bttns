@@ -1,7 +1,8 @@
-import { GameObject, PlayerScore } from "@prisma/client";
+import { GameObject, PlayerScore, Weight } from "@prisma/client";
+import { performance } from "perf_hooks";
 import { z } from "zod";
+import normalizeScores from "../../../shared/normalizeScores";
 import { publicProcedure } from "../../trpc";
-import { prisma } from "./../../../db";
 
 const choiceItemSchema = z.object({
   gameObjectId: z.string(),
@@ -19,6 +20,8 @@ export const processGameResults = publicProcedure
     })
   )
   .mutation(async ({ ctx, input }) => {
+    const startTime = performance.now();
+
     const { results } = input;
 
     const player = await ctx.prisma.player.findUnique({
@@ -28,31 +31,65 @@ export const processGameResults = publicProcedure
     });
 
     if (!player) {
-      await prisma.player.create({
+      await ctx.prisma.player.create({
         data: {
           id: input.playerId,
         },
       });
     }
 
-    const gameObjectIdsInvolved = new Set<string>();
+    const resultGameObjectIds = new Set<string>();
     results.forEach((choice) => {
-      gameObjectIdsInvolved.add(choice.picked.gameObjectId);
-      gameObjectIdsInvolved.add(choice.not_picked.gameObjectId);
+      resultGameObjectIds.add(choice.picked.gameObjectId);
+      resultGameObjectIds.add(choice.not_picked.gameObjectId);
     });
 
-    const gameObjectsInvolved = await ctx.prisma.gameObject.findMany({
+    const resultGameObjects = await ctx.prisma.gameObject.findMany({
       where: {
         id: {
-          in: Array.from(gameObjectIdsInvolved),
+          in: Array.from(resultGameObjectIds),
+        },
+      },
+      include: {
+        FromGameObjectRelationship: {
+          include: {
+            weight: true,
+            toGameObject: true,
+          },
         },
       },
     });
 
+    const relatedGameObjectIds = new Set<string>();
+    const relatedGameObjectsMap = new Map<
+      GameObject["id"],
+      Map<GameObject["id"], Weight>
+    >();
+    resultGameObjects.forEach((gameObject) => {
+      gameObject.FromGameObjectRelationship.forEach((relationship) => {
+        relatedGameObjectIds.add(relationship.toGameObjectId);
+
+        if (!relatedGameObjectsMap.has(gameObject.id)) {
+          relatedGameObjectsMap.set(
+            gameObject.id,
+            new Map<GameObject["id"], Weight>()
+          );
+        }
+
+        relatedGameObjectsMap
+          .get(gameObject.id)
+          ?.set(relationship.toGameObjectId, relationship.weight);
+      });
+    });
+
+    const resultAndRelatedGameObjectIds = [
+      ...resultGameObjectIds,
+      ...relatedGameObjectIds,
+    ];
     const existingPlayerScores = await ctx.prisma.playerScore.findMany({
       where: {
         gameObjectId: {
-          in: Array.from(gameObjectIdsInvolved),
+          in: resultAndRelatedGameObjectIds,
         },
         playerId: input.playerId,
       },
@@ -63,9 +100,10 @@ export const processGameResults = publicProcedure
     });
 
     const scoresMap = new Map<GameObject["id"], number>();
-    gameObjectsInvolved.forEach((gameObject) => {
-      const existingPlayerScore = existingPlayerScoresMap.get(gameObject.id);
-      scoresMap.set(gameObject.id, existingPlayerScore?.score.toNumber() ?? 0);
+    resultAndRelatedGameObjectIds.forEach((gameObjectId) => {
+      const existingPlayerScore =
+        existingPlayerScoresMap.get(gameObjectId)?.score.toNumber() ?? 0;
+      scoresMap.set(gameObjectId, existingPlayerScore);
     });
 
     const winnerScoreBonus = 1;
@@ -78,13 +116,24 @@ export const processGameResults = publicProcedure
       const updatedWinnerScore =
         pickedScore + winnerScoreBonus + notPickedScore;
       scoresMap.set(picked.gameObjectId, updatedWinnerScore);
+
+      if (!relatedGameObjectsMap.has(picked.gameObjectId)) return;
+      const relatedGameObjects = relatedGameObjectsMap.get(
+        picked.gameObjectId
+      )!;
+      relatedGameObjects.forEach((weight, relatedId) => {
+        const updatedScore =
+          scoresMap.get(relatedId)! +
+          weight.weight.toNumber() * (winnerScoreBonus + notPickedScore);
+        scoresMap.set(relatedId, updatedScore);
+      });
     });
 
-    const upsertedPlayerScores = await prisma.$transaction([
+    await ctx.prisma.$transaction([
       ...Array.from(scoresMap.entries()).map(([gameObjectId, score]) => {
         const existingPlayerScore = existingPlayerScoresMap.get(gameObjectId);
         if (existingPlayerScore) {
-          return prisma.playerScore.update({
+          return ctx.prisma.playerScore.update({
             where: {
               playerId_gameObjectId: {
                 playerId: input.playerId,
@@ -96,7 +145,7 @@ export const processGameResults = publicProcedure
             },
           });
         } else {
-          return prisma.playerScore.create({
+          return ctx.prisma.playerScore.create({
             data: {
               player: {
                 connect: {
@@ -115,5 +164,13 @@ export const processGameResults = publicProcedure
       }),
     ]);
 
-    return { upsertedPlayerScores };
+    const { allPlayerScoresNormalized } = await normalizeScores(input.playerId);
+    const resultScores = allPlayerScoresNormalized.filter((playerScore) => {
+      return scoresMap.has(playerScore.gameObjectId);
+    });
+
+    const endTime = performance.now();
+    const elapsedTimeMS = endTime - startTime;
+
+    return { resultScores, elapsedTimeMS };
   });

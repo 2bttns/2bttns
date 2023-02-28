@@ -6,6 +6,7 @@ export const getPlayerScores = publicProcedure
     z.object({
       game_id: z.string(),
       player_id: z.string(),
+      include_game_objects: z.boolean().optional(),
     })
   )
   .query(async ({ ctx, input }) => {
@@ -37,6 +38,9 @@ export const getPlayerScores = publicProcedure
           in: gameObjects.map((gameObject) => gameObject.id),
         },
         playerId: input.player_id,
+      },
+      include: {
+        gameObject: input.include_game_objects,
       },
       orderBy: {
         score: "desc",

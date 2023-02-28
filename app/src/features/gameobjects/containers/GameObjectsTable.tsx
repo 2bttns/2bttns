@@ -1,4 +1,4 @@
-import { Box, ButtonGroup, HStack } from "@chakra-ui/react";
+import { Box, HStack } from "@chakra-ui/react";
 import { Tag } from "@prisma/client";
 import {
   ColumnDef,
@@ -9,7 +9,6 @@ import {
 import { useMemo, useState } from "react";
 import { tagFilter } from "../../../server/shared/z";
 import { api, RouterInputs, RouterOutputs } from "../../../utils/api";
-import CsvImport from "../../csv-import/CsvImport";
 import CustomEditable from "../../shared/components/CustomEditable";
 import PaginatedTable from "../../shared/components/Table/containers/PaginatedTable";
 import SearchAndCreateBar from "../../shared/components/Table/containers/SearchAndCreateBar";
@@ -19,18 +18,35 @@ import TagMultiSelect, { TagOption } from "./TagMultiSelect";
 export type GameObjectData =
   RouterOutputs["gameObjects"]["getAll"]["gameObjects"][0];
 
-const columnHelper = createColumnHelper<GameObjectData>();
+export const columnHelper = createColumnHelper<GameObjectData>();
+
+export type AdditionalColumns = {
+  columns: ColumnDef<GameObjectData>[];
+  // The dependencies of the columns. If any of these change, the columns will be re-created.
+  dependencies: any[];
+};
 
 export type GameObjectsTableProps = {
   tag?: typeof tagFilter._type;
   onGameObjectCreated?: (gameObjectId: string) => Promise<void>;
-  additionalActions?: (gameObjectData: GameObjectData) => React.ReactNode;
+  additionalColumns?: AdditionalColumns;
+  gameObjectsToExclude?: GameObjectData["id"][];
+  additionalTopBarContent?: React.ReactNode;
+  editable?: boolean;
 };
 
 export default function GameObjectsTable(props: GameObjectsTableProps) {
-  const { tag, onGameObjectCreated, additionalActions } = props;
+  const {
+    tag,
+    onGameObjectCreated,
+    additionalColumns,
+    gameObjectsToExclude,
+    additionalTopBarContent,
+    editable = true,
+  } = props;
 
   const utils = api.useContext();
+  console.log(gameObjectsToExclude);
 
   const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: 0,
@@ -49,10 +65,18 @@ export default function GameObjectsTable(props: GameObjectsTableProps) {
     return result.desc ? "desc" : "asc";
   };
 
+  const skip = useMemo(() => {
+    let result = pageIndex * pageSize;
+    if (result < 0) {
+      result = 0;
+    }
+    return result;
+  }, [pageIndex, pageSize]);
+
   const gameObjectsQuery = api.gameObjects.getAll.useQuery(
     {
       includeTags: true,
-      skip: pageIndex * pageSize,
+      skip: skip,
       take: pageSize,
       filter: globalFilter
         ? {
@@ -71,6 +95,7 @@ export default function GameObjectsTable(props: GameObjectsTableProps) {
         tags: getSort("tags"),
         updatedAt: getSort("updatedAt"),
       },
+      excludeGameObjects: gameObjectsToExclude,
     },
     {
       keepPreviousData: true,
@@ -90,6 +115,7 @@ export default function GameObjectsTable(props: GameObjectsTableProps) {
         : {
             tag,
           },
+      excludeGameObjects: gameObjectsToExclude,
     },
     {
       keepPreviousData: true,
@@ -145,6 +171,7 @@ export default function GameObjectsTable(props: GameObjectsTableProps) {
                 id: nextValue,
               })
             }
+            isEditable={editable}
           />
         ),
         enableSorting: true,
@@ -159,6 +186,7 @@ export default function GameObjectsTable(props: GameObjectsTableProps) {
                 name: nextValue,
               })
             }
+            isEditable={editable}
           />
         ),
         enableSorting: true,
@@ -173,6 +201,7 @@ export default function GameObjectsTable(props: GameObjectsTableProps) {
                 description: nextValue,
               })
             }
+            isEditable={editable}
           />
         ),
         enableSorting: true,
@@ -195,6 +224,7 @@ export default function GameObjectsTable(props: GameObjectsTableProps) {
                     tags: nextTags,
                   });
                 }}
+                isEditable={editable}
               />
             </Box>
           );
@@ -208,22 +238,12 @@ export default function GameObjectsTable(props: GameObjectsTableProps) {
       }),
     ];
 
-    if (additionalActions) {
-      items.push({
-        id: "actions",
-        header: "",
-        cell: (info) => {
-          return (
-            <ButtonGroup width="100%" justifyContent="end">
-              {additionalActions(info.row.original)}
-            </ButtonGroup>
-          );
-        },
-      });
+    if (additionalColumns) {
+      items.push(...additionalColumns.columns);
     }
 
     return items;
-  }, []);
+  }, [editable, ...(additionalColumns ? additionalColumns.dependencies : [])]);
 
   return (
     <Box height="100%">
@@ -233,7 +253,7 @@ export default function GameObjectsTable(props: GameObjectsTableProps) {
           onChange={setGlobalFilter}
           onCreate={handleCreateGameObject}
         />
-        <CsvImport parentTags={tag?.include} />
+        {additionalTopBarContent}
       </HStack>
       <PaginatedTable
         columns={columns}

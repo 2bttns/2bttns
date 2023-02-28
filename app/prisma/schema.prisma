@@ -83,8 +83,10 @@ model GameObject {
     name        String
     description String?
 
-    tags        Tag[]
-    PlayerScore PlayerScore[]
+    tags                       Tag[]
+    PlayerScore                PlayerScore[]
+    ToGameObjectRelationship   GameObjectRelationship[] @relation("toGameObject")
+    FromGameObjectRelationship GameObjectRelationship[] @relation("fromGameObject")
 }
 
 model Tag {
@@ -127,4 +129,28 @@ model PlayerScore {
     gameObject GameObject @relation(fields: [gameObjectId], references: [id], onDelete: Cascade)
 
     @@id([playerId, gameObjectId])
+}
+
+model Weight {
+    id                     String                   @id @default(cuid())
+    createdAt              DateTime                 @default(now())
+    updatedAt              DateTime                 @updatedAt
+    name                   String?
+    description            String?
+    weight                 Decimal
+    GameObjectRelationship GameObjectRelationship[]
+}
+
+model GameObjectRelationship {
+    createdAt        DateTime @default(now())
+    updatedAt        DateTime @updatedAt
+    weightId         String
+    fromGameObjectId String
+    toGameObjectId   String
+
+    weight         Weight     @relation(fields: [weightId], references: [id], onDelete: Cascade)
+    fromGameObject GameObject @relation(fields: [fromGameObjectId], references: [id], onDelete: Cascade, name: "fromGameObject")
+    toGameObject   GameObject @relation(fields: [toGameObjectId], references: [id], onDelete: Cascade, name: "toGameObject")
+
+    @@id([fromGameObjectId, toGameObjectId])
 }

@@ -2,6 +2,31 @@ import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 async function main() {
   try {
+    const createWeights = [
+      { name: "LOW", value: 0.1 },
+      { name: "MEDIUM", value: 0.25 },
+      { name: "HIGH", value: 0.5 },
+    ].map((weight, i) => {
+      return new Promise<void>((resolve) => {
+        prisma.weight
+          .create({
+            data: {
+              id: weight.name,
+              name: weight.name,
+              weight: weight.value,
+            },
+          })
+          .then((result) => {
+            console.log(`Created Weight: ${result.id}`);
+          })
+          .catch(() => {})
+          .finally(() => {
+            resolve();
+          });
+      });
+    });
+    await Promise.all(createWeights);
+
     const exampleGame1 = await prisma.game.create({
       data: {
         id: "example-game-1",

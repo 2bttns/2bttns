@@ -6,14 +6,18 @@ import {
   Heading,
   Stack,
 } from "@chakra-ui/react";
+import { Tag } from "@prisma/client";
 import { GetServerSideProps, NextPage } from "next";
 import { Session } from "next-auth";
 import Head from "next/head";
 import { useRouter } from "next/router";
 import { useMemo, useState } from "react";
+import CsvImport from "../../features/csv-import/CsvImport";
 import GameObjectsTable, {
+  AdditionalColumns,
   GameObjectsTableProps,
 } from "../../features/gameobjects/containers/GameObjectsTable";
+import ManageGameObjectButton from "../../features/gameobjects/containers/ManageGameObjectButton";
 import CustomEditable from "../../features/shared/components/CustomEditable";
 import TagFilterToggles, {
   TagFilter,
@@ -124,6 +128,10 @@ const TagByIdPage: NextPage<TagByIdPageProps> = (props) => {
 
   const includeUntagged = tagFilter["Untagged"]!.on;
 
+  const includeTags = useMemo(() => {
+    return tagsToFilterGameObjectsBy?.map((tag) => tag.id) || [];
+  }, [tagsToFilterGameObjectsBy]);
+
   const excludeTags = useMemo(() => {
     if (tagFilter["Not Applied"]!.on && !tagFilter["Applied"]!.on) {
       return [tagId];
@@ -213,19 +221,13 @@ const TagByIdPage: NextPage<TagByIdPageProps> = (props) => {
           />
           <GameObjectsTable
             tag={{
-              include: tagsToFilterGameObjectsBy?.map((tag) => tag.id) || [],
+              include: includeTags,
               exclude: excludeTags,
               includeUntagged,
             }}
             onGameObjectCreated={handleGameObjectCreated}
-            additionalActions={(gameObjectData) => (
-              <>
-                <ToggleTagButton
-                  gameObjectId={gameObjectData.id}
-                  tagId={tagId}
-                />
-              </>
-            )}
+            additionalTopBarContent={<CsvImport parentTags={[tagId]} />}
+            additionalColumns={getAdditionalColumns(tagId)}
           />
           <Divider />
           <Heading size="md" color="red.500">
@@ -247,5 +249,29 @@ const TagByIdPage: NextPage<TagByIdPageProps> = (props) => {
     </>
   );
 };
+
+function getAdditionalColumns(tagId: Tag["id"]): AdditionalColumns {
+  return {
+    columns: [
+      {
+        id: "actions",
+        header: "",
+        cell: (info) => {
+          const { id } = info.row.original;
+          return (
+            <ButtonGroup width="100%" justifyContent="end">
+              <ToggleTagButton gameObjectId={id} tagId={tagId} />
+              <ManageGameObjectButton gameObjectId={id} />
+            </ButtonGroup>
+          );
+        },
+      },
+    ],
+
+    // Re-render the table the game objects table when these change
+    // Without this, relationship weights might not update correctly when navigating to another game object's page
+    dependencies: [tagId],
+  };
+}
 
 export default TagByIdPage;

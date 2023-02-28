@@ -19,10 +19,11 @@ export interface TagOption extends Option {
 export type TagMultiSelectProps = {
   selected: TagOption[];
   onChange: (tags: TagOption["value"][]) => void;
+  isEditable?: boolean;
 };
 
 export default function TagMultiSelect(props: TagMultiSelectProps) {
-  const { selected, onChange } = props;
+  const { selected, onChange, isEditable = true } = props;
 
   const tagsQuery = api.tags.getAll.useQuery(
     {},
@@ -48,7 +49,7 @@ export default function TagMultiSelect(props: TagMultiSelectProps) {
   return (
     <Box>
       <MultiSelect
-        options={options}
+        options={isEditable ? options : selected}
         value={selected}
         onChange={setSelected}
         labelledBy="Select"
@@ -60,60 +61,64 @@ export default function TagMultiSelect(props: TagMultiSelectProps) {
           onClick: () => void;
         }) => {
           const { option, checked, onClick } = item;
-          return <Item option={option} checked={checked} onClick={onClick} />;
+          return (
+            <Item
+              option={option}
+              checked={checked}
+              onClick={onClick}
+              isEditable={isEditable}
+            />
+          );
         }}
         valueRenderer={(selected) => {
-          const sorted = selected.sort((a, b) =>
-            a.label.localeCompare(b.label)
-          );
-
-          const firstItem = sorted[0];
-          if (!firstItem) return "No Tags Applied";
-
-          return (
-            <>
-              <Tooltip
-                label={`Click to view ${firstItem.label}`}
-                placement="top"
-                hasArrow
-              >
-                <NextLink href={`/tags/${firstItem.value}`}>
-                  <ChakraTag
-                    size="sm"
-                    variant="solid"
-                    colorScheme={"green"}
-                    mr={1}
-                  >
-                    {firstItem.label}
-                  </ChakraTag>
-                </NextLink>
-              </Tooltip>
-              {selected.length - 1 > 0 && (
-                <ChakraTag
-                  size="sm"
-                  variant="outline"
-                  colorScheme={"green"}
-                  mr={1}
-                >
-                  + {selected.length - 1} More
-                </ChakraTag>
-              )}
-            </>
-          );
+          return <SelectedTags selected={selected as TagOption[]} />;
         }}
       />
     </Box>
   );
 }
 
+type SelectedTagsProps = {
+  selected: TagOption[];
+};
+function SelectedTags(props: SelectedTagsProps) {
+  const { selected } = props;
+  const sorted = selected.sort((a, b) => a.label.localeCompare(b.label));
+
+  const firstItem = sorted[0];
+  if (!firstItem) return <>No Tags Applied</>;
+
+  return (
+    <>
+      <Tooltip
+        label={`Click to view ${firstItem.label}`}
+        placement="top"
+        hasArrow
+      >
+        <NextLink href={`/tags/${firstItem.value}`}>
+          <ChakraTag size="sm" variant="solid" colorScheme={"green"} mr={1}>
+            {firstItem.label}
+          </ChakraTag>
+        </NextLink>
+      </Tooltip>
+      {selected.length - 1 > 0 && (
+        <ChakraTag size="sm" variant="outline" colorScheme={"green"} mr={1}>
+          + {selected.length - 1} More
+        </ChakraTag>
+      )}
+    </>
+  );
+}
+
 type ItemProps = {
   option: TagOption;
   checked: boolean;
+  isEditable: boolean;
   onClick: () => void;
 };
 
 function Item(props: ItemProps) {
-  const { option, checked, onClick } = props;
+  const { option, checked, isEditable, onClick } = props;
   return (
     <HStack justifyContent="space-between">
       <Tooltip label={`Click to view ${option.label}`} placement="top" hasArrow>
@@ -128,13 +133,15 @@ function Item(props: ItemProps) {
           </ChakraTag>
         </NextLink>
       </Tooltip>
-      <Checkbox
-        animation="none"
-        isChecked={checked}
-        onChange={onClick}
-        backgroundColor="white"
-        colorScheme="green"
-      />
+      {isEditable && (
+        <Checkbox
+          animation="none"
+          isChecked={checked}
+          onChange={onClick}
+          backgroundColor="white"
+          colorScheme="green"
+        />
+      )}
     </HStack>
   );
 }

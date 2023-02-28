@@ -164,6 +164,7 @@ function ScoresModal({ gameId, playerId }: ScoresModalProps) {
     {
       game_id: gameId,
       player_id: playerId,
+      include_game_objects: true,
     },
     {
       cacheTime: 0,
@@ -192,7 +193,8 @@ function ScoresModal({ gameId, playerId }: ScoresModalProps) {
                 return (
                   <Badge>
                     <>
-                      {score.gameObjectId} = {score.score}
+                      {score.gameObject?.name ?? score.gameObjectId} ={" "}
+                      {score.score}
                     </>
                   </Badge>
                 );
