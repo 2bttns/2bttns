@@ -66,8 +66,6 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   };
 };
 
-const GAME_OBJECT_DETAILS_HEIGHT_PX = "200px";
-
 const GameObjectById: NextPage<GameObjectByIdPageProps> = (props) => {
   const { gameObjectId } = props;
 
@@ -75,11 +73,8 @@ const GameObjectById: NextPage<GameObjectByIdPageProps> = (props) => {
 
   return (
     <>
-      <Box
-        width="100%"
-        height={`calc(100vh - ${NAVBAR_HEIGHT_PX} - ${GAME_OBJECT_DETAILS_HEIGHT_PX})`}
-      >
-        <Box height={GAME_OBJECT_DETAILS_HEIGHT_PX}>
+      <Box width="100%" height="100vh" overflowY="scroll">
+        <Box>
           <GameObjectDetails gameObjectId={gameObjectId} />
           <Divider />
         </Box>
