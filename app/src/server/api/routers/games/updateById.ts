@@ -10,6 +10,7 @@ export const updateById = publicProcedure
         name: z.string().optional(),
         description: z.string().optional(),
         inputTags: z.array(z.string()).optional(),
+        defaultNumItemsPerRound: z.number().optional(),
       }),
     })
   )
@@ -26,6 +27,7 @@ export const updateById = publicProcedure
         inputTags: {
           set: input.data.inputTags?.map((tag) => ({ id: tag })),
         },
+        defaultNumItemsPerRound: input.data.defaultNumItemsPerRound,
       },
     });
 
