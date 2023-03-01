@@ -11,7 +11,7 @@ import {
   useDisclosure,
   VStack,
 } from "@chakra-ui/react";
-import { Game, GameObject, Player } from "@prisma/client";
+import { Game, Player } from "@prisma/client";
 import jwt from "jsonwebtoken";
 import type { GetServerSideProps } from "next";
 import { getSession } from "next-auth/react";
@@ -23,6 +23,7 @@ import PlayContainer, {
   PlayContainerProps,
 } from "../features/play/containers/PlayContainer";
 import { prisma } from "../server/db";
+import getRandomGameObjects from "../server/helpers/getRandomGameObjects";
 import { api } from "../utils/api";
 import { NextPageWithLayout } from "./_app";
 
@@ -93,41 +94,13 @@ export const getServerSideProps: GetServerSideProps<ReturnType> = async (
       where: { id: gameId },
     });
 
-    // Get the game data with the possible game objects that can be used for the round
-    const gameWithInputGameObjectIds = await prisma.game.findUniqueOrThrow({
-      where: { id: gameId },
-      select: {
-        defaultNumItemsPerRound: true,
-        inputTags: { select: { gameObjects: { select: { id: true } } } },
-      },
-    });
-
     // Get the game objects for the round
-    // If null, will get all game objects
     const numItemsQueryParam = numItems ? parseInt(numItems) : null;
-    if (numItemsQueryParam === 0)
-      throw new Error("numItemsQueryParam cannot be 0");
     const numItemsToGet = numItemsQueryParam ?? game.defaultNumItemsPerRound;
-
-    const gameObjectIds = new Set<GameObject["id"]>();
-    gameWithInputGameObjectIds.inputTags.forEach((inputTag) => {
-      inputTag.gameObjects.forEach((gameObject) => {
-        gameObjectIds.add(gameObject.id);
-      });
-    });
-
-    const shuffledGameObjectIds = [...gameObjectIds].sort(
-      () => 0.5 - Math.random()
+    const shuffledGameObjects = await getRandomGameObjects(
+      gameId,
+      numItemsToGet ?? "ALL"
     );
-
-    let gameObjectsToGet = shuffledGameObjectIds;
-    if (numItemsToGet !== null && numItemsToGet > 0) {
-      gameObjectsToGet = shuffledGameObjectIds.slice(0, numItemsToGet);
-    }
-
-    const gameObjects = await prisma.gameObject.findMany({
-      where: { id: { in: gameObjectsToGet } },
-    });
 
     return {
       props: {
@@ -137,7 +110,7 @@ export const getServerSideProps: GetServerSideProps<ReturnType> = async (
         gameData: {
           game: JSON.parse(JSON.stringify(game)),
           numItems: numItemsToGet,
-          gameObjects: JSON.parse(JSON.stringify(gameObjects)),
+          gameObjects: JSON.parse(JSON.stringify(shuffledGameObjects)),
         },
       },
     };
