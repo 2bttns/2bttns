@@ -46,36 +46,56 @@ const createMachine2bttns = <I extends Item = Item>() => {
             },
           },
         },
-        loading_next_items: {
-          entry: assign({
-            current_options: (ctx) => {
-              const updatedOptions = { ...ctx.current_options };
-              Object.keys(ctx.to_replace).forEach((key) => {
-                const replaceKey =
-                  key as keyof ChoiceReplacement<DefaultOptionFields>;
-                const shouldReplace = ctx.to_replace[replaceKey];
-                if (!shouldReplace) return;
-                const nextItem = ctx.item_queue.shift();
-                if (!nextItem) {
-                  return;
-                }
-                updatedOptions[replaceKey] = nextItem;
-              });
-
-              return updatedOptions;
-            },
-          }),
+        checking_next_items: {
           always: [
             {
-              cond: (ctx) => !hasEnoughChoices<I, DefaultOptionFields>(ctx),
+              cond: (ctx) => hasEnoughNextItems<I, DefaultOptionFields>(ctx),
+              target: "loading_next_items",
+            },
+            {
+              cond: (ctx) => !hasEnoughNextItems<I, DefaultOptionFields>(ctx),
               target: "finished",
             },
           ],
+        },
+        loading_next_items: {
+          entry: [
+            assign({
+              current_options: (ctx) => {
+                const updatedOptions = { ...ctx.current_options };
+                Object.keys(ctx.to_replace).forEach((key) => {
+                  const replaceKey =
+                    key as keyof ChoiceReplacement<DefaultOptionFields>;
+                  const shouldReplace = ctx.to_replace[replaceKey];
+                  if (!shouldReplace) return;
+                  const nextItem = ctx.item_queue.shift();
+                  if (!nextItem) {
+                    return;
+                  }
+                  updatedOptions[replaceKey] = nextItem;
+                });
+
+                return updatedOptions;
+              },
+            }),
+          ],
           on: {
             PICK_READY: {
-              target: "picking",
+              target: "checking_for_enough_options",
             },
           },
+        },
+        checking_for_enough_options: {
+          always: [
+            {
+              cond: (ctx) => hasEnoughOptions<I, DefaultOptionFields>(ctx),
+              target: "picking",
+            },
+            {
+              cond: (ctx) => !hasEnoughOptions<I, DefaultOptionFields>(ctx),
+              target: "finished",
+            },
+          ],
         },
         picking: {
           on: {
@@ -135,7 +155,7 @@ const createMachine2bttns = <I extends Item = Item>() => {
         picking_disabled: {
           on: {
             LOAD_NEXT_ITEMS: {
-              target: "loading_next_items",
+              target: "checking_next_items",
             },
           },
         },
@@ -151,7 +171,7 @@ const createMachine2bttns = <I extends Item = Item>() => {
 
 export default createMachine2bttns;
 
-function hasEnoughChoices<I extends Item, OptionFields extends string>(
+export function hasEnoughNextItems<I extends Item, OptionFields extends string>(
   context: Context<I, OptionFields>
 ) {
   switch (context.replace_policy) {
@@ -164,5 +184,29 @@ function hasEnoughChoices<I extends Item, OptionFields extends string>(
       );
     default:
       return false;
+  }
+}
+
+export function hasEnoughOptions<I extends Item, OptionFields extends string>(
+  context: Context<I, OptionFields>
+) {
+  return Object.values(context.current_options).every((v) => v !== null);
+}
+
+export function getChoicesRemaining<
+  I extends Item,
+  OptionFields extends string
+>(context: Context<I, OptionFields>) {
+  const remainingItems = context.item_queue.length;
+  switch (context.replace_policy) {
+    case "keep-picked":
+    case "replace-picked":
+      return remainingItems;
+    case "replace-all":
+      return Math.floor(context.item_queue.length / 2);
+    default:
+      throw new Error(
+        ":: 2bttns - Invalid replace policy while computing remaining choices."
+      );
   }
 }

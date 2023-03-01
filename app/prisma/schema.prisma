@@ -71,7 +71,9 @@ model Game {
     updatedAt   DateTime @updatedAt
     name        String
     description String?
-    plugins     String? // Comma separated list of plugins
+
+    defaultNumItemsPerRound Int?
+    plugins                 String? // Comma separated list of plugins
 
     inputTags Tag[]
 }

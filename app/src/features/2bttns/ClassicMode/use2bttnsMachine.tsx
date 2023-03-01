@@ -1,9 +1,15 @@
 import { useMachine } from "@xstate/react";
 import { motion } from "framer-motion";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import wait from "../../../utils/wait";
-import createMachine2bttns from "./twobttns.machine";
-import { DefaultOptionFields, Item, Results, States } from "./types";
+import createMachine2bttns, { getChoicesRemaining } from "./twobttns.machine";
+import {
+  DefaultOptionFields,
+  Item,
+  ReplacePolicy,
+  Results,
+  States,
+} from "./types";
 import useAnimations from "./useAnimations";
 import useHotkey, { Hotkey } from "./useHotkey";
 
@@ -18,6 +24,7 @@ export type Use2bttnsMachineConfig = {
   items: Item[];
   onFinish: (results: Results) => Promise<void>;
   hotkeys?: { [K in DefaultOptionFields]: Hotkey };
+  replace?: ReplacePolicy;
 };
 
 const machine = createMachine2bttns();
@@ -26,6 +33,7 @@ export default function use2bttnsMachine({
   items,
   onFinish,
   hotkeys,
+  replace = "keep-picked",
 }: Use2bttnsMachineConfig) {
   const { variants, controls, animateVariant, animate, duration } =
     useAnimations();
@@ -104,7 +112,7 @@ export default function use2bttnsMachine({
   };
 
   useEffect(() => {
-    send({ type: "INIT", args: { items } });
+    send({ type: "INIT", args: { items, replace } });
     send({ type: "PICK_READY", args: {} });
   }, []);
 
@@ -129,10 +137,15 @@ export default function use2bttnsMachine({
     onPress: handleButtonClick("second"),
   });
 
+  const choicesRemaining = useMemo(() => {
+    return getChoicesRemaining(current.context);
+  }, [current.context]);
+
   return {
     registerButton,
     current_options: current.context.current_options,
     isFinished,
     context: current.context,
+    choicesRemaining,
   };
 }

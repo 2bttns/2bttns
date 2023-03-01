@@ -19,8 +19,11 @@ import Head from "next/head";
 import { z } from "zod";
 import AdminLayout from "../features/layouts/containers/AdminLayout";
 import UserLayout from "../features/layouts/containers/UserLayout";
-import PlayContainer from "../features/play/containers/PlayContainer";
+import PlayContainer, {
+  PlayContainerProps,
+} from "../features/play/containers/PlayContainer";
 import { prisma } from "../server/db";
+import getRandomGameObjects from "../server/helpers/getRandomGameObjects";
 import { api } from "../utils/api";
 import { NextPageWithLayout } from "./_app";
 
@@ -34,6 +37,7 @@ type ReturnType = {
   gameId: string;
   userId: string;
   isAdmin: boolean;
+  gameData: PlayContainerProps["gameData"];
 };
 
 export const getServerSideProps: GetServerSideProps<ReturnType> = async (
@@ -44,6 +48,7 @@ export const getServerSideProps: GetServerSideProps<ReturnType> = async (
   const gameId = urlObj.searchParams.get("game_id");
   const appId = urlObj.searchParams.get("app_id");
   const incomingJwt = urlObj.searchParams.get("jwt");
+  const numItems = urlObj.searchParams.get("num_items");
 
   try {
     if (!gameId) {
@@ -84,14 +89,28 @@ export const getServerSideProps: GetServerSideProps<ReturnType> = async (
       userId = decoded.userId;
     }
 
-    // Ensure the game exists
-    await prisma.game.findFirstOrThrow({ where: { id: gameId } });
+    // Ensure the game exists while getting the necessary data
+    const game = await prisma.game.findUniqueOrThrow({
+      where: { id: gameId },
+    });
+
+    // Get the game objects for the round
+    const numItemsQueryParam = numItems ? parseInt(numItems) : null;
+    const numItemsToGet = numItemsQueryParam ?? game.defaultNumItemsPerRound;
+    const shuffledGameObjects = await getRandomGameObjects(
+      gameId,
+      numItemsToGet ?? "ALL"
+    );
 
     return {
       props: {
         gameId: gameId ?? "",
         userId,
         isAdmin: !!session?.user,
+        gameData: {
+          game: JSON.parse(JSON.stringify(game)),
+          gameObjects: JSON.parse(JSON.stringify(shuffledGameObjects)),
+        },
       },
     };
   } catch (error) {
@@ -107,8 +126,7 @@ export const getServerSideProps: GetServerSideProps<ReturnType> = async (
 };
 
 const Play: NextPageWithLayout<ReturnType> = (props) => {
-  const { gameId, userId, isAdmin } = props;
-
+  const { gameId, userId, isAdmin, gameData } = props;
   return (
     <Layout isAdmin={isAdmin} userId={userId}>
       <Head>
@@ -120,7 +138,7 @@ const Play: NextPageWithLayout<ReturnType> = (props) => {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <ScoresModal gameId={gameId} playerId={userId} />
-      <PlayContainer gameId={gameId} playerId={userId} />
+      <PlayContainer playerId={userId} gameData={gameData} />
     </Layout>
   );
 };

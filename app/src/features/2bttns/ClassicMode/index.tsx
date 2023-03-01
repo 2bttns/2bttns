@@ -1,5 +1,5 @@
 import ClassicButton, { ClassicButtonProps } from "./ClassicButton";
-import { Item } from "./types";
+import { Item, ReplacePolicy } from "./types";
 import use2bttnsMachine, { Use2bttnsMachineConfig } from "./use2bttnsMachine";
 
 export type RenderPropParams = {
@@ -7,6 +7,7 @@ export type RenderPropParams = {
   button2: React.ReactNode;
   context: ReturnType<typeof use2bttnsMachine>["context"];
   isFinished: ReturnType<typeof use2bttnsMachine>["isFinished"];
+  choicesRemaining: ReturnType<typeof use2bttnsMachine>["choicesRemaining"];
 };
 
 export type ClassicModeProps<T extends Item> = {
@@ -21,23 +22,35 @@ export type ClassicModeProps<T extends Item> = {
   renderItem?: (item: T) => string;
 
   onFinish: Use2bttnsMachineConfig["onFinish"];
+  replace?: ReplacePolicy;
 };
 
-export default function ClassicMode<T extends Item>({
-  items,
-  hotkeys,
-  children,
-  button1Props,
-  button2Props,
-  renderItem = (item) => item.id,
-  onFinish,
-}: ClassicModeProps<T>) {
-  const { registerButton, current_options, isFinished, context } =
-    use2bttnsMachine({
-      items,
-      hotkeys,
-      onFinish,
-    });
+export default function ClassicMode<T extends Item>(
+  props: ClassicModeProps<T>
+) {
+  const {
+    items,
+    hotkeys,
+    children,
+    button1Props,
+    button2Props,
+    renderItem = (item) => item.id,
+    onFinish,
+    replace,
+  } = props;
+
+  const {
+    registerButton,
+    current_options,
+    isFinished,
+    context,
+    choicesRemaining,
+  } = use2bttnsMachine({
+    items,
+    hotkeys,
+    onFinish,
+    replace,
+  });
 
   return children({
     button1: registerButton({
@@ -62,5 +75,6 @@ export default function ClassicMode<T extends Item>({
     }),
     context,
     isFinished,
+    choicesRemaining,
   });
 }

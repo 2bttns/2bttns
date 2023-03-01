@@ -1,16 +1,21 @@
-import { Code, Heading, Stack, Text } from "@chakra-ui/react";
+import { Heading, Stack, Text } from "@chakra-ui/react";
 import { Game, GameObject } from "@prisma/client";
 import ClassicMode from "../../2bttns/ClassicMode";
 import { Use2bttnsMachineConfig } from "../../2bttns/ClassicMode/use2bttnsMachine";
 
 export type PlayProps = {
-  game: Game;
-  gameObjects: GameObject[];
+  gameData: {
+    game: Game;
+    gameObjects: GameObject[];
+  };
   onFinish: Use2bttnsMachineConfig["onFinish"];
 };
 
 export default function Play(props: PlayProps) {
-  const { game, gameObjects, onFinish } = props;
+  const {
+    gameData: { game, gameObjects },
+    onFinish,
+  } = props;
 
   return (
     <>
@@ -33,10 +38,18 @@ export default function Play(props: PlayProps) {
           second: ["s", "ArrowDown"],
         }}
         onFinish={onFinish}
+        replace="keep-picked"
       >
-        {({ button1, button2, isFinished, context }) => {
+        {({ button1, button2, isFinished, context, choicesRemaining }) => {
           return (
             <Stack direction="column" alignItems="center">
+              {!isFinished &&
+                (choicesRemaining > 0 ? (
+                  <Text>{choicesRemaining} Choice(s) Remaining</Text>
+                ) : (
+                  <Text>Final Choice</Text>
+                ))}
+
               <Text
                 as="h1"
                 sx={{
@@ -61,18 +74,6 @@ export default function Play(props: PlayProps) {
                   </Text>
                   {button2}
                 </>
-              )}
-
-              {isFinished && (
-                <Code
-                  sx={{
-                    textTransform: "uppercase",
-                    padding: "1rem",
-                    width: "540px",
-                  }}
-                >
-                  {JSON.stringify(context.results, null, 2)}
-                </Code>
               )}
             </Stack>
           );
