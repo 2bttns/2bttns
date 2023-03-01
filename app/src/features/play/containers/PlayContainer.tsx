@@ -1,15 +1,11 @@
-import { Game, GameObject, Player } from "@prisma/client";
+import { Player } from "@prisma/client";
 import { api } from "../../../utils/api";
 import { Use2bttnsMachineConfig } from "../../2bttns/ClassicMode/use2bttnsMachine";
-import Play from "../views/Play";
+import Play, { PlayProps } from "../views/Play";
 
 export type PlayContainerProps = {
   playerId: Player["id"];
-  gameData: {
-    game: Game;
-    gameObjects: GameObject[];
-    numItems: number | null;
-  };
+  gameData: PlayProps["gameData"];
 };
 
 export default function PlayContainer(props: PlayContainerProps) {
@@ -41,11 +37,5 @@ export default function PlayContainer(props: PlayContainerProps) {
     }
   };
 
-  return (
-    <Play
-      game={gameData.game}
-      gameObjects={gameData.gameObjects}
-      onFinish={handleSubmitResults}
-    />
-  );
+  return <Play gameData={gameData} onFinish={handleSubmitResults} />;
 }

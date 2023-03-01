@@ -4,13 +4,19 @@ import ClassicMode from "../../2bttns/ClassicMode";
 import { Use2bttnsMachineConfig } from "../../2bttns/ClassicMode/use2bttnsMachine";
 
 export type PlayProps = {
-  game: Game;
-  gameObjects: GameObject[];
+  gameData: {
+    game: Game;
+    gameObjects: GameObject[];
+    numItems: number | null;
+  };
   onFinish: Use2bttnsMachineConfig["onFinish"];
 };
 
 export default function Play(props: PlayProps) {
-  const { game, gameObjects, onFinish } = props;
+  const {
+    gameData: { game, gameObjects, numItems },
+    onFinish,
+  } = props;
 
   return (
     <>
