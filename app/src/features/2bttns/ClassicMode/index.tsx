@@ -23,15 +23,19 @@ export type ClassicModeProps<T extends Item> = {
   onFinish: Use2bttnsMachineConfig["onFinish"];
 };
 
-export default function ClassicMode<T extends Item>({
-  items,
-  hotkeys,
-  children,
-  button1Props,
-  button2Props,
-  renderItem = (item) => item.id,
-  onFinish,
-}: ClassicModeProps<T>) {
+export default function ClassicMode<T extends Item>(
+  props: ClassicModeProps<T>
+) {
+  const {
+    items,
+    hotkeys,
+    children,
+    button1Props,
+    button2Props,
+    renderItem = (item) => item.id,
+    onFinish,
+  } = props;
+
   const { registerButton, current_options, isFinished, context } =
     use2bttnsMachine({
       items,

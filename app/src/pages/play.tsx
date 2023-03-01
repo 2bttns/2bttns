@@ -109,7 +109,6 @@ export const getServerSideProps: GetServerSideProps<ReturnType> = async (
         isAdmin: !!session?.user,
         gameData: {
           game: JSON.parse(JSON.stringify(game)),
-          numItems: numItemsToGet,
           gameObjects: JSON.parse(JSON.stringify(shuffledGameObjects)),
         },
       },
