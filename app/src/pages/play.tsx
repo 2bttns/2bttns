@@ -11,7 +11,7 @@ import {
   useDisclosure,
   VStack,
 } from "@chakra-ui/react";
-import { Game, Player } from "@prisma/client";
+import { Game, GameObject, Player } from "@prisma/client";
 import jwt from "jsonwebtoken";
 import type { GetServerSideProps } from "next";
 import { getSession } from "next-auth/react";
@@ -19,7 +19,9 @@ import Head from "next/head";
 import { z } from "zod";
 import AdminLayout from "../features/layouts/containers/AdminLayout";
 import UserLayout from "../features/layouts/containers/UserLayout";
-import PlayContainer from "../features/play/containers/PlayContainer";
+import PlayContainer, {
+  PlayContainerProps,
+} from "../features/play/containers/PlayContainer";
 import { prisma } from "../server/db";
 import { api } from "../utils/api";
 import { NextPageWithLayout } from "./_app";
@@ -34,6 +36,7 @@ type ReturnType = {
   gameId: string;
   userId: string;
   isAdmin: boolean;
+  gameData: PlayContainerProps["gameData"];
 };
 
 export const getServerSideProps: GetServerSideProps<ReturnType> = async (
@@ -44,6 +47,7 @@ export const getServerSideProps: GetServerSideProps<ReturnType> = async (
   const gameId = urlObj.searchParams.get("game_id");
   const appId = urlObj.searchParams.get("app_id");
   const incomingJwt = urlObj.searchParams.get("jwt");
+  const numItems = urlObj.searchParams.get("num_items");
 
   try {
     if (!gameId) {
@@ -84,14 +88,57 @@ export const getServerSideProps: GetServerSideProps<ReturnType> = async (
       userId = decoded.userId;
     }
 
-    // Ensure the game exists
-    await prisma.game.findFirstOrThrow({ where: { id: gameId } });
+    // Ensure the game exists while getting the necessary data
+    const game = await prisma.game.findUniqueOrThrow({
+      where: { id: gameId },
+    });
+
+    // Get the game data with the possible game objects that can be used for the round
+    const gameWithInputGameObjectIds = await prisma.game.findUniqueOrThrow({
+      where: { id: gameId },
+      select: {
+        defaultNumItemsPerRound: true,
+        inputTags: { select: { gameObjects: { select: { id: true } } } },
+      },
+    });
+
+    // Get the game objects for the round
+    // If null, will get all game objects
+    const numItemsQueryParam = numItems ? parseInt(numItems) : null;
+    if (numItemsQueryParam === 0)
+      throw new Error("numItemsQueryParam cannot be 0");
+    const numItemsToGet = numItemsQueryParam ?? game.defaultNumItemsPerRound;
+
+    const gameObjectIds = new Set<GameObject["id"]>();
+    gameWithInputGameObjectIds.inputTags.forEach((inputTag) => {
+      inputTag.gameObjects.forEach((gameObject) => {
+        gameObjectIds.add(gameObject.id);
+      });
+    });
+
+    const shuffledGameObjectIds = [...gameObjectIds].sort(
+      () => 0.5 - Math.random()
+    );
+
+    let gameObjectsToGet = shuffledGameObjectIds;
+    if (numItemsToGet !== null && numItemsToGet > 0) {
+      gameObjectsToGet = shuffledGameObjectIds.slice(0, numItemsToGet);
+    }
+
+    const gameObjects = await prisma.gameObject.findMany({
+      where: { id: { in: gameObjectsToGet } },
+    });
 
     return {
       props: {
         gameId: gameId ?? "",
         userId,
         isAdmin: !!session?.user,
+        gameData: {
+          game: JSON.parse(JSON.stringify(game)),
+          numItems: numItemsToGet,
+          gameObjects: JSON.parse(JSON.stringify(gameObjects)),
+        },
       },
     };
   } catch (error) {
@@ -107,8 +154,7 @@ export const getServerSideProps: GetServerSideProps<ReturnType> = async (
 };
 
 const Play: NextPageWithLayout<ReturnType> = (props) => {
-  const { gameId, userId, isAdmin } = props;
-
+  const { gameId, userId, isAdmin, gameData } = props;
   return (
     <Layout isAdmin={isAdmin} userId={userId}>
       <Head>
@@ -120,7 +166,7 @@ const Play: NextPageWithLayout<ReturnType> = (props) => {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <ScoresModal gameId={gameId} playerId={userId} />
-      <PlayContainer gameId={gameId} playerId={userId} />
+      <PlayContainer playerId={userId} gameData={gameData} />
     </Layout>
   );
 };

@@ -165,11 +165,23 @@ function GameDetails(props: GameDetailsProps) {
           value={gameQuery.data.game.defaultNumItemsPerRound?.toString() ?? ""}
           placeholder="ALL"
           handleSave={async (nextValue) => {
+            // Null means ALL
+            // Otherwise this must be a number greater than 0
+            let value: Game["defaultNumItemsPerRound"] = null;
+            if (nextValue !== "") {
+              try {
+                const parsed = parseInt(nextValue, 10);
+                if (isNaN(parsed)) throw new Error("Must be a number");
+                if (parsed <= 0) throw new Error("Must be greater than 0");
+                value = parsed;
+              } catch (error) {
+                throw error;
+              }
+            }
             await handleUpdateGame({
               id: gameId,
               data: {
-                defaultNumItemsPerRound:
-                  nextValue === "" ? undefined : parseInt(nextValue),
+                defaultNumItemsPerRound: value,
               },
             });
           }}

@@ -10,7 +10,7 @@ export const updateById = publicProcedure
         name: z.string().optional(),
         description: z.string().optional(),
         inputTags: z.array(z.string()).optional(),
-        defaultNumItemsPerRound: z.number().optional(),
+        defaultNumItemsPerRound: z.number().nullable().optional(),
       }),
     })
   )
