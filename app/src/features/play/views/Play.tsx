@@ -38,11 +38,17 @@ export default function Play(props: PlayProps) {
           second: ["s", "ArrowDown"],
         }}
         onFinish={onFinish}
+        replace="keep-picked"
       >
-        {({ button1, button2, isFinished, context }) => {
+        {({ button1, button2, isFinished, context, choicesRemaining }) => {
           return (
             <Stack direction="column" alignItems="center">
-              <Text>{context.item_queue.length} Remaining</Text>
+              {!isFinished &&
+                (choicesRemaining > 0 ? (
+                  <Text>{choicesRemaining} Choice(s) Remaining</Text>
+                ) : (
+                  <Text>Final Choice</Text>
+                ))}
 
               <Text
                 as="h1"
