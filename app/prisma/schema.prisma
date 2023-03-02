@@ -158,14 +158,6 @@ model GameObjectRelationship {
     @@id([fromGameObjectId, toGameObjectId])
 }
 
-model Mode {
-    id          String     @id
-    createdAt   DateTime   @default(now())
-    updatedAt   DateTime   @updatedAt
-    description String?
-    GameMode    GameMode[]
-}
-
 model GameMode {
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
@@ -173,7 +165,6 @@ model GameMode {
     modeId    String
 
     game Game @relation(fields: [gameId], references: [id], onDelete: Cascade)
-    mode Mode @relation(fields: [modeId], references: [id], onDelete: Cascade)
 
     modeConfigJson String?
 
