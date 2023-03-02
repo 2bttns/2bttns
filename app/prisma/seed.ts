@@ -2,6 +2,17 @@ import { PrismaClient } from "@prisma/client";
 import { defaultMode } from "../src/modes/availableModes";
 const prisma = new PrismaClient();
 async function main() {
+  try {
+    const secret = await prisma.secret.create({
+      data: {
+        id: "example-app",
+        name: `example-secret`,
+        secret: `example-secret-value`,
+      },
+    });
+    console.log(`Created Secret: ${secret.id}`);
+  } catch {}
+
   const createWeights = [
     { name: "LOW", value: 0.1 },
     { name: "MEDIUM", value: 0.25 },

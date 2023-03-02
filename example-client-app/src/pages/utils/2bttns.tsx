@@ -1,8 +1,8 @@
 import twobttns from "@2bttns/controller";
 
 export const twobttnsController = new twobttns.Controller({
-  appId: "example-client-app",
-  secret: "1rRVsAOPeUq0k/QWIsfffC5cWmW9XSvouww4HAmAia4=",
+  appId: "example-app",
+  secret: "example-secret-value",
   url: "http://localhost:3001",
 });
 
