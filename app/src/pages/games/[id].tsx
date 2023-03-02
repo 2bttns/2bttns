@@ -20,11 +20,7 @@ import DeleteGameButton from "../../features/games/containers/DeleteGameButton";
 import PlayGameButton from "../../features/games/containers/PlayGameButton";
 import CustomEditable from "../../features/shared/components/CustomEditable";
 import GameInputTagsMultiSelect from "../../features/tags/containers/GameInputTagsMultiSelect";
-import {
-  AvailableModes,
-  availableModes,
-  defaultMode,
-} from "../../modes/availableModes";
+import { AvailableModes, availableModes } from "../../modes/availableModes";
 import { getModeUI } from "../../modes/modesUIRegistry";
 import { ConfigComponentProps } from "../../modes/types";
 import { prisma } from "../../server/db";
@@ -209,23 +205,24 @@ type EditGameModeProps = {
 
 function EditGameMode(props: EditGameModeProps) {
   const { gameId } = props;
-  const [selectedMode, setSelectedMode] = useState<AvailableModes>(defaultMode);
 
+  const [selectedMode, setSelectedMode] = useState<AvailableModes | null>(null);
   const [modeConfig, setModeConfig] =
     useState<ConfigComponentProps<any>["config"]>(null);
 
-  const ConfigComponent = getModeUI(selectedMode).ConfigComponent;
+  const ConfigComponent = selectedMode
+    ? getModeUI(selectedMode).ConfigComponent
+    : null;
 
   const utils = api.useContext();
   api.games.getById.useQuery(
     { id: gameId },
     {
       retry: false,
-      onSuccess: (data) => {
-        const config = data.game.modeConfigJson
-          ? JSON.parse(data.game.modeConfigJson)
-          : {};
+      onSuccess: ({ game: { mode, modeConfigJson } }) => {
+        const config = modeConfigJson ? JSON.parse(modeConfigJson) : {};
         setModeConfig(config);
+        setSelectedMode(mode as AvailableModes);
       },
     }
   );
@@ -247,7 +244,7 @@ function EditGameMode(props: EditGameModeProps) {
     event: React.ChangeEvent<HTMLSelectElement>
   ) => {
     const mode = event.target.value as AvailableModes;
-    setSelectedMode(mode);
+    await handleUpdateGame({ id: gameId, data: { mode } });
     await utils.games.getById.invalidate({ id: gameId });
   };
 
@@ -269,19 +266,21 @@ function EditGameMode(props: EditGameModeProps) {
         />
       )}
 
-      <Box width="256px">
-        <Select
-          value={selectedMode}
-          sx={{ backgroundColor: "white" }}
-          onChange={handleSelectChange}
-        >
-          {availableModes.map((mode) => (
-            <option key={mode} value={mode}>
-              {mode}
-            </option>
-          ))}
-        </Select>
-      </Box>
+      {selectedMode && (
+        <Box width="256px">
+          <Select
+            value={selectedMode}
+            sx={{ backgroundColor: "white" }}
+            onChange={handleSelectChange}
+          >
+            {availableModes.map((mode) => (
+              <option key={mode} value={mode}>
+                {mode}
+              </option>
+            ))}
+          </Select>
+        </Box>
+      )}
     </>
   );
 }
