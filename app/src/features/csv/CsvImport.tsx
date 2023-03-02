@@ -23,15 +23,18 @@ export default function CsvImport(props: CsvImportProps) {
     const file = event.target.files?.[0];
     if (!file) return;
     try {
-      const { created, failed } = await importGameObjects({ file, parentTags });
+      const { gameObjects, relationships } = await importGameObjects({
+        file,
+        parentTags,
+      });
       if (onImportComplete) {
-        onImportComplete({ created, failed });
+        onImportComplete({ gameObjects, relationships });
       }
 
-      const alert = `[csvImport] ${created.length} game objects created. ${failed.length} failed.`;
+      const alert = `[csvImport] ${gameObjects.successful.length} game objects created | ${gameObjects.failed.length} failed | ${relationships.successful} relationships created | ${relationships.failed} relationships failed`;
       console.info(alert);
-      console.info("CREATED:", created);
-      console.info("FAILED:", failed);
+      console.info("SUCCESS:", gameObjects.successful);
+      console.info("FAILED:", gameObjects.failed);
       if (typeof window === "undefined") return;
       window.alert(`${alert} See console for details.`);
     } catch (error) {

@@ -11,39 +11,27 @@ export const upsertRelationship = publicProcedure
     })
   )
   .mutation(async ({ ctx, input }) => {
-    const weight = await ctx.prisma.weight.findFirst({
+    await ctx.prisma.weight.findFirstOrThrow({
       where: {
         id: input.weightId,
       },
     });
 
-    if (!weight) {
-      throw new Error("Weight not found");
-    }
-
     if (input.gameObjectId1 === input.gameObjectId2) {
       throw new Error("Cannot create relationship to self");
     }
 
-    const gameObject1 = await ctx.prisma.gameObject.findFirst({
+    await ctx.prisma.gameObject.findFirstOrThrow({
       where: {
         id: input.gameObjectId1,
       },
     });
 
-    if (!gameObject1) {
-      throw new Error("GameObject 1 not found");
-    }
-
-    const gameObject2 = await ctx.prisma.gameObject.findFirst({
+    await ctx.prisma.gameObject.findFirstOrThrow({
       where: {
         id: input.gameObjectId2,
       },
     });
-
-    if (!gameObject2) {
-      throw new Error("GameObject 2 not found");
-    }
 
     const results = await ctx.prisma.$transaction([
       ctx.prisma.gameObjectRelationship.upsert({
