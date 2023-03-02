@@ -24,7 +24,6 @@ import RelateGameObjects from "../../features/gameobjects/containers/RelateGameO
 import TagMultiSelect, {
   TagOption,
 } from "../../features/gameobjects/containers/TagMultiSelect";
-import { NAVBAR_HEIGHT_PX } from "../../features/navbar/views/Navbar";
 import CustomEditable from "../../features/shared/components/CustomEditable";
 import TagFilterToggles from "../../features/tags/containers/TagFilterToggles";
 import useAllTagFilters from "../../features/tags/hooks/useAllTagFilters";
@@ -73,7 +72,7 @@ const GameObjectById: NextPage<GameObjectByIdPageProps> = (props) => {
 
   return (
     <>
-      <Box width="100%" height="100vh" overflowY="scroll">
+      <Box width="100%">
         <Box>
           <GameObjectDetails gameObjectId={gameObjectId} />
           <Divider />
@@ -179,7 +178,7 @@ function GameObjectDetails(props: GameObjectDetailsProps) {
   if (!gameObject) return null;
 
   return (
-    <Box marginY="1rem">
+    <Box>
       <Head>
         <title>{name} - GameObjects | 2bttns</title>
         <meta name="description" content="Manage Game Object" />
