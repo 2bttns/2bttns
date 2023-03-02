@@ -1,5 +1,5 @@
 import { Select } from "@chakra-ui/react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { ConfigComponentProps } from "../../types";
 import { ReplacePolicy } from "./ClassicMode/types";
 import {
@@ -19,10 +19,6 @@ export default function ClassicModeConfig(
   const [config, setConfig] = useState<ClassicModeContainerProps["config"]>({
     ...props.config,
   });
-
-  useEffect(() => {
-    setConfig(props.config ?? {});
-  }, [props.config]);
 
   const handleReplacePolicyChange = (
     event: React.ChangeEvent<HTMLSelectElement>
