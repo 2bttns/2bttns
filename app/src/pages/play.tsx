@@ -19,9 +19,9 @@ import Head from "next/head";
 import { z } from "zod";
 import AdminLayout from "../features/layouts/containers/AdminLayout";
 import UserLayout from "../features/layouts/containers/UserLayout";
-import PlayContainer, {
-  PlayContainerProps,
-} from "../features/play/containers/PlayContainer";
+import PlayMode from "../features/play/containers/PlayMode";
+import { ClassicModeContainerProps } from "../modes/classic/frontend/containers/ClassicModeContainer";
+import { classicMode } from "../modes/classic/frontend/_index";
 import { prisma } from "../server/db";
 import getRandomGameObjects from "../server/helpers/getRandomGameObjects";
 import { api } from "../utils/api";
@@ -37,7 +37,7 @@ type ReturnType = {
   gameId: string;
   userId: string;
   isAdmin: boolean;
-  gameData: PlayContainerProps["gameData"];
+  gameData: ClassicModeContainerProps["gameData"];
 };
 
 export const getServerSideProps: GetServerSideProps<ReturnType> = async (
@@ -138,7 +138,13 @@ const Play: NextPageWithLayout<ReturnType> = (props) => {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <ScoresModal gameId={gameId} playerId={userId} />
-      <PlayContainer playerId={userId} gameData={gameData} />
+      <PlayMode
+        ModeFrontendComponent={classicMode.FrontendComponent}
+        modeFrontendProps={{
+          gameData,
+          playerId: userId,
+        }}
+      />
     </Layout>
   );
 };

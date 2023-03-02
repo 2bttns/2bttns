@@ -1,25 +1,19 @@
 import { Heading, Stack, Text } from "@chakra-ui/react";
 import { Game, GameObject } from "@prisma/client";
-import ClassicMode from "../../../modes/classic/frontend/ClassicMode";
-import { Use2bttnsMachineConfig } from "../../../modes/classic/frontend/ClassicMode/use2bttnsMachine";
+import ClassicMode from "../ClassicMode";
+import { Use2bttnsMachineConfig } from "../ClassicMode/use2bttnsMachine";
 
-export type PlayProps = {
-  gameData: {
-    game: Game;
-    gameObjects: GameObject[];
-  };
+export type ClassicModeViewProps = {
+  game: Game;
+  gameObjects: GameObject[];
   onFinish: Use2bttnsMachineConfig["onFinish"];
 };
 
-export default function Play(props: PlayProps) {
-  const {
-    gameData: { game, gameObjects },
-    onFinish,
-  } = props;
+export default function ClassicModeView(props: ClassicModeViewProps) {
+  const { game, gameObjects, onFinish } = props;
 
   return (
     <>
-      {/* TODO: swap out game modes if a frontend plugin is active for the game (e.g. Tinder-style) */}
       <Heading
         as="h1"
         sx={{

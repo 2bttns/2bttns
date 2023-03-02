@@ -1,7 +1,5 @@
-import { Mode } from "../modes/_index";
-
 export type PlayProps<ModeFrontendProps extends {}> = {
-  ModeFrontendComponent: Mode<ModeFrontendProps>["FrontendComponent"];
+  ModeFrontendComponent: ModeUI<ModeFrontendProps>["FrontendComponent"];
   modeFrontendProps: ModeFrontendProps;
 };
 

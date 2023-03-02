@@ -1,13 +1,12 @@
 import { useEffect, useState } from "react";
-import { ClassicModeProps } from "./ClassicMode";
+import { ConfigComponentProps } from "../../types";
+import { ClassicModeContainerProps } from "./containers/ClassicModeContainer";
 
-export type ClassicModeConfigProps = ClassicModeProps & {
-  onConfigChange: (config: ClassicModeProps) => void;
-};
-
-export default function ClassicModeConfig(props: ClassicModeConfigProps) {
+export default function ClassicModeConfig(
+  props: ConfigComponentProps<ClassicModeContainerProps>
+) {
   const { onConfigChange, ...rest } = props;
-  const [config, setConfig] = useState<ClassicModeProps>(rest);
+  const [config, setConfig] = useState<ClassicModeContainerProps>(rest);
 
   useEffect(() => {
     onConfigChange(config);
@@ -21,12 +20,12 @@ export default function ClassicModeConfig(props: ClassicModeConfigProps) {
   return (
     <div>
       <label htmlFor="name">Name</label>
-      <input
+      {/* <input
         type="text"
         name="name"
         value={config.name}
         onChange={handleChange}
-      />
+      /> */}
     </div>
   );
 }

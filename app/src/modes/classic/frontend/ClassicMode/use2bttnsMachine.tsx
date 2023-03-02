@@ -1,7 +1,7 @@
 import { useMachine } from "@xstate/react";
 import { motion } from "framer-motion";
 import { useEffect, useMemo, useRef, useState } from "react";
-import wait from "../../../utils/wait";
+import wait from "../../../../utils/wait";
 import createMachine2bttns, { getChoicesRemaining } from "./twobttns.machine";
 import {
   DefaultOptionFields,
