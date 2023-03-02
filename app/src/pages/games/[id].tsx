@@ -7,6 +7,7 @@ import {
   ButtonGroup,
   Heading,
   HStack,
+  Select,
   Text,
   VStack,
 } from "@chakra-ui/react";
@@ -14,10 +15,16 @@ import { Game } from "@prisma/client";
 import type { GetServerSideProps, NextPage } from "next";
 import { Session } from "next-auth";
 import { useRouter } from "next/router";
+import { useState } from "react";
 import DeleteGameButton from "../../features/games/containers/DeleteGameButton";
 import PlayGameButton from "../../features/games/containers/PlayGameButton";
 import CustomEditable from "../../features/shared/components/CustomEditable";
 import GameInputTagsMultiSelect from "../../features/tags/containers/GameInputTagsMultiSelect";
+import {
+  AvailableModes,
+  availableModes,
+  defaultMode,
+} from "../../modes/availableModes";
 import { prisma } from "../../server/db";
 import { api, RouterInputs } from "../../utils/api";
 import getSessionWithSignInRedirect from "../../utils/getSessionWithSignInRedirect";
@@ -133,7 +140,6 @@ function GameDetails(props: GameDetailsProps) {
           <DeleteGameButton gameId={gameId} onDeleted={onDeleted} />
         </ButtonGroup>
       </HStack>
-
       <Heading size="xl">
         <CustomEditable
           value={gameQuery.data.game.name ?? ""}
@@ -157,8 +163,8 @@ function GameDetails(props: GameDetailsProps) {
           });
         }}
       />
-
       <Text>Configure</Text>
+      <EditGameMode gameId={gameId} />
       <HStack>
         <Text fontWeight="bold"># Items Per Round:</Text>
         <CustomEditable
@@ -194,3 +200,60 @@ function GameDetails(props: GameDetailsProps) {
 }
 
 export default GameById;
+
+type EditGameModeProps = {
+  gameId: Game["id"];
+};
+
+function EditGameMode(props: EditGameModeProps) {
+  const { gameId } = props;
+  const utils = api.useContext();
+  const [selectedMode, setSelectedMode] = useState<AvailableModes>(defaultMode);
+  const [gameModeConfig, setGameModeConfig] = useState<Object | null>(null);
+  api.modes.getGameModeConfig.useQuery(
+    { gameId, mode: selectedMode! },
+    {
+      enabled: !!selectedMode,
+      retry: false,
+      onSuccess: (data) => {
+        console.log("FOO");
+        console.log(data);
+        setGameModeConfig(data.gameModeConfig);
+      },
+    }
+  );
+
+  const handleSelectChange = async (
+    event: React.ChangeEvent<HTMLSelectElement>
+  ) => {
+    const mode = event.target.value as AvailableModes;
+    setSelectedMode(mode);
+  };
+
+  return (
+    <>
+      <Text fontWeight="bold">Game Modes:</Text>
+      <Box>
+        Foo
+        {gameModeConfig && (
+          <>
+            <Text>{JSON.stringify(gameModeConfig)}</Text>
+          </>
+        )}
+      </Box>
+      <Box width="256px">
+        <Select
+          value={selectedMode}
+          sx={{ backgroundColor: "white" }}
+          onChange={handleSelectChange}
+        >
+          {availableModes.map((mode) => (
+            <option key={mode} value={mode}>
+              {mode}
+            </option>
+          ))}
+        </Select>
+      </Box>
+    </>
+  );
+}

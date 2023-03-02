@@ -1,14 +1,12 @@
+import { AvailableModes } from "./availableModes";
 import { classicMode } from "./classic/frontend/_index";
 
-// Add identifiers for all modes that you want to be available for games to use
-export const availableModes = ["classic"] as const;
-
 // Register modes here based on their identifiers
-export const modesUIRegistry = {
+const modesUIRegistry = {
   classic: classicMode,
 };
 
-export const getModeUI = (mode: typeof availableModes[number]) => {
+export const getModeUI = (mode: AvailableModes) => {
   if (!modesUIRegistry[mode]) throw new Error(`Mode ${mode} not found`);
   return modesUIRegistry[mode];
 };

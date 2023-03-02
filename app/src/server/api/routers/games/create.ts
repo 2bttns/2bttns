@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { defaultMode } from "../../../../modes/availableModes";
 import { publicProcedure } from "../../trpc";
 
 export const create = publicProcedure
@@ -15,6 +16,13 @@ export const create = publicProcedure
         id: input.id,
         name: input.name,
         description: input.description,
+        GameMode: {
+          create: [
+            {
+              modeId: defaultMode,
+            },
+          ],
+        },
       },
     });
 

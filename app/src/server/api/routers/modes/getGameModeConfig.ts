@@ -3,7 +3,7 @@
 import { GameMode } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
-import { availableModes } from "../../../../modes/modesUIRegistry";
+import { availableModes } from "../../../../modes/availableModes";
 import { publicProcedure } from "../../trpc";
 
 export const getGameModeConfig = publicProcedure
