@@ -7,6 +7,13 @@ export type UseCsvImportGameObjectsOptions = {};
 const validator = z.object({
   id: z.string().optional(),
   name: z.string(),
+  description: z.string().optional().nullable(),
+  tags: z.preprocess((tags) => {
+    if (tags && typeof tags === "string") {
+      return tags.split(",").map((tag) => ({ id: tag }));
+    }
+    return [];
+  }, z.array(z.object({ id: z.string() })).optional()),
 });
 
 export type Created = typeof validator._type;
@@ -32,17 +39,26 @@ export default function useCsvImportGameObjects(
     file,
     parentTags,
   }: ImportGameObjectsOptions): Promise<ImportResult> => {
-    const tags = parentTags?.map((tagId) => ({ id: tagId }));
+    const parentTagsToAdd = parentTags?.map((tagId) => ({ id: tagId }));
 
     const created: Created[] = [];
     const failed: Failed[] = [];
     await csvParse(file, async (line) => {
       try {
         // TODO: Support custom fields
-        const { id, name } = await validator.parseAsync(line);
+        const {
+          id,
+          name,
+          description,
+          tags: importedTags,
+        } = await validator.parseAsync(line);
+
+        const tags = [...(parentTagsToAdd ?? []), ...(importedTags ?? [])];
+
         const result = await createGameObjectMutation.mutateAsync({
           id,
           name,
+          description: description ?? undefined,
           tags,
         });
         created.push(result.createdGameObject);

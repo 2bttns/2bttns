@@ -30,11 +30,13 @@ export function useCsvExportGameObjects(params: UseCsvExportParams) {
         FromGameObjectRelationship,
         createdAt,
         updatedAt,
+        description,
         ...rest
       } = gameObject;
 
       return {
         ...rest,
+        description: description ?? undefined,
         tags: tagRelationships,
         outgoingRelationships,
       };
