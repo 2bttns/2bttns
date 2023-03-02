@@ -91,37 +91,31 @@ export default function useCsvImportGameObjects(
       }
     });
 
-    console.log("STARTING");
+    if (gameObjectsResults.successful.length > 0) {
+      await utils.gameObjects.invalidate();
+    }
+
     const relationshipResults: ImportResult["relationships"] = {
       successful: 0,
       failed: 0,
     };
-    const upsertRelationships = relationshipsToUpsert.map((rel, i) => {
-      return new Promise<void>((resolve) => {
-        console.log("UPSERT", rel);
-        upsertGameObjectRelationshipMutation
-          .mutateAsync({
-            gameObjectId1: rel.from,
-            gameObjectId2: rel.to,
-            weightId: rel.weight,
-          })
-          .then((result) => {
-            relationshipResults.successful++;
-          })
-          .catch((error) => {
-            relationshipResults.failed++;
-          })
-          .finally(() => {
-            resolve();
-          });
-      });
-    });
-    await Promise.all(upsertRelationships);
 
-    if (
-      gameObjectsResults.successful.length > 0 ||
-      relationshipResults.successful > 0
-    ) {
+    // Upsert each relationship sequentially
+    // This can't be done in parallel because each upsert uses a Prisma transaction; parallel upserts would cause some to fail
+    for (const relationship of relationshipsToUpsert) {
+      try {
+        await upsertGameObjectRelationshipMutation.mutateAsync({
+          gameObjectId1: relationship.from,
+          gameObjectId2: relationship.to,
+          weightId: relationship.weight,
+        });
+        relationshipResults.successful++;
+      } catch (error) {
+        relationshipResults.failed++;
+      }
+    }
+
+    if (relationshipResults.successful > 0) {
       await utils.gameObjects.invalidate();
     }
 
