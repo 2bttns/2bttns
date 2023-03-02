@@ -34,11 +34,11 @@ const getGameModeConfig = publicProcedure
         cause: e,
       });
     }
-    const modeUIConfig = gameMode.modeConfigJson
+    const gameModeConfig = gameMode.modeConfigJson
       ? JSON.parse(gameMode!.modeConfigJson)
       : {};
 
-    return { modeUIConfig };
+    return { gameModeConfig };
   });
 
 const upsertGameModeConfig = publicProcedure
