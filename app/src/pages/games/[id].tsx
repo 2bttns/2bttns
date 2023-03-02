@@ -26,6 +26,7 @@ import {
   defaultMode,
 } from "../../modes/availableModes";
 import { getModeUI } from "../../modes/modesUIRegistry";
+import { ConfigComponentProps } from "../../modes/types";
 import { prisma } from "../../server/db";
 import { api, RouterInputs } from "../../utils/api";
 import getSessionWithSignInRedirect from "../../utils/getSessionWithSignInRedirect";
@@ -210,7 +211,10 @@ function EditGameMode(props: EditGameModeProps) {
   const { gameId } = props;
   const [selectedMode, setSelectedMode] = useState<AvailableModes>(defaultMode);
 
-  const [gameModeConfig, setGameModeConfig] = useState<any | null>(null);
+  const [modeConfig, setModeConfig] = useState<
+    ConfigComponentProps<any>["config"] | null
+  >(null);
+
   const ConfigComponent = getModeUI(selectedMode).ConfigComponent;
 
   const utils = api.useContext();
@@ -222,10 +226,23 @@ function EditGameMode(props: EditGameModeProps) {
         const config = data.game.modeConfigJson
           ? JSON.parse(data.game.modeConfigJson)
           : null;
-        setGameModeConfig(config);
+        setModeConfig(config);
       },
     }
   );
+
+  const updateGameMutation = api.games.updateById.useMutation();
+  const handleUpdateGame = async (
+    input: RouterInputs["games"]["updateById"]
+  ) => {
+    try {
+      await updateGameMutation.mutateAsync(input);
+      await utils.games.getById.invalidate({ id: input.id });
+    } catch (error) {
+      console.error(error);
+      window.alert("Error updating game. See console for details.");
+    }
+  };
 
   const handleSelectChange = async (
     event: React.ChangeEvent<HTMLSelectElement>
@@ -238,21 +255,18 @@ function EditGameMode(props: EditGameModeProps) {
   return (
     <>
       <Text fontWeight="bold">Game Modes:</Text>
-      <Box>
-        {gameModeConfig && (
-          <>
-            <Text>{JSON.stringify(gameModeConfig)}</Text>
-          </>
-        )}
-      </Box>
 
-      {/* TODO: Pass config to mode config component */}
       {ConfigComponent && (
         <ConfigComponent
-          {...gameModeConfig}
+          config={modeConfig}
           onConfigChange={(updatedConfig) => {
-            console.log;
-            updatedConfig;
+            console.log("updatedConfig", updatedConfig);
+            handleUpdateGame({
+              id: gameId,
+              data: {
+                modeConfigJson: JSON.stringify(updatedConfig),
+              },
+            });
           }}
         />
       )}

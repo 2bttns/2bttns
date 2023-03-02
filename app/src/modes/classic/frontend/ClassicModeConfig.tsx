@@ -2,7 +2,10 @@ import { Select } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
 import { ConfigComponentProps } from "../../types";
 import { ReplacePolicy } from "./ClassicMode/types";
-import { ClassicModeContainerProps } from "./containers/ClassicModeContainer";
+import {
+  ClassicModeContainerProps,
+  defaultReplacePolicy,
+} from "./containers/ClassicModeContainer";
 
 const replacePolicies: ReplacePolicy[] = [
   "keep-picked",
@@ -11,28 +14,35 @@ const replacePolicies: ReplacePolicy[] = [
 ];
 
 export default function ClassicModeConfig(
-  props: ConfigComponentProps<ClassicModeContainerProps>
+  props: ConfigComponentProps<ClassicModeContainerProps["config"]>
 ) {
-  const [config, setConfig] = useState<ClassicModeContainerProps["config"]>(
-    props.config
-  );
+  const [config, setConfig] = useState<ClassicModeContainerProps["config"]>({
+    ...props.config,
+  });
 
   useEffect(() => {
-    props.onConfigChange(config);
-  }, [config]);
+    setConfig(props.config ?? {});
+  }, [props.config]);
 
   const handleReplacePolicyChange = (
     event: React.ChangeEvent<HTMLSelectElement>
   ) => {
-    setConfig({
-      ...config,
-      replacePolicy: event.target.value as ReplacePolicy,
+    setConfig((prev) => {
+      const updatedConfig = {
+        ...prev,
+        replacePolicy: event.target.value as ReplacePolicy,
+      };
+      props.onConfigChange(updatedConfig);
+      return updatedConfig;
     });
   };
 
   return (
     <div>
-      <Select onChange={handleReplacePolicyChange} value={config.replacePolicy}>
+      <Select
+        onChange={handleReplacePolicyChange}
+        value={config.replacePolicy ?? defaultReplacePolicy}
+      >
         {replacePolicies.map((policy) => (
           <option value={policy}>{policy}</option>
         ))}

@@ -112,9 +112,7 @@ export const getServerSideProps: GetServerSideProps<ReturnType> = async (
         isAdmin: !!session?.user,
         gameModeData: {
           mode: game.mode as AvailableModes,
-          config: game.modeConfigJson
-            ? JSON.parse(JSON.stringify(game.modeConfigJson))
-            : {},
+          config: game.modeConfigJson ? JSON.parse(game.modeConfigJson) : {},
         },
         gameData: {
           playerId: userId,
@@ -137,6 +135,7 @@ export const getServerSideProps: GetServerSideProps<ReturnType> = async (
 
 const Play: NextPageWithLayout<ReturnType> = (props) => {
   const { gameId, isAdmin, gameModeData, gameData } = props;
+  console.log(gameModeData);
   return (
     <Layout isAdmin={isAdmin} userId={gameData.playerId}>
       <Head>

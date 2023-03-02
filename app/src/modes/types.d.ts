@@ -7,11 +7,13 @@ export interface ModeUIProps<ConfigProps> {
   config: ConfigProps;
 }
 
-type ConfigComponentProps<Props> = ModeUIProps<Props>["config"] & {
+type ConfigComponentProps<ConfigProps> = {
+  config?: ConfigProps;
+} & {
   onConfigChange: (config: ClassicModeProps) => void;
 };
 
-type ModeUI<Props extends ModeUIProps> = {
-  FrontendComponent: React.ComponentType<Props>;
-  ConfigComponent?: React.ComponentType<ConfigComponentProps<Props["config"]>>;
+type ModeUI<ConfigProps extends ModeUIProps> = {
+  FrontendComponent: React.ComponentType<ConfigProps>;
+  ConfigComponent?: React.ComponentType<ConfigComponentProps<ConfigProps>>;
 };

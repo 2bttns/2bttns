@@ -4,8 +4,10 @@ import { ReplacePolicy } from "../ClassicMode/types";
 import { Use2bttnsMachineConfig } from "../ClassicMode/use2bttnsMachine";
 import ClassicModeView from "../views/ClassicModeView";
 
+export const defaultReplacePolicy: ReplacePolicy = "keep-picked";
+
 export type ClassicModeContainerProps = ModeUIProps<{
-  replacePolicy: ReplacePolicy;
+  replacePolicy?: ReplacePolicy;
 }>;
 
 export default function ClassicModeContainer(props: ClassicModeContainerProps) {
@@ -45,7 +47,7 @@ export default function ClassicModeContainer(props: ClassicModeContainerProps) {
     <ClassicModeView
       game={gameData.game}
       gameObjects={gameData.gameObjects}
-      replacePolicy={replacePolicy}
+      replacePolicy={replacePolicy ?? defaultReplacePolicy}
       onFinish={handleSubmitResults}
     />
   );
