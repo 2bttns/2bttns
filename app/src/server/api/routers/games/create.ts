@@ -16,13 +16,7 @@ export const create = publicProcedure
         id: input.id,
         name: input.name,
         description: input.description,
-        GameMode: {
-          create: [
-            {
-              modeId: defaultMode,
-            },
-          ],
-        },
+        mode: defaultMode,
       },
     });
 
