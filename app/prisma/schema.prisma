@@ -175,5 +175,7 @@ model GameMode {
     game Game @relation(fields: [gameId], references: [id], onDelete: Cascade)
     mode Mode @relation(fields: [modeId], references: [id], onDelete: Cascade)
 
+    modeConfigJson String?
+
     @@id([gameId, modeId])
 }
