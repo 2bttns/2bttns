@@ -4,12 +4,15 @@ import { ModeUIProps } from "../../../types";
 import { Use2bttnsMachineConfig } from "../ClassicMode/use2bttnsMachine";
 import ClassicModeView from "../views/ClassicModeView";
 
-export interface ClassicModeContainerProps extends ModeUIProps {
+export type ClassicModeContainerProps = ModeUIProps<{
   playerId: Player["id"];
-}
+}>;
 
 export default function ClassicModeContainer(props: ClassicModeContainerProps) {
-  const { playerId, gameData } = props;
+  const {
+    config: { playerId },
+    gameData,
+  } = props;
 
   const processGameResultsMutation =
     api.modes.classicMode.processGameResults.useMutation();

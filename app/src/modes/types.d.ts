@@ -1,8 +1,9 @@
-export interface ModeUIProps {
+export interface ModeUIProps<ConfigProps> {
   gameData: {
     game: Game;
     gameObjects: GameObject[];
   };
+  config: ConfigProps;
 }
 
 type ConfigComponentProps<Props extends ModeUIProps> = Props & {
