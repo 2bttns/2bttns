@@ -17,21 +17,21 @@ export default function PlayContainer(props: PlayContainerProps) {
   ) => {
     try {
       console.info(":: 2bttns - Results:", results);
-      const result = await processGameResultsMutation.mutateAsync({
-        playerId,
-        results: results.map((r) => {
-          return {
-            not_picked: {
-              gameObjectId: r.not_picked.id,
-            },
-            picked: {
-              gameObjectId: r.picked.id,
-            },
-          };
-        }),
-      });
-
-      console.info(":: 2bttns - Result:", result);
+      // const result = await processGameResultsMutation.mutateAsync({
+      //   playerId,
+      //   results: results.map((r) => {
+      //     return {
+      //       not_picked: {
+      //         gameObjectId: r.not_picked.id,
+      //       },
+      //       picked: {
+      //         gameObjectId: r.picked.id,
+      //       },
+      //     };
+      //   }),
+      // });
+      //
+      // console.info(":: 2bttns - Result:", result);
     } catch (error) {
       console.error(":: 2bttns - Error:", error);
     }
