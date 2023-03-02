@@ -31,11 +31,13 @@ class Controller {
         }
         return decodedObj;
     }
-    generatePlayUrl({ gameId, userId }) {
-        const token = this.generateUserToken({ userId });
+    generatePlayUrl(params) {
+        const { game_id, user_id, num_items } = params;
+        const token = this.generateUserToken({ userId: user_id });
         const queryBuilder = new URLSearchParams();
-        queryBuilder.append("game_id", gameId);
+        queryBuilder.append("game_id", game_id);
         queryBuilder.append("app_id", this.appId);
+        queryBuilder.append("num_items", num_items.toString());
         queryBuilder.append("jwt", token);
         return `${this.url}/play?${queryBuilder.toString()}`;
     }

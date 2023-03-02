@@ -99,11 +99,26 @@ export const getServerSideProps: GetServerSideProps<ReturnType> = async (
     });
 
     // Get the game objects for the round
-    const numItemsQueryParam = numItems ? parseInt(numItems) : null;
-    const numItemsToGet = numItemsQueryParam ?? game.defaultNumItemsPerRound;
+    // Query param that can be used to override the default number of items per round
+    // If no default is set, get all items
+    let numItemsQueryParam: number | null | "ALL" = null;
+    if (numItems) {
+      if (numItems === "ALL") {
+        numItemsQueryParam = "ALL";
+      } else {
+        const parsedNumItems = parseInt(numItems);
+        if (isNaN(parsedNumItems)) {
+          throw new Error("Invalid num_items query param");
+        }
+        numItemsQueryParam = parsedNumItems;
+      }
+    }
+
+    const numItemsToGet: number | "ALL" =
+      numItemsQueryParam ?? game.defaultNumItemsPerRound ?? "ALL";
     const shuffledGameObjects = await getRandomGameObjects(
       gameId,
-      numItemsToGet ?? "ALL"
+      numItemsToGet
     );
 
     return {
