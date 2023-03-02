@@ -15,6 +15,7 @@ import type { GetServerSideProps, NextPage } from "next";
 import { Session } from "next-auth";
 import { useRouter } from "next/router";
 import DeleteGameButton from "../../features/games/containers/DeleteGameButton";
+import EditGameMode from "../../features/games/containers/EditGameMode";
 import PlayGameButton from "../../features/games/containers/PlayGameButton";
 import CustomEditable from "../../features/shared/components/CustomEditable";
 import GameInputTagsMultiSelect from "../../features/tags/containers/GameInputTagsMultiSelect";
@@ -133,7 +134,6 @@ function GameDetails(props: GameDetailsProps) {
           <DeleteGameButton gameId={gameId} onDeleted={onDeleted} />
         </ButtonGroup>
       </HStack>
-
       <Heading size="xl">
         <CustomEditable
           value={gameQuery.data.game.name ?? ""}
@@ -157,8 +157,8 @@ function GameDetails(props: GameDetailsProps) {
           });
         }}
       />
-
       <Text>Configure</Text>
+
       <HStack>
         <Text fontWeight="bold"># Items Per Round:</Text>
         <CustomEditable
@@ -187,6 +187,9 @@ function GameDetails(props: GameDetailsProps) {
           }}
         />
       </HStack>
+      <Box sx={{ marginY: "1rem" }}>
+        <EditGameMode gameId={gameId} />
+      </Box>
       {/* <Text>Mode</Text> */}
       {/* <Text>Game Objects</Text> */}
     </Box>

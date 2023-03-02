@@ -76,6 +76,9 @@ model Game {
     plugins                 String? // Comma separated list of plugins
 
     inputTags Tag[]
+
+    mode           String?
+    modeConfigJson String?
 }
 
 model GameObject {

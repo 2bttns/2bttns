@@ -1,15 +1,21 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { twobttnsController } from "../utils/2bttns";
+import { GeneratePlayURLParams } from "./../../../../@2bttns/controller/src/Controller";
 
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
   try {
-    const gameId = req.query.game_id as string;
-    const userId = req.query.user_id as string;
+    const game_id = req.query.game_id as GeneratePlayURLParams["game_id"];
+    const user_id = req.query.user_id as GeneratePlayURLParams["user_id"];
+    const num_items = req.query.num_items as GeneratePlayURLParams["num_items"];
 
-    const url = twobttnsController.generatePlayUrl({ gameId, userId });
+    const url = twobttnsController.generatePlayUrl({
+      game_id,
+      user_id,
+      num_items,
+    });
     return res.redirect(url);
   } catch (error) {
     if (error instanceof Error) {

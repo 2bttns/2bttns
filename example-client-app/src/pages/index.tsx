@@ -9,13 +9,16 @@ export default function Home() {
     if (typeof window === "undefined") {
       return;
     }
-    const gameId = window.prompt("Enter game id");
-    if (!gameId) return;
-    const userId = window.prompt(
+    const game_id = window.prompt("Enter game id");
+    if (!game_id) return;
+    const user_id = window.prompt(
       "Enter user id (random strings are fine for now)"
     );
-    if (!userId) return;
-    window.location.href = `/api/play2bttns?game_id=${gameId}&user_id=${userId}`;
+    if (!user_id) return;
+    const num_items =
+      window.prompt("Enter #items (optional; leave blank for ALL)") || "ALL";
+    if (!num_items) return;
+    window.location.href = `/api/play2bttns?game_id=${game_id}&user_id=${user_id}&num_items=${num_items}`;
   };
 
   return (

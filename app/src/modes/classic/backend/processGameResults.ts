@@ -1,8 +1,8 @@
 import { GameObject, PlayerScore, Weight } from "@prisma/client";
 import { performance } from "perf_hooks";
 import { z } from "zod";
-import normalizeScores from "../../../shared/normalizeScores";
-import { publicProcedure } from "../../trpc";
+import { publicProcedure } from "../../../server/api/trpc";
+import normalizeScores from "../../../server/shared/normalizeScores";
 
 const choiceItemSchema = z.object({
   gameObjectId: z.string(),
@@ -16,6 +16,7 @@ export const processGameResults = publicProcedure
   .input(
     z.object({
       playerId: z.string(),
+      modeParams: z.unknown(),
       results: z.array(userChoiceSchema),
     })
   )

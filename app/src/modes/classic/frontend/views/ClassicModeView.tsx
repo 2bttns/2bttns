@@ -1,25 +1,21 @@
 import { Heading, Stack, Text } from "@chakra-ui/react";
 import { Game, GameObject } from "@prisma/client";
-import ClassicMode from "../../../modes/classic/frontend/ClassicMode";
-import { Use2bttnsMachineConfig } from "../../../modes/classic/frontend/ClassicMode/use2bttnsMachine";
+import ClassicMode from "../ClassicMode";
+import { ReplacePolicy } from "../ClassicMode/types";
+import { Use2bttnsMachineConfig } from "../ClassicMode/use2bttnsMachine";
 
-export type PlayProps = {
-  gameData: {
-    game: Game;
-    gameObjects: GameObject[];
-  };
+export type ClassicModeViewProps = {
+  game: Game;
+  gameObjects: GameObject[];
   onFinish: Use2bttnsMachineConfig["onFinish"];
+  replacePolicy: ReplacePolicy;
 };
 
-export default function Play(props: PlayProps) {
-  const {
-    gameData: { game, gameObjects },
-    onFinish,
-  } = props;
+export default function ClassicModeView(props: ClassicModeViewProps) {
+  const { game, gameObjects, onFinish, replacePolicy } = props;
 
   return (
     <>
-      {/* TODO: swap out game modes if a frontend plugin is active for the game (e.g. Tinder-style) */}
       <Heading
         as="h1"
         sx={{
@@ -38,7 +34,7 @@ export default function Play(props: PlayProps) {
           second: ["s", "ArrowDown"],
         }}
         onFinish={onFinish}
-        replace="keep-picked"
+        replace={replacePolicy}
       >
         {({ button1, button2, isFinished, context, choicesRemaining }) => {
           return (
