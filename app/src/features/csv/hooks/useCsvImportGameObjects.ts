@@ -8,14 +8,6 @@ const validator = z.object({
   id: z.string().optional(),
   name: z.string(),
   description: z.string().optional().nullable(),
-  tags: z
-    .preprocess((tags) => {
-      if (tags && typeof tags === "string") {
-        return tags.split(",").map((tag) => ({ id: tag }));
-      }
-      return [];
-    }, z.array(z.object({ id: z.string() })))
-    .optional(),
   outgoingRelationships: z
     .preprocess((outgoingRelationships) => {
       if (outgoingRelationships && typeof outgoingRelationships === "string") {
@@ -73,21 +65,14 @@ export default function useCsvImportGameObjects(
     };
     await csvParse(file, async (line) => {
       try {
-        const {
-          id,
-          name,
-          description,
-          tags: importedTags,
-          outgoingRelationships,
-        } = await validator.parseAsync(line);
-
-        const tags = [...(parentTagsToAdd ?? []), ...(importedTags ?? [])];
+        const { id, name, description, outgoingRelationships } =
+          await validator.parseAsync(line);
 
         const result = await createGameObjectMutation.mutateAsync({
           id,
           name,
           description: description ?? undefined,
-          tags,
+          tags: parentTagsToAdd,
         });
 
         gameObjectsResults.successful.push(result.createdGameObject);

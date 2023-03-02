@@ -16,8 +16,6 @@ export function useCsvExportGameObjects(params: UseCsvExportParams) {
     })[]
   ) {
     return gameObjects.map((gameObject) => {
-      const tagRelationships = gameObject.tags.map((tag) => tag.id).join();
-
       const outgoingRelationships = gameObject.FromGameObjectRelationship.map(
         (relationship) => ({
           to: relationship.toGameObjectId,
@@ -37,7 +35,6 @@ export function useCsvExportGameObjects(params: UseCsvExportParams) {
       return {
         ...rest,
         description: description ?? undefined,
-        tags: tagRelationships,
         outgoingRelationships,
       };
     });
