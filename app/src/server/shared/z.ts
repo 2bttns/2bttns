@@ -6,9 +6,9 @@ export const textFilter = z.object({
 });
 
 export const tagFilter = z.object({
-  include: z.array(z.string()).optional(),
-  exclude: z.array(z.string()).optional(),
-  includeUntagged: z.boolean().optional().default(false),
+  include: z.array(z.string()),
+  exclude: z.array(z.string()),
+  includeUntagged: z.boolean().default(false),
 });
 
 export const sort = z.enum(["asc", "desc"]);

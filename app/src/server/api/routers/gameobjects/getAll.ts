@@ -27,6 +27,7 @@ export const getAll = publicProcedure
           })
           .optional(),
         excludeGameObjects: z.array(z.string()).optional().default([]),
+        includeOutgoingRelationships: z.boolean().optional().default(false),
       })
       .optional()
   )
@@ -98,6 +99,8 @@ export const getAll = publicProcedure
       },
       include: {
         tags: input?.includeTags,
+        // TODO: Include related game objects
+        FromGameObjectRelationship: input?.includeOutgoingRelationships,
       },
       orderBy: {
         id: input?.sort?.id,
