@@ -41,7 +41,14 @@ export default function CsvExport(props: CsvExportProps) {
       onSuccess: (data) => {
         if (!data) return;
         json2csv(data.gameObjects, (err, csv) => {
-          console.log(csv);
+          if (err || !csv) return;
+          const blob = new Blob([csv], { type: "text/csv" });
+          const url = URL.createObjectURL(blob);
+          const link = document.createElement("a");
+          link.href = url;
+          link.remove();
+          link.setAttribute("download", "export.csv");
+          link.click();
         });
       },
     }
