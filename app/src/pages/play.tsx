@@ -20,8 +20,9 @@ import { z } from "zod";
 import AdminLayout from "../features/layouts/containers/AdminLayout";
 import UserLayout from "../features/layouts/containers/UserLayout";
 import PlayMode from "../features/play/containers/PlayMode";
-import { ClassicModeContainerProps } from "../modes/classic/frontend/containers/ClassicModeContainer";
-import { classicMode } from "../modes/classic/frontend/_index";
+import { AvailableModes } from "../modes/availableModes";
+import { getModeUI } from "../modes/modesUIRegistry";
+import { ModeUIProps } from "../modes/types";
 import { prisma } from "../server/db";
 import getRandomGameObjects from "../server/helpers/getRandomGameObjects";
 import { api } from "../utils/api";
@@ -35,9 +36,12 @@ const jwtSchema = z.object({
 
 type ReturnType = {
   gameId: string;
-  userId: string;
   isAdmin: boolean;
-  gameData: ClassicModeContainerProps["gameData"];
+  gameModeData: {
+    mode: AvailableModes;
+    config: ModeUIProps<any>["config"];
+  };
+  gameData: ModeUIProps<any>["gameData"];
 };
 
 export const getServerSideProps: GetServerSideProps<ReturnType> = async (
@@ -105,9 +109,15 @@ export const getServerSideProps: GetServerSideProps<ReturnType> = async (
     return {
       props: {
         gameId: gameId ?? "",
-        userId,
         isAdmin: !!session?.user,
+        gameModeData: {
+          mode: game.mode as AvailableModes,
+          config: game.modeConfigJson
+            ? JSON.parse(JSON.stringify(game.modeConfigJson))
+            : {},
+        },
         gameData: {
+          playerId: userId,
           game: JSON.parse(JSON.stringify(game)),
           gameObjects: JSON.parse(JSON.stringify(shuffledGameObjects)),
         },
@@ -126,9 +136,9 @@ export const getServerSideProps: GetServerSideProps<ReturnType> = async (
 };
 
 const Play: NextPageWithLayout<ReturnType> = (props) => {
-  const { gameId, userId, isAdmin, gameData } = props;
+  const { gameId, isAdmin, gameModeData, gameData } = props;
   return (
-    <Layout isAdmin={isAdmin} userId={userId}>
+    <Layout isAdmin={isAdmin} userId={gameData.playerId}>
       <Head>
         <title>Play 2bttns</title>
         <meta
@@ -137,14 +147,12 @@ const Play: NextPageWithLayout<ReturnType> = (props) => {
         />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <ScoresModal gameId={gameId} playerId={userId} />
+      <ScoresModal gameId={gameId} playerId={gameData.playerId} />
       <PlayMode
-        ModeFrontendComponent={classicMode.FrontendComponent}
+        ModeFrontendComponent={getModeUI(gameModeData.mode).FrontendComponent}
         modeFrontendProps={{
           gameData,
-          config: {
-            playerId: userId,
-          },
+          config: gameModeData.config,
         }}
       />
     </Layout>

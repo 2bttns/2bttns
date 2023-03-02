@@ -1,16 +1,18 @@
 import { Heading, Stack, Text } from "@chakra-ui/react";
 import { Game, GameObject } from "@prisma/client";
 import ClassicMode from "../ClassicMode";
+import { ReplacePolicy } from "../ClassicMode/types";
 import { Use2bttnsMachineConfig } from "../ClassicMode/use2bttnsMachine";
 
 export type ClassicModeViewProps = {
   game: Game;
   gameObjects: GameObject[];
   onFinish: Use2bttnsMachineConfig["onFinish"];
+  replacePolicy: ReplacePolicy;
 };
 
 export default function ClassicModeView(props: ClassicModeViewProps) {
-  const { game, gameObjects, onFinish } = props;
+  const { game, gameObjects, onFinish, replacePolicy } = props;
 
   return (
     <>
@@ -32,7 +34,7 @@ export default function ClassicModeView(props: ClassicModeViewProps) {
           second: ["s", "ArrowDown"],
         }}
         onFinish={onFinish}
-        replace="keep-picked"
+        replace={replacePolicy}
       >
         {({ button1, button2, isFinished, context, choicesRemaining }) => {
           return (

@@ -1,16 +1,16 @@
-import { Player } from "@prisma/client";
 import { api } from "../../../../utils/api";
 import { ModeUIProps } from "../../../types";
+import { ReplacePolicy } from "../ClassicMode/types";
 import { Use2bttnsMachineConfig } from "../ClassicMode/use2bttnsMachine";
 import ClassicModeView from "../views/ClassicModeView";
 
 export type ClassicModeContainerProps = ModeUIProps<{
-  playerId: Player["id"];
+  replacePolicy: ReplacePolicy;
 }>;
 
 export default function ClassicModeContainer(props: ClassicModeContainerProps) {
   const {
-    config: { playerId },
+    config: { replacePolicy },
     gameData,
   } = props;
 
@@ -22,7 +22,7 @@ export default function ClassicModeContainer(props: ClassicModeContainerProps) {
     try {
       console.info(":: 2bttns - Results:", results);
       const result = await processGameResultsMutation.mutateAsync({
-        playerId,
+        playerId: gameData.playerId,
         results: results.map((r) => {
           return {
             not_picked: {
@@ -45,6 +45,7 @@ export default function ClassicModeContainer(props: ClassicModeContainerProps) {
     <ClassicModeView
       game={gameData.game}
       gameObjects={gameData.gameObjects}
+      replacePolicy={replacePolicy}
       onFinish={handleSubmitResults}
     />
   );

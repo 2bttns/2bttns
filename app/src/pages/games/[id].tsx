@@ -25,6 +25,7 @@ import {
   availableModes,
   defaultMode,
 } from "../../modes/availableModes";
+import { getModeUI } from "../../modes/modesUIRegistry";
 import { prisma } from "../../server/db";
 import { api, RouterInputs } from "../../utils/api";
 import getSessionWithSignInRedirect from "../../utils/getSessionWithSignInRedirect";
@@ -207,18 +208,21 @@ type EditGameModeProps = {
 
 function EditGameMode(props: EditGameModeProps) {
   const { gameId } = props;
-  const utils = api.useContext();
   const [selectedMode, setSelectedMode] = useState<AvailableModes>(defaultMode);
-  const [gameModeConfig, setGameModeConfig] = useState<Object | null>(null);
-  api.modes.getGameModeConfig.useQuery(
-    { gameId, mode: selectedMode! },
+
+  const [gameModeConfig, setGameModeConfig] = useState<any | null>(null);
+  const ConfigComponent = getModeUI(selectedMode).ConfigComponent;
+
+  const utils = api.useContext();
+  api.games.getById.useQuery(
+    { id: gameId },
     {
-      enabled: !!selectedMode,
       retry: false,
       onSuccess: (data) => {
-        console.log("FOO");
-        console.log(data);
-        setGameModeConfig(data.gameModeConfig);
+        const config = data.game.modeConfigJson
+          ? JSON.parse(data.game.modeConfigJson)
+          : null;
+        setGameModeConfig(config);
       },
     }
   );
@@ -228,19 +232,31 @@ function EditGameMode(props: EditGameModeProps) {
   ) => {
     const mode = event.target.value as AvailableModes;
     setSelectedMode(mode);
+    await utils.games.getById.invalidate({ id: gameId });
   };
 
   return (
     <>
       <Text fontWeight="bold">Game Modes:</Text>
       <Box>
-        Foo
         {gameModeConfig && (
           <>
             <Text>{JSON.stringify(gameModeConfig)}</Text>
           </>
         )}
       </Box>
+
+      {/* TODO: Pass config to mode config component */}
+      {ConfigComponent && (
+        <ConfigComponent
+          {...gameModeConfig}
+          onConfigChange={(updatedConfig) => {
+            console.log;
+            updatedConfig;
+          }}
+        />
+      )}
+
       <Box width="256px">
         <Select
           value={selectedMode}

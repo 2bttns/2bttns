@@ -76,7 +76,9 @@ model Game {
     plugins                 String? // Comma separated list of plugins
 
     inputTags Tag[]
-    GameMode  GameMode[]
+
+    mode           String?
+    modeConfigJson String?
 }
 
 model GameObject {
@@ -156,17 +158,4 @@ model GameObjectRelationship {
     toGameObject   GameObject @relation(fields: [toGameObjectId], references: [id], onDelete: Cascade, name: "toGameObject")
 
     @@id([fromGameObjectId, toGameObjectId])
-}
-
-model GameMode {
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
-    gameId    String
-    modeId    String
-
-    game Game @relation(fields: [gameId], references: [id], onDelete: Cascade)
-
-    modeConfigJson String?
-
-    @@id([gameId, modeId])
 }

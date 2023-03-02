@@ -67,11 +67,7 @@ async function main() {
             id: `example-game-${i}`,
             name: `Example Game ${i}`,
             description: "This is an example game",
-            GameMode: {
-              create: {
-                modeId: defaultMode,
-              },
-            },
+            mode: defaultMode,
             inputTags: {
               connectOrCreate: {
                 where: {
