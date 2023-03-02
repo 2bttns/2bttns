@@ -142,7 +142,9 @@ const Play: NextPageWithLayout<ReturnType> = (props) => {
         ModeFrontendComponent={classicMode.FrontendComponent}
         modeFrontendProps={{
           gameData,
-          playerId: userId,
+          config: {
+            playerId: userId,
+          },
         }}
       />
     </Layout>

@@ -15,7 +15,7 @@ export default function ClassicModeContainer(props: ClassicModeContainerProps) {
   } = props;
 
   const processGameResultsMutation =
-    api.modes.classicMode.processGameResults.useMutation();
+    api.modes.modeBackendRouter.classicMode.processGameResults.useMutation();
   const handleSubmitResults: Use2bttnsMachineConfig["onFinish"] = async (
     results
   ) => {
