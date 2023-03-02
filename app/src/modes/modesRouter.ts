@@ -1,24 +1,44 @@
+import { GameMode } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { createTRPCRouter } from "../server/api/trpc";
 import { publicProcedure } from "./../server/api/trpc";
 import { classicModeRouter } from "./classic/backend/_index";
-import { availableModes, modesUIRegistry } from "./modesUIRegistry";
+import { availableModes } from "./modesUIRegistry";
 
 // TODO: TRPC procedure to resolve mode UI props
 // When done, pass the result to the Play page's PlayMode component
-const resolveMode = publicProcedure
+const getGameModeConfig = publicProcedure
   .input(
     z.object({
+      gameId: z.string(),
       mode: z.enum(availableModes),
     })
   )
   .query(async ({ ctx, input }) => {
-    const modeUIConfig = {};
-    const modeUI = modesUIRegistry[input.mode];
-    // TODO: Fetch mode config from DB and return it as props
+    const { gameId, mode } = input;
+    let gameMode: GameMode | null = null;
+    try {
+      gameMode = await ctx.prisma.gameMode.findUniqueOrThrow({
+        where: {
+          gameId_modeId: {
+            gameId: gameId,
+            modeId: mode,
+          },
+        },
+      });
+    } catch (e) {
+      throw new TRPCError({
+        code: "BAD_REQUEST",
+        message: "Game mode not found",
+        cause: e,
+      });
+    }
+    const modeUIConfig = gameMode.modeConfigJson
+      ? JSON.parse(gameMode!.modeConfigJson)
+      : {};
 
-    return { modeUIProps: modeUIConfig };
+    return { modeUIConfig };
   });
 
 const upsertGameModeConfig = publicProcedure
@@ -97,7 +117,7 @@ const upsertGameModeConfig = publicProcedure
   });
 
 export const modesRouter = createTRPCRouter({
-  resolveMode,
+  getGameModeConfig,
   upsertGameModeConfig,
   classicMode: classicModeRouter,
   // Register additional mode backend routers here
