@@ -1,8 +1,5 @@
 import { Box } from "@chakra-ui/react";
-import Navbar, {
-  NavbarProps,
-  NAVBAR_HEIGHT_PX,
-} from "../../navbar/views/Navbar";
+import Navbar, { NavbarProps } from "../../navbar/views/Navbar";
 
 export type UserLayoutProps = {
   children: React.ReactNode;
@@ -13,14 +10,16 @@ export default function UserLayout(props: UserLayoutProps) {
   const { children, navbarProps } = props;
 
   return (
-    <Box width="100vw" height="100vh" backgroundColor="gray.300">
-      <Navbar {...navbarProps} />
-      <Box
-        width="100vw"
-        height={`calc(100vh - ${NAVBAR_HEIGHT_PX})`}
-        padding="1rem"
-        overflow="hidden"
-      >
+    <Box
+      width="100vw"
+      minHeight="100vh"
+      backgroundColor="gray.300"
+      position="relative"
+    >
+      <Box position="sticky" top="0" zIndex="99">
+        <Navbar {...navbarProps} />
+      </Box>
+      <Box width="100vw" padding="1rem">
         {children}
       </Box>
     </Box>

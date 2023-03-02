@@ -79,41 +79,39 @@ export default function SettingsPage(props: SettingsPageProps) {
 
           <TabPanels>
             <TabPanel>
-              <Box maxHeight="500px" overflow="scroll">
-                <SecretsTable
-                  additionalActions={(secretData) => {
-                    const { id } = secretData;
-                    return (
-                      <>
-                        <Tooltip label={`Regenerate Secret`} placement="top">
-                          <IconButton
-                            colorScheme="blue"
-                            onClick={() => {
-                              regenerateSecret(id);
-                            }}
-                            icon={<RepeatIcon />}
-                            aria-label={`Regenerate secret`}
-                            size="sm"
-                            variant="outline"
-                          />
-                        </Tooltip>
-                        <Tooltip label={`Delete`} placement="top">
-                          <IconButton
-                            colorScheme="red"
-                            onClick={() => {
-                              handleDeleteSecret(id);
-                            }}
-                            icon={<DeleteIcon />}
-                            aria-label={`Delete secret with ID: ${id}`}
-                            size="sm"
-                            variant="outline"
-                          />
-                        </Tooltip>
-                      </>
-                    );
-                  }}
-                />
-              </Box>
+              <SecretsTable
+                additionalActions={(secretData) => {
+                  const { id } = secretData;
+                  return (
+                    <>
+                      <Tooltip label={`Regenerate Secret`} placement="top">
+                        <IconButton
+                          colorScheme="blue"
+                          onClick={() => {
+                            regenerateSecret(id);
+                          }}
+                          icon={<RepeatIcon />}
+                          aria-label={`Regenerate secret`}
+                          size="sm"
+                          variant="outline"
+                        />
+                      </Tooltip>
+                      <Tooltip label={`Delete`} placement="top">
+                        <IconButton
+                          colorScheme="red"
+                          onClick={() => {
+                            handleDeleteSecret(id);
+                          }}
+                          icon={<DeleteIcon />}
+                          aria-label={`Delete secret with ID: ${id}`}
+                          size="sm"
+                          variant="outline"
+                        />
+                      </Tooltip>
+                    </>
+                  );
+                }}
+              />
             </TabPanel>
             <TabPanel>
               <h2>Foo</h2>
