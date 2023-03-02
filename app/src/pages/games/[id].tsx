@@ -211,9 +211,8 @@ function EditGameMode(props: EditGameModeProps) {
   const { gameId } = props;
   const [selectedMode, setSelectedMode] = useState<AvailableModes>(defaultMode);
 
-  const [modeConfig, setModeConfig] = useState<
-    ConfigComponentProps<any>["config"] | null
-  >(null);
+  const [modeConfig, setModeConfig] =
+    useState<ConfigComponentProps<any>["config"]>(null);
 
   const ConfigComponent = getModeUI(selectedMode).ConfigComponent;
 
@@ -225,7 +224,7 @@ function EditGameMode(props: EditGameModeProps) {
       onSuccess: (data) => {
         const config = data.game.modeConfigJson
           ? JSON.parse(data.game.modeConfigJson)
-          : null;
+          : {};
         setModeConfig(config);
       },
     }
@@ -256,12 +255,11 @@ function EditGameMode(props: EditGameModeProps) {
     <>
       <Text fontWeight="bold">Game Modes:</Text>
 
-      {ConfigComponent && (
+      {ConfigComponent && modeConfig && (
         <ConfigComponent
           config={modeConfig}
-          onConfigChange={(updatedConfig) => {
-            console.log("updatedConfig", updatedConfig);
-            handleUpdateGame({
+          onConfigChange={async (updatedConfig) => {
+            await handleUpdateGame({
               id: gameId,
               data: {
                 modeConfigJson: JSON.stringify(updatedConfig),
