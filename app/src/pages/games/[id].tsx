@@ -7,7 +7,6 @@ import {
   ButtonGroup,
   Heading,
   HStack,
-  Select,
   Text,
   VStack,
 } from "@chakra-ui/react";
@@ -15,14 +14,11 @@ import { Game } from "@prisma/client";
 import type { GetServerSideProps, NextPage } from "next";
 import { Session } from "next-auth";
 import { useRouter } from "next/router";
-import { useState } from "react";
 import DeleteGameButton from "../../features/games/containers/DeleteGameButton";
+import EditGameMode from "../../features/games/containers/EditGameMode";
 import PlayGameButton from "../../features/games/containers/PlayGameButton";
 import CustomEditable from "../../features/shared/components/CustomEditable";
 import GameInputTagsMultiSelect from "../../features/tags/containers/GameInputTagsMultiSelect";
-import { AvailableModes, availableModes } from "../../modes/availableModes";
-import { getModeUI } from "../../modes/modesUIRegistry";
-import { ConfigComponentProps } from "../../modes/types";
 import { prisma } from "../../server/db";
 import { api, RouterInputs } from "../../utils/api";
 import getSessionWithSignInRedirect from "../../utils/getSessionWithSignInRedirect";
@@ -162,7 +158,7 @@ function GameDetails(props: GameDetailsProps) {
         }}
       />
       <Text>Configure</Text>
-      <EditGameMode gameId={gameId} />
+
       <HStack>
         <Text fontWeight="bold"># Items Per Round:</Text>
         <CustomEditable
@@ -191,6 +187,9 @@ function GameDetails(props: GameDetailsProps) {
           }}
         />
       </HStack>
+      <Box sx={{ marginY: "1rem" }}>
+        <EditGameMode gameId={gameId} />
+      </Box>
       {/* <Text>Mode</Text> */}
       {/* <Text>Game Objects</Text> */}
     </Box>
@@ -198,89 +197,3 @@ function GameDetails(props: GameDetailsProps) {
 }
 
 export default GameById;
-
-type EditGameModeProps = {
-  gameId: Game["id"];
-};
-
-function EditGameMode(props: EditGameModeProps) {
-  const { gameId } = props;
-
-  const [selectedMode, setSelectedMode] = useState<AvailableModes | null>(null);
-  const [modeConfig, setModeConfig] =
-    useState<ConfigComponentProps<any>["config"]>(null);
-
-  const ConfigComponent = selectedMode
-    ? getModeUI(selectedMode).ConfigComponent
-    : null;
-
-  const utils = api.useContext();
-  api.games.getById.useQuery(
-    { id: gameId },
-    {
-      retry: false,
-      onSuccess: ({ game: { mode, modeConfigJson } }) => {
-        const config = modeConfigJson ? JSON.parse(modeConfigJson) : {};
-        setModeConfig(config);
-        setSelectedMode(mode as AvailableModes);
-      },
-    }
-  );
-
-  const updateGameMutation = api.games.updateById.useMutation();
-  const handleUpdateGame = async (
-    input: RouterInputs["games"]["updateById"]
-  ) => {
-    try {
-      await updateGameMutation.mutateAsync(input);
-      await utils.games.getById.invalidate({ id: input.id });
-    } catch (error) {
-      console.error(error);
-      window.alert("Error updating game. See console for details.");
-    }
-  };
-
-  const handleSelectChange = async (
-    event: React.ChangeEvent<HTMLSelectElement>
-  ) => {
-    const mode = event.target.value as AvailableModes;
-    await handleUpdateGame({ id: gameId, data: { mode } });
-    await utils.games.getById.invalidate({ id: gameId });
-  };
-
-  return (
-    <>
-      <Text fontWeight="bold">Game Modes:</Text>
-
-      {ConfigComponent && modeConfig && (
-        <ConfigComponent
-          config={modeConfig}
-          onConfigChange={async (updatedConfig) => {
-            await handleUpdateGame({
-              id: gameId,
-              data: {
-                modeConfigJson: JSON.stringify(updatedConfig),
-              },
-            });
-          }}
-        />
-      )}
-
-      {selectedMode && (
-        <Box width="256px">
-          <Select
-            value={selectedMode}
-            sx={{ backgroundColor: "white" }}
-            onChange={handleSelectChange}
-          >
-            {availableModes.map((mode) => (
-              <option key={mode} value={mode}>
-                {mode}
-              </option>
-            ))}
-          </Select>
-        </Box>
-      )}
-    </>
-  );
-}

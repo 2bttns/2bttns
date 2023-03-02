@@ -38,6 +38,7 @@ export default function ClassicModeConfig(
       <Select
         onChange={handleReplacePolicyChange}
         value={config.replacePolicy ?? defaultReplacePolicy}
+        sx={{ backgroundColor: "white" }}
       >
         {replacePolicies.map((policy) => (
           <option value={policy}>{policy}</option>
