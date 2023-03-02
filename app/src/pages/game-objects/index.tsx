@@ -2,7 +2,7 @@ import { Box, ButtonGroup } from "@chakra-ui/react";
 import type { GetServerSideProps, NextPage } from "next";
 import { Session } from "next-auth";
 import Head from "next/head";
-import CsvImport from "../../features/csv-import/CsvImport";
+import CsvImport from "../../features/csv/CsvImport";
 import DeleteGameObjectButton from "../../features/gameobjects/containers/DeleteGameObjectButton";
 import GameObjectsTable, {
   AdditionalColumns,

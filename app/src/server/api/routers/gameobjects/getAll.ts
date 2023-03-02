@@ -31,6 +31,8 @@ export const getAll = publicProcedure
       .optional()
   )
   .query(async ({ ctx, input }) => {
+    console.log("input");
+    console.log(input);
     const gameObjects = await ctx.prisma.gameObject.findMany({
       take: input?.take,
       skip: input?.skip,

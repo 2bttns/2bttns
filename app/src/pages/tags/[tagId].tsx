@@ -12,7 +12,8 @@ import { Session } from "next-auth";
 import Head from "next/head";
 import { useRouter } from "next/router";
 import { useMemo, useState } from "react";
-import CsvImport from "../../features/csv-import/CsvImport";
+import CsvExport from "../../features/csv/CsvExport";
+import CsvImport from "../../features/csv/CsvImport";
 import GameObjectsTable, {
   AdditionalColumns,
   GameObjectsTableProps,
@@ -226,7 +227,12 @@ const TagByIdPage: NextPage<TagByIdPageProps> = (props) => {
               includeUntagged,
             }}
             onGameObjectCreated={handleGameObjectCreated}
-            additionalTopBarContent={<CsvImport parentTags={[tagId]} />}
+            additionalTopBarContent={
+              <>
+                <CsvImport parentTags={[tagId]} />
+                <CsvExport tagsToExportBy={[tagId]} />
+              </>
+            }
             additionalColumns={getAdditionalColumns(tagId)}
           />
           <Divider />
