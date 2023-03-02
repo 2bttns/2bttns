@@ -1,5 +1,6 @@
 import { Button } from "@chakra-ui/react";
 import { Tag } from "@prisma/client";
+import { json2csv } from "json-2-csv";
 import { api } from "../../utils/api";
 
 export type CsvExportProps = {
@@ -12,7 +13,11 @@ export default function CsvExport(props: CsvExportProps) {
   const gameObjectsCount = api.gameObjects.getCount.useQuery({
     filter: tagsToExportBy
       ? {
-          tag: { include: tagsToExportBy, exclude: [], includeUntagged: false },
+          tag: {
+            include: tagsToExportBy,
+            exclude: [],
+            includeUntagged: false,
+          },
         }
       : undefined,
   });
@@ -32,17 +37,18 @@ export default function CsvExport(props: CsvExportProps) {
       includeTags: true,
     },
     {
-      enabled: !!gameObjectsCount.data,
+      enabled: false,
+      onSuccess: (data) => {
+        if (!data) return;
+        json2csv(data.gameObjects, (err, csv) => {
+          console.log(csv);
+        });
+      },
     }
   );
 
-  const exportCsv = () => {
-    console.log("export", tagsToExportBy);
-    console.log(gameObjectsQuery.data?.gameObjects);
-  };
-
   const handleClick = () => {
-    exportCsv();
+    gameObjectsQuery.refetch();
   };
 
   return (

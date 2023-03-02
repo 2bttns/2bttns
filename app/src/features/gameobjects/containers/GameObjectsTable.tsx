@@ -46,7 +46,6 @@ export default function GameObjectsTable(props: GameObjectsTableProps) {
   } = props;
 
   const utils = api.useContext();
-  console.log(gameObjectsToExclude);
 
   const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: 0,

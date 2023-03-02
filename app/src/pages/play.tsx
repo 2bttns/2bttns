@@ -150,7 +150,6 @@ export const getServerSideProps: GetServerSideProps<ReturnType> = async (
 
 const Play: NextPageWithLayout<ReturnType> = (props) => {
   const { gameId, isAdmin, gameModeData, gameData } = props;
-  console.log(gameModeData);
   return (
     <Layout isAdmin={isAdmin} userId={gameData.playerId}>
       <Head>
