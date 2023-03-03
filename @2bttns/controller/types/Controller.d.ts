@@ -3,7 +3,7 @@ import { paths } from "../2bttns-api";
 export type GeneratePlayURLParams = {
     game_id: string;
     user_id: string;
-    num_items: number | "ALL";
+    num_items?: number | "ALL";
 };
 export type ControllerConfig = {
     appId: string;

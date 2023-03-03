@@ -15,10 +15,34 @@ export default function Home() {
       "Enter user id (random strings are fine for now)"
     );
     if (!user_id) return;
-    const num_items =
-      window.prompt("Enter #items (optional; leave blank for ALL)") || "ALL";
-    if (!num_items) return;
-    window.location.href = `/api/play2bttns?game_id=${game_id}&user_id=${user_id}&num_items=${num_items}`;
+    let num_items: any = window.prompt(
+      "Enter #items (ALL for all items; or leave blank to use the configured default)"
+    );
+
+    const queryParams = new URLSearchParams();
+    queryParams.append("game_id", game_id);
+    queryParams.append("user_id", user_id);
+    if (num_items) {
+      if (num_items.toUpperCase() === "ALL") {
+        num_items = "ALL";
+      } else if (!isNaN(parseInt(num_items))) {
+        num_items = parseInt(num_items);
+
+        if (num_items < 1) {
+          window.alert(`Invalid value: num_items=${num_items}`);
+          return;
+        }
+      } else {
+        window.alert(`Invalid value: num_items=${num_items}`);
+        return;
+      }
+
+      if (num_items) {
+        queryParams.append("num_items", num_items);
+      }
+    }
+
+    window.location.href = `/api/play2bttns?${queryParams.toString()}`;
   };
 
   return (

@@ -5,7 +5,7 @@ import { paths } from "../2bttns-api";
 export type GeneratePlayURLParams = {
   game_id: string;
   user_id: string;
-  num_items: number | "ALL";
+  num_items?: number | "ALL";
 };
 
 export type ControllerConfig = {
@@ -57,8 +57,10 @@ export default class Controller {
     const queryBuilder = new URLSearchParams();
     queryBuilder.append("game_id", game_id);
     queryBuilder.append("app_id", this.appId);
-    queryBuilder.append("num_items", num_items.toString());
     queryBuilder.append("jwt", token);
+    if (num_items) {
+      queryBuilder.append("num_items", num_items.toString());
+    }
 
     return `${this.url}/play?${queryBuilder.toString()}`;
   }
