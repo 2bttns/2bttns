@@ -19,7 +19,7 @@ const createMachine2bttns = <I extends Item = Item>() => {
     >({
       context: {
         current_options: { first: null, second: null },
-        item_queue: [],
+        items: { type: "preload", payload: { item_queue: [] } },
         results: [],
         to_replace: { first: true, second: true },
         replace_policy: "keep-picked",
@@ -33,50 +33,58 @@ const createMachine2bttns = <I extends Item = Item>() => {
       states: {
         starting: {
           on: {
-            INIT: {
-              actions: assign({
-                item_queue: (context, event) => {
-                  return [...event.args.items];
-                },
-                replace_policy: (context, event) => {
-                  return event.args.replace ?? "keep-picked";
-                },
+            INIT_ITEMS_PRELOAD: {
+              // "preload" means that the calling code will provide a queue of items to be used
+              actions: assign((context, event) => {
+                return {
+                  items: event.args.items,
+                  replace_policy: event.args.replace ?? context.replace_policy,
+                };
               }),
-              target: "loading_next_items",
+              target: "loading_next_items_preload",
+            },
+            INIT_ITEMS_LOAD_ON_DEMAND: {
+              actions: assign((context, event) => {
+                // "load-on-demand" means that the calling code will provide a function to load items on demand, e.g. via an API call
+                return {
+                  items: event.args.items,
+                  replace_policy: event.args.replace ?? context.replace_policy,
+                };
+              }),
+              target: "loading_next_items_load_on_demand",
             },
           },
         },
-        checking_next_items: {
-          always: [
-            {
-              cond: (ctx) => hasEnoughNextItems<I, DefaultOptionFields>(ctx),
-              target: "loading_next_items",
-            },
-            {
-              cond: (ctx) => !hasEnoughNextItems<I, DefaultOptionFields>(ctx),
-              target: "finished",
-            },
-          ],
-        },
-        loading_next_items: {
+        loading_next_items_preload: {
           entry: [
-            assign({
-              current_options: (ctx) => {
-                const updatedOptions = { ...ctx.current_options };
-                Object.keys(ctx.to_replace).forEach((key) => {
-                  const replaceKey =
-                    key as keyof ChoiceReplacement<DefaultOptionFields>;
-                  const shouldReplace = ctx.to_replace[replaceKey];
-                  if (!shouldReplace) return;
-                  const nextItem = ctx.item_queue.shift();
-                  if (!nextItem) {
-                    return;
-                  }
-                  updatedOptions[replaceKey] = nextItem;
-                });
+            assign((context, event) => {
+              if (context.items.type !== "preload") {
+                throw new Error(
+                  'Unexpected context.items.type -- expected "preload"'
+                );
+              }
+              const item_queue = [...context.items.payload.item_queue] as I[];
 
-                return updatedOptions;
-              },
+              const updatedOptions = { ...context.current_options };
+              Object.keys(context.to_replace).forEach((key) => {
+                const replaceKey =
+                  key as keyof ChoiceReplacement<DefaultOptionFields>;
+                const shouldReplace = context.to_replace[replaceKey];
+                if (!shouldReplace) return;
+                const nextItem = item_queue.shift();
+                if (!nextItem) return;
+                updatedOptions[replaceKey] = nextItem;
+              });
+
+              const updatedItemsContext = {
+                ...context.items,
+                payload: { ...context.items.payload, item_queue },
+              };
+              return {
+                ...context,
+                current_options: updatedOptions,
+                items: updatedItemsContext,
+              };
             }),
           ],
           on: {
@@ -85,6 +93,39 @@ const createMachine2bttns = <I extends Item = Item>() => {
             },
           },
         },
+        loading_next_items_load_on_demand: {
+          on: {
+            LOAD_NEXT_ITEMS_LOAD_ON_DEMAND: {
+              actions: assign({
+                current_options: (context, event) => {
+                  if (context.items.type !== "load-on-demand") {
+                    throw new Error(
+                      'Unexpected context.items.type -- expected "load-on-demand"'
+                    );
+                  }
+                  const updatedOptions = { ...context.current_options };
+                  Object.keys(context.to_replace).forEach((key) => {
+                    const replaceKey =
+                      key as keyof ChoiceReplacement<DefaultOptionFields>;
+                    const shouldReplace = context.to_replace[replaceKey];
+                    if (!shouldReplace) return;
+                    const nextItem = event.args.itemsToLoad.shift();
+                    if (!nextItem) return;
+                    updatedOptions[replaceKey] = nextItem;
+                  });
+                  return updatedOptions;
+                },
+              }),
+              target: "loaded_items_load_on_demand",
+            },
+          },
+        },
+        loaded_items_load_on_demand: {
+          always: {
+            target: "checking_for_enough_options",
+          },
+        },
+        // This state is used to check if there are enough pickable options for the user to continue
         checking_for_enough_options: {
           always: [
             {
@@ -154,10 +195,32 @@ const createMachine2bttns = <I extends Item = Item>() => {
         },
         picking_disabled: {
           on: {
-            LOAD_NEXT_ITEMS: {
+            LOAD_NEXT_ITEMS_PRELOADED: {
               target: "checking_next_items",
             },
           },
+        },
+        // This state is used to check if there are enough incoming items to continue
+        checking_next_items: {
+          always: [
+            {
+              cond: (ctx) =>
+                ctx.items.type === "preload" &&
+                hasEnoughNextItems<I, DefaultOptionFields>(ctx),
+              target: "loading_next_items_preload",
+            },
+            {
+              cond: (ctx) =>
+                ctx.items.type === "load-on-demand" &&
+                hasEnoughNextItems<I, DefaultOptionFields>(ctx),
+              target: "loading_next_items_load_on_demand",
+            },
+
+            {
+              cond: (ctx) => !hasEnoughNextItems<I, DefaultOptionFields>(ctx),
+              target: "finished",
+            },
+          ],
         },
         finished: {
           entry: () => {
@@ -174,16 +237,35 @@ export default createMachine2bttns;
 export function hasEnoughNextItems<I extends Item, OptionFields extends string>(
   context: Context<I, OptionFields>
 ) {
-  switch (context.replace_policy) {
-    case "keep-picked":
-    case "replace-picked":
-      return context.item_queue.length >= 1;
-    case "replace-all":
-      return (
-        context.item_queue.length >= Object.keys(context.to_replace).length
-      );
+  switch (context.items.type) {
+    case "preload":
+      switch (context.replace_policy) {
+        case "keep-picked":
+        case "replace-picked":
+          return context.items.payload.item_queue.length >= 1;
+        case "replace-all":
+          return (
+            context.items.payload.item_queue.length >=
+            Object.keys(context.to_replace).length
+          );
+        default:
+          return false;
+      }
+    case "load-on-demand":
+      switch (context.replace_policy) {
+        case "keep-picked":
+        case "replace-picked":
+          return context.items.payload.itemsToLoad >= 1;
+        case "replace-all":
+          return (
+            context.items.payload.itemsToLoad >=
+            Object.keys(context.to_replace).length
+          );
+        default:
+          return false;
+      }
     default:
-      return false;
+      throw new Error("Unexpected context.items.type");
   }
 }
 
@@ -197,16 +279,34 @@ export function getChoicesRemaining<
   I extends Item,
   OptionFields extends string
 >(context: Context<I, OptionFields>) {
-  const remainingItems = context.item_queue.length;
-  switch (context.replace_policy) {
-    case "keep-picked":
-    case "replace-picked":
-      return remainingItems;
-    case "replace-all":
-      return Math.floor(context.item_queue.length / 2);
+  switch (context.items.type) {
+    case "preload":
+      const remainingPreloadItems = context.items.payload.item_queue.length;
+      switch (context.replace_policy) {
+        case "keep-picked":
+        case "replace-picked":
+          return remainingPreloadItems;
+        case "replace-all":
+          return Math.floor(context.items.payload.item_queue.length / 2);
+        default:
+          throw new Error(
+            ":: 2bttns - Invalid replace policy while computing remaining choices."
+          );
+      }
+    case "load-on-demand":
+      const remainingLoadOnDemandItems = context.items.payload.itemsToLoad;
+      switch (context.replace_policy) {
+        case "keep-picked":
+        case "replace-picked":
+          return remainingLoadOnDemandItems;
+        case "replace-all":
+          return Math.floor(context.items.payload.itemsToLoad / 2);
+        default:
+          throw new Error(
+            ":: 2bttns - Invalid replace policy while computing remaining choices."
+          );
+      }
     default:
-      throw new Error(
-        ":: 2bttns - Invalid replace policy while computing remaining choices."
-      );
+      throw new Error("Unexpected context.items.type");
   }
 }

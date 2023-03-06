@@ -1,3 +1,4 @@
+import { GameObject } from "@prisma/client";
 import { api } from "../../../../utils/api";
 import { ModeUIProps } from "../../../types";
 import { ReplacePolicy } from "../ClassicMode/types";
@@ -18,35 +19,39 @@ export default function ClassicModeContainer(props: ClassicModeContainerProps) {
 
   const processGameResultsMutation =
     api.modes.modeBackendRouter.classicMode.processGameResults.useMutation();
-  const handleSubmitResults: Use2bttnsMachineConfig["onFinish"] = async (
-    results
-  ) => {
-    try {
-      console.info(":: 2bttns - Results:", results);
-      const result = await processGameResultsMutation.mutateAsync({
-        playerId: gameData.playerId,
-        results: results.map((r) => {
-          return {
-            not_picked: {
-              gameObjectId: r.not_picked.id,
-            },
-            picked: {
-              gameObjectId: r.picked.id,
-            },
-          };
-        }),
-      });
+  const handleSubmitResults: Use2bttnsMachineConfig<GameObject>["onFinish"] =
+    async (results) => {
+      try {
+        console.info(":: 2bttns - Results:", results);
+        const result = await processGameResultsMutation.mutateAsync({
+          playerId: gameData.playerId,
+          results: results.map((r) => {
+            return {
+              not_picked: {
+                gameObjectId: r.not_picked.id,
+              },
+              picked: {
+                gameObjectId: r.picked.id,
+              },
+            };
+          }),
+        });
 
-      console.info(":: 2bttns - Result:", result);
-    } catch (error) {
-      console.error(":: 2bttns - Error:", error);
-    }
-  };
+        console.info(":: 2bttns - Result:", result);
+      } catch (error) {
+        console.error(":: 2bttns - Error:", error);
+      }
+    };
 
   return (
     <ClassicModeView
       game={gameData.game}
-      gameObjects={gameData.gameObjects}
+      items={{
+        type: "preload",
+        payload: {
+          item_queue: gameData.gameObjects,
+        },
+      }}
       replacePolicy={replacePolicy ?? defaultReplacePolicy}
       onFinish={handleSubmitResults}
     />

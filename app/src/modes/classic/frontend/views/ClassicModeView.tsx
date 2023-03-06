@@ -1,18 +1,20 @@
 import { Heading, Stack, Text } from "@chakra-ui/react";
-import { Game, GameObject } from "@prisma/client";
+import { Game } from "@prisma/client";
 import ClassicMode from "../ClassicMode";
-import { ReplacePolicy } from "../ClassicMode/types";
+import { Item, ReplacePolicy } from "../ClassicMode/types";
 import { Use2bttnsMachineConfig } from "../ClassicMode/use2bttnsMachine";
 
-export type ClassicModeViewProps = {
+export type ClassicModeViewProps<I extends Item> = {
   game: Game;
-  gameObjects: GameObject[];
-  onFinish: Use2bttnsMachineConfig["onFinish"];
+  items: Use2bttnsMachineConfig<I>["items"];
+  onFinish: Use2bttnsMachineConfig<I>["onFinish"];
   replacePolicy: ReplacePolicy;
 };
 
-export default function ClassicModeView(props: ClassicModeViewProps) {
-  const { game, gameObjects, onFinish, replacePolicy } = props;
+export default function ClassicModeView<I extends Item>(
+  props: ClassicModeViewProps<I>
+) {
+  const { game, items, onFinish, replacePolicy } = props;
 
   return (
     <>
@@ -27,7 +29,7 @@ export default function ClassicModeView(props: ClassicModeViewProps) {
         {game?.name}
       </Heading>
       <ClassicMode
-        items={gameObjects}
+        items={items}
         renderItem={(item) => item.name}
         hotkeys={{
           first: ["w", "ArrowUp"],

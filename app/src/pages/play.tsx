@@ -238,7 +238,7 @@ function ScoresModal({ gameId, playerId }: ScoresModalProps) {
             <VStack>
               {scoresQuery.data?.playerScores.map((score) => {
                 return (
-                  <Badge>
+                  <Badge key={score.gameObjectId}>
                     <>
                       {score.gameObject?.name ?? score.gameObjectId} ={" "}
                       {score.score}

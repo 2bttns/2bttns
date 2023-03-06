@@ -10,23 +10,23 @@ export type RenderPropParams = {
   choicesRemaining: ReturnType<typeof use2bttnsMachine>["choicesRemaining"];
 };
 
-export type ClassicModeProps<T extends Item> = {
+export type ClassicModeProps<I extends Item> = {
   // TODO: Replace Item type with GameObject type
-  items: T[];
+  items: Use2bttnsMachineConfig<I>["items"];
   children: (params: RenderPropParams) => JSX.Element;
-  hotkeys?: Use2bttnsMachineConfig["hotkeys"];
+  hotkeys?: Use2bttnsMachineConfig<I>["hotkeys"];
   button1Props?: Partial<ClassicButtonProps>;
   button2Props?: Partial<ClassicButtonProps>;
 
   // TODO: Allow for custom ReactNode rendering of items
-  renderItem?: (item: T) => string;
+  renderItem?: (item: I) => string;
 
-  onFinish: Use2bttnsMachineConfig["onFinish"];
+  onFinish: Use2bttnsMachineConfig<I>["onFinish"];
   replace?: ReplacePolicy;
 };
 
-export default function ClassicMode<T extends Item>(
-  props: ClassicModeProps<T>
+export default function ClassicMode<I extends Item>(
+  props: ClassicModeProps<I>
 ) {
   const {
     items,

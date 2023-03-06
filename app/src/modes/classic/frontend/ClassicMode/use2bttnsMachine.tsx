@@ -6,6 +6,7 @@ import createMachine2bttns, { getChoicesRemaining } from "./twobttns.machine";
 import {
   DefaultOptionFields,
   Item,
+  ItemPolicy,
   ReplacePolicy,
   Results,
   States,
@@ -20,8 +21,8 @@ export type RegisterButtonConfig = {
 
 export type RegisterButton = (config: RegisterButtonConfig) => JSX.Element;
 
-export type Use2bttnsMachineConfig = {
-  items: Item[];
+export type Use2bttnsMachineConfig<I extends Item> = {
+  items: ItemPolicy<I>;
   onFinish: (results: Results) => Promise<void>;
   hotkeys?: { [K in DefaultOptionFields]: Hotkey };
   replace?: ReplacePolicy;
@@ -29,12 +30,12 @@ export type Use2bttnsMachineConfig = {
 
 const machine = createMachine2bttns();
 
-export default function use2bttnsMachine({
+export default function use2bttnsMachine<I extends Item>({
   items,
   onFinish,
   hotkeys,
   replace = "keep-picked",
-}: Use2bttnsMachineConfig) {
+}: Use2bttnsMachineConfig<I>) {
   const { variants, controls, animateVariant, animate, duration } =
     useAnimations();
 
@@ -70,7 +71,17 @@ export default function use2bttnsMachine({
 
       await Promise.race([onPickAnimations(), wait(duration)]);
 
-      send({ type: "LOAD_NEXT_ITEMS", args: {} });
+      switch (items.type) {
+        case "preload":
+          send({ type: "LOAD_NEXT_ITEMS_PRELOADED", args: {} });
+          break;
+        case "load-on-demand":
+          // TODO: Fetch next items
+          send({
+            type: "LOAD_NEXT_ITEMS_LOAD_ON_DEMAND",
+            args: { itemsToLoad: [] },
+          });
+      }
 
       const onPickPostAnimations = async () => {
         await Promise.all([
@@ -112,9 +123,24 @@ export default function use2bttnsMachine({
   };
 
   useEffect(() => {
-    send({ type: "INIT", args: { items, replace } });
-    send({ type: "PICK_READY", args: {} });
+    switch (items.type) {
+      case "preload":
+        send({ type: "INIT_ITEMS_PRELOAD", args: { items, replace } });
+        send({ type: "PICK_READY", args: {} });
+        break;
+      case "load-on-demand":
+        send({ type: "INIT_ITEMS_LOAD_ON_DEMAND", args: { items, replace } });
+        break;
+      default:
+        throw new Error(":: 2bttns - Invalid items type");
+    }
   }, []);
+
+  useEffect(() => {
+    console.log(":: 2bttns - Current State");
+    console.log(current.context);
+    console.log(current.value);
+  }, [current]);
 
   useEffect(() => {
     const isPickingState = (current.value as States) === "picking";
