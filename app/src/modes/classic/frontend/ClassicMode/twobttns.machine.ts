@@ -45,7 +45,7 @@ const createMachine2bttns = <I extends Item = Item>() => {
             },
             INIT_ITEMS_LOAD_ON_DEMAND: {
               actions: assign((context, event) => {
-                // "load-on-demand" means that the calling code will provide a function to load items on demand, e.g. via an API call
+                // "load-on-demand" means that the calling code will have its own code to load items on demand, e.g. an API call
                 return {
                   items: event.args.items,
                   replace_policy: event.args.replace ?? context.replace_policy,
@@ -95,34 +95,61 @@ const createMachine2bttns = <I extends Item = Item>() => {
         },
         loading_next_items_load_on_demand: {
           on: {
-            LOAD_NEXT_ITEMS_LOAD_ON_DEMAND: {
-              actions: assign({
-                current_options: (context, event) => {
-                  if (context.items.type !== "load-on-demand") {
-                    throw new Error(
-                      'Unexpected context.items.type -- expected "load-on-demand"'
-                    );
-                  }
-                  const updatedOptions = { ...context.current_options };
-                  Object.keys(context.to_replace).forEach((key) => {
-                    const replaceKey =
-                      key as keyof ChoiceReplacement<DefaultOptionFields>;
-                    const shouldReplace = context.to_replace[replaceKey];
-                    if (!shouldReplace) return;
-                    const nextItem = event.args.itemsToLoad.shift();
-                    if (!nextItem) return;
-                    updatedOptions[replaceKey] = nextItem;
-                  });
-                  return updatedOptions;
-                },
+            // The calling code should call this event during this state with items that were loaded on demand (e.g. from an API call)
+            LOAD_NEXT_ITEMS_ON_DEMAND: {
+              actions: assign((context, event) => {
+                if (context.items.type !== "load-on-demand") {
+                  throw new Error(
+                    'Unexpected context.items.type -- expected "load-on-demand"'
+                  );
+                }
+                console.log("ARG", event.args);
+
+                const itemsToLoad = [...event.args.itemsToLoad];
+                let itemsLoadedToOptions = 0;
+
+                const updatedOptions: typeof context.current_options = {
+                  ...context.current_options,
+                };
+                Object.keys(context.to_replace).forEach((key) => {
+                  const replaceKey =
+                    key as keyof ChoiceReplacement<DefaultOptionFields>;
+                  const shouldReplace = context.to_replace[replaceKey];
+                  if (!shouldReplace) return;
+                  const nextItem = itemsToLoad.shift();
+                  if (!nextItem) return;
+                  updatedOptions[replaceKey] = nextItem;
+                  itemsLoadedToOptions++;
+                });
+
+                const updatedItemsContext: typeof context.items = {
+                  ...context.items,
+                  payload: {
+                    ...context.items.payload,
+                    totalNumItemsToLoad:
+                      context.items.payload.totalNumItemsToLoad -
+                      itemsLoadedToOptions,
+                  },
+                };
+
+                console.log("event.args", event.args);
+                console.log("updatedoptions", updatedOptions);
+                console.log("updatedItemsContext", updatedItemsContext);
+
+                return {
+                  current_options: updatedOptions,
+                  items: updatedItemsContext,
+                };
               }),
               target: "loaded_items_load_on_demand",
             },
           },
         },
         loaded_items_load_on_demand: {
-          always: {
-            target: "checking_for_enough_options",
+          on: {
+            PICK_READY: {
+              target: "checking_for_enough_options",
+            },
           },
         },
         // This state is used to check if there are enough pickable options for the user to continue
@@ -255,10 +282,10 @@ export function hasEnoughNextItems<I extends Item, OptionFields extends string>(
       switch (context.replace_policy) {
         case "keep-picked":
         case "replace-picked":
-          return context.items.payload.itemsToLoad >= 1;
+          return context.items.payload.totalNumItemsToLoad >= 1;
         case "replace-all":
           return (
-            context.items.payload.itemsToLoad >=
+            context.items.payload.totalNumItemsToLoad >=
             Object.keys(context.to_replace).length
           );
         default:
@@ -294,13 +321,14 @@ export function getChoicesRemaining<
           );
       }
     case "load-on-demand":
-      const remainingLoadOnDemandItems = context.items.payload.itemsToLoad;
+      const remainingLoadOnDemandItems =
+        context.items.payload.totalNumItemsToLoad;
       switch (context.replace_policy) {
         case "keep-picked":
         case "replace-picked":
           return remainingLoadOnDemandItems;
         case "replace-all":
-          return Math.floor(context.items.payload.itemsToLoad / 2);
+          return Math.floor(context.items.payload.totalNumItemsToLoad / 2);
         default:
           throw new Error(
             ":: 2bttns - Invalid replace policy while computing remaining choices."
@@ -309,4 +337,11 @@ export function getChoicesRemaining<
     default:
       throw new Error("Unexpected context.items.type");
   }
+}
+
+export function countEmptyOptions<I extends Item, OptionFields extends string>(
+  context: Context<I, OptionFields>
+) {
+  return Object.values(context.current_options).filter((v) => v === null)
+    .length;
 }

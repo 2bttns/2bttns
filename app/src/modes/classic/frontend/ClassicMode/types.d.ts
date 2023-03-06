@@ -38,7 +38,7 @@ export interface Events<I extends Item, OptionFields extends string> {
   };
 
   LOAD_NEXT_ITEMS_PRELOADED: {};
-  LOAD_NEXT_ITEMS_LOAD_ON_DEMAND: {
+  LOAD_NEXT_ITEMS_ON_DEMAND: {
     itemsToLoad: I[];
   };
 
@@ -66,7 +66,7 @@ export type PreloadItemPolicy<I extends Item> = {
 export type LoadOnDemandItemPolicy<I extends Item> = {
   type: "load-on-demand";
   payload: {
-    itemsToLoad: number;
+    totalNumItemsToLoad: number;
   };
 };
 

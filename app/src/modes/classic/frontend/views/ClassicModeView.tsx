@@ -9,12 +9,14 @@ export type ClassicModeViewProps<I extends Item> = {
   items: Use2bttnsMachineConfig<I>["items"];
   onFinish: Use2bttnsMachineConfig<I>["onFinish"];
   replacePolicy: ReplacePolicy;
+  loadItemsOnDemandCallback?: Use2bttnsMachineConfig<I>["loadItemsOnDemandCallback"];
 };
 
 export default function ClassicModeView<I extends Item>(
   props: ClassicModeViewProps<I>
 ) {
-  const { game, items, onFinish, replacePolicy } = props;
+  const { game, items, onFinish, replacePolicy, loadItemsOnDemandCallback } =
+    props;
 
   return (
     <>
@@ -37,6 +39,7 @@ export default function ClassicModeView<I extends Item>(
         }}
         onFinish={onFinish}
         replace={replacePolicy}
+        loadItemsOnDemandCallback={loadItemsOnDemandCallback}
       >
         {({ button1, button2, isFinished, context, choicesRemaining }) => {
           return (

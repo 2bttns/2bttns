@@ -2,7 +2,10 @@ import { useMachine } from "@xstate/react";
 import { motion } from "framer-motion";
 import { useEffect, useMemo, useRef, useState } from "react";
 import wait from "../../../../utils/wait";
-import createMachine2bttns, { getChoicesRemaining } from "./twobttns.machine";
+import createMachine2bttns, {
+  countEmptyOptions,
+  getChoicesRemaining,
+} from "./twobttns.machine";
 import {
   DefaultOptionFields,
   Item,
@@ -21,11 +24,16 @@ export type RegisterButtonConfig = {
 
 export type RegisterButton = (config: RegisterButtonConfig) => JSX.Element;
 
+export type LoadItemsOnDemandCallback<I extends Item> = (
+  count: number
+) => Promise<I[]>;
+
 export type Use2bttnsMachineConfig<I extends Item> = {
   items: ItemPolicy<I>;
   onFinish: (results: Results) => Promise<void>;
   hotkeys?: { [K in DefaultOptionFields]: Hotkey };
   replace?: ReplacePolicy;
+  loadItemsOnDemandCallback?: LoadItemsOnDemandCallback<I>;
 };
 
 const machine = createMachine2bttns();
@@ -35,6 +43,7 @@ export default function use2bttnsMachine<I extends Item>({
   onFinish,
   hotkeys,
   replace = "keep-picked",
+  loadItemsOnDemandCallback,
 }: Use2bttnsMachineConfig<I>) {
   const { variants, controls, animateVariant, animate, duration } =
     useAnimations();
@@ -42,6 +51,7 @@ export default function use2bttnsMachine<I extends Item>({
   const [current, send] = useMachine(machine);
   const [canPick, setCanPick] = useState(false);
   const canPickRef = useRef<boolean>(canPick);
+  const numItemsToLoadOnDemandRef = useRef<number>(0);
 
   const isFinished = (current.value as States) === "finished";
 
@@ -76,10 +86,16 @@ export default function use2bttnsMachine<I extends Item>({
           send({ type: "LOAD_NEXT_ITEMS_PRELOADED", args: {} });
           break;
         case "load-on-demand":
-          // TODO: Fetch next items
+          if (!loadItemsOnDemandCallback) {
+            throw new Error(
+              ":: 2bttns - loadItemsOnDemand is undefined; Required for load-on-demand ItemPolicy"
+            );
+          }
+          const count = numItemsToLoadOnDemandRef.current;
+          const itemsToLoad = await loadItemsOnDemandCallback(count);
           send({
-            type: "LOAD_NEXT_ITEMS_LOAD_ON_DEMAND",
-            args: { itemsToLoad: [] },
+            type: "LOAD_NEXT_ITEMS_ON_DEMAND",
+            args: { itemsToLoad },
           });
       }
 
@@ -129,7 +145,23 @@ export default function use2bttnsMachine<I extends Item>({
         send({ type: "PICK_READY", args: {} });
         break;
       case "load-on-demand":
-        send({ type: "INIT_ITEMS_LOAD_ON_DEMAND", args: { items, replace } });
+        (async function () {
+          if (!loadItemsOnDemandCallback) {
+            throw new Error(
+              ":: 2bttns - loadItemsOnDemandCallback is undefined; required for load-on-demand ItemPolicy"
+            );
+          }
+          send({ type: "INIT_ITEMS_LOAD_ON_DEMAND", args: { items, replace } });
+          const count = numItemsToLoadOnDemandRef.current;
+          console.log("COUNT", count);
+          const itemsToLoad = await loadItemsOnDemandCallback(count);
+          console.log("ITEMS", itemsToLoad);
+          send({
+            type: "LOAD_NEXT_ITEMS_ON_DEMAND",
+            args: { itemsToLoad },
+          });
+          send({ type: "PICK_READY", args: {} });
+        })();
         break;
       default:
         throw new Error(":: 2bttns - Invalid items type");
@@ -137,15 +169,20 @@ export default function use2bttnsMachine<I extends Item>({
   }, []);
 
   useEffect(() => {
-    console.log(":: 2bttns - Current State");
-    console.log(current.context);
-    console.log(current.value);
-  }, [current]);
+    console.log("======");
+    console.log(":: 2bttns - Current context", current.context);
+    console.log(":: 2bttns - Current state", current.value);
+    console.log("======");
+  }, [current.value]);
 
   useEffect(() => {
     const isPickingState = (current.value as States) === "picking";
     setCanPick(isPickingState);
     canPickRef.current = isPickingState;
+  }, [current.value]);
+
+  useEffect(() => {
+    numItemsToLoadOnDemandRef.current = countEmptyOptions(current.context);
   }, [current.value]);
 
   useEffect(() => {

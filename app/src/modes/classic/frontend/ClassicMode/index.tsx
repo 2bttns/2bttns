@@ -23,6 +23,7 @@ export type ClassicModeProps<I extends Item> = {
 
   onFinish: Use2bttnsMachineConfig<I>["onFinish"];
   replace?: ReplacePolicy;
+  loadItemsOnDemandCallback?: Use2bttnsMachineConfig<I>["loadItemsOnDemandCallback"];
 };
 
 export default function ClassicMode<I extends Item>(
@@ -37,6 +38,7 @@ export default function ClassicMode<I extends Item>(
     renderItem = (item) => item.id,
     onFinish,
     replace,
+    loadItemsOnDemandCallback,
   } = props;
 
   const {
@@ -50,6 +52,7 @@ export default function ClassicMode<I extends Item>(
     hotkeys,
     onFinish,
     replace,
+    loadItemsOnDemandCallback,
   });
 
   return children({

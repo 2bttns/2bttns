@@ -1,3 +1,5 @@
+import { Game, GameObject } from "@prisma/client";
+
 export interface ModeUIProps<ConfigProps> {
   gameData: {
     playerId: string;

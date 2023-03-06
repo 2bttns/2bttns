@@ -1,9 +1,11 @@
 import { GameObject } from "@prisma/client";
-import { api } from "../../../../utils/api";
+import { api, apiClient } from "../../../../utils/api";
 import { ModeUIProps } from "../../../types";
 import { ReplacePolicy } from "../ClassicMode/types";
 import { Use2bttnsMachineConfig } from "../ClassicMode/use2bttnsMachine";
-import ClassicModeView from "../views/ClassicModeView";
+import ClassicModeView, {
+  ClassicModeViewProps,
+} from "../views/ClassicModeView";
 
 export const defaultReplacePolicy: ReplacePolicy = "keep-picked";
 
@@ -43,9 +45,28 @@ export default function ClassicModeContainer(props: ClassicModeContainerProps) {
       }
     };
 
+  const loadItemsOnDemandCallback: ClassicModeViewProps<GameObject>["loadItemsOnDemandCallback"] =
+    async (count) => {
+      // TODO: FIlter by tag & exclude seen gameObjects
+      const { results } =
+        await apiClient.modes.modeBackendRouter.classicMode.getRandomGameObjects.query(
+          {
+            numGameObjects: count,
+          }
+        );
+      return results;
+    };
+
   return (
     <ClassicModeView
       game={gameData.game}
+      // items={{
+      //   type: "load-on-demand",
+      //   payload: {
+      //     // TODO: Props for this
+      //     totalNumItemsToLoad: gameData.game.defaultNumItemsPerRound ?? 10,
+      //   },
+      // }}
       items={{
         type: "preload",
         payload: {
@@ -54,6 +75,7 @@ export default function ClassicModeContainer(props: ClassicModeContainerProps) {
       }}
       replacePolicy={replacePolicy ?? defaultReplacePolicy}
       onFinish={handleSubmitResults}
+      loadItemsOnDemandCallback={loadItemsOnDemandCallback}
     />
   );
 }
