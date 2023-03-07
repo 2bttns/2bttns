@@ -4,7 +4,14 @@ export interface ModeUIProps<ConfigProps> {
   gameData: {
     playerId: string;
     game: Game;
-    gameObjects: GameObject[];
+    gameObjects:
+      | { type: "preload"; payload: { gameObjects: GameObject[] } }
+      | {
+          type: "load-on-demand";
+          payload: {
+            totalNumItemsToLoad: number;
+          };
+        };
   };
   config: ConfigProps;
 }

@@ -59,20 +59,7 @@ export default function ClassicModeContainer(props: ClassicModeContainerProps) {
 
   return (
     <ClassicModeView
-      game={gameData.game}
-      items={{
-        type: "load-on-demand",
-        payload: {
-          // TODO: Props for this
-          totalNumItemsToLoad: gameData.game.defaultNumItemsPerRound ?? 10,
-        },
-      }}
-      // items={{
-      //   type: "preload",
-      //   payload: {
-      //     item_queue: gameData.gameObjects,
-      //   },
-      // }}
+      gameData={gameData}
       replacePolicy={replacePolicy ?? defaultReplacePolicy}
       onFinish={handleSubmitResults}
       loadItemsOnDemandCallback={loadItemsOnDemandCallback}

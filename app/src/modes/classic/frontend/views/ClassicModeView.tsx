@@ -1,22 +1,49 @@
 import { Heading, Stack, Text } from "@chakra-ui/react";
-import { Game } from "@prisma/client";
+import { useMemo } from "react";
+import { ModeUIProps } from "../../../types";
 import ClassicMode from "../ClassicMode";
-import { Item, ReplacePolicy } from "../ClassicMode/types";
-import { Use2bttnsMachineConfig } from "../ClassicMode/use2bttnsMachine";
+import {
+  Item,
+  ItemPolicy,
+  LoadOnDemandItemPolicy,
+  PreloadItemPolicy,
+  ReplacePolicy,
+} from "../ClassicMode/types";
+import {
+  LoadItemsOnDemandCallback,
+  Use2bttnsMachineConfig,
+} from "../ClassicMode/use2bttnsMachine";
 
 export type ClassicModeViewProps<I extends Item> = {
-  game: Game;
-  items: Use2bttnsMachineConfig<I>["items"];
+  gameData: ModeUIProps<any>["gameData"];
   onFinish: Use2bttnsMachineConfig<I>["onFinish"];
   replacePolicy: ReplacePolicy;
-  loadItemsOnDemandCallback?: Use2bttnsMachineConfig<I>["loadItemsOnDemandCallback"];
+  loadItemsOnDemandCallback?: LoadItemsOnDemandCallback<I>;
 };
 
 export default function ClassicModeView<I extends Item>(
   props: ClassicModeViewProps<I>
 ) {
-  const { game, items, onFinish, replacePolicy, loadItemsOnDemandCallback } =
+  const { gameData, onFinish, replacePolicy, loadItemsOnDemandCallback } =
     props;
+
+  const formattedItems: ItemPolicy<any> = useMemo(() => {
+    switch (gameData.gameObjects.type) {
+      case "preload":
+        return {
+          type: "preload",
+          payload: { item_queue: gameData.gameObjects.payload.gameObjects },
+        } as PreloadItemPolicy<any>;
+      case "load-on-demand":
+        return {
+          type: "load-on-demand",
+          payload: {
+            totalNumItemsToLoad:
+              gameData.gameObjects.payload.totalNumItemsToLoad,
+          },
+        } as LoadOnDemandItemPolicy<any>;
+    }
+  }, [gameData.gameObjects]);
 
   return (
     <>
@@ -28,10 +55,10 @@ export default function ClassicModeView<I extends Item>(
           textAlign: "center",
         }}
       >
-        {game?.name}
+        {gameData.game.name ?? "Untitled Game"}
       </Heading>
       <ClassicMode
-        items={items}
+        items={formattedItems}
         renderItem={(item) => item.name}
         hotkeys={{
           first: ["w", "ArrowUp"],

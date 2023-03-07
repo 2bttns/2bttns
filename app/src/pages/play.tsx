@@ -132,7 +132,18 @@ export const getServerSideProps: GetServerSideProps<ReturnType> = async (
         gameData: {
           playerId: userId,
           game: JSON.parse(JSON.stringify(game)),
-          gameObjects: JSON.parse(JSON.stringify(shuffledGameObjects)),
+          // gameObjects: {
+          //   type: "preload",
+          //   payload: {
+          //     gameObjects: JSON.parse(JSON.stringify(shuffledGameObjects)),
+          //   },
+          // },
+          gameObjects: {
+            type: "load-on-demand",
+            payload: {
+              totalNumItemsToLoad: shuffledGameObjects.length,
+            },
+          },
         },
       },
     };
