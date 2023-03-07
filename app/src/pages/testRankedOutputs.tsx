@@ -6,17 +6,21 @@ import TagMultiSelect, {
   TagOption,
 } from "../features/gameobjects/containers/TagMultiSelect";
 import { NAVBAR_HEIGHT_PX } from "../features/navbar/views/Navbar";
+import { prisma } from "../server/db";
 import { api } from "../utils/api";
 import getSessionWithSignInRedirect from "../utils/getSessionWithSignInRedirect";
 
 type ReturnType = {
   playerId: Player["id"];
+  allPlayers: Player[];
 };
 
 export const getServerSideProps: GetServerSideProps<ReturnType> = async (
   ctx
 ) => {
   const { session, redirect } = await getSessionWithSignInRedirect(ctx);
+
+  const players = await prisma.player.findMany();
 
   if (!session && redirect) {
     return {
@@ -25,26 +29,32 @@ export const getServerSideProps: GetServerSideProps<ReturnType> = async (
   }
 
   return {
-    props: { playerId: session!.user.id },
+    props: {
+      playerId: session!.user.id,
+      allPlayers: JSON.parse(JSON.stringify(players)),
+    },
   };
 };
 
 export default function testRankedOutputs(props: ReturnType) {
-  const { playerId } = props;
+  const { playerId, allPlayers } = props;
 
   const [inputTags, setInputTags] = useState<TagOption[]>([]);
   const [outputTag, setOutputTag] = useState<string | undefined>();
+  const [selectedPlayer, setSelectedPlayer] = useState<
+    Player["id"] | undefined
+  >(playerId);
 
   const utils = api.useContext();
   const tagsQuery = api.tags.getAll.useQuery();
   const outputs = api.gameObjects.getRanked.useQuery(
     {
-      playerId,
+      playerId: selectedPlayer!,
       inputTags: inputTags.map((tag) => tag.value),
       outputTag: outputTag!,
     },
     {
-      enabled: !!outputTag && !!inputTags.length,
+      enabled: !!outputTag && !!inputTags.length && !!selectedPlayer,
       keepPreviousData: false,
     }
   );
@@ -61,8 +71,30 @@ export default function testRankedOutputs(props: ReturnType) {
     >
       <Stack direction="column" spacing="1rem" height="100%" padding="1rem">
         <h1>testRankedOutputs for {playerId}</h1>
-
-        <HStack>
+        <HStack justifyContent="space-between">
+          <Text fontWeight="bold">Player</Text>
+          <Box width="250px">
+            {
+              <Select
+                placeholder="Select Player"
+                value={selectedPlayer}
+                onChange={(e) => {
+                  setSelectedPlayer(e.target.value);
+                  utils.gameObjects.getRanked.invalidate();
+                }}
+                bgColor="white"
+                color="black"
+              >
+                {allPlayers.map((player) => (
+                  <option key={player.id} value={player.id}>
+                    {player.id}
+                  </option>
+                ))}
+              </Select>
+            }
+          </Box>
+        </HStack>
+        <HStack justifyContent="space-between">
           <Text fontWeight="bold">Output Tag</Text>
           <Box width="250px">
             {tagsQuery.data && (
@@ -86,7 +118,7 @@ export default function testRankedOutputs(props: ReturnType) {
           </Box>
         </HStack>
 
-        <HStack>
+        <HStack justifyContent="space-between">
           <Text fontWeight="bold">Input Tags</Text>
           <Box width="250px">
             <TagMultiSelect
