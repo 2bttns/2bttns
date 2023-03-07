@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import { useEffect, useMemo, useRef, useState } from "react";
 import wait from "../../../../utils/wait";
 import createMachine2bttns, {
-  countEmptyOptions,
+  countNumToReplace,
   getChoicesRemaining,
 } from "./twobttns.machine";
 import {
@@ -83,7 +83,7 @@ export default function use2bttnsMachine<I extends Item>({
 
       switch (items.type) {
         case "preload":
-          send({ type: "LOAD_NEXT_ITEMS_PRELOADED", args: {} });
+          send({ type: "READY_FOR_NEXT_ITEMS", args: {} });
           break;
         case "load-on-demand":
           if (!loadItemsOnDemandCallback) {
@@ -91,6 +91,8 @@ export default function use2bttnsMachine<I extends Item>({
               ":: 2bttns - loadItemsOnDemand is undefined; Required for load-on-demand ItemPolicy"
             );
           }
+          send({ type: "READY_FOR_NEXT_ITEMS", args: {} });
+          await wait(0.1);
           const count = numItemsToLoadOnDemandRef.current;
           const itemsToLoad = await loadItemsOnDemandCallback(count);
           send({
@@ -152,13 +154,15 @@ export default function use2bttnsMachine<I extends Item>({
             );
           }
           send({ type: "INIT_ITEMS_LOAD_ON_DEMAND", args: { items, replace } });
+          await wait(0.1);
           const count = numItemsToLoadOnDemandRef.current;
-          console.log("COUNT", count);
           const itemsToLoad = await loadItemsOnDemandCallback(count);
-          console.log("ITEMS", itemsToLoad);
+          await wait(0.1);
           send({
             type: "LOAD_NEXT_ITEMS_ON_DEMAND",
-            args: { itemsToLoad },
+            args: {
+              itemsToLoad,
+            },
           });
           send({ type: "PICK_READY", args: {} });
         })();
@@ -169,20 +173,13 @@ export default function use2bttnsMachine<I extends Item>({
   }, []);
 
   useEffect(() => {
-    console.log("======");
-    console.log(":: 2bttns - Current context", current.context);
-    console.log(":: 2bttns - Current state", current.value);
-    console.log("======");
-  }, [current.value]);
-
-  useEffect(() => {
     const isPickingState = (current.value as States) === "picking";
     setCanPick(isPickingState);
     canPickRef.current = isPickingState;
   }, [current.value]);
 
   useEffect(() => {
-    numItemsToLoadOnDemandRef.current = countEmptyOptions(current.context);
+    numItemsToLoadOnDemandRef.current = countNumToReplace(current.context);
   }, [current.value]);
 
   useEffect(() => {
@@ -210,5 +207,6 @@ export default function use2bttnsMachine<I extends Item>({
     isFinished,
     context: current.context,
     choicesRemaining,
+    state: current.value,
   };
 }

@@ -8,6 +8,7 @@ export type RenderPropParams = {
   context: ReturnType<typeof use2bttnsMachine>["context"];
   isFinished: ReturnType<typeof use2bttnsMachine>["isFinished"];
   choicesRemaining: ReturnType<typeof use2bttnsMachine>["choicesRemaining"];
+  state: ReturnType<typeof use2bttnsMachine>["state"];
 };
 
 export type ClassicModeProps<I extends Item> = {
@@ -47,6 +48,7 @@ export default function ClassicMode<I extends Item>(
     isFinished,
     context,
     choicesRemaining,
+    state,
   } = use2bttnsMachine({
     items,
     hotkeys,
@@ -79,5 +81,6 @@ export default function ClassicMode<I extends Item>(
     context,
     isFinished,
     choicesRemaining,
+    state,
   });
 }

@@ -103,8 +103,6 @@ const createMachine2bttns = <I extends Item = Item>() => {
                     'Unexpected context.items.type -- expected "load-on-demand"'
                   );
                 }
-                console.log("ARG", event.args);
-
                 const itemsToLoad = [...event.args.itemsToLoad];
                 let itemsLoadedToOptions = 0;
 
@@ -131,10 +129,6 @@ const createMachine2bttns = <I extends Item = Item>() => {
                       itemsLoadedToOptions,
                   },
                 };
-
-                console.log("event.args", event.args);
-                console.log("updatedoptions", updatedOptions);
-                console.log("updatedItemsContext", updatedItemsContext);
 
                 return {
                   current_options: updatedOptions,
@@ -222,7 +216,7 @@ const createMachine2bttns = <I extends Item = Item>() => {
         },
         picking_disabled: {
           on: {
-            LOAD_NEXT_ITEMS_PRELOADED: {
+            READY_FOR_NEXT_ITEMS: {
               target: "checking_next_items",
             },
           },
@@ -339,9 +333,8 @@ export function getChoicesRemaining<
   }
 }
 
-export function countEmptyOptions<I extends Item, OptionFields extends string>(
+export function countNumToReplace<I extends Item, OptionFields extends string>(
   context: Context<I, OptionFields>
 ) {
-  return Object.values(context.current_options).filter((v) => v === null)
-    .length;
+  return Object.values(context.to_replace).filter((v) => v).length;
 }

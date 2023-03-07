@@ -41,7 +41,14 @@ export default function ClassicModeView<I extends Item>(
         replace={replacePolicy}
         loadItemsOnDemandCallback={loadItemsOnDemandCallback}
       >
-        {({ button1, button2, isFinished, context, choicesRemaining }) => {
+        {({
+          button1,
+          button2,
+          isFinished,
+          context,
+          state,
+          choicesRemaining,
+        }) => {
           return (
             <Stack direction="column" alignItems="center">
               {!isFinished &&
@@ -61,6 +68,7 @@ export default function ClassicModeView<I extends Item>(
               >
                 {isFinished ? "Round over!" : "Which is more fun?"}
               </Text>
+              <>{state}</>
 
               {!isFinished && (
                 <>

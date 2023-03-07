@@ -37,7 +37,8 @@ export interface Events<I extends Item, OptionFields extends string> {
     replace?: Context<I, OptionFields>["replace_policy"];
   };
 
-  LOAD_NEXT_ITEMS_PRELOADED: {};
+  READY_FOR_NEXT_ITEMS: {};
+
   LOAD_NEXT_ITEMS_ON_DEMAND: {
     itemsToLoad: I[];
   };
