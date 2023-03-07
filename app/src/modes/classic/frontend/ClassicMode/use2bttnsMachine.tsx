@@ -2,6 +2,7 @@ import { useMachine } from "@xstate/react";
 import { motion } from "framer-motion";
 import { useEffect, useMemo, useRef, useState } from "react";
 import wait from "../../../../utils/wait";
+import { ModeUIProps } from "../../../types";
 import createMachine2bttns, {
   countNumToReplace,
   getChoicesRemaining,
@@ -9,7 +10,7 @@ import createMachine2bttns, {
 import {
   DefaultOptionFields,
   Item,
-  ItemPolicy,
+  ItemPolicyType,
   ReplacePolicy,
   Results,
   States,
@@ -24,26 +25,28 @@ export type RegisterButtonConfig = {
 
 export type RegisterButton = (config: RegisterButtonConfig) => JSX.Element;
 
-export type LoadItemsOnDemandCallback<I extends Item> = (
-  count: number
+export type LoadItemsCallback<I extends Item> = (
+  count: ModeUIProps<I>["gameData"]["numRoundItems"]
 ) => Promise<I[]>;
 
 export type Use2bttnsMachineConfig<I extends Item> = {
-  items: ItemPolicy<I>;
+  itemPolicy: ItemPolicyType;
+  numRoundItems: ModeUIProps<I>["gameData"]["numRoundItems"];
+  loadItemsCallback: LoadItemsCallback<I>;
   onFinish: (results: Results) => Promise<void>;
   hotkeys?: { [K in DefaultOptionFields]: Hotkey };
   replace?: ReplacePolicy;
-  loadItemsOnDemandCallback?: LoadItemsOnDemandCallback<I>;
 };
 
 const machine = createMachine2bttns();
 
 export default function use2bttnsMachine<I extends Item>({
-  items,
+  itemPolicy,
+  numRoundItems,
   onFinish,
   hotkeys,
   replace = "keep-picked",
-  loadItemsOnDemandCallback,
+  loadItemsCallback,
 }: Use2bttnsMachineConfig<I>) {
   const { variants, controls, animateVariant, animate, duration } =
     useAnimations();
@@ -81,19 +84,19 @@ export default function use2bttnsMachine<I extends Item>({
 
       await Promise.race([onPickAnimations(), wait(duration)]);
 
-      switch (items.type) {
+      switch (itemPolicy) {
         case "preload":
           send({ type: "READY_FOR_NEXT_ITEMS", args: {} });
           break;
         case "load-on-demand":
-          if (!loadItemsOnDemandCallback) {
+          if (!loadItemsCallback) {
             throw new Error(
               ":: 2bttns - loadItemsOnDemand is undefined; Required for load-on-demand ItemPolicy"
             );
           }
           send({ type: "READY_FOR_NEXT_ITEMS", args: {} });
           const count = numItemsToLoadOnDemandRef.current;
-          const itemsToLoad = await loadItemsOnDemandCallback(count);
+          const itemsToLoad = await loadItemsCallback(count);
           send({
             type: "LOAD_NEXT_ITEMS_ON_DEMAND",
             args: { itemsToLoad },
@@ -140,21 +143,46 @@ export default function use2bttnsMachine<I extends Item>({
   };
 
   useEffect(() => {
-    switch (items.type) {
+    switch (itemPolicy) {
       case "preload":
-        send({ type: "INIT_ITEMS_PRELOAD", args: { items, replace } });
-        send({ type: "PICK_READY", args: {} });
+        (async function () {
+          const items = await loadItemsCallback(numRoundItems);
+          send({
+            type: "INIT_ITEMS_PRELOAD",
+            args: {
+              items: {
+                type: "preload",
+                payload: {
+                  item_queue: items,
+                },
+              },
+              replace,
+            },
+          });
+          send({ type: "PICK_READY", args: {} });
+        })();
         break;
       case "load-on-demand":
         (async function () {
-          if (!loadItemsOnDemandCallback) {
+          if (!loadItemsCallback) {
             throw new Error(
               ":: 2bttns - loadItemsOnDemandCallback is undefined; required for load-on-demand ItemPolicy"
             );
           }
-          send({ type: "INIT_ITEMS_LOAD_ON_DEMAND", args: { items, replace } });
+          send({
+            type: "INIT_ITEMS_LOAD_ON_DEMAND",
+            args: {
+              items: {
+                type: "load-on-demand",
+                payload: {
+                  remainingNumItemsToLoad: numRoundItems,
+                },
+              },
+              replace,
+            },
+          });
           const count = countNumToReplace(current.context);
-          const itemsToLoad = await loadItemsOnDemandCallback(count);
+          const itemsToLoad = await loadItemsCallback(count);
           send({
             type: "LOAD_NEXT_ITEMS_ON_DEMAND",
             args: {

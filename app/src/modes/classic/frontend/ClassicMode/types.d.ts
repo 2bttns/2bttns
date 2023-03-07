@@ -67,13 +67,15 @@ export type PreloadItemPolicy<I extends Item> = {
 export type LoadOnDemandItemPolicy<I extends Item> = {
   type: "load-on-demand";
   payload: {
-    totalNumItemsToLoad: number;
+    remainingNumItemsToLoad: number;
   };
 };
 
 export type ItemPolicy<I extends Item> =
   | PreloadItemPolicy<I>
   | LoadOnDemandItemPolicy<I>;
+
+export type ItemPolicyType = ItemPolicy<any>["type"];
 
 export interface Context<I extends Item, OptionFields extends string> {
   items: ItemPolicy<I>;

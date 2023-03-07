@@ -4,13 +4,13 @@ import { publicProcedure } from "../../../server/api/trpc";
 export const getRandomGameObjects = publicProcedure
   .input(
     z.object({
-      numGameObjects: z.number(),
+      count: z.number().optional(),
       excludedGameObjectIds: z.array(z.string()).optional(),
       tags: z.array(z.string()).optional(),
     })
   )
   .query(async ({ ctx, input }) => {
-    const { numGameObjects, excludedGameObjectIds, tags } = input;
+    const { count, excludedGameObjectIds, tags } = input;
 
     const gameObjects = await ctx.prisma.gameObject.findMany({
       where: {
@@ -22,7 +22,7 @@ export const getRandomGameObjects = publicProcedure
         tags: tags
           ? {
               some: {
-                name: {
+                id: {
                   in: tags,
                 },
               },
@@ -32,7 +32,10 @@ export const getRandomGameObjects = publicProcedure
     });
 
     const shuffled = gameObjects.sort(() => 0.5 - Math.random());
-    const selected = shuffled.slice(0, numGameObjects);
+    let selected = shuffled;
+    if (count) {
+      selected = shuffled.slice(0, count);
+    }
 
     return { results: selected };
   });

@@ -31,7 +31,7 @@ export default function Play(props: PlayProps) {
         {game?.name}
       </Heading>
       <ClassicMode
-        items={gameObjects}
+        itemPolicy={gameObjects}
         renderItem={(item) => item.name}
         hotkeys={{
           first: ["w", "ArrowUp"],

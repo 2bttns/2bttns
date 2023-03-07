@@ -1,7 +1,7 @@
 import { GameObject } from "@prisma/client";
 import { api, apiClient } from "../../../../utils/api";
 import { ModeUIProps } from "../../../types";
-import { ReplacePolicy } from "../ClassicMode/types";
+import { ItemPolicyType, ReplacePolicy } from "../ClassicMode/types";
 import { Use2bttnsMachineConfig } from "../ClassicMode/use2bttnsMachine";
 import ClassicModeView, {
   ClassicModeViewProps,
@@ -10,12 +10,13 @@ import ClassicModeView, {
 export const defaultReplacePolicy: ReplacePolicy = "keep-picked";
 
 export type ClassicModeContainerProps = ModeUIProps<{
+  itemPolicy: ItemPolicyType;
   replacePolicy?: ReplacePolicy;
 }>;
 
 export default function ClassicModeContainer(props: ClassicModeContainerProps) {
   const {
-    config: { replacePolicy },
+    config: { itemPolicy = "load-on-demand", replacePolicy },
     gameData,
   } = props;
 
@@ -45,13 +46,13 @@ export default function ClassicModeContainer(props: ClassicModeContainerProps) {
       }
     };
 
-  const loadItemsOnDemandCallback: ClassicModeViewProps<GameObject>["loadItemsOnDemandCallback"] =
+  const loadItemsCallback: ClassicModeViewProps<GameObject>["loadItemsCallback"] =
     async (count) => {
-      // TODO: FIlter by tag & exclude seen gameObjects
       const { results } =
         await apiClient.modes.modeBackendRouter.classicMode.getRandomGameObjects.query(
           {
-            numGameObjects: count,
+            count: count,
+            tags: gameData.game.inputTags.map((t) => t.id),
           }
         );
       return results;
@@ -59,10 +60,12 @@ export default function ClassicModeContainer(props: ClassicModeContainerProps) {
 
   return (
     <ClassicModeView
-      gameData={gameData}
+      game={gameData.game}
+      itemPolicy={itemPolicy}
+      numRoundItems={gameData.numRoundItems}
       replacePolicy={replacePolicy ?? defaultReplacePolicy}
       onFinish={handleSubmitResults}
-      loadItemsOnDemandCallback={loadItemsOnDemandCallback}
+      loadItemsCallback={loadItemsCallback}
     />
   );
 }

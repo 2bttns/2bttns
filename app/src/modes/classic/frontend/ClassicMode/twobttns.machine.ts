@@ -125,8 +125,8 @@ const createMachine2bttns = <I extends Item = Item>() => {
                   ...context.items,
                   payload: {
                     ...context.items.payload,
-                    totalNumItemsToLoad:
-                      context.items.payload.totalNumItemsToLoad -
+                    remainingNumItemsToLoad:
+                      context.items.payload.remainingNumItemsToLoad -
                       itemsLoadedToOptions,
                   },
                 };
@@ -277,10 +277,10 @@ export function hasEnoughNextItems<I extends Item, OptionFields extends string>(
       switch (context.replace_policy) {
         case "keep-picked":
         case "replace-picked":
-          return context.items.payload.totalNumItemsToLoad >= 1;
+          return context.items.payload.remainingNumItemsToLoad >= 1;
         case "replace-all":
           return (
-            context.items.payload.totalNumItemsToLoad >=
+            context.items.payload.remainingNumItemsToLoad >=
             Object.keys(context.to_replace).length
           );
         default:
@@ -317,13 +317,13 @@ export function getChoicesRemaining<
       }
     case "load-on-demand":
       const remainingLoadOnDemandItems =
-        context.items.payload.totalNumItemsToLoad;
+        context.items.payload.remainingNumItemsToLoad;
       switch (context.replace_policy) {
         case "keep-picked":
         case "replace-picked":
           return remainingLoadOnDemandItems;
         case "replace-all":
-          return Math.floor(context.items.payload.totalNumItemsToLoad / 2);
+          return Math.floor(context.items.payload.remainingNumItemsToLoad / 2);
         default:
           throw new Error(
             ":: 2bttns - Invalid replace policy while computing remaining choices."

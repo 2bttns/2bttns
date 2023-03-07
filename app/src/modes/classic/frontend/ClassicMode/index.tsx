@@ -1,5 +1,5 @@
 import ClassicButton, { ClassicButtonProps } from "./ClassicButton";
-import { Item, ReplacePolicy } from "./types";
+import { Item } from "./types";
 import use2bttnsMachine, { Use2bttnsMachineConfig } from "./use2bttnsMachine";
 
 export type RenderPropParams = {
@@ -12,8 +12,6 @@ export type RenderPropParams = {
 };
 
 export type ClassicModeProps<I extends Item> = {
-  // TODO: Replace Item type with GameObject type
-  items: Use2bttnsMachineConfig<I>["items"];
   children: (params: RenderPropParams) => JSX.Element;
   hotkeys?: Use2bttnsMachineConfig<I>["hotkeys"];
   button1Props?: Partial<ClassicButtonProps>;
@@ -22,39 +20,43 @@ export type ClassicModeProps<I extends Item> = {
   // TODO: Allow for custom ReactNode rendering of items
   renderItem?: (item: I) => string;
 
+  itemPolicy: Use2bttnsMachineConfig<I>["itemPolicy"];
+  loadItemsCallback: Use2bttnsMachineConfig<I>["loadItemsCallback"];
+  numRoundItems: Use2bttnsMachineConfig<I>["numRoundItems"];
+  replace?: Use2bttnsMachineConfig<I>["replace"];
   onFinish: Use2bttnsMachineConfig<I>["onFinish"];
-  replace?: ReplacePolicy;
-  loadItemsOnDemandCallback?: Use2bttnsMachineConfig<I>["loadItemsOnDemandCallback"];
 };
 
 export default function ClassicMode<I extends Item>(
   props: ClassicModeProps<I>
 ) {
   const {
-    items,
-    hotkeys,
-    children,
     button1Props,
     button2Props,
-    renderItem = (item) => item.id,
+    children,
+    hotkeys,
+    itemPolicy,
+    loadItemsCallback,
+    numRoundItems,
     onFinish,
+    renderItem = (item) => item.id,
     replace,
-    loadItemsOnDemandCallback,
   } = props;
 
   const {
-    registerButton,
+    choicesRemaining,
+    context,
     current_options,
     isFinished,
-    context,
-    choicesRemaining,
+    registerButton,
     state,
   } = use2bttnsMachine({
-    items,
     hotkeys,
+    itemPolicy,
+    loadItemsCallback,
+    numRoundItems,
     onFinish,
     replace,
-    loadItemsOnDemandCallback,
   });
 
   return children({

@@ -1,17 +1,12 @@
-import { Game, GameObject } from "@prisma/client";
+import { Game, Tag } from "@prisma/client";
 
 export interface ModeUIProps<ConfigProps> {
   gameData: {
     playerId: string;
-    game: Game;
-    gameObjects:
-      | { type: "preload"; payload: { gameObjects: GameObject[] } }
-      | {
-          type: "load-on-demand";
-          payload: {
-            totalNumItemsToLoad: number;
-          };
-        };
+    game: Game & {
+      inputTags: Tag[];
+    };
+    numRoundItems: number;
   };
   config: ConfigProps;
 }

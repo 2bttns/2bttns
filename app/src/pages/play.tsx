@@ -24,7 +24,6 @@ import { AvailableModes } from "../modes/availableModes";
 import { getModeUI } from "../modes/modesUIRegistry";
 import { ModeUIProps } from "../modes/types";
 import { prisma } from "../server/db";
-import getRandomGameObjects from "../server/helpers/getRandomGameObjects";
 import { api } from "../utils/api";
 import { NextPageWithLayout } from "./_app";
 
@@ -96,9 +95,9 @@ export const getServerSideProps: GetServerSideProps<ReturnType> = async (
     // Ensure the game exists while getting the necessary data
     const game = await prisma.game.findUniqueOrThrow({
       where: { id: gameId },
+      include: { inputTags: true },
     });
 
-    // Get the game objects for the round
     // Query param that can be used to override the default number of items per round
     // If no default is set, get all items
     let numItemsQueryParam: number | null | "ALL" = null;
@@ -113,13 +112,15 @@ export const getServerSideProps: GetServerSideProps<ReturnType> = async (
         numItemsQueryParam = parsedNumItems;
       }
     }
-
-    const numItemsToGet: number | "ALL" =
+    let numItemsToGet =
       numItemsQueryParam ?? game.defaultNumItemsPerRound ?? "ALL";
-    const shuffledGameObjects = await getRandomGameObjects(
-      gameId,
-      numItemsToGet
-    );
+    if (numItemsToGet === "ALL") {
+      numItemsToGet = await prisma.gameObject.count({
+        where: {
+          tags: { some: { id: { in: game.inputTags.map((t) => t.id) } } },
+        },
+      });
+    }
 
     return {
       props: {
@@ -132,18 +133,8 @@ export const getServerSideProps: GetServerSideProps<ReturnType> = async (
         gameData: {
           playerId: userId,
           game: JSON.parse(JSON.stringify(game)),
-          // gameObjects: {
-          //   type: "preload",
-          //   payload: {
-          //     gameObjects: JSON.parse(JSON.stringify(shuffledGameObjects)),
-          //   },
-          // },
-          gameObjects: {
-            type: "load-on-demand",
-            payload: {
-              totalNumItemsToLoad: shuffledGameObjects.length,
-            },
-          },
+          // TODO: Just return #round items; individual modes will handle gameobject fetching
+          numRoundItems: numItemsToGet,
         },
       },
     };
