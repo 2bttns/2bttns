@@ -92,7 +92,6 @@ export default function use2bttnsMachine<I extends Item>({
             );
           }
           send({ type: "READY_FOR_NEXT_ITEMS", args: {} });
-          await wait(0.1);
           const count = numItemsToLoadOnDemandRef.current;
           const itemsToLoad = await loadItemsOnDemandCallback(count);
           send({
@@ -154,10 +153,8 @@ export default function use2bttnsMachine<I extends Item>({
             );
           }
           send({ type: "INIT_ITEMS_LOAD_ON_DEMAND", args: { items, replace } });
-          await wait(0.1);
-          const count = numItemsToLoadOnDemandRef.current;
+          const count = countNumToReplace(current.context);
           const itemsToLoad = await loadItemsOnDemandCallback(count);
-          await wait(0.1);
           send({
             type: "LOAD_NEXT_ITEMS_ON_DEMAND",
             args: {
@@ -179,6 +176,8 @@ export default function use2bttnsMachine<I extends Item>({
   }, [current.value]);
 
   useEffect(() => {
+    // Ref to track how many items to load on demand, if items.type is load-on-demand
+    // handleButtonClick uses this ref; without it the value would be stale and items won't load as expected
     numItemsToLoadOnDemandRef.current = countNumToReplace(current.context);
   }, [current.value]);
 

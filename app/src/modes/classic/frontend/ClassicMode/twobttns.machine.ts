@@ -96,6 +96,7 @@ const createMachine2bttns = <I extends Item = Item>() => {
         loading_next_items_load_on_demand: {
           on: {
             // The calling code should call this event during this state with items that were loaded on demand (e.g. from an API call)
+            // The calling code should use countNumToReplace() to determine the number of items to load
             LOAD_NEXT_ITEMS_ON_DEMAND: {
               actions: assign((context, event) => {
                 if (context.items.type !== "load-on-demand") {
