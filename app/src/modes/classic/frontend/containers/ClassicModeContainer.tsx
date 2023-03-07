@@ -7,16 +7,17 @@ import ClassicModeView, {
   ClassicModeViewProps,
 } from "../views/ClassicModeView";
 
+export const defaultItemPolicy: ItemPolicyType = "load-on-demand";
 export const defaultReplacePolicy: ReplacePolicy = "keep-picked";
 
 export type ClassicModeContainerProps = ModeUIProps<{
-  itemPolicy: ItemPolicyType;
+  itemPolicy?: ItemPolicyType;
   replacePolicy?: ReplacePolicy;
 }>;
 
 export default function ClassicModeContainer(props: ClassicModeContainerProps) {
   const {
-    config: { itemPolicy = "load-on-demand", replacePolicy },
+    config: { itemPolicy, replacePolicy },
     gameData,
   } = props;
 
@@ -63,7 +64,7 @@ export default function ClassicModeContainer(props: ClassicModeContainerProps) {
   return (
     <ClassicModeView
       game={gameData.game}
-      itemPolicy={itemPolicy}
+      itemPolicy={itemPolicy ?? defaultItemPolicy}
       numRoundItems={gameData.numRoundItems}
       replacePolicy={replacePolicy ?? defaultReplacePolicy}
       onFinish={handleSubmitResults}

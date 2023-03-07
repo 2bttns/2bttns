@@ -31,7 +31,7 @@ export type LoadItemsCallback<I extends Item> = (
 ) => Promise<I[]>;
 
 export type Use2bttnsMachineConfig<I extends Item> = {
-  itemPolicy: ItemPolicyType;
+  itemPolicy?: ItemPolicyType;
   numRoundItems: ModeUIProps<I>["gameData"]["numRoundItems"];
   loadItemsCallback: LoadItemsCallback<I>;
   onFinish: (results: Results) => Promise<void>;
@@ -197,7 +197,9 @@ export default function use2bttnsMachine<I extends Item>({
         })();
         break;
       default:
-        throw new Error(":: 2bttns - Invalid items type");
+        throw new Error(
+          ":: 2bttns - Invalid itemPolicy provided to use2bttnsMachine -- must be 'preload' or 'load-on-demand'"
+        );
     }
   }, []);
 

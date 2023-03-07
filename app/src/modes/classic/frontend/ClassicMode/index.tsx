@@ -20,7 +20,7 @@ export type ClassicModeProps<I extends Item> = {
   // TODO: Allow for custom ReactNode rendering of items
   renderItem?: (item: I) => string;
 
-  itemPolicy: Use2bttnsMachineConfig<I>["itemPolicy"];
+  itemPolicy?: Use2bttnsMachineConfig<I>["itemPolicy"];
   loadItemsCallback: Use2bttnsMachineConfig<I>["loadItemsCallback"];
   numRoundItems: Use2bttnsMachineConfig<I>["numRoundItems"];
   replace?: Use2bttnsMachineConfig<I>["replace"];
