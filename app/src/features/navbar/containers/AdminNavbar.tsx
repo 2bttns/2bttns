@@ -11,6 +11,7 @@ const links: NavbarLink[] = [
   { href: "/tags", label: "Tags" },
   { href: "/settings", label: "Settings" },
   { href: "/docs", label: "Docs" },
+  { href: "/testRankedOutputs", label: "Outputs" },
 ];
 
 export default function AdminNavbar(props: AdminNavbarProps) {
