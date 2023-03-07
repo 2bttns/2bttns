@@ -47,12 +47,14 @@ export default function ClassicModeContainer(props: ClassicModeContainerProps) {
     };
 
   const loadItemsCallback: ClassicModeViewProps<GameObject>["loadItemsCallback"] =
-    async (count) => {
+    async (count, exclude) => {
+      // TODO: Get items based on a "next item policy" such as "top-rated", "random", "discover-new", etc.
       const { results } =
         await apiClient.modes.modeBackendRouter.classicMode.getRandomGameObjects.query(
           {
             count: count,
             tags: gameData.game.inputTags.map((t) => t.id),
+            excludedGameObjectIds: exclude?.map((item) => item.id) ?? [],
           }
         );
       return results;

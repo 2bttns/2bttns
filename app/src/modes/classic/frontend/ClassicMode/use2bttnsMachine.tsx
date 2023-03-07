@@ -26,7 +26,8 @@ export type RegisterButtonConfig = {
 export type RegisterButton = (config: RegisterButtonConfig) => JSX.Element;
 
 export type LoadItemsCallback<I extends Item> = (
-  count: ModeUIProps<I>["gameData"]["numRoundItems"]
+  count: ModeUIProps<I>["gameData"]["numRoundItems"],
+  exclude?: I[]
 ) => Promise<I[]>;
 
 export type Use2bttnsMachineConfig<I extends Item> = {
@@ -96,7 +97,10 @@ export default function use2bttnsMachine<I extends Item>({
           }
           send({ type: "READY_FOR_NEXT_ITEMS", args: {} });
           const count = numItemsToLoadOnDemandRef.current;
-          const itemsToLoad = await loadItemsCallback(count);
+          const exclude = Object.values(current.context.current_options).filter(
+            (item) => !!item
+          ) as I[];
+          const itemsToLoad = await loadItemsCallback(count, exclude);
           send({
             type: "LOAD_NEXT_ITEMS_ON_DEMAND",
             args: { itemsToLoad },
