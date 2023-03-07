@@ -1,18 +1,28 @@
 import { Heading, Stack, Text } from "@chakra-ui/react";
-import { Game, GameObject } from "@prisma/client";
-import ClassicMode from "../ClassicMode";
-import { ReplacePolicy } from "../ClassicMode/types";
-import { Use2bttnsMachineConfig } from "../ClassicMode/use2bttnsMachine";
+import { Game } from "@prisma/client";
+import ClassicMode, { ClassicModeProps } from "../ClassicMode";
+import { Item } from "../ClassicMode/types";
 
-export type ClassicModeViewProps = {
+export type ClassicModeViewProps<I extends Item> = {
   game: Game;
-  gameObjects: GameObject[];
-  onFinish: Use2bttnsMachineConfig["onFinish"];
-  replacePolicy: ReplacePolicy;
+  itemPolicy: ClassicModeProps<I>["itemPolicy"];
+  numRoundItems: ClassicModeProps<I>["numRoundItems"];
+  loadItemsCallback: ClassicModeProps<I>["loadItemsCallback"];
+  replacePolicy: ClassicModeProps<I>["replace"];
+  onFinish: ClassicModeProps<I>["onFinish"];
 };
 
-export default function ClassicModeView(props: ClassicModeViewProps) {
-  const { game, gameObjects, onFinish, replacePolicy } = props;
+export default function ClassicModeView<I extends Item>(
+  props: ClassicModeViewProps<I>
+) {
+  const {
+    game,
+    itemPolicy,
+    numRoundItems,
+    onFinish,
+    replacePolicy,
+    loadItemsCallback,
+  } = props;
 
   return (
     <>
@@ -24,10 +34,12 @@ export default function ClassicModeView(props: ClassicModeViewProps) {
           textAlign: "center",
         }}
       >
-        {game?.name}
+        {game.name ?? "Untitled Game"}
       </Heading>
       <ClassicMode
-        items={gameObjects}
+        itemPolicy={itemPolicy}
+        numRoundItems={numRoundItems}
+        loadItemsCallback={loadItemsCallback}
         renderItem={(item) => item.name}
         hotkeys={{
           first: ["w", "ArrowUp"],
@@ -36,7 +48,14 @@ export default function ClassicModeView(props: ClassicModeViewProps) {
         onFinish={onFinish}
         replace={replacePolicy}
       >
-        {({ button1, button2, isFinished, context, choicesRemaining }) => {
+        {({
+          button1,
+          button2,
+          isFinished,
+          context,
+          state,
+          choicesRemaining,
+        }) => {
           return (
             <Stack direction="column" alignItems="center">
               {!isFinished &&
@@ -56,6 +75,7 @@ export default function ClassicModeView(props: ClassicModeViewProps) {
               >
                 {isFinished ? "Round over!" : "Which is more fun?"}
               </Text>
+              <>{state}</>
 
               {!isFinished && (
                 <>

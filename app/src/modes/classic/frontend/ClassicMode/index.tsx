@@ -1,5 +1,5 @@
 import ClassicButton, { ClassicButtonProps } from "./ClassicButton";
-import { Item, ReplacePolicy } from "./types";
+import { Item } from "./types";
 import use2bttnsMachine, { Use2bttnsMachineConfig } from "./use2bttnsMachine";
 
 export type RenderPropParams = {
@@ -8,46 +8,53 @@ export type RenderPropParams = {
   context: ReturnType<typeof use2bttnsMachine>["context"];
   isFinished: ReturnType<typeof use2bttnsMachine>["isFinished"];
   choicesRemaining: ReturnType<typeof use2bttnsMachine>["choicesRemaining"];
+  state: ReturnType<typeof use2bttnsMachine>["state"];
 };
 
-export type ClassicModeProps<T extends Item> = {
-  // TODO: Replace Item type with GameObject type
-  items: T[];
+export type ClassicModeProps<I extends Item> = {
   children: (params: RenderPropParams) => JSX.Element;
-  hotkeys?: Use2bttnsMachineConfig["hotkeys"];
+  hotkeys?: Use2bttnsMachineConfig<I>["hotkeys"];
   button1Props?: Partial<ClassicButtonProps>;
   button2Props?: Partial<ClassicButtonProps>;
 
   // TODO: Allow for custom ReactNode rendering of items
-  renderItem?: (item: T) => string;
+  renderItem?: (item: I) => string;
 
-  onFinish: Use2bttnsMachineConfig["onFinish"];
-  replace?: ReplacePolicy;
+  itemPolicy?: Use2bttnsMachineConfig<I>["itemPolicy"];
+  loadItemsCallback: Use2bttnsMachineConfig<I>["loadItemsCallback"];
+  numRoundItems: Use2bttnsMachineConfig<I>["numRoundItems"];
+  replace?: Use2bttnsMachineConfig<I>["replace"];
+  onFinish: Use2bttnsMachineConfig<I>["onFinish"];
 };
 
-export default function ClassicMode<T extends Item>(
-  props: ClassicModeProps<T>
+export default function ClassicMode<I extends Item>(
+  props: ClassicModeProps<I>
 ) {
   const {
-    items,
-    hotkeys,
-    children,
     button1Props,
     button2Props,
-    renderItem = (item) => item.id,
+    children,
+    hotkeys,
+    itemPolicy,
+    loadItemsCallback,
+    numRoundItems,
     onFinish,
+    renderItem = (item) => item.id,
     replace,
   } = props;
 
   const {
-    registerButton,
+    choicesRemaining,
+    context,
     current_options,
     isFinished,
-    context,
-    choicesRemaining,
+    registerButton,
+    state,
   } = use2bttnsMachine({
-    items,
     hotkeys,
+    itemPolicy,
+    loadItemsCallback,
+    numRoundItems,
     onFinish,
     replace,
   });
@@ -76,5 +83,6 @@ export default function ClassicMode<T extends Item>(
     context,
     isFinished,
     choicesRemaining,
+    state,
   });
 }

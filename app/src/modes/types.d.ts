@@ -1,8 +1,12 @@
+import { Game, Tag } from "@prisma/client";
+
 export interface ModeUIProps<ConfigProps> {
   gameData: {
     playerId: string;
-    game: Game;
-    gameObjects: GameObject[];
+    game: Game & {
+      inputTags: Tag[];
+    };
+    numRoundItems: number;
   };
   config: ConfigProps;
 }

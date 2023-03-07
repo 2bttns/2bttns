@@ -76,22 +76,19 @@ export default function EditGameMode(props: EditGameModeProps) {
           </Box>
         )}
       </HStack>
-      <HStack>
-        <Text fontWeight="bold">Replace Policy:</Text>
-        {ConfigComponent && modeConfig && (
-          <ConfigComponent
-            config={modeConfig}
-            onConfigChange={async (updatedConfig) => {
-              await handleUpdateGame({
-                id: gameId,
-                data: {
-                  modeConfigJson: JSON.stringify(updatedConfig),
-                },
-              });
-            }}
-          />
-        )}
-      </HStack>
+      {ConfigComponent && modeConfig && (
+        <ConfigComponent
+          config={modeConfig}
+          onConfigChange={async (updatedConfig) => {
+            await handleUpdateGame({
+              id: gameId,
+              data: {
+                modeConfigJson: JSON.stringify(updatedConfig),
+              },
+            });
+          }}
+        />
+      )}
     </VStack>
   );
 }

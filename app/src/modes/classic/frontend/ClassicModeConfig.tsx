@@ -1,9 +1,10 @@
-import { Select } from "@chakra-ui/react";
+import { HStack, Select, Stack, Text } from "@chakra-ui/react";
 import { useState } from "react";
 import { ConfigComponentProps } from "../../types";
-import { ReplacePolicy } from "./ClassicMode/types";
+import { ItemPolicyType, ReplacePolicy } from "./ClassicMode/types";
 import {
   ClassicModeContainerProps,
+  defaultItemPolicy,
   defaultReplacePolicy,
 } from "./containers/ClassicModeContainer";
 
@@ -13,6 +14,8 @@ const replacePolicies: ReplacePolicy[] = [
   "replace-all",
 ];
 
+const itemPolicies: ItemPolicyType[] = ["load-on-demand", "preload"];
+
 export default function ClassicModeConfig(
   props: ConfigComponentProps<ClassicModeContainerProps["config"]>
 ) {
@@ -20,11 +23,24 @@ export default function ClassicModeConfig(
     ...props.config,
   });
 
+  const handleItemPolicyChange = (
+    event: React.ChangeEvent<HTMLSelectElement>
+  ) => {
+    setConfig((prev) => {
+      const updatedConfig: ClassicModeContainerProps["config"] = {
+        ...prev,
+        itemPolicy: event.target.value as ItemPolicyType,
+      };
+      props.onConfigChange(updatedConfig);
+      return updatedConfig;
+    });
+  };
+
   const handleReplacePolicyChange = (
     event: React.ChangeEvent<HTMLSelectElement>
   ) => {
     setConfig((prev) => {
-      const updatedConfig = {
+      const updatedConfig: ClassicModeContainerProps["config"] = {
         ...prev,
         replacePolicy: event.target.value as ReplacePolicy,
       };
@@ -34,16 +50,36 @@ export default function ClassicModeConfig(
   };
 
   return (
-    <div>
-      <Select
-        onChange={handleReplacePolicyChange}
-        value={config.replacePolicy ?? defaultReplacePolicy}
-        sx={{ backgroundColor: "white" }}
-      >
-        {replacePolicies.map((policy) => (
-          <option value={policy}>{policy}</option>
-        ))}
-      </Select>
-    </div>
+    <Stack direction="column" spacing="1rem" width="100%">
+      <HStack maxWidth="512px">
+        <Text fontWeight="bold" minWidth="128px">
+          Item Policy:
+        </Text>
+        <Select
+          onChange={handleItemPolicyChange}
+          value={config.itemPolicy ?? defaultItemPolicy}
+          sx={{ backgroundColor: "white" }}
+        >
+          {itemPolicies.map((option) => (
+            <option value={option}>{option}</option>
+          ))}
+        </Select>
+      </HStack>
+
+      <HStack maxWidth="512px">
+        <Text fontWeight="bold" minWidth="128px">
+          Replace Policy:
+        </Text>
+        <Select
+          onChange={handleReplacePolicyChange}
+          value={config.replacePolicy ?? defaultReplacePolicy}
+          sx={{ backgroundColor: "white" }}
+        >
+          {replacePolicies.map((options) => (
+            <option value={options}>{options}</option>
+          ))}
+        </Select>
+      </HStack>
+    </Stack>
   );
 }

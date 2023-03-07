@@ -27,12 +27,21 @@ export interface UserChoice<I extends Item> {
 }
 
 export interface Events<I extends Item, OptionFields extends string> {
-  INIT: {
-    items: I[];
+  INIT_ITEMS_PRELOAD: {
+    items: PreloadItemPolicy;
     replace?: Context<I, OptionFields>["replace_policy"];
   };
 
-  LOAD_NEXT_ITEMS: {};
+  INIT_ITEMS_LOAD_ON_DEMAND: {
+    items: LoadOnDemandItemPolicy;
+    replace?: Context<I, OptionFields>["replace_policy"];
+  };
+
+  READY_FOR_NEXT_ITEMS: {};
+
+  LOAD_NEXT_ITEMS_ON_DEMAND: {
+    itemsToLoad: I[];
+  };
 
   PICK_READY: {};
 
@@ -48,8 +57,28 @@ export type EventObject<E extends Events<any, any> = Events<any, any>> = {
   };
 }[keyof E];
 
+export type PreloadItemPolicy<I extends Item> = {
+  type: "preload";
+  payload: {
+    item_queue: I[];
+  };
+};
+
+export type LoadOnDemandItemPolicy<I extends Item> = {
+  type: "load-on-demand";
+  payload: {
+    remainingNumItemsToLoad: number;
+  };
+};
+
+export type ItemPolicy<I extends Item> =
+  | PreloadItemPolicy<I>
+  | LoadOnDemandItemPolicy<I>;
+
+export type ItemPolicyType = ItemPolicy<any>["type"];
+
 export interface Context<I extends Item, OptionFields extends string> {
-  item_queue: I[];
+  items: ItemPolicy<I>;
   current_options: Choice<I, OptionFields>;
   to_replace: ChoiceReplacement<OptionFields>;
   results: UserChoice<I>[];
