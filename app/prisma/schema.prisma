@@ -73,12 +73,11 @@ model Game {
     description String?
 
     defaultNumItemsPerRound Int?
-    plugins                 String? // Comma separated list of plugins
-
-    inputTags Tag[]
 
     mode           String?
     modeConfigJson String?
+
+    inputTags Tag[]
 }
 
 model GameObject {
