@@ -7,6 +7,7 @@ export interface ModeUIProps<ConfigProps> {
       inputTags: Tag[];
     };
     numRoundItems: number;
+    callbackUrl: string | null;
   };
   config: ConfigProps;
 }

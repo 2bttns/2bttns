@@ -52,6 +52,7 @@ export const getServerSideProps: GetServerSideProps<ReturnType> = async (
   const appId = urlObj.searchParams.get("app_id");
   const incomingJwt = urlObj.searchParams.get("jwt");
   const numItems = urlObj.searchParams.get("num_items");
+  const callbackUrl = urlObj.searchParams.get("callback_url");
 
   try {
     if (!gameId) {
@@ -135,6 +136,7 @@ export const getServerSideProps: GetServerSideProps<ReturnType> = async (
           game: JSON.parse(JSON.stringify(game)),
           // TODO: Just return #round items; individual modes will handle gameobject fetching
           numRoundItems: numItemsToGet,
+          callbackUrl,
         },
       },
     };

@@ -32,7 +32,7 @@ class Controller {
         return decodedObj;
     }
     generatePlayUrl(params) {
-        const { game_id, user_id, num_items } = params;
+        const { game_id, user_id, num_items, callback_url } = params;
         const token = this.generateUserToken({ userId: user_id });
         const queryBuilder = new URLSearchParams();
         queryBuilder.append("game_id", game_id);
@@ -40,6 +40,9 @@ class Controller {
         queryBuilder.append("jwt", token);
         if (num_items) {
             queryBuilder.append("num_items", num_items.toString());
+        }
+        if (callback_url) {
+            queryBuilder.append("callback_url", callback_url);
         }
         return `${this.url}/play?${queryBuilder.toString()}`;
     }

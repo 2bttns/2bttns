@@ -10,11 +10,14 @@ export default async function handler(
     const game_id = req.query.game_id as GeneratePlayURLParams["game_id"];
     const user_id = req.query.user_id as GeneratePlayURLParams["user_id"];
     const num_items = req.query.num_items as GeneratePlayURLParams["num_items"];
+    const callback_url = req.query
+      .callback_url as GeneratePlayURLParams["callback_url"];
 
     const url = twobttnsController.generatePlayUrl({
       game_id,
       user_id,
       num_items,
+      callback_url,
     });
     return res.redirect(url);
   } catch (error) {

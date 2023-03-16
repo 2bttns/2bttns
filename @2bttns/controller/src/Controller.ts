@@ -6,6 +6,7 @@ export type GeneratePlayURLParams = {
   game_id: string;
   user_id: string;
   num_items?: number | "ALL";
+  callback_url?: string;
 };
 
 export type ControllerConfig = {
@@ -51,7 +52,7 @@ export default class Controller {
   }
 
   generatePlayUrl(params: GeneratePlayURLParams) {
-    const { game_id, user_id, num_items } = params;
+    const { game_id, user_id, num_items, callback_url } = params;
 
     const token = this.generateUserToken({ userId: user_id });
     const queryBuilder = new URLSearchParams();
@@ -60,6 +61,10 @@ export default class Controller {
     queryBuilder.append("jwt", token);
     if (num_items) {
       queryBuilder.append("num_items", num_items.toString());
+    }
+
+    if (callback_url) {
+      queryBuilder.append("callback_url", callback_url);
     }
 
     return `${this.url}/play?${queryBuilder.toString()}`;

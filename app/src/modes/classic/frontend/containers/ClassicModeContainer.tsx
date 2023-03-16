@@ -21,31 +21,41 @@ export default function ClassicModeContainer(props: ClassicModeContainerProps) {
     gameData,
   } = props;
 
+  const redirectToCallbackUrl = () => {
+    console.log(`Try redirecting to ${gameData.callbackUrl}`);
+    if (typeof window === "undefined") return;
+    if (!gameData.callbackUrl) return;
+
+    window.location.href = gameData.callbackUrl;
+  };
+
   const processGameResultsMutation =
     api.modes.modeBackendRouter.classicMode.processGameResults.useMutation();
-  const handleSubmitResults: Use2bttnsMachineConfig<GameObject>["onFinish"] =
-    async (results) => {
-      try {
-        console.info(":: 2bttns - Results:", results);
-        const result = await processGameResultsMutation.mutateAsync({
-          playerId: gameData.playerId,
-          results: results.map((r) => {
-            return {
-              not_picked: {
-                gameObjectId: r.not_picked.id,
-              },
-              picked: {
-                gameObjectId: r.picked.id,
-              },
-            };
-          }),
-        });
+  const handleFinish: Use2bttnsMachineConfig<GameObject>["onFinish"] = async (
+    results
+  ) => {
+    try {
+      console.info(":: 2bttns - Results:", results);
+      const result = await processGameResultsMutation.mutateAsync({
+        playerId: gameData.playerId,
+        results: results.map((r) => {
+          return {
+            not_picked: {
+              gameObjectId: r.not_picked.id,
+            },
+            picked: {
+              gameObjectId: r.picked.id,
+            },
+          };
+        }),
+      });
 
-        console.info(":: 2bttns - Result:", result);
-      } catch (error) {
-        console.error(":: 2bttns - Error:", error);
-      }
-    };
+      console.info(":: 2bttns - Result:", result);
+      redirectToCallbackUrl();
+    } catch (error) {
+      console.error(":: 2bttns - Error:", error);
+    }
+  };
 
   const loadItemsCallback: ClassicModeViewProps<GameObject>["loadItemsCallback"] =
     async (count, exclude) => {
@@ -67,7 +77,7 @@ export default function ClassicModeContainer(props: ClassicModeContainerProps) {
       itemPolicy={itemPolicy ?? defaultItemPolicy}
       numRoundItems={gameData.numRoundItems}
       replacePolicy={replacePolicy ?? defaultReplacePolicy}
-      onFinish={handleSubmitResults}
+      onFinish={handleFinish}
       loadItemsCallback={loadItemsCallback}
     />
   );

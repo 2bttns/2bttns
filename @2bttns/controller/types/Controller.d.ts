@@ -4,6 +4,7 @@ export type GeneratePlayURLParams = {
     game_id: string;
     user_id: string;
     num_items?: number | "ALL";
+    callback_url?: string;
 };
 export type ControllerConfig = {
     appId: string;
