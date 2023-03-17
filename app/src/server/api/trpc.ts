@@ -24,6 +24,7 @@ import { prisma } from "../db";
 
 type CreateContextOptions = {
   session: Session | null;
+  prisma?: PrismaClient;
 };
 
 /**
@@ -35,10 +36,10 @@ type CreateContextOptions = {
  * - trpc's `createSSGHelpers` where we don't have req/res
  * @see https://create.t3.gg/en/usage/trpc#-servertrpccontextts
  */
-export const createInnerTRPCContext = async (opts: CreateContextOptions) => {
+export const createInnerTRPCContext = (opts: CreateContextOptions) => {
   return {
     session: opts.session,
-    prisma,
+    prisma: opts.prisma || prisma,
   };
 };
 
@@ -64,6 +65,7 @@ export const createTRPCContext = async (opts: CreateNextContextOptions) => {
  * This is where the trpc api is initialized, connecting the context and
  * transformer
  */
+import { PrismaClient } from "@prisma/client";
 import { initTRPC, TRPCError } from "@trpc/server";
 import superjson from "superjson";
 import { OpenApiMeta } from "trpc-openapi";

@@ -1,12 +1,12 @@
 import { type inferProcedureInput } from "@trpc/server";
 import { TRPC_ERROR_CODE_KEY } from "@trpc/server/rpc/index.js";
 import { describe, expect, test } from "vitest";
-import { AppRouter, appRouter } from "../../root";
-import { createInnerTRPCContext } from "../../trpc";
+import { AppRouter, appRouter } from "../../../../src/server/api/root";
+import { createInnerTRPCContext } from "../../../../src/server/api/trpc";
 
 describe("example router", () => {
   test("greeting", async () => {
-    const ctx = await createInnerTRPCContext({ session: null });
+    const ctx = createInnerTRPCContext({ session: null });
     const caller = appRouter.createCaller(ctx);
 
     type Input = inferProcedureInput<AppRouter["example"]["hello"]>;
@@ -19,7 +19,7 @@ describe("example router", () => {
   });
 
   test("getSecretMessage with session", async () => {
-    const ctx = await createInnerTRPCContext({
+    const ctx = createInnerTRPCContext({
       session: {
         user: { id: "123", name: "John Doe" },
         expires: "1",
@@ -31,7 +31,7 @@ describe("example router", () => {
   });
 
   test("getSecretMessage without session", async () => {
-    const ctx = await createInnerTRPCContext({ session: null });
+    const ctx = createInnerTRPCContext({ session: null });
     const caller = appRouter.createCaller(ctx);
 
     const expectedTRPCErrorKey: TRPC_ERROR_CODE_KEY = "UNAUTHORIZED";
