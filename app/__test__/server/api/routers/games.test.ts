@@ -1,80 +1,100 @@
 import { defaultMode } from "../../../../src/modes/availableModes";
 // test/sample.test.ts
-import { Game } from "@prisma/client";
 import { inferProcedureInput } from "@trpc/server";
-import { describe, expect, test, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, test } from "vitest";
 import { appRouter, AppRouter } from "../../../../src/server/api/root";
 import { createInnerTRPCContext } from "../../../../src/server/api/trpc";
-import prismaMock from "../../../__mocks__/prismaMock";
-
-vi.mock("../libs/prisma");
+import { prisma } from "../../../../src/server/db";
 
 describe("games router", () => {
-  test("games.create", async () => {
-    const ctx = createInnerTRPCContext({ session: null, prisma: prismaMock });
-    const caller = appRouter.createCaller(ctx);
+  beforeEach(async () => {
+    await clearGames();
+  });
 
-    const mockedTime = new Date();
-    vi.setSystemTime(mockedTime);
-    const mockedOutput: Game = {
-      id: "test-game-id",
-      name: "test-game",
-      description: "test-description",
-      mode: defaultMode,
-      createdAt: mockedTime,
-      updatedAt: mockedTime,
-      defaultNumItemsPerRound: 10,
-      modeConfigJson: null,
-    };
-    prismaMock.game.create.mockResolvedValue(mockedOutput);
+  afterEach(async () => {
+    await clearGames();
+  });
+
+  test("games.create", async () => {
+    const ctx = createInnerTRPCContext({ session: null });
+    const caller = appRouter.createCaller(ctx);
 
     type Input = inferProcedureInput<AppRouter["games"]["create"]>;
     const input: Input = {
-      id: mockedOutput.id,
-      name: mockedOutput.name,
-      description: mockedOutput.description!,
+      id: "test-game-id",
+      name: "test-game",
     };
 
     const result = await caller.games.create(input);
-    expect(result.createdGame).toMatchObject(mockedOutput);
+    expect(result.createdGame.id).toBe(input.id);
+    expect(result.createdGame.name).toBe(input.name);
+    expect(result.createdGame.description).toBe(null);
+    expect(result.createdGame.mode).toBe(defaultMode);
+    expect(result.createdGame.createdAt).toBeInstanceOf(Date);
+    expect(result.createdGame.updatedAt).toBeInstanceOf(Date);
   });
 
-  test("games.getAll", async () => {
-    const ctx = createInnerTRPCContext({ session: null, prisma: prismaMock });
-    const caller = appRouter.createCaller(ctx);
+  describe("games.getAll", () => {
+    test("default limit 10", async () => {
+      const ctx = createInnerTRPCContext({ session: null });
+      const caller = appRouter.createCaller(ctx);
 
-    const mockedTime = new Date();
-    vi.setSystemTime(mockedTime);
+      const numberOfGames = 101;
+      await createTestGames(numberOfGames);
 
-    const mockedOutput: Game[] = [
-      {
-        id: "test-game-id",
-        name: "test-game",
-        description: "test-description",
-        mode: defaultMode,
-        createdAt: mockedTime,
-        updatedAt: mockedTime,
-        defaultNumItemsPerRound: 10,
-        modeConfigJson: null,
-      },
-      {
-        id: "test-game-id-2",
-        name: "test-game-2",
-        description: "test-description-2",
-        mode: defaultMode,
-        createdAt: mockedTime,
-        updatedAt: mockedTime,
-        defaultNumItemsPerRound: 5,
-        modeConfigJson: null,
-      },
-    ];
+      type Input = inferProcedureInput<AppRouter["games"]["getAll"]>;
+      const input: Input = {};
 
-    prismaMock.game.findMany.mockResolvedValue(mockedOutput);
+      const result = await caller.games.getAll(input);
+      expect(result.games).length(10);
+    });
 
-    type Input = inferProcedureInput<AppRouter["games"]["getAll"]>;
-    const input: Input = {};
+    test("sort by name", async () => {
+      const ctx = createInnerTRPCContext({ session: null });
+      const caller = appRouter.createCaller(ctx);
 
-    const result = await caller.games.getAll(input);
-    expect(result.games).toMatchObject(mockedOutput);
+      const numberOfGames = 101;
+      await createTestGames(numberOfGames);
+      const testGames = await getAllGames();
+      const first10Asc = testGames
+        .sort((a, b) => a.name.localeCompare(b.name))
+        .slice(0, 10);
+      const first10Desc = testGames
+        .sort((a, b) => b.name.localeCompare(a.name))
+        .slice(0, 10);
+
+      type Input = inferProcedureInput<AppRouter["games"]["getAll"]>;
+      const input: Input = { sort: { name: "asc" } };
+
+      const result = await caller.games.getAll(input);
+      expect(result.games).length(10);
+      expect(result.games).toEqual(first10Asc);
+
+      const input2: Input = { sort: { name: "desc" } };
+      const result2 = await caller.games.getAll(input2);
+      expect(result2.games).length(10);
+      expect(result2.games).toEqual(first10Desc);
+    });
+
+    // TODO: test pagination
+    // TODO: test filters
+    // TODO: test other sorting params
   });
 });
+
+async function clearGames() {
+  return await prisma.game.deleteMany();
+}
+
+async function createTestGames(count: number) {
+  return await prisma.game.createMany({
+    data: Array.from({ length: count }, (_, i) => ({
+      id: `test-game-id-${i}`,
+      name: `test-game-${i}`,
+    })),
+  });
+}
+
+async function getAllGames() {
+  return await prisma.game.findMany();
+}
