@@ -1,13 +1,23 @@
 version: "3.9"
 
 services:
-  db:
+  dev-db:
     image: postgres:13
     restart: always
-    container_name: integration-tests-prisma
+    container_name: integration-dev-db-postgres
     ports:
       - "5433:5432"
     environment:
-      POSTGRES_USER: prisma
-      POSTGRES_PASSWORD: prisma
-      POSTGRES_DB: tests
+      POSTGRES_USER: dev-user
+      POSTGRES_PASSWORD: dev-pass
+      POSTGRES_DB: dev-db
+  test-db:
+    image: postgres:13
+    restart: always
+    container_name: integration-test-db-postgres
+    ports:
+      - "5433:5432"
+    environment:
+      POSTGRES_USER: test-user
+      POSTGRES_PASSWORD: test-pass
+      POSTGRES_DB: test-db

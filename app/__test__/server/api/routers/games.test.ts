@@ -1,4 +1,4 @@
-import { defaultMode } from "./../../../../src/modes/availableModes";
+import { defaultMode } from "../../../../src/modes/availableModes";
 // test/sample.test.ts
 import { Game } from "@prisma/client";
 import { inferProcedureInput } from "@trpc/server";
