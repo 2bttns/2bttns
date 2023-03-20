@@ -117,7 +117,7 @@ describe("gameobjects router", () => {
 
       const result = await caller.gameObjects.getRanked({
         playerId: "test-player-id",
-        inputTags: ["test-input-tag-id", "test-output-tag-id"],
+        inputTags: "test-input-tag-id,test-output-tag-id",
         outputTag: "test-output-tag-id",
       });
 
