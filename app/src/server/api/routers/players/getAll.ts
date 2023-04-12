@@ -19,15 +19,25 @@ export const getAll = publicProcedure
         z.object({
           id: z.string(),
           name: z.string().nullable().optional(),
-          description: z.string().nullable().optional(),
+          createdAt: z.string().describe("ISO date string"),
+          updatedAt: z.string().describe("ISO date string"),
         })
       ),
     })
   )
   .mutation(async ({ input, ctx }) => {
-    const players = await ctx.prisma.player.findMany({});
+    const players = await ctx.prisma.player.findMany();
+
+    const processedPlayers = players.map((player) => {
+      return {
+        id: player.id,
+        name: player.name,
+        createdAt: player.createdAt.toISOString(),
+        updatedAt: player.updatedAt.toISOString(),
+      };
+    });
 
     return {
-      players,
+      players: processedPlayers,
     };
   });
