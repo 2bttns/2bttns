@@ -33,6 +33,13 @@ export interface paths {
      */
     get: operations["query.example.getSecretMessage"];
   };
+  "/game-objects/ranked": {
+    /**
+     * Get Ranked Results 
+     * @description Get ranked Game Object results for a player
+     */
+    get: operations["query.gameObjects.getRanked"];
+  };
 }
 
 export type webhooks = Record<string, never>;
@@ -142,6 +149,42 @@ export interface operations {
       200: {
         content: {
           "application/json": string;
+        };
+      };
+      default: components["responses"]["error"];
+    };
+  };
+  "query.gameObjects.getRanked": {
+    /**
+     * Get Ranked Results 
+     * @description Get ranked Game Object results for a player
+     */
+    parameters: {
+        /**
+         * @description Specify input tags that will be used to score the game objects associated with the output tag.
+         * 
+         * If the output tag is included in the input tags, the player's score for those game object will be used as base scores
+         */
+        /** @description Specify the output tag of the game objects to get ranked results for */
+      query: {
+        playerId: string;
+        inputTags: string;
+        outputTag: string;
+      };
+    };
+    responses: {
+      /** @description Successful response */
+      200: {
+        content: {
+          "application/json": {
+            scores: ({
+                gameObject: {
+                  id: string;
+                  name: string;
+                };
+                score: number;
+              })[];
+          };
         };
       };
       default: components["responses"]["error"];
