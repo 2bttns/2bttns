@@ -8,7 +8,7 @@ First, set up the environment variables folder by copying `.env.example` to a ne
 
 ### Docker Compose
 
-We use Docker Compose to initialize a `dev-db` and `test-db` PostgreSQL databases. Be sure to have Docker with Docker Compose installed and running before running tests.
+We use Docker Compose to initialize `dev-db` and `test-db` PostgreSQL databases. Be sure to have Docker with Docker Compose installed and running before running tests.
 
 You can modify the database container credentials in `docker-compose.yml`.
 
