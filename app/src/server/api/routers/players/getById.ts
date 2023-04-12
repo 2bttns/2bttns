@@ -28,7 +28,7 @@ export const getById = publicProcedure
     })
   )
   .output(output)
-  .mutation(async ({ input, ctx }) => {
+  .query(async ({ input, ctx }) => {
     try {
       const player = await ctx.prisma.player.findFirstOrThrow({
         where: {

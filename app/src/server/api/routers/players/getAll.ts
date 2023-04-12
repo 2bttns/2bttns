@@ -25,7 +25,7 @@ export const getAll = publicProcedure
       ),
     })
   )
-  .mutation(async ({ input, ctx }) => {
+  .query(async ({ input, ctx }) => {
     const players = await ctx.prisma.player.findMany();
 
     const processedPlayers = players.map((player) => {
