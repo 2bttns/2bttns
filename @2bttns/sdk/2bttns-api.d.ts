@@ -40,6 +40,44 @@ export interface paths {
      */
     get: operations["query.gameObjects.getRanked"];
   };
+  "/players/create": {
+    /**
+     * Create Player 
+     * @description Creates a player with the given ID and an optional name. The ID must be unique, and ideally corresponds with a user ID used by the app integrating with 2bttns.
+     */
+    post: operations["mutation.players.create"];
+  };
+  "/players": {
+    /**
+     * Get All Players 
+     * @description Get all players
+     */
+    get: operations["query.players.getAll"];
+  };
+  "/players/count": {
+    /**
+     * Get Player Count 
+     * @description Get player count
+     */
+    get: operations["query.players.getCount"];
+  };
+  "/players/{id}": {
+    /**
+     * Get Player by ID 
+     * @description Get player by ID
+     */
+    get: operations["query.players.getById"];
+    /**
+     * Update Player by ID 
+     * @description Update player by ID.
+     */
+    put: operations["mutation.players.updateById"];
+    /**
+     * Delete Player by ID 
+     * @description Delete player by ID
+     */
+    delete: operations["mutation.players.deleteById"];
+  };
 }
 
 export type webhooks = Record<string, never>;
@@ -184,6 +222,176 @@ export interface operations {
                 };
                 score: number;
               })[];
+          };
+        };
+      };
+      default: components["responses"]["error"];
+    };
+  };
+  "mutation.players.create": {
+    /**
+     * Create Player 
+     * @description Creates a player with the given ID and an optional name. The ID must be unique, and ideally corresponds with a user ID used by the app integrating with 2bttns.
+     */
+    requestBody: {
+      content: {
+        "application/json": {
+          id: string;
+          name?: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Successful response */
+      200: {
+        content: {
+          "application/json": {
+            createdPlayer: {
+              id: string;
+              name?: string | null;
+              /** @description ISO date string */
+              createdAt: string;
+              /** @description ISO date string */
+              updatedAt: string;
+            };
+          };
+        };
+      };
+      default: components["responses"]["error"];
+    };
+  };
+  "query.players.getAll": {
+    /**
+     * Get All Players 
+     * @description Get all players
+     */
+    responses: {
+      /** @description Successful response */
+      200: {
+        content: {
+          "application/json": {
+            players: ({
+                id: string;
+                name?: string | null;
+                /** @description ISO date string */
+                createdAt: string;
+                /** @description ISO date string */
+                updatedAt: string;
+              })[];
+          };
+        };
+      };
+      default: components["responses"]["error"];
+    };
+  };
+  "query.players.getCount": {
+    /**
+     * Get Player Count 
+     * @description Get player count
+     */
+    responses: {
+      /** @description Successful response */
+      200: {
+        content: {
+          "application/json": {
+            count: number;
+          };
+        };
+      };
+      default: components["responses"]["error"];
+    };
+  };
+  "query.players.getById": {
+    /**
+     * Get Player by ID 
+     * @description Get player by ID
+     */
+    parameters: {
+      path: {
+        id: string;
+      };
+    };
+    responses: {
+      /** @description Successful response */
+      200: {
+        content: {
+          "application/json": {
+            player: {
+              id: string;
+              name?: string | null;
+              /** @description ISO date string */
+              createdAt: string;
+              /** @description ISO date string */
+              updatedAt: string;
+            };
+          };
+        };
+      };
+      default: components["responses"]["error"];
+    };
+  };
+  "mutation.players.updateById": {
+    /**
+     * Update Player by ID 
+     * @description Update player by ID.
+     */
+    parameters: {
+      path: {
+        id: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          data?: {
+            id?: string;
+            name?: string;
+          };
+        };
+      };
+    };
+    responses: {
+      /** @description Successful response */
+      200: {
+        content: {
+          "application/json": {
+            updatedPlayer: {
+              id: string;
+              name?: string | null;
+              /** @description ISO date string */
+              createdAt: string;
+              /** @description ISO date string */
+              updatedAt: string;
+            };
+          };
+        };
+      };
+      default: components["responses"]["error"];
+    };
+  };
+  "mutation.players.deleteById": {
+    /**
+     * Delete Player by ID 
+     * @description Delete player by ID
+     */
+    parameters: {
+      path: {
+        id: string;
+      };
+    };
+    responses: {
+      /** @description Successful response */
+      200: {
+        content: {
+          "application/json": {
+            deletedPlayer: {
+              id: string;
+              name?: string | null;
+              /** @description ISO date string */
+              createdAt: string;
+              /** @description ISO date string */
+              updatedAt: string;
+            };
           };
         };
       };
