@@ -5,7 +5,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const openapi_typescript_fetch_1 = require("openapi-typescript-fetch");
-class Controller {
+class TwoBttns {
     constructor(config) {
         const { appId, secret, url } = config;
         this.appId = appId;
@@ -15,7 +15,7 @@ class Controller {
         this.api.configure({
             baseUrl: `${url}/api`,
         });
-        console.info(`[2bttns] Controller initialized ${secret} ${url}`);
+        console.info(`[2bttns] SDK initialized ${secret} ${url}`);
     }
     generateUserToken({ userId }) {
         const token = jsonwebtoken_1.default.sign({ userId }, this.secret, {
@@ -47,4 +47,4 @@ class Controller {
         return `${this.url}/play?${queryBuilder.toString()}`;
     }
 }
-exports.default = Controller;
+exports.default = TwoBttns;

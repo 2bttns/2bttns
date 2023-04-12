@@ -9,19 +9,19 @@ export type GeneratePlayURLParams = {
   callback_url?: string;
 };
 
-export type ControllerConfig = {
+export type TwoBttnsConfig = {
   appId: string; // e.g. Favorite Activities
   secret: string; // e.g. OVTGng6GC4kT2zGINR/brqO1AaVam+EcTvX/74CmzH4=
   url: string; // e.g. "localhost:3001"
 };
 
-export default class Controller {
+export default class TwoBttns {
   appId: string;
   secret: string;
   url: string;
   api: ReturnType<typeof Fetcher.for<paths>>;
 
-  constructor(config: ControllerConfig) {
+  constructor(config: TwoBttnsConfig) {
     const { appId, secret, url } = config;
     this.appId = appId;
     this.secret = secret;
@@ -32,7 +32,7 @@ export default class Controller {
       baseUrl: `${url}/api`,
     });
 
-    console.info(`[2bttns] Controller initialized ${secret} ${url}`);
+    console.info(`[2bttns] SDK initialized ${secret} ${url}`);
   }
 
   generateUserToken({ userId }: { userId: string }) {

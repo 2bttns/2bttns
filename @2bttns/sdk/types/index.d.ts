@@ -6,17 +6,17 @@ export type GeneratePlayURLParams = {
     num_items?: number | "ALL";
     callback_url?: string;
 };
-export type ControllerConfig = {
+export type TwoBttnsConfig = {
     appId: string;
     secret: string;
     url: string;
 };
-export default class Controller {
+export default class TwoBttns {
     appId: string;
     secret: string;
     url: string;
     api: ReturnType<typeof Fetcher.for<paths>>;
-    constructor(config: ControllerConfig);
+    constructor(config: TwoBttnsConfig);
     generateUserToken({ userId }: {
         userId: string;
     }): string;

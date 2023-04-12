@@ -9,7 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@2bttns/controller": "file:../@2bttns/controller",
+    "@2bttns/sdk": "file:../@2bttns/sdk",
     "@next/font": "13.1.6",
     "@types/node": "18.13.0",
     "@types/react": "18.0.28",
