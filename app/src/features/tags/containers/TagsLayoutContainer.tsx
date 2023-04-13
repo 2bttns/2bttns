@@ -31,7 +31,15 @@ export default function TagsLayoutContainer(props: TagsLayoutContainerProps) {
 
   return (
     <TagsLayout
-      tags={getTagsQuery.data?.tags || []}
+      tags={
+        getTagsQuery.data?.tags.map((tag) => {
+          return {
+            ...tag,
+            createdAt: new Date(tag.createdAt),
+            updatedAt: new Date(tag.updatedAt),
+          };
+        }) || []
+      }
       selectedTag={selectedTag}
       handleCreateTag={handleCreateTag}
       onTagSelect={onTagSelect}

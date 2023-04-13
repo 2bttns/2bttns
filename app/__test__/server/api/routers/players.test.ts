@@ -5,7 +5,7 @@ import { AppRouter, appRouter } from "../../../../src/server/api/root";
 import { createInnerTRPCContext } from "../../../../src/server/api/trpc";
 import { prisma } from "../../../../src/server/db";
 
-describe("games router", () => {
+describe("players router", () => {
   beforeEach(async () => {
     await clearPlayers();
   });

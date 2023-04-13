@@ -1,23 +1,61 @@
 import { z } from "zod";
+import { OPENAPI_TAGS } from "../../openapi/openApiTags";
 import { publicProcedure } from "../../trpc";
 
+const output = z.object({
+  tags: z.array(
+    z.object({
+      id: z.string(),
+      name: z.string(),
+      description: z.string().nullable(),
+      createdAt: z.string().describe("ISO date string"),
+      updatedAt: z.string().describe("ISO date string"),
+    })
+  ),
+});
+
 export const getAll = publicProcedure
+  .meta({
+    openapi: {
+      summary: "Get All Tags",
+      description: "Get all tags",
+      tags: [OPENAPI_TAGS.TAGS],
+      method: "GET",
+      path: "/tags",
+    },
+  })
+
   .input(
     z
       .object({
-        id: z.array(z.string()).optional(),
+        id: z
+          .string()
+          .optional()
+          .describe("Comma separated list of tag ids to filter by"),
       })
       .optional()
   )
+  .output(output)
   .query(async ({ ctx, input }) => {
+    const tagsToFilterBy = input?.id?.split(",");
+
     const tags = await ctx.prisma.tag.findMany({
       where: {
-        id: input?.id
+        id: tagsToFilterBy
           ? {
-              in: input?.id,
+              in: tagsToFilterBy,
             }
           : undefined,
       },
     });
-    return { tags };
+
+    const processedTags: typeof output._type["tags"] = tags.map((tag) => {
+      return {
+        ...tag,
+        createdAt: tag.createdAt.toISOString(),
+        updatedAt: tag.updatedAt.toISOString(),
+      };
+    });
+
+    return { tags: processedTags };
   });
