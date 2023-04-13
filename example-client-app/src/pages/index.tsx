@@ -1,4 +1,6 @@
+import { useQuery } from "@tanstack/react-query";
 import Head from "next/head";
+import { twobttns } from "./utils/2bttns";
 
 export default function Home() {
   const redirectToGame = () => {
@@ -42,6 +44,24 @@ export default function Home() {
     window.location.href = `/api/play2bttns?${queryParams.toString()}`;
   };
 
+  const twobttnsPlayersQuery = useQuery({
+    queryKey: ["players"],
+    queryFn: async () => {
+      const getPlayers = twobttns.api.path("/players").method("get").create();
+      const players = await getPlayers({});
+      return players.data.players;
+    },
+  });
+
+  const twobttnsTagsQuery = useQuery({
+    queryKey: ["tags"],
+    queryFn: async () => {
+      const getTags = twobttns.api.path("/tags").method("get").create();
+      const players = await getTags({});
+      return players.data.tags;
+    },
+  });
+
   return (
     <>
       <Head>
@@ -52,6 +72,12 @@ export default function Home() {
       </Head>
       <main>
         <button onClick={redirectToGame}>To Game</button>
+
+        <h1>Players</h1>
+        <pre>{JSON.stringify(twobttnsPlayersQuery.data, null, 2)}</pre>
+
+        <h1>Tags</h1>
+        <pre>{JSON.stringify(twobttnsTagsQuery.data, null, 2)}</pre>
       </main>
     </>
   );

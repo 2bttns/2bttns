@@ -40,6 +40,13 @@ export interface paths {
      */
     get: operations["query.gameObjects.getRanked"];
   };
+  "/tags": {
+    /**
+     * Get All Tags 
+     * @description Get all tags
+     */
+    get: operations["query.tags.getAll"];
+  };
   "/players/create": {
     /**
      * Create Player 
@@ -221,6 +228,36 @@ export interface operations {
                   name: string;
                 };
                 score: number;
+              })[];
+          };
+        };
+      };
+      default: components["responses"]["error"];
+    };
+  };
+  "query.tags.getAll": {
+    /**
+     * Get All Tags 
+     * @description Get all tags
+     */
+    parameters?: {
+      query?: {
+        id?: string;
+      };
+    };
+    responses: {
+      /** @description Successful response */
+      200: {
+        content: {
+          "application/json": {
+            tags: ({
+                id: string;
+                name: string;
+                description: string | null;
+                /** @description ISO date string */
+                createdAt: string;
+                /** @description ISO date string */
+                updatedAt: string;
               })[];
           };
         };
