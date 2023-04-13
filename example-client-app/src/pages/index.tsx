@@ -2,7 +2,18 @@ import { useQuery } from "@tanstack/react-query";
 import Head from "next/head";
 import { twobttns } from "./utils/2bttns";
 
+import { ApiResponses } from "@2bttns/sdk";
+import { useState } from "react";
 import Select from "react-select";
+
+const getPlayers = twobttns.api.path("/players").method("get").create();
+const getTags = twobttns.api.path("/tags").method("get").create();
+
+type TwoBttnsPlayer =
+  ApiResponses["/players"]["get"]["responses"]["200"]["content"]["application/json"]["players"][number];
+
+type TwoBttnsTag =
+  ApiResponses["/tags"]["get"]["responses"]["200"]["content"]["application/json"]["tags"][number];
 
 export default function Home() {
   const redirectToGame = () => {
@@ -49,7 +60,6 @@ export default function Home() {
   const twobttnsPlayersQuery = useQuery({
     queryKey: ["players"],
     queryFn: async () => {
-      const getPlayers = twobttns.api.path("/players").method("get").create();
       const players = await getPlayers({});
       return players.data.players;
     },
@@ -58,11 +68,17 @@ export default function Home() {
   const twobttnsTagsQuery = useQuery({
     queryKey: ["tags"],
     queryFn: async () => {
-      const getTags = twobttns.api.path("/tags").method("get").create();
       const players = await getTags({});
       return players.data.tags;
     },
   });
+
+  const [selectedPlayer, setSelectedPlayer] = useState<TwoBttnsPlayer["id"]>();
+  const [selectedInputTags, setSelectedInputTags] = useState<
+    TwoBttnsTag["id"][]
+  >([]);
+  const [selectedOutputTag, setSelectedOutputTag] =
+    useState<TwoBttnsTag["id"]>();
 
   return (
     <>
@@ -83,6 +99,10 @@ export default function Home() {
               value: tag.id,
               label: tag.name,
             }))}
+            onChange={(selected) => {
+              setSelectedPlayer(selected?.value as TwoBttnsPlayer["id"]);
+            }}
+            isSearchable
           />
 
           <p style={{ fontWeight: "bold" }}>
@@ -96,8 +116,14 @@ export default function Home() {
               value: tag.id,
               label: tag.name,
             }))}
+            onChange={(selected) => {
+              setSelectedInputTags(
+                selected.map((s) => s.value as TwoBttnsTag["id"])
+              );
+            }}
             isMulti
             closeMenuOnSelect={false}
+            isSearchable
           />
 
           <p style={{ fontWeight: "bold" }}>Output Tag</p>
@@ -106,6 +132,10 @@ export default function Home() {
               value: tag.id,
               label: tag.name,
             }))}
+            onChange={(selected) => {
+              setSelectedOutputTag(selected?.value as TwoBttnsTag["id"]);
+            }}
+            isSearchable
           />
         </div>
       </main>
