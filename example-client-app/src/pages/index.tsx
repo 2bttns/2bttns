@@ -2,6 +2,8 @@ import { useQuery } from "@tanstack/react-query";
 import Head from "next/head";
 import { twobttns } from "./utils/2bttns";
 
+import Select from "react-select";
+
 export default function Home() {
   const redirectToGame = () => {
     if (typeof window === "undefined") {
@@ -73,11 +75,39 @@ export default function Home() {
       <main>
         <button onClick={redirectToGame}>To Game</button>
 
-        <h1>Players</h1>
-        <pre>{JSON.stringify(twobttnsPlayersQuery.data, null, 2)}</pre>
+        <h1>See Results</h1>
+        <div style={{ border: "1px solid black", padding: "1rem" }}>
+          <p style={{ fontWeight: "bold" }}>Player</p>
+          <Select
+            options={twobttnsPlayersQuery.data?.map((tag) => ({
+              value: tag.id,
+              label: tag.name,
+            }))}
+          />
 
-        <h1>Tags</h1>
-        <pre>{JSON.stringify(twobttnsTagsQuery.data, null, 2)}</pre>
+          <p style={{ fontWeight: "bold" }}>
+            Input Tags{" "}
+            <span style={{ fontWeight: "normal", fontStyle: "italic" }}>
+              (multi-select allowed)
+            </span>
+          </p>
+          <Select
+            options={twobttnsTagsQuery.data?.map((tag) => ({
+              value: tag.id,
+              label: tag.name,
+            }))}
+            isMulti
+            closeMenuOnSelect={false}
+          />
+
+          <p style={{ fontWeight: "bold" }}>Output Tag</p>
+          <Select
+            options={twobttnsTagsQuery.data?.map((tag) => ({
+              value: tag.id,
+              label: tag.name,
+            }))}
+          />
+        </div>
       </main>
     </>
   );
