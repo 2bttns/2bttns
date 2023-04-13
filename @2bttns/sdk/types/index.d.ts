@@ -11,6 +11,7 @@ export type TwoBttnsConfig = {
     secret: string;
     url: string;
 };
+export type ApiResponses = paths;
 export default class TwoBttns {
     appId: string;
     secret: string;

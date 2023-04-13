@@ -15,6 +15,7 @@ export type TwoBttnsConfig = {
   url: string; // e.g. "localhost:3001"
 };
 
+export type ApiResponses = paths;
 export default class TwoBttns {
   appId: string;
   secret: string;
