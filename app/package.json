@@ -8,8 +8,17 @@
     "postinstall": "prisma generate",
     "lint": "next lint",
     "start": "next start -p 3001",
+    "test": "npm run init-db:test && vitest && npm run docker:rm:test-db",
+    "init-db:dev": "npm run docker:stop && npm run docker:up:dev-db && sleep 1 && npm run db-sync:dev && npm run db-seed",
+    "init-db:test": "npm run docker:stop && npm run docker:up:test-db && sleep 1 && npm run db-sync:test",
     "db-sync:dev": "npx prisma migrate dev",
-    "db-seed": "NODE_ENV=development prisma db seed"
+    "db-sync:test": "npx prisma migrate deploy",
+    "db-seed": "NODE_ENV=development prisma db seed",
+    "docker:up:dev-db": "docker-compose up dev-db -d",
+    "docker:up:test-db": "docker-compose up test-db -d",
+    "docker:stop": "docker-compose stop",
+    "docker:rm:test-db": "docker-compose rm -svf test-db",
+    "docker:rm:dev-db": "docker-compose rm -svf dev-db"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
@@ -55,12 +64,16 @@
     "@types/swagger-ui-react": "^4.11.0",
     "@typescript-eslint/eslint-plugin": "^5.47.1",
     "@typescript-eslint/parser": "^5.47.1",
+    "@vitejs/plugin-react": "^3.1.0",
     "eslint": "^8.30.0",
     "eslint-config-next": "13.1.6",
+    "jsdom": "^21.1.1",
     "prisma": "^4.9.0",
     "ts-node": "^10.9.1",
     "tsx": "^3.12.2",
-    "typescript": "^4.9.5"
+    "typescript": "^4.9.5",
+    "vitest": "^0.29.3",
+    "vitest-mock-extended": "^1.1.0"
   },
   "ct3aMetadata": {
     "initVersion": "7.4.0"

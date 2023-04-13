@@ -1,15 +1,23 @@
-import twobttns from "@2bttns/controller";
+import TwoBttns, { ApiResponses } from "@2bttns/sdk";
 
-export const twobttnsController = new twobttns.Controller({
+export const twobttns = new TwoBttns({
   appId: "example-app",
   secret: "example-secret-value",
   url: "http://localhost:3001",
 });
 
-// const test = twobttnsController.api
-//   .path("/example/hello")
-//   .method("get")
-//   .create();
-// test({ text: "hello" }).then((res) => {
-//   console.log(res);
-// });
+export const getPlayers = twobttns.api.path("/players").method("get").create();
+export const getTags = twobttns.api.path("/tags").method("get").create();
+export const getRanked = twobttns.api
+  .path("/game-objects/ranked")
+  .method("get")
+  .create();
+
+export type TwoBttnsPlayer =
+  ApiResponses["/players"]["get"]["responses"]["200"]["content"]["application/json"]["players"][number];
+
+export type TwoBttnsTag =
+  ApiResponses["/tags"]["get"]["responses"]["200"]["content"]["application/json"]["tags"][number];
+
+export type TwoBttnsRankedOutput =
+  ApiResponses["/game-objects/ranked"]["get"]["responses"]["200"]["content"]["application/json"];

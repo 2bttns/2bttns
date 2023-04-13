@@ -3,21 +3,49 @@ import { Decimal } from "@prisma/client/runtime";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { prisma } from "../../../db";
+import { OPENAPI_TAGS } from "../../openapi/openApiTags";
 import { publicProcedure } from "../../trpc";
 
 const input = z.object({
   playerId: z.string(),
 
-  // Specify input tags that will be used to score the game objects associated with the output tag
-  // If the output tag is included in the input tags, the player's score for those game object will be used as base scores
-  inputTags: z.array(z.string()),
+  inputTags: z
+    .string()
+    .describe(
+      "Specify input tags that will be used to score the game objects associated with the output tag.\n\nIf the output tag is included in the input tags, the player's score for those game object will be used as base scores"
+    ),
 
-  // Specify the output tag of the game objects to get ranked results for
-  outputTag: z.string(),
+  outputTag: z
+    .string()
+    .describe(
+      "Specify the output tag of the game objects to get ranked results for"
+    ),
+});
+
+const output = z.object({
+  scores: z.array(
+    z.object({
+      gameObject: z.object({
+        id: z.string(),
+        name: z.string(),
+      }),
+      score: z.number(),
+    })
+  ),
 });
 
 export const getRanked = publicProcedure
+  .meta({
+    openapi: {
+      summary: "Get Ranked Results",
+      description: "Get ranked Game Object results for a player",
+      tags: [OPENAPI_TAGS.GAME_OBJECTS],
+      method: "GET",
+      path: "/game-objects/ranked",
+    },
+  })
   .input(input)
+  .output(output)
   .query(async ({ ctx, input }) => {
     await validate(input);
 
@@ -159,12 +187,13 @@ async function validate(inputData: z.infer<typeof input>) {
     });
   }
 
+  const inputTagIds = inputData.inputTags.split(",");
   const hasDuplicateInputTags =
-    new Set(inputData.inputTags).size !== inputData.inputTags.length;
+    new Set(inputTagIds).size !== inputTagIds.length;
   if (hasDuplicateInputTags) {
     const seen = new Set<string>();
     const duplicates = new Set<string>();
-    inputData.inputTags.forEach((tag) => {
+    inputTagIds.forEach((tag) => {
       if (seen.has(tag)) {
         duplicates.add(tag);
         return;
@@ -184,13 +213,13 @@ async function validate(inputData: z.infer<typeof input>) {
   const inputTags = await prisma.tag.findMany({
     where: {
       id: {
-        in: inputData.inputTags,
+        in: inputTagIds,
       },
     },
   });
 
-  if (inputTags.length !== inputData.inputTags.length) {
-    const missingTags = inputData.inputTags.filter(
+  if (inputTags.length !== inputTagIds.length) {
+    const missingTags = inputTagIds.filter(
       (inputTag) => !inputTags.some((tag) => tag.id === inputTag)
     );
     throw new TRPCError({

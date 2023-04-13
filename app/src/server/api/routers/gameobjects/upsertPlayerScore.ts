@@ -36,7 +36,7 @@ export const upsertPlayerScore = publicProcedure
       throw new Error("GameObject not found");
     }
 
-    const existingPlayerScore: PlayerScore | null =
+    const existingPlayerScoreObject: PlayerScore | null =
       await ctx.prisma.playerScore.findUnique({
         where: {
           playerId_gameObjectId: {
@@ -45,6 +45,9 @@ export const upsertPlayerScore = publicProcedure
           },
         },
       });
+
+    const existingPlayerScore =
+      existingPlayerScoreObject?.score.toNumber() ?? 0;
 
     const targetGameObject = await ctx.prisma.gameObject.findFirst({
       where: {
@@ -76,7 +79,7 @@ export const upsertPlayerScore = publicProcedure
           },
         },
         update: {
-          score: existingPlayerScore!.score.toNumber() + input.score,
+          score: existingPlayerScore + input.score,
         },
         create: {
           player: {

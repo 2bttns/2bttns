@@ -1,6 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from "next";
-import { twobttnsController } from "../utils/2bttns";
-import { GeneratePlayURLParams } from "./../../../../@2bttns/controller/src/Controller";
+import { twobttns } from "../utils/2bttns";
+import { GeneratePlayURLParams } from "./../../../../@2bttns/sdk";
 
 export default async function handler(
   req: NextApiRequest,
@@ -13,7 +13,7 @@ export default async function handler(
     const callback_url = req.query
       .callback_url as GeneratePlayURLParams["callback_url"];
 
-    const url = twobttnsController.generatePlayUrl({
+    const url = twobttns.generatePlayUrl({
       game_id,
       user_id,
       num_items,
