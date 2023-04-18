@@ -30,7 +30,13 @@ const apiKeyTokenSchema = z
 
 const tokenSchema = z.union([playerTokenSchema, apiKeyTokenSchema]);
 
-export function checkUserAuth(ctx: CreateContextOptions) {
+export type CheckUserAuthType =
+  | z.infer<typeof tokenSchema>["type"]
+  | "admin_session";
+
+export async function checkUserAuth(
+  ctx: CreateContextOptions
+): Promise<CheckUserAuthType> {
   // Allow the user access if they have a valid Authorization header
   // The Authorization token can represent one of the following:
   //  1. player_token - Player ID encoded in a JWT; used when a player is bounced from to a 2bttns game
@@ -39,7 +45,6 @@ export function checkUserAuth(ctx: CreateContextOptions) {
   const authHeader = ctx.req?.headers?.authorization;
   const token = authHeader?.split(" ")[1];
   if (token) {
-    // TODO: Decode JWT and check if valid
     const decoded = jwt.decode(token);
     if (!decoded) {
       throw new TRPCError({
@@ -49,11 +54,28 @@ export function checkUserAuth(ctx: CreateContextOptions) {
     }
 
     const tokenData = tokenSchema.parse(decoded);
-    switch (tokenData.type) {
-      case "player_token":
-        break;
-      case "api_key_token":
-        break;
+
+    const correspondingSecret = await ctx.prisma?.secret.findFirst({
+      where: {
+        id: tokenData.appId,
+      },
+      select: { secret: true },
+    });
+
+    if (!correspondingSecret) {
+      throw new TRPCError({
+        code: "BAD_REQUEST",
+        message: "Invalid token app_id",
+      });
+    }
+
+    try {
+      jwt.verify(token, correspondingSecret.secret);
+    } catch {
+      throw new TRPCError({
+        code: "BAD_REQUEST",
+        message: `Invalid token -- app_id: ${tokenData.appId} could not be verified with its corresponding secret`,
+      });
     }
 
     if (tokenData.type) {

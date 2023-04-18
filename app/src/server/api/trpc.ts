@@ -26,6 +26,7 @@ export type CreateContextOptions = {
   session: Session | null;
   prisma?: PrismaClient;
   req?: NextApiRequest;
+  authType?: CheckUserAuthType;
 };
 
 /**
@@ -42,6 +43,7 @@ export const createInnerTRPCContext = (opts: CreateContextOptions) => {
     session: opts.session,
     prisma: opts.prisma || prisma,
     req: opts.req,
+    authType: opts.authType,
   };
 };
 
@@ -73,7 +75,7 @@ import { initTRPC } from "@trpc/server";
 import { NextApiRequest } from "next";
 import superjson from "superjson";
 import { OpenApiMeta } from "trpc-openapi";
-import { checkUserAuth } from "../helpers/checkUserAuth";
+import { CheckUserAuthType, checkUserAuth } from "../helpers/checkUserAuth";
 
 export const t = initTRPC
   .context<typeof createTRPCContext>()
@@ -111,14 +113,14 @@ export const publicProcedure = t.procedure;
  * Reusable middleware that enforces users are logged in before running the
  * procedure
  */
-const enforceUserIsAuthed = t.middleware(({ ctx, next }) => {
+const enforceUserIsAuthed = t.middleware(async ({ ctx, next }) => {
+  let authType: CheckUserAuthType | undefined;
   try {
-    const authCheckType = checkUserAuth(ctx);
-    console.log("authCheckType", authCheckType);
+    authType = await checkUserAuth(ctx);
   } catch (error) {
     throw error;
   }
-  return next({ ctx });
+  return next({ ctx: { ...ctx, authType } });
 });
 /**
  * Protected (authed) procedure

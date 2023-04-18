@@ -37,9 +37,13 @@ export default class TwoBttns {
   }
 
   generateUserToken({ userId }: { userId: string }) {
-    const token = jwt.sign({ userId }, this.secret, {
-      expiresIn: "1h",
-    });
+    const token = jwt.sign(
+      { type: "player_token", appId: this.appId, userId },
+      this.secret,
+      {
+        expiresIn: "1h",
+      }
+    );
     return token;
   }
 

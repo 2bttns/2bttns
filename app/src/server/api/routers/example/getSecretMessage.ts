@@ -15,6 +15,7 @@ export const getSecretMessage = protectedProcedure
   })
   .input(z.void())
   .output(z.string())
-  .query(() => {
+  .query((ctx) => {
+    console.log("Viewed secret message using authType:", ctx.ctx.authType);
     return "you can now see this secret message!";
   });

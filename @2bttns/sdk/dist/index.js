@@ -18,7 +18,7 @@ class TwoBttns {
         console.info(`[2bttns] SDK initialized ${secret} ${url}`);
     }
     generateUserToken({ userId }) {
-        const token = jsonwebtoken_1.default.sign({ userId }, this.secret, {
+        const token = jsonwebtoken_1.default.sign({ type: "player_token", appId: this.appId, userId }, this.secret, {
             expiresIn: "1h",
         });
         return token;
