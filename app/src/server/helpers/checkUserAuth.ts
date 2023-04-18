@@ -20,7 +20,6 @@ const apiKeyTokenSchema = z
   .object({
     type: z.literal("api_key_token"),
     secretId: z.string(),
-    secretValue: z.string(),
   })
   .merge(jwtBaseSchema);
 
