@@ -1,8 +1,8 @@
 import { z } from "zod";
 import { OPENAPI_TAGS } from "../../openapi/openApiTags";
-import { protectedProcedure } from "../../trpc";
+import { anyAuthProtectedProcedure } from "../../trpc";
 
-export const getSecretMessage = protectedProcedure
+export const getSecretMessage = anyAuthProtectedProcedure
   .meta({
     openapi: {
       summary: "Get secret message",

@@ -71,7 +71,7 @@ export const createTRPCContext = async (opts: CreateNextContextOptions) => {
  * transformer
  */
 import { PrismaClient } from "@prisma/client";
-import { initTRPC } from "@trpc/server";
+import { TRPCError, initTRPC } from "@trpc/server";
 import { NextApiRequest } from "next";
 import superjson from "superjson";
 import { OpenApiMeta } from "trpc-openapi";
@@ -110,25 +110,45 @@ export const createTRPCRouter = t.router;
 export const publicProcedure = t.procedure;
 
 /**
- * Reusable middleware that enforces users are logged in before running the
- * procedure
+ * Protected (authed) procedure for any of the following:
+ * 1. Logged in admin -- when an admin is logged in (has an active session) with the 2bttns admin panel
+ * 2. Authentication header with valid player_token -- particularly from users granted a play URL by an app integration
+ * 3. Authentication header with valid api_key_token -- particularly from 2bttns SDK API calls
  */
-const enforceUserIsAuthed = t.middleware(async ({ ctx, next }) => {
-  let authType: CheckUserAuthType | undefined;
-  try {
-    authType = await checkUserAuth(ctx);
-  } catch (error) {
-    throw error;
-  }
-  return next({ ctx: { ...ctx, authType } });
-});
+export const anyAuthProtectedProcedure = t.procedure.use(
+  t.middleware(async ({ ctx, next }) => {
+    let authType: CheckUserAuthType | undefined;
+    try {
+      authType = await checkUserAuth(ctx);
+    } catch (error) {
+      throw error;
+    }
+    return next({ ctx: { ...ctx, authType } });
+  })
+);
+
 /**
- * Protected (authed) procedure
+ * Protected (authed) procedure for either of the following:
+ * 1. Logged in admin -- when an admin is logged in (has an active session) with the 2bttns admin panel
+ * 2. Authentication header with valid api_key_token -- particularly from 2bttns SDK API calls
  *
- * If you want a query or mutation to ONLY be accessible to logged in users, use
- * this. It verifies the session is valid and guarantees ctx.session.user is not
- * null
- *
- * @see https://trpc.io/docs/procedures
+ * Does not allow player_token authentication -- use this for routes that should not be accessible to players
  */
-export const protectedProcedure = t.procedure.use(enforceUserIsAuthed);
+export const adminOrApiKeyProtectedProcedure = t.procedure.use(
+  t.middleware(async ({ ctx, next }) => {
+    let authType: CheckUserAuthType | undefined;
+    try {
+      authType = await checkUserAuth(ctx);
+
+      if (authType === "player_token") {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "You are not authorized to access this resource",
+        });
+      }
+    } catch (error) {
+      throw error;
+    }
+    return next({ ctx: { ...ctx, authType } });
+  })
+);
