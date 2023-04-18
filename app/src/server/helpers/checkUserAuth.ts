@@ -19,7 +19,7 @@ const playerTokenSchema = z
 const apiKeyTokenSchema = z
   .object({
     type: z.literal("api_key_token"),
-    secretId: z.string(),
+    appId: z.string(),
   })
   .merge(jwtBaseSchema);
 
