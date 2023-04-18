@@ -1,39 +1,68 @@
 "use strict";
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const openapi_typescript_fetch_1 = require("openapi-typescript-fetch");
+/**
+ * **!! Important !! -- The 2bttns SDK is intended for server-side use only.**
+ *
+ *  It should not be used by client-side code, because API requests are made using an access token generated using an API Key secret
+ *  that should not be exposed.
+ */
 class TwoBttns {
     constructor(config) {
+        if (typeof window !== "undefined") {
+            throw new Error("Raised an Error because `window` was detected -- this likely means you are trying to use the 2bttns SDK in a client-side context, which is not allowed. The 2bttns SDK is intended for server-side use only.");
+        }
         const { appId, secret, url } = config;
         this.appId = appId;
         this.secret = secret;
         this.url = url;
+        this.apiAccessToken = TwoBttns.generateApiAccessToken({ appId, secret });
         this.api = openapi_typescript_fetch_1.Fetcher.for();
         this.api.configure({
             baseUrl: `${url}/api`,
         });
-        console.info(`[2bttns] SDK initialized ${secret} ${url}`);
+        console.info(`[2bttns] Successfully initialized SDK.`);
     }
-    generateUserToken({ userId }) {
-        const token = jsonwebtoken_1.default.sign({ type: "player_token", appId: this.appId, userId }, this.secret, {
-            expiresIn: "1h",
+    /**
+     * Make an API call to the 2bttns Admin Server
+     * @param path API path name
+     * @param method API method name
+     * @param args  API method arguments corresponding to the path & method
+     * @param init *[optional]* Additional request options -- for example, custom headers. An `Authorization: "Bearer <apiAccessToken>"` header is automatically configured, unless it is overridden here.
+     */
+    callApi(path, method, args, init) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const call = this.api.path(path).method(method).create();
+            const response = yield call(args !== null && args !== void 0 ? args : {}, Object.assign(Object.assign({}, init), { headers: { Authorization: `Bearer ${this.apiAccessToken}` } }));
+            return response;
         });
-        return token;
     }
-    decodeUserToken({ token }) {
-        const decoded = jsonwebtoken_1.default.verify(token, this.secret);
-        const decodedObj = decoded;
-        if (!decodedObj.userId) {
-            throw new Error("Invalid token: no userId");
-        }
-        return decodedObj;
-    }
-    generatePlayUrl(params) {
+    /**
+     * Generate a URL that can be used to send a user to 2bttns to play a game.
+     *
+     * This URL should be generated on the server-side of your application, and then used on the server or client-side to redirect the user to 2bttns.
+     */
+    generatePlayUrl(params, expiresIn = "1h") {
         const { game_id, user_id, num_items, callback_url } = params;
-        const token = this.generateUserToken({ userId: user_id });
+        const token = TwoBttns.generatePlayerToken({
+            appId: this.appId,
+            secret: this.secret,
+            userId: user_id,
+            expiresIn,
+        });
         const queryBuilder = new URLSearchParams();
         queryBuilder.append("game_id", game_id);
         queryBuilder.append("app_id", this.appId);
@@ -45,6 +74,43 @@ class TwoBttns {
             queryBuilder.append("callback_url", callback_url);
         }
         return `${this.url}/play?${queryBuilder.toString()}`;
+    }
+    /**
+     * Generate a JWT token for a user who should be sent to 2bttns to play a game.
+     * @param expiresIn *[optional]* How long the token should be valid for. Defaults to "1h".
+     */
+    static generatePlayerToken(params) {
+        const { appId, secret, userId, expiresIn = "1hr" } = params;
+        const token = jsonwebtoken_1.default.sign({ type: "player_token", appId, userId }, secret, {
+            expiresIn,
+        });
+        return token;
+    }
+    /**
+     * Decode a JWT token that was generated by generatePlayerToken()
+     */
+    static decodeUserToken(params) {
+        const { token, secret } = params;
+        const decoded = jsonwebtoken_1.default.verify(token, secret);
+        const decodedObj = decoded;
+        if (!decodedObj) {
+            throw new Error("Invalid token: no data");
+        }
+        if (decodedObj.type !== "player_token") {
+            throw new Error(`Invalid token: received type ${decodedObj.type}; expected type "player_token"`);
+        }
+        if (!decodedObj.userId) {
+            throw new Error("Invalid token: no userId");
+        }
+        return decodedObj;
+    }
+    /**
+     * Generate an API access token JWT for a given API Key
+     */
+    static generateApiAccessToken(params) {
+        const { appId, secret } = params;
+        const token = jsonwebtoken_1.default.sign({ type: "api_key_token", appId }, secret);
+        return token;
     }
 }
 exports.default = TwoBttns;

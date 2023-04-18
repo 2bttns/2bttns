@@ -6,13 +6,6 @@ export const twobttns = new TwoBttns({
   url: "http://localhost:3001",
 });
 
-export const getPlayers = twobttns.api.path("/players").method("get").create();
-export const getTags = twobttns.api.path("/tags").method("get").create();
-export const getRanked = twobttns.api
-  .path("/game-objects/ranked")
-  .method("get")
-  .create();
-
 export type TwoBttnsPlayer =
   ApiResponses["/players"]["get"]["responses"]["200"]["content"]["application/json"]["players"][number];
 

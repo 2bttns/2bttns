@@ -1,12 +1,12 @@
 import jwt from "jsonwebtoken";
-import { Fetcher } from "openapi-typescript-fetch";
+import { Fetcher, OpArgType } from "openapi-typescript-fetch";
 import { paths } from "../2bttns-api";
 
 export type GeneratePlayURLParams = {
-  game_id: string;
-  user_id: string;
-  num_items?: number | "ALL";
-  callback_url?: string;
+  game_id: string; // ID of the game to play
+  user_id: string; // ID of the user who is playing the game
+  num_items?: number | "ALL"; // Number of items to show in the game; otherwise defaults to the game's default number of items
+  callback_url?: string; // URL to redirect to after the game is complete
 };
 
 export type TwoBttnsConfig = {
@@ -16,50 +16,94 @@ export type TwoBttnsConfig = {
 };
 
 export type ApiResponses = paths;
+/**
+ * **!! Important !! -- The 2bttns SDK is intended for server-side use only.**
+ *
+ *  It should not be used by client-side code, because API requests are made using an access token generated using an API Key secret
+ *  that should not be exposed.
+ */
 export default class TwoBttns {
-  appId: string;
-  secret: string;
-  url: string;
-  api: ReturnType<typeof Fetcher.for<paths>>;
+  /**
+   * 2bttns App ID corresponding to a 2bttns API Key
+   */
+  protected appId: string;
+
+  /**
+   * API Key secret corresponding to a 2bttns API App ID
+   */
+  protected secret: string;
+
+  /**
+   * URL of the 2bttns Admin Server
+   */
+  protected url: string;
+
+  /**
+   * Access token that is automatically sent with 2bttns API calls via callApi()
+   */
+  protected apiAccessToken: string;
+
+  /**
+   * 2bttns API client generated using openapi-typescript-fetch. Not used directly; instead, use callApi().
+   */
+  protected api: ReturnType<typeof Fetcher.for<paths>>;
 
   constructor(config: TwoBttnsConfig) {
+    if (typeof window !== "undefined") {
+      throw new Error(
+        "Raised an Error because `window` was detected -- this likely means you are trying to use the 2bttns SDK in a client-side context, which is not allowed. The 2bttns SDK is intended for server-side use only."
+      );
+    }
+
     const { appId, secret, url } = config;
     this.appId = appId;
     this.secret = secret;
     this.url = url;
+
+    this.apiAccessToken = TwoBttns.generateApiAccessToken({ appId, secret });
 
     this.api = Fetcher.for<paths>();
     this.api.configure({
       baseUrl: `${url}/api`,
     });
 
-    console.info(`[2bttns] SDK initialized ${secret} ${url}`);
+    console.info(`[2bttns] Successfully initialized SDK.`);
   }
 
-  generateUserToken({ userId }: { userId: string }) {
-    const token = jwt.sign(
-      { type: "player_token", appId: this.appId, userId },
-      this.secret,
-      {
-        expiresIn: "1h",
-      }
-    );
-    return token;
+  /**
+   * Make an API call to the 2bttns Admin Server
+   * @param path API path name
+   * @param method API method name
+   * @param args  API method arguments corresponding to the path & method
+   * @param init *[optional]* Additional request options -- for example, custom headers. An `Authorization: "Bearer <apiAccessToken>"` header is automatically configured, unless it is overridden here.
+   */
+  async callApi<
+    Path extends keyof ApiResponses,
+    Method extends keyof ApiResponses[Path],
+    Body extends OpArgType<paths[Path][Method]>
+  >(path: Path, method: Method, args?: Body, init?: RequestInit) {
+    const call = this.api.path(path).method(method).create();
+    const response = await call(args ?? ({} as any), {
+      ...init,
+      headers: { Authorization: `Bearer ${this.apiAccessToken}` },
+    });
+    return response;
   }
 
-  decodeUserToken({ token }: { token: string }) {
-    const decoded = jwt.verify(token, this.secret);
-    const decodedObj = decoded as { userId: string };
-    if (!decodedObj.userId) {
-      throw new Error("Invalid token: no userId");
-    }
-    return decodedObj;
-  }
-
-  generatePlayUrl(params: GeneratePlayURLParams) {
+  /**
+   * Generate a URL that can be used to send a user to 2bttns to play a game.
+   *
+   * This URL should be generated on the server-side of your application, and then used on the server or client-side to redirect the user to 2bttns.
+   */
+  generatePlayUrl(params: GeneratePlayURLParams, expiresIn: string = "1h") {
     const { game_id, user_id, num_items, callback_url } = params;
 
-    const token = this.generateUserToken({ userId: user_id });
+    const token = TwoBttns.generatePlayerToken({
+      appId: this.appId,
+      secret: this.secret,
+      userId: user_id,
+      expiresIn,
+    });
     const queryBuilder = new URLSearchParams();
     queryBuilder.append("game_id", game_id);
     queryBuilder.append("app_id", this.appId);
@@ -73,5 +117,55 @@ export default class TwoBttns {
     }
 
     return `${this.url}/play?${queryBuilder.toString()}`;
+  }
+
+  /**
+   * Generate a JWT token for a user who should be sent to 2bttns to play a game.
+   * @param expiresIn *[optional]* How long the token should be valid for. Defaults to "1h".
+   */
+  static generatePlayerToken(params: {
+    appId: string;
+    secret: string;
+    userId: string;
+    expiresIn: string;
+  }) {
+    const { appId, secret, userId, expiresIn = "1hr" } = params;
+    const token = jwt.sign({ type: "player_token", appId, userId }, secret, {
+      expiresIn,
+    });
+    return token;
+  }
+
+  /**
+   * Decode a JWT token that was generated by generatePlayerToken()
+   */
+  static decodeUserToken(params: { token: string; secret: string }) {
+    const { token, secret } = params;
+    const decoded = jwt.verify(token, secret);
+    const decodedObj = decoded as { type: string; userId: string };
+
+    if (!decodedObj) {
+      throw new Error("Invalid token: no data");
+    }
+
+    if (decodedObj.type !== "player_token") {
+      throw new Error(
+        `Invalid token: received type ${decodedObj.type}; expected type "player_token"`
+      );
+    }
+
+    if (!decodedObj.userId) {
+      throw new Error("Invalid token: no userId");
+    }
+    return decodedObj;
+  }
+
+  /**
+   * Generate an API access token JWT for a given API Key
+   */
+  static generateApiAccessToken(params: { appId: string; secret: string }) {
+    const { appId, secret } = params;
+    const token = jwt.sign({ type: "api_key_token", appId }, secret);
+    return token;
   }
 }

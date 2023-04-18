@@ -12,7 +12,7 @@ const input = z.object({
   inputTags: z
     .string()
     .describe(
-      "Specify input tags that will be used to score the game objects associated with the output tag.\n\nIf the output tag is included in the input tags, the player's score for those game object will be used as base scores"
+      "Specify comma-separated input tags that will be used to score the game objects associated with the output tag.\n\nIf the output tag is included in the input tags, the player's score for those game object will be used as base scores"
     ),
 
   outputTag: z
