@@ -9,19 +9,24 @@ const jwtBaseSchema = z.object({
   exp: z.number().optional(),
 });
 
+const twobttnsBaseJwtSchema = z
+  .object({
+    appId: z.string(),
+  })
+  .merge(jwtBaseSchema);
+
 const playerTokenSchema = z
   .object({
     type: z.literal("player_token"),
     userId: z.string(),
   })
-  .merge(jwtBaseSchema);
+  .merge(twobttnsBaseJwtSchema);
 
 const apiKeyTokenSchema = z
   .object({
     type: z.literal("api_key_token"),
-    appId: z.string(),
   })
-  .merge(jwtBaseSchema);
+  .merge(twobttnsBaseJwtSchema);
 
 const tokenSchema = z.union([playerTokenSchema, apiKeyTokenSchema]);
 
