@@ -1,8 +1,8 @@
 import { z } from "zod";
 import { sort, textFilter } from "../../../shared/z";
-import { publicProcedure } from "../../trpc";
+import { anyAuthProtectedProcedure } from "../../trpc";
 
-export const getAll = publicProcedure
+export const getAll = anyAuthProtectedProcedure
   .input(
     z
       .object({

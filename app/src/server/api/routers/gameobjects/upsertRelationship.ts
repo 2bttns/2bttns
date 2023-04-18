@@ -1,8 +1,8 @@
 import { z } from "zod";
-import { publicProcedure } from "../../trpc";
+import { anyAuthProtectedProcedure } from "../../trpc";
 
 // Creates/updates a relationship in both directions, meaning two records are created/updated.
-export const upsertRelationship = publicProcedure
+export const upsertRelationship = anyAuthProtectedProcedure
   .input(
     z.object({
       gameObjectId1: z.string(),

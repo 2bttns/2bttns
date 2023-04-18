@@ -1,8 +1,8 @@
 import { z } from "zod";
 import generateSecret from "../../../../utils/generateSecret";
-import { publicProcedure } from "../../trpc";
+import { anyAuthProtectedProcedure } from "../../trpc";
 
-export const create = publicProcedure
+export const create = anyAuthProtectedProcedure
   .input(
     z.object({
       id: z.string().optional(),

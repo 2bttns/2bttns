@@ -1,9 +1,9 @@
 import { GameObjectRelationship, PlayerScore, Weight } from "@prisma/client";
 import { z } from "zod";
 import normalizeScores from "../../../shared/normalizeScores";
-import { publicProcedure } from "../../trpc";
+import { anyAuthProtectedProcedure } from "../../trpc";
 
-export const upsertPlayerScore = publicProcedure
+export const upsertPlayerScore = anyAuthProtectedProcedure
   .input(
     z.object({
       playerId: z.string(),

@@ -1,7 +1,7 @@
 import { z } from "zod";
-import { publicProcedure } from "../../trpc";
+import { anyAuthProtectedProcedure } from "../../trpc";
 
-export const updateById = publicProcedure
+export const updateById = anyAuthProtectedProcedure
   .input(
     z.object({
       id: z.string(),

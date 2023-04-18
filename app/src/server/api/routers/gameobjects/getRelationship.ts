@@ -1,7 +1,7 @@
 import { z } from "zod";
-import { publicProcedure } from "../../trpc";
+import { anyAuthProtectedProcedure } from "../../trpc";
 
-export const getRelationship = publicProcedure
+export const getRelationship = anyAuthProtectedProcedure
   .input(
     z.object({
       fromGameObjectId: z.string(),

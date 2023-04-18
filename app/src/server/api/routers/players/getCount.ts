@@ -1,8 +1,8 @@
 import { z } from "zod";
 import { OPENAPI_TAGS } from "../../openapi/openApiTags";
-import { publicProcedure } from "../../trpc";
+import { anyAuthProtectedProcedure } from "../../trpc";
 
-export const getCount = publicProcedure
+export const getCount = anyAuthProtectedProcedure
   .meta({
     openapi: {
       summary: "Get Player Count",

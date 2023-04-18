@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { OPENAPI_TAGS } from "../../openapi/openApiTags";
-import { publicProcedure } from "../../trpc";
+import { anyAuthProtectedProcedure } from "../../trpc";
 
 const output = z.object({
   createdPlayer: z.object({
@@ -11,7 +11,7 @@ const output = z.object({
   }),
 });
 
-export const create = publicProcedure
+export const create = anyAuthProtectedProcedure
   .meta({
     openapi: {
       summary: "Create Player",
