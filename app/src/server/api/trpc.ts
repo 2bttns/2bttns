@@ -22,9 +22,10 @@ import { type Session } from "next-auth";
 import { getServerAuthSession } from "../auth";
 import { prisma } from "../db";
 
-type CreateContextOptions = {
+export type CreateContextOptions = {
   session: Session | null;
   prisma?: PrismaClient;
+  req?: NextApiRequest;
 };
 
 /**
@@ -40,6 +41,7 @@ export const createInnerTRPCContext = (opts: CreateContextOptions) => {
   return {
     session: opts.session,
     prisma: opts.prisma || prisma,
+    req: opts.req,
   };
 };
 
@@ -56,6 +58,7 @@ export const createTRPCContext = async (opts: CreateNextContextOptions) => {
 
   return await createInnerTRPCContext({
     session,
+    req,
   });
 };
 
@@ -66,11 +69,13 @@ export const createTRPCContext = async (opts: CreateNextContextOptions) => {
  * transformer
  */
 import { PrismaClient } from "@prisma/client";
-import { initTRPC, TRPCError } from "@trpc/server";
+import { initTRPC } from "@trpc/server";
+import { NextApiRequest } from "next";
 import superjson from "superjson";
 import { OpenApiMeta } from "trpc-openapi";
+import { checkUserAuth } from "../helpers/checkUserAuth";
 
-const t = initTRPC
+export const t = initTRPC
   .context<typeof createTRPCContext>()
   .meta<OpenApiMeta>()
   .create({
@@ -107,17 +112,14 @@ export const publicProcedure = t.procedure;
  * procedure
  */
 const enforceUserIsAuthed = t.middleware(({ ctx, next }) => {
-  if (!ctx.session || !ctx.session.user) {
-    throw new TRPCError({ code: "UNAUTHORIZED" });
+  try {
+    const authCheckType = checkUserAuth(ctx);
+    console.log("authCheckType", authCheckType);
+  } catch (error) {
+    throw error;
   }
-  return next({
-    ctx: {
-      // infers the `session` as non-nullable
-      session: { ...ctx.session, user: ctx.session.user },
-    },
-  });
+  return next({ ctx });
 });
-
 /**
  * Protected (authed) procedure
  *
