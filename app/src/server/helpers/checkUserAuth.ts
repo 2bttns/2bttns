@@ -2,6 +2,7 @@ import { TRPCError } from "@trpc/server";
 import jwt from "jsonwebtoken";
 import { z } from "zod";
 import { CreateContextOptions } from "../api/trpc";
+import { logger } from "./logger";
 
 const jwtBaseSchema = z.object({
   sub: z.string().optional(),
@@ -43,8 +44,11 @@ export async function checkUserAuth(
   //      A Bearer token Authorization header is automatically sent when `playerToken` is set in frontend code via `setPlayerToken()`
   //  2. api_key_token - API Key encoded in a JWT; used by client apps to access the 2bttns API
   //      The 2bttns SDK should automatically pass the API key Bearer token as an Authorization header when making API calls
+  logger.verbose("checkUserAuth - start");
 
   const authHeader = ctx.headers?.authorization;
+  logger.info(`checkUserAuth - Received authHeader: ${authHeader}`);
+
   const token = authHeader?.split(" ")[1];
   if (token) {
     const decoded = jwt.decode(token);
@@ -54,6 +58,7 @@ export async function checkUserAuth(
         message: "Invalid token",
       });
     }
+    logger.info(`checkUserAuth - decoded token: ${JSON.stringify(decoded)}`);
 
     const tokenData = tokenSchema.parse(decoded);
 
@@ -81,6 +86,7 @@ export async function checkUserAuth(
     }
 
     if (tokenData.type) {
+      logger.verbose("checkUserAuth - end (valid token)");
       return tokenData;
     }
   }
@@ -91,10 +97,12 @@ export async function checkUserAuth(
   //  (end users don't log in to the admin panel; when they play a game they are referred to as "players")
   const isAdmin = ctx.session && ctx.session.user;
   if (isAdmin) {
+    logger.verbose("checkUserAuth - end (admin session)");
     return { type: "admin_session" };
   }
 
   // Otherwise, they are not authorized
+  logger.verbose("checkUserAuth - end (UNAUTHORIZED)");
   throw new TRPCError({
     code: "UNAUTHORIZED",
     message: "You are not authorized to access this resource",
