@@ -30,13 +30,13 @@ const apiKeyTokenSchema = z
 
 const tokenSchema = z.union([playerTokenSchema, apiKeyTokenSchema]);
 
-export type CheckUserAuthType =
-  | z.infer<typeof tokenSchema>["type"]
-  | "admin_session";
+export type CheckUserAuthData =
+  | z.infer<typeof tokenSchema>
+  | { type: "admin_session" };
 
 export async function checkUserAuth(
   ctx: CreateContextOptions
-): Promise<CheckUserAuthType> {
+): Promise<CheckUserAuthData> {
   // Allow the user access if they have a valid Authorization header
   // The Authorization token can represent one of the following:
   //  1. player_token - Player ID encoded in a JWT; used when a player is bounced from to a 2bttns game
@@ -79,7 +79,7 @@ export async function checkUserAuth(
     }
 
     if (tokenData.type) {
-      return tokenData.type;
+      return tokenData;
     }
   }
 
@@ -89,7 +89,7 @@ export async function checkUserAuth(
   //  (end users don't log in to the admin panel; when they play a game they are referred to as "players")
   const isAdmin = ctx.session && ctx.session.user;
   if (isAdmin) {
-    return "admin_session";
+    return { type: "admin_session" };
   }
 
   // Otherwise, they are not authorized

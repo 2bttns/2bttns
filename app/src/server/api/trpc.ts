@@ -26,7 +26,7 @@ export type CreateContextOptions = {
   session: Session | null;
   prisma?: PrismaClient;
   req?: NextApiRequest;
-  authType?: CheckUserAuthType;
+  authData?: CheckUserAuthData;
 };
 
 /**
@@ -43,7 +43,7 @@ export const createInnerTRPCContext = (opts: CreateContextOptions) => {
     session: opts.session,
     prisma: opts.prisma || prisma,
     req: opts.req,
-    authType: opts.authType,
+    authData: opts.authData,
   };
 };
 
@@ -75,7 +75,7 @@ import { TRPCError, initTRPC } from "@trpc/server";
 import { NextApiRequest } from "next";
 import superjson from "superjson";
 import { OpenApiMeta } from "trpc-openapi";
-import { CheckUserAuthType, checkUserAuth } from "../helpers/checkUserAuth";
+import { CheckUserAuthData, checkUserAuth } from "../helpers/checkUserAuth";
 
 export const t = initTRPC
   .context<typeof createTRPCContext>()
@@ -117,13 +117,13 @@ export const publicProcedure = t.procedure;
  */
 export const anyAuthProtectedProcedure = t.procedure.use(
   t.middleware(async ({ ctx, next }) => {
-    let authType: CheckUserAuthType | undefined;
+    let authData: CheckUserAuthData | undefined;
     try {
-      authType = await checkUserAuth(ctx);
+      authData = await checkUserAuth(ctx);
     } catch (error) {
       throw error;
     }
-    return next({ ctx: { ...ctx, authType } });
+    return next({ ctx: { ...ctx, authData } });
   })
 );
 
@@ -136,11 +136,11 @@ export const anyAuthProtectedProcedure = t.procedure.use(
  */
 export const adminOrApiKeyProtectedProcedure = t.procedure.use(
   t.middleware(async ({ ctx, next }) => {
-    let authType: CheckUserAuthType | undefined;
+    let authData: CheckUserAuthData | undefined;
     try {
-      authType = await checkUserAuth(ctx);
+      authData = await checkUserAuth(ctx);
 
-      if (authType === "player_token") {
+      if (authData.type === "player_token") {
         throw new TRPCError({
           code: "FORBIDDEN",
           message: "You are not authorized to access this resource",
@@ -149,6 +149,6 @@ export const adminOrApiKeyProtectedProcedure = t.procedure.use(
     } catch (error) {
       throw error;
     }
-    return next({ ctx: { ...ctx, authType } });
+    return next({ ctx: { ...ctx, authData } });
   })
 );

@@ -1,8 +1,8 @@
 import { z } from "zod";
 import { OPENAPI_TAGS } from "../../openapi/openApiTags";
-import { adminOrApiKeyProtectedProcedure } from "../../trpc";
+import { anyAuthProtectedProcedure } from "../../trpc";
 
-export const getSecretMessage = adminOrApiKeyProtectedProcedure
+export const getSecretMessage = anyAuthProtectedProcedure
   .meta({
     openapi: {
       summary: "Get secret message",
@@ -16,6 +16,6 @@ export const getSecretMessage = adminOrApiKeyProtectedProcedure
   .input(z.void())
   .output(z.string())
   .query((ctx) => {
-    console.log("Viewed secret message using authType:", ctx.ctx.authType);
+    console.log("Viewed secret message with authData:", ctx.ctx.authData);
     return "you can now see this secret message!";
   });
