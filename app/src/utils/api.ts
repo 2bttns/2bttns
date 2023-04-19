@@ -37,7 +37,6 @@ export function setPlayerToken(newToken: typeof playerToken) {
   }
 
   playerToken = newToken;
-  console.log("playerToken set to", playerToken);
 }
 
 function headers() {
