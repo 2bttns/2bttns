@@ -2,8 +2,8 @@
 import { inferProcedureInput } from "@trpc/server";
 import { afterEach, beforeEach, describe, expect, test } from "vitest";
 import { AppRouter, appRouter } from "../../../../src/server/api/root";
-import { createInnerTRPCContext } from "../../../../src/server/api/trpc";
 import { prisma } from "../../../../src/server/db";
+import { createInnerTRPCContextWithSessionForTest } from "./helpers";
 
 describe("players router", () => {
   beforeEach(async () => {
@@ -15,7 +15,7 @@ describe("players router", () => {
   });
 
   test("players.create", async () => {
-    const ctx = createInnerTRPCContext({ session: null });
+    const ctx = createInnerTRPCContextWithSessionForTest();
     const caller = appRouter.createCaller(ctx);
 
     type Input = inferProcedureInput<AppRouter["players"]["create"]>;
@@ -33,7 +33,7 @@ describe("players router", () => {
 
   describe("players.count", () => {
     test("gets proper count", async () => {
-      const ctx = createInnerTRPCContext({ session: null });
+      const ctx = createInnerTRPCContextWithSessionForTest();
       const caller = appRouter.createCaller(ctx);
 
       const numberOfPlayers = 101;
@@ -46,7 +46,7 @@ describe("players router", () => {
 
   describe("players.getAll", () => {
     test("get all", async () => {
-      const ctx = createInnerTRPCContext({ session: null });
+      const ctx = createInnerTRPCContextWithSessionForTest();
       const caller = appRouter.createCaller(ctx);
 
       const numberOfPlayers = 101;
@@ -64,7 +64,7 @@ describe("players router", () => {
 
   describe("players.getById", () => {
     test("get existing player", async () => {
-      const ctx = createInnerTRPCContext({ session: null });
+      const ctx = createInnerTRPCContextWithSessionForTest();
       const caller = appRouter.createCaller(ctx);
 
       const initialPlayer = { id: "test-player-id", name: "test-player" };
@@ -80,7 +80,7 @@ describe("players router", () => {
 
   describe("players.updateById", () => {
     test("update id", async () => {
-      const ctx = createInnerTRPCContext({ session: null });
+      const ctx = createInnerTRPCContextWithSessionForTest();
       const caller = appRouter.createCaller(ctx);
 
       const initialPlayer = { id: "test-player-id", name: "test-player" };
@@ -98,7 +98,7 @@ describe("players router", () => {
       expect(result.updatedPlayer.id).toBe(updatedId);
     });
     test("update name", async () => {
-      const ctx = createInnerTRPCContext({ session: null });
+      const ctx = createInnerTRPCContextWithSessionForTest();
       const caller = appRouter.createCaller(ctx);
 
       const initialPlayer = { id: "test-player-id", name: "test-player" };
@@ -119,7 +119,7 @@ describe("players router", () => {
 
   describe("players.deleteById", () => {
     test("delete existing player", async () => {
-      const ctx = createInnerTRPCContext({ session: null });
+      const ctx = createInnerTRPCContextWithSessionForTest();
       const caller = appRouter.createCaller(ctx);
 
       const initialPlayer = { id: "test-player-id", name: "test-player" };

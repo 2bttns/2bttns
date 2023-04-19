@@ -5,6 +5,7 @@ import { afterEach, beforeEach, describe, expect, test } from "vitest";
 import { appRouter, AppRouter } from "../../../../src/server/api/root";
 import { createInnerTRPCContext } from "../../../../src/server/api/trpc";
 import { prisma } from "../../../../src/server/db";
+import { createInnerTRPCContextWithSessionForTest } from "./helpers";
 
 describe("games router", () => {
   beforeEach(async () => {
@@ -16,7 +17,7 @@ describe("games router", () => {
   });
 
   test("games.create", async () => {
-    const ctx = createInnerTRPCContext({ session: null });
+    const ctx = createInnerTRPCContextWithSessionForTest();
     const caller = appRouter.createCaller(ctx);
 
     type Input = inferProcedureInput<AppRouter["games"]["create"]>;
@@ -36,7 +37,7 @@ describe("games router", () => {
 
   describe("games.getAll", () => {
     test("default limit 10", async () => {
-      const ctx = createInnerTRPCContext({ session: null });
+      const ctx = createInnerTRPCContextWithSessionForTest();
       const caller = appRouter.createCaller(ctx);
 
       const numberOfGames = 101;
@@ -50,7 +51,7 @@ describe("games router", () => {
     });
 
     test("sort by name", async () => {
-      const ctx = createInnerTRPCContext({ session: null });
+      const ctx = createInnerTRPCContextWithSessionForTest();
       const caller = appRouter.createCaller(ctx);
 
       const numberOfGames = 101;

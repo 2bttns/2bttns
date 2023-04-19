@@ -1,8 +1,8 @@
 // test/sample.test.ts
 import { afterEach, beforeEach, describe, expect, test } from "vitest";
 import { appRouter } from "../../../../src/server/api/root";
-import { createInnerTRPCContext } from "../../../../src/server/api/trpc";
 import { prisma } from "../../../../src/server/db";
+import { createInnerTRPCContextWithSessionForTest } from "./helpers";
 
 describe("tags router", () => {
   beforeEach(async () => {
@@ -15,7 +15,7 @@ describe("tags router", () => {
 
   describe("tags.getAll", () => {
     test("get all", async () => {
-      const ctx = createInnerTRPCContext({ session: null });
+      const ctx = createInnerTRPCContextWithSessionForTest();
       const caller = appRouter.createCaller(ctx);
 
       const numberOfTags = 101;
@@ -31,7 +31,7 @@ describe("tags router", () => {
     });
 
     test("filter by comma-separated list of tags", async () => {
-      const ctx = createInnerTRPCContext({ session: null });
+      const ctx = createInnerTRPCContextWithSessionForTest();
       const caller = appRouter.createCaller(ctx);
 
       const totalNumberOfTags = 101;

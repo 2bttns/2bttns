@@ -2,9 +2,9 @@
 import { Tag } from "@prisma/client";
 import { inferProcedureInput } from "@trpc/server";
 import { afterEach, beforeEach, describe, expect, test } from "vitest";
-import { appRouter, AppRouter } from "../../../../src/server/api/root";
-import { createInnerTRPCContext } from "../../../../src/server/api/trpc";
+import { AppRouter, appRouter } from "../../../../src/server/api/root";
 import { prisma } from "../../../../src/server/db";
+import { createInnerTRPCContextWithSessionForTest } from "./helpers";
 
 describe("gameobjects router", () => {
   beforeEach(async () => {
@@ -20,7 +20,7 @@ describe("gameobjects router", () => {
   });
 
   test("games.create", async () => {
-    const ctx = createInnerTRPCContext({ session: null });
+    const ctx = createInnerTRPCContextWithSessionForTest();
     const caller = appRouter.createCaller(ctx);
 
     type Input = inferProcedureInput<AppRouter["gameObjects"]["create"]>;
@@ -39,7 +39,7 @@ describe("gameobjects router", () => {
 
   describe("gameobjects.getAll", () => {
     test("default limit 10", async () => {
-      const ctx = createInnerTRPCContext({ session: null });
+      const ctx = createInnerTRPCContextWithSessionForTest();
       const caller = appRouter.createCaller(ctx);
 
       const numberOfGames = 101;
@@ -53,7 +53,7 @@ describe("gameobjects router", () => {
     });
 
     test("sort by name", async () => {
-      const ctx = createInnerTRPCContext({ session: null });
+      const ctx = createInnerTRPCContextWithSessionForTest();
       const caller = appRouter.createCaller(ctx);
 
       const numberOfGameObjects = 101;
@@ -86,7 +86,7 @@ describe("gameobjects router", () => {
 
   describe("gameobjects.getRanked", async () => {
     test("getRanked", async () => {
-      const ctx = createInnerTRPCContext({ session: null });
+      const ctx = createInnerTRPCContextWithSessionForTest();
       const caller = appRouter.createCaller(ctx);
 
       await prisma.player.create({
