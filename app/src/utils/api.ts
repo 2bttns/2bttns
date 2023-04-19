@@ -10,6 +10,9 @@ import { createTRPCNext } from "@trpc/next";
 import { type inferRouterInputs, type inferRouterOutputs } from "@trpc/server";
 import superjson from "superjson";
 
+// Fetch polyfill -- Fixes "Error: No fetch implementation found" errors during testing
+import "whatwg-fetch";
+
 import { type AppRouter } from "../server/api/root";
 
 const getBaseUrl = () => {

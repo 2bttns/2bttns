@@ -3,17 +3,22 @@ import { afterEach, beforeEach, describe, expect, test } from "vitest";
 import { defaultMode } from "../../../../src/modes/availableModes";
 import { AppRouter, appRouter } from "../../../../src/server/api/root";
 import { prisma } from "../../../../src/server/db";
+import { setPlayerToken } from "../../../../src/utils/api";
 import {
   clearDbsTest,
+  createInnerTRPCContextWithPlayerTokenAuthForTest,
   createInnerTRPCContextWithSessionForTest,
+  createTestSecret,
 } from "./helpers";
 
 describe("games router", () => {
   beforeEach(async () => {
+    setPlayerToken(null);
     await clearDbsTest(prisma);
   });
 
   afterEach(async () => {
+    setPlayerToken(null);
     await clearDbsTest(prisma);
   });
 
@@ -85,11 +90,13 @@ describe("games router", () => {
 
   describe("games.getPlayerScores", () => {
     const numGameObjectsForScoring = 10;
+    const numPlayers = 2;
     const testTagId = "test-tag-id";
     const testGameId = "test-game-id";
     const testPlayerId = "test-player-id";
     const testGameObjectId = "test-game-object-id";
 
+    // Creates all necessary data like game objects, tags, games, players, and player scores to be used in this test suite
     const createNecessaryPlayerScoreData = async () => {
       await prisma.tag.create({
         data: {
@@ -120,29 +127,32 @@ describe("games router", () => {
         },
       });
 
-      await prisma.player.create({
-        data: { name: "test-player", id: testPlayerId },
-      });
-
-      for (let i = 0; i < numGameObjectsForScoring; i++) {
-        await prisma.playerScore.create({
-          data: {
-            gameObjectId: `${testGameObjectId}-${i}`,
-            playerId: testPlayerId,
-            score: i / numGameObjectsForScoring,
-          },
+      for (let i = 0; i < numPlayers; i++) {
+        const playerId = `${testPlayerId}-${i}`;
+        await prisma.player.create({
+          data: { name: `test-player-${i}`, id: playerId },
         });
+
+        for (let i = 0; i < numGameObjectsForScoring; i++) {
+          await prisma.playerScore.create({
+            data: {
+              gameObjectId: `${testGameObjectId}-${i}`,
+              playerId,
+              score: i / numGameObjectsForScoring,
+            },
+          });
+        }
       }
     };
 
-    test("getPlayerScores with gameobjects", async () => {
+    test("getPlayerScores with gameobjects (admin session)", async () => {
       const ctx = createInnerTRPCContextWithSessionForTest();
       const caller = appRouter.createCaller(ctx);
 
       type Input = inferProcedureInput<AppRouter["games"]["getPlayerScores"]>;
       const input: Input = {
         game_id: testGameId,
-        player_id: testPlayerId,
+        player_id: `${testPlayerId}-0`,
         include_game_objects: "true", // String "true" is intentional; see getPlayerScores for more info
       };
 
@@ -173,14 +183,14 @@ describe("games router", () => {
       expect(result2.playerScores[0]!.gameObject).not.toBeDefined();
     });
 
-    test("getPlayerScores without gameobjects", async () => {
+    test("getPlayerScores without gameobjects (admin session)", async () => {
       const ctx = createInnerTRPCContextWithSessionForTest();
       const caller = appRouter.createCaller(ctx);
 
       type Input = inferProcedureInput<AppRouter["games"]["getPlayerScores"]>;
       const input: Input = {
         game_id: testGameId,
-        player_id: testPlayerId,
+        player_id: `${testPlayerId}-0`,
       };
 
       await createNecessaryPlayerScoreData();
@@ -195,6 +205,58 @@ describe("games router", () => {
 
       // Does not include game objects
       expect(result2.playerScores[0]!.gameObject).not.toBeDefined();
+    });
+
+    test("getPlayerScores (player_token auth)", async () => {
+      await createNecessaryPlayerScoreData();
+      const secret = await createTestSecret();
+      const player_id = `${testPlayerId}-0`;
+
+      const ctx = createInnerTRPCContextWithPlayerTokenAuthForTest(
+        {
+          type: "player_token",
+          appId: secret.id,
+          userId: player_id,
+        },
+        secret.secret
+      );
+      const caller = appRouter.createCaller(ctx);
+
+      type Input = inferProcedureInput<AppRouter["games"]["getPlayerScores"]>;
+      const input: Input = {
+        game_id: testGameId,
+        player_id,
+      };
+
+      // Player should receive their own scores
+      const result2 = await caller.games.getPlayerScores(input);
+      expect(result2.playerScores).toBeDefined();
+    });
+
+    test("when using player_token auth, cannot access other players' scores", async () => {
+      await createNecessaryPlayerScoreData();
+      const secret = await createTestSecret();
+      const player_id = `${testPlayerId}-0`;
+      const otherPlayerId = `${testPlayerId}-1`;
+
+      const ctx = createInnerTRPCContextWithPlayerTokenAuthForTest(
+        {
+          type: "player_token",
+          appId: secret.id,
+          userId: player_id,
+        },
+        secret.secret
+      );
+      const caller = appRouter.createCaller(ctx);
+
+      type Input = inferProcedureInput<AppRouter["games"]["getPlayerScores"]>;
+      const input: Input = {
+        game_id: testGameId,
+        player_id: otherPlayerId,
+      };
+
+      // Player 0 should not be able to access Player 1's scores
+      expect(() => caller.games.getPlayerScores(input)).rejects.toThrow();
     });
   });
 });

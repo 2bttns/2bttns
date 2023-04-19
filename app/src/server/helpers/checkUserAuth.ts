@@ -9,26 +9,26 @@ const jwtBaseSchema = z.object({
   exp: z.number().optional(),
 });
 
-const twobttnsBaseJwtSchema = z
+export const twobttnsBaseJwtSchema = z
   .object({
     appId: z.string(),
   })
   .merge(jwtBaseSchema);
 
-const playerTokenSchema = z
+export const playerTokenSchema = z
   .object({
     type: z.literal("player_token"),
     userId: z.string(),
   })
   .merge(twobttnsBaseJwtSchema);
 
-const apiKeyTokenSchema = z
+export const apiKeyTokenSchema = z
   .object({
     type: z.literal("api_key_token"),
   })
   .merge(twobttnsBaseJwtSchema);
 
-const tokenSchema = z.union([playerTokenSchema, apiKeyTokenSchema]);
+export const tokenSchema = z.union([playerTokenSchema, apiKeyTokenSchema]);
 
 export type CheckUserAuthData =
   | z.infer<typeof tokenSchema>
@@ -40,9 +40,11 @@ export async function checkUserAuth(
   // Allow the user access if they have a valid Authorization header
   // The Authorization token can represent one of the following:
   //  1. player_token - Player ID encoded in a JWT; used when a player is bounced from to a 2bttns game
+  //      A Bearer token Authorization header is automatically sent when `playerToken` is set in frontend code via `setPlayerToken()`
   //  2. api_key_token - API Key encoded in a JWT; used by client apps to access the 2bttns API
+  //      The 2bttns SDK should automatically pass the API key Bearer token as an Authorization header when making API calls
 
-  const authHeader = ctx.req?.headers?.authorization;
+  const authHeader = ctx.headers?.authorization;
   const token = authHeader?.split(" ")[1];
   if (token) {
     const decoded = jwt.decode(token);

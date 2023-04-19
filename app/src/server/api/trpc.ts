@@ -25,7 +25,7 @@ import { prisma } from "../db";
 export type CreateContextOptions = {
   session: Session | null;
   prisma?: PrismaClient;
-  req?: NextApiRequest;
+  headers?: NextApiRequest["headers"];
   authData?: CheckUserAuthData;
 };
 
@@ -42,7 +42,7 @@ export const createInnerTRPCContext = (opts: CreateContextOptions) => {
   return {
     session: opts.session,
     prisma: opts.prisma || prisma,
-    req: opts.req,
+    headers: opts.headers,
     authData: opts.authData,
   };
 };
@@ -60,7 +60,7 @@ export const createTRPCContext = async (opts: CreateNextContextOptions) => {
 
   return await createInnerTRPCContext({
     session,
-    req,
+    headers: req.headers,
   });
 };
 

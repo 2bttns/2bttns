@@ -172,7 +172,6 @@ function ViewResults(props: ViewResultsProps) {
             );
           }}
           isMulti
-          closeMenuOnSelect={false}
           isSearchable
         />
 
