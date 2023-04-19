@@ -1,16 +1,18 @@
-// test/sample.test.ts
 import { afterEach, beforeEach, describe, expect, test } from "vitest";
 import { appRouter } from "../../../../src/server/api/root";
 import { prisma } from "../../../../src/server/db";
-import { createInnerTRPCContextWithSessionForTest } from "./helpers";
+import {
+  clearDbsTest,
+  createInnerTRPCContextWithSessionForTest,
+} from "./helpers";
 
 describe("tags router", () => {
   beforeEach(async () => {
-    await clearTags();
+    await clearDbsTest(prisma);
   });
 
   afterEach(async () => {
-    await clearTags();
+    await clearDbsTest(prisma);
   });
 
   describe("tags.getAll", () => {
@@ -56,10 +58,6 @@ describe("tags router", () => {
     });
   });
 });
-
-async function clearTags() {
-  return await prisma.tag.deleteMany();
-}
 
 async function createTags(count: number) {
   return await prisma.tag.createMany({

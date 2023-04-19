@@ -33,6 +33,13 @@ export interface paths {
      */
     get: operations["query.example.getSecretMessage"];
   };
+  "/games/getPlayerScores": {
+    /**
+     * Get Player Scores 
+     * @description Get a player's score data for a specific game
+     */
+    get: operations["query.games.getPlayerScores"];
+  };
   "/game-objects/ranked": {
     /**
      * Get Ranked Results 
@@ -199,6 +206,46 @@ export interface operations {
       default: components["responses"]["error"];
     };
   };
+  "query.games.getPlayerScores": {
+    /**
+     * Get Player Scores 
+     * @description Get a player's score data for a specific game
+     */
+    parameters: {
+        /** @description The game id to get scores for */
+        /** @description The player id to get scores for */
+        /** @description Whether to include game objects in the response */
+      query: {
+        game_id: string;
+        player_id: string;
+        include_game_objects?: boolean;
+      };
+    };
+    responses: {
+      /** @description Successful response */
+      200: {
+        content: {
+          "application/json": {
+            playerScores: ({
+                createdAt: string;
+                updatedAt: string;
+                score: number;
+                playerId: string;
+                gameObjectId: string;
+                gameObject?: {
+                  id: string;
+                  createdAt: string;
+                  updatedAt: string;
+                  name: string;
+                  description: string | null;
+                };
+              })[];
+          };
+        };
+      };
+      default: components["responses"]["error"];
+    };
+  };
   "query.gameObjects.getRanked": {
     /**
      * Get Ranked Results 
@@ -206,7 +253,7 @@ export interface operations {
      */
     parameters: {
         /**
-         * @description Specify input tags that will be used to score the game objects associated with the output tag.
+         * @description Specify comma-separated input tags that will be used to score the game objects associated with the output tag.
          * 
          * If the output tag is included in the input tags, the player's score for those game object will be used as base scores
          */

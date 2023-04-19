@@ -1,17 +1,19 @@
-// test/sample.test.ts
 import { inferProcedureInput } from "@trpc/server";
 import { afterEach, beforeEach, describe, expect, test } from "vitest";
 import { AppRouter, appRouter } from "../../../../src/server/api/root";
 import { prisma } from "../../../../src/server/db";
-import { createInnerTRPCContextWithSessionForTest } from "./helpers";
+import {
+  clearDbsTest,
+  createInnerTRPCContextWithSessionForTest,
+} from "./helpers";
 
 describe("players router", () => {
   beforeEach(async () => {
-    await clearPlayers();
+    await clearDbsTest(prisma);
   });
 
   afterEach(async () => {
-    await clearPlayers();
+    await clearDbsTest(prisma);
   });
 
   test("players.create", async () => {
@@ -141,10 +143,6 @@ describe("players router", () => {
     });
   });
 });
-
-async function clearPlayers() {
-  return await prisma.player.deleteMany();
-}
 
 async function createPlayers(count: number) {
   return await prisma.player.createMany({

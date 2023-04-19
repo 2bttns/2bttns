@@ -1,10 +1,22 @@
 import { type inferProcedureInput } from "@trpc/server";
-import { describe, expect, test } from "vitest";
+import { afterEach, beforeEach, describe, expect, test } from "vitest";
 import { AppRouter, appRouter } from "../../../../src/server/api/root";
 import { createInnerTRPCContext } from "../../../../src/server/api/trpc";
-import { createInnerTRPCContextWithSessionForTest } from "./helpers";
+import { prisma } from "../../../../src/server/db";
+import {
+  clearDbsTest,
+  createInnerTRPCContextWithSessionForTest,
+} from "./helpers";
 
 describe("example router", () => {
+  beforeEach(async () => {
+    await clearDbsTest(prisma);
+  });
+
+  afterEach(async () => {
+    await clearDbsTest(prisma);
+  });
+
   test("greeting", async () => {
     const ctx = createInnerTRPCContext({ session: null });
     const caller = appRouter.createCaller(ctx);

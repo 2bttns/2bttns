@@ -1,22 +1,20 @@
-// test/sample.test.ts
 import { Tag } from "@prisma/client";
 import { inferProcedureInput } from "@trpc/server";
 import { afterEach, beforeEach, describe, expect, test } from "vitest";
 import { AppRouter, appRouter } from "../../../../src/server/api/root";
 import { prisma } from "../../../../src/server/db";
-import { createInnerTRPCContextWithSessionForTest } from "./helpers";
+import {
+  clearDbsTest,
+  createInnerTRPCContextWithSessionForTest,
+} from "./helpers";
 
 describe("gameobjects router", () => {
   beforeEach(async () => {
-    await clearGameObjects();
-    await clearTags();
-    await clearPlayers();
+    await clearDbsTest(prisma);
   });
 
   afterEach(async () => {
-    await clearGameObjects();
-    await clearTags();
-    await clearPlayers();
+    await clearDbsTest(prisma);
   });
 
   test("games.create", async () => {
