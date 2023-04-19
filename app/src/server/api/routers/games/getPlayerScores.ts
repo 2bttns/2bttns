@@ -1,14 +1,55 @@
+import { GameObject, PlayerScore } from "@prisma/client";
 import { z } from "zod";
-import { adminOrApiKeyProtectedProcedure } from "../../trpc";
+import { OPENAPI_TAGS } from "../../openapi/openApiTags";
+import { anyAuthProtectedProcedure } from "../../trpc";
 
-export const getPlayerScores = adminOrApiKeyProtectedProcedure
+const output = z.object({
+  playerScores: z.array(
+    z.object({
+      createdAt: z.string(),
+      updatedAt: z.string(),
+      score: z.number(),
+      playerId: z.string(),
+      gameObjectId: z.string(),
+      gameObject: z
+        .object({
+          id: z.string(),
+          createdAt: z.string(),
+          updatedAt: z.string(),
+          name: z.string(),
+          description: z.string().nullable(),
+        })
+        .optional(),
+    })
+  ),
+});
+
+export const getPlayerScores = anyAuthProtectedProcedure
+  .meta({
+    openapi: {
+      summary: "Get Player Scores",
+      description: "Get a player's score data for a specific game",
+      tags: [OPENAPI_TAGS.GAMES],
+      method: "GET",
+      path: "/games/getPlayerScores",
+      protect: true,
+    },
+  })
   .input(
     z.object({
-      game_id: z.string(),
-      player_id: z.string(),
-      include_game_objects: z.boolean().optional(),
+      game_id: z.string().describe("The game id to get scores for"),
+      player_id: z.string().describe("The player id to get scores for"),
+      include_game_objects: z
+        // For some reason, z.boolean() doesn't work here when setting this via the swagger docs UI; everything registered as true
+        // Hence, we use z.string() and then preprocess it to a boolean
+        .preprocess((value) => {
+          return value === "true";
+        }, z.boolean())
+        .default(false)
+        .describe("Whether to include game objects in the response"),
     })
   )
+  .output(output)
   .query(async ({ ctx, input }) => {
     const gameTags = await ctx.prisma.tag.findMany({
       where: {
@@ -32,7 +73,9 @@ export const getPlayerScores = adminOrApiKeyProtectedProcedure
       },
     });
 
-    const playerScores = await ctx.prisma.playerScore.findMany({
+    let playerScores: (PlayerScore & {
+      gameObject?: GameObject;
+    })[] = await ctx.prisma.playerScore.findMany({
       where: {
         gameObjectId: {
           in: gameObjects.map((gameObject) => gameObject.id),
@@ -47,7 +90,25 @@ export const getPlayerScores = adminOrApiKeyProtectedProcedure
       },
     });
 
+    const outputData: typeof output._type["playerScores"] = playerScores.map(
+      (playerScore) => {
+        return {
+          ...playerScore,
+          score: playerScore.score.toNumber(),
+          createdAt: playerScore.createdAt.toISOString(),
+          updatedAt: playerScore.updatedAt.toISOString(),
+          gameObject: playerScore.gameObject
+            ? {
+                ...playerScore.gameObject,
+                createdAt: playerScore.gameObject.createdAt.toISOString(),
+                updatedAt: playerScore.gameObject.updatedAt.toISOString(),
+              }
+            : undefined,
+        };
+      }
+    );
+
     return {
-      playerScores,
+      playerScores: outputData,
     };
   });

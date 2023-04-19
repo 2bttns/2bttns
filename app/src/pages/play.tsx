@@ -243,7 +243,7 @@ function ScoresModal({ gameId, playerId }: ScoresModalProps) {
     {
       game_id: gameId,
       player_id: playerId,
-      include_game_objects: true,
+      include_game_objects: "true",
     },
     {
       cacheTime: 0,
