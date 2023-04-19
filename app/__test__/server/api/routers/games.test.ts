@@ -84,16 +84,13 @@ describe("games router", () => {
   });
 
   describe("games.getPlayerScores", () => {
-    test("getPlayerScores", async () => {
-      const ctx = createInnerTRPCContextWithSessionForTest();
-      const caller = appRouter.createCaller(ctx);
+    const numGameObjectsForScoring = 10;
+    const testTagId = "test-tag-id";
+    const testGameId = "test-game-id";
+    const testPlayerId = "test-player-id";
+    const testGameObjectId = "test-game-object-id";
 
-      const numGameObjectsForScoring = 10;
-      const testTagId = "test-tag-id";
-      const testGameId = "test-game-id";
-      const testPlayerId = "test-player-id";
-      const testGameObjectId = "test-game-object-id";
-
+    const createNecessaryPlayerScoreData = async () => {
       await prisma.tag.create({
         data: {
           name: "test-tag",
@@ -136,6 +133,11 @@ describe("games router", () => {
           },
         });
       }
+    };
+
+    test("getPlayerScores with gameobjects", async () => {
+      const ctx = createInnerTRPCContextWithSessionForTest();
+      const caller = appRouter.createCaller(ctx);
 
       type Input = inferProcedureInput<AppRouter["games"]["getPlayerScores"]>;
       const input: Input = {
@@ -143,6 +145,8 @@ describe("games router", () => {
         player_id: testPlayerId,
         include_game_objects: "true", // String "true" is intentional; see getPlayerScores for more info
       };
+
+      await createNecessaryPlayerScoreData();
 
       // Has correct number of player scores
       const result = await caller.games.getPlayerScores(input);
@@ -156,6 +160,30 @@ describe("games router", () => {
       expect(result.playerScores[0]!.gameObject).toBeDefined();
 
       delete input.include_game_objects;
+
+      // Has correct number of player scores
+      const result2 = await caller.games.getPlayerScores(input);
+      expect(result2.playerScores).length(numGameObjectsForScoring);
+
+      // Is sorted
+      const sortedPlayerScores2 = [...result2.playerScores].sort();
+      expect(sortedPlayerScores2).toEqual(result2.playerScores);
+
+      // Does not include game objects
+      expect(result2.playerScores[0]!.gameObject).not.toBeDefined();
+    });
+
+    test("getPlayerScores without gameobjects", async () => {
+      const ctx = createInnerTRPCContextWithSessionForTest();
+      const caller = appRouter.createCaller(ctx);
+
+      type Input = inferProcedureInput<AppRouter["games"]["getPlayerScores"]>;
+      const input: Input = {
+        game_id: testGameId,
+        player_id: testPlayerId,
+      };
+
+      await createNecessaryPlayerScoreData();
 
       // Has correct number of player scores
       const result2 = await caller.games.getPlayerScores(input);
