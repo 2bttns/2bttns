@@ -1,4 +1,5 @@
 import { GameObject, PlayerScore } from "@prisma/client";
+import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { OPENAPI_TAGS } from "../../openapi/openApiTags";
 import { anyAuthProtectedProcedure } from "../../trpc";
@@ -51,6 +52,15 @@ export const getPlayerScores = anyAuthProtectedProcedure
   )
   .output(output)
   .query(async ({ ctx, input }) => {
+    if (ctx.authData.type === "player_token") {
+      if (ctx.authData.userId !== input.player_id) {
+        throw new TRPCError({
+          code: "UNAUTHORIZED",
+          message: `Player ${ctx.authData.userId} is only authorized to get their own scores`,
+        });
+      }
+    }
+
     const gameTags = await ctx.prisma.tag.findMany({
       where: {
         inputToGames: {
