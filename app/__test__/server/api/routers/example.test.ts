@@ -2,6 +2,7 @@ import { type inferProcedureInput } from "@trpc/server";
 import { describe, expect, test } from "vitest";
 import { AppRouter, appRouter } from "../../../../src/server/api/root";
 import { createInnerTRPCContext } from "../../../../src/server/api/trpc";
+import { createInnerTRPCContextWithSessionForTest } from "./helpers";
 
 describe("example router", () => {
   test("greeting", async () => {
@@ -18,12 +19,7 @@ describe("example router", () => {
   });
 
   test("getSecretMessage with session", async () => {
-    const ctx = createInnerTRPCContext({
-      session: {
-        user: { id: "123", name: "John Doe" },
-        expires: "1",
-      },
-    });
+    const ctx = createInnerTRPCContextWithSessionForTest();
     const caller = appRouter.createCaller(ctx);
     const result = await caller.example.getSecretMessage();
     expect(result).toEqual("you can now see this secret message!");
