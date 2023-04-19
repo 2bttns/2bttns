@@ -1,7 +1,7 @@
 import { z } from "zod";
-import { anyAuthProtectedProcedure } from "../../trpc";
+import { adminOrApiKeyProtectedProcedure } from "../../trpc";
 
-export const getPlayerScores = anyAuthProtectedProcedure
+export const getPlayerScores = adminOrApiKeyProtectedProcedure
   .input(
     z.object({
       game_id: z.string(),

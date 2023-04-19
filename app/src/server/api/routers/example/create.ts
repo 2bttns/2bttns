@@ -1,8 +1,8 @@
 import { z } from "zod";
 import { OPENAPI_TAGS } from "../../openapi/openApiTags";
-import { anyAuthProtectedProcedure } from "../../trpc";
+import { adminOrApiKeyProtectedProcedure } from "../../trpc";
 
-export const create = anyAuthProtectedProcedure
+export const create = adminOrApiKeyProtectedProcedure
   .meta({
     openapi: {
       summary: "Create example",
@@ -10,6 +10,7 @@ export const create = anyAuthProtectedProcedure
       tags: [OPENAPI_TAGS.EXAMPLE],
       method: "POST",
       path: "/example/create",
+      protect: true,
     },
   })
   .input(

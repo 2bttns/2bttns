@@ -1,7 +1,7 @@
 import { z } from "zod";
-import { anyAuthProtectedProcedure } from "../../trpc";
+import { adminOrApiKeyProtectedProcedure } from "../../trpc";
 
-export const getAll = anyAuthProtectedProcedure
+export const getAll = adminOrApiKeyProtectedProcedure
   .input(z.null())
   .query(async ({ ctx }) => {
     const weights = await ctx.prisma.weight.findMany({

@@ -1,7 +1,7 @@
 import { GameObject, PlayerScore, Weight } from "@prisma/client";
 import { performance } from "perf_hooks";
 import { z } from "zod";
-import { anyAuthProtectedProcedure } from "../../../server/api/trpc";
+import { adminOrApiKeyProtectedProcedure } from "../../../server/api/trpc";
 import normalizeScores from "../../../server/shared/normalizeScores";
 
 const choiceItemSchema = z.object({
@@ -12,7 +12,7 @@ const userChoiceSchema = z.object({
   not_picked: choiceItemSchema,
 });
 
-export const processGameResults = anyAuthProtectedProcedure
+export const processGameResults = adminOrApiKeyProtectedProcedure
   .input(
     z.object({
       playerId: z.string(),

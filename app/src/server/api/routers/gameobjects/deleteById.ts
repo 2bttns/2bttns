@@ -1,7 +1,7 @@
 import { z } from "zod";
-import { anyAuthProtectedProcedure } from "../../trpc";
+import { adminOrApiKeyProtectedProcedure } from "../../trpc";
 
-export const deleteById = anyAuthProtectedProcedure
+export const deleteById = adminOrApiKeyProtectedProcedure
   .input(
     z.object({
       id: z.string(),

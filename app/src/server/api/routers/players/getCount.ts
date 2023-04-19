@@ -1,8 +1,8 @@
 import { z } from "zod";
 import { OPENAPI_TAGS } from "../../openapi/openApiTags";
-import { anyAuthProtectedProcedure } from "../../trpc";
+import { adminOrApiKeyProtectedProcedure } from "../../trpc";
 
-export const getCount = anyAuthProtectedProcedure
+export const getCount = adminOrApiKeyProtectedProcedure
   .meta({
     openapi: {
       summary: "Get Player Count",
@@ -10,6 +10,7 @@ export const getCount = anyAuthProtectedProcedure
       tags: [OPENAPI_TAGS.PLAYERS],
       method: "GET",
       path: "/players/count",
+      protect: true,
     },
   })
   .input(z.void())

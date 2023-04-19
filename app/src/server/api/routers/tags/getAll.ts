@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { OPENAPI_TAGS } from "../../openapi/openApiTags";
-import { anyAuthProtectedProcedure } from "../../trpc";
+import { adminOrApiKeyProtectedProcedure } from "../../trpc";
 
 const output = z.object({
   tags: z.array(
@@ -14,7 +14,7 @@ const output = z.object({
   ),
 });
 
-export const getAll = anyAuthProtectedProcedure
+export const getAll = adminOrApiKeyProtectedProcedure
   .meta({
     openapi: {
       summary: "Get All Tags",
@@ -22,6 +22,7 @@ export const getAll = anyAuthProtectedProcedure
       tags: [OPENAPI_TAGS.TAGS],
       method: "GET",
       path: "/tags",
+      protect: true,
     },
   })
 

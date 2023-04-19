@@ -1,8 +1,8 @@
 import { z } from "zod";
 import generateSecret from "../../../../utils/generateSecret";
-import { anyAuthProtectedProcedure } from "../../trpc";
+import { adminOrApiKeyProtectedProcedure } from "../../trpc";
 
-export const updateById = anyAuthProtectedProcedure
+export const updateById = adminOrApiKeyProtectedProcedure
   .input(
     z.object({
       id: z.string(),

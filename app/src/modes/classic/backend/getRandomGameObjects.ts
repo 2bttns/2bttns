@@ -1,7 +1,7 @@
 import { z } from "zod";
-import { anyAuthProtectedProcedure } from "../../../server/api/trpc";
+import { adminOrApiKeyProtectedProcedure } from "../../../server/api/trpc";
 
-export const getRandomGameObjects = anyAuthProtectedProcedure
+export const getRandomGameObjects = adminOrApiKeyProtectedProcedure
   .input(
     z.object({
       count: z.number().optional(),

@@ -4,7 +4,7 @@ import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { prisma } from "../../../db";
 import { OPENAPI_TAGS } from "../../openapi/openApiTags";
-import { anyAuthProtectedProcedure } from "../../trpc";
+import { adminOrApiKeyProtectedProcedure } from "../../trpc";
 
 const input = z.object({
   playerId: z.string(),
@@ -34,7 +34,7 @@ const output = z.object({
   ),
 });
 
-export const getRanked = anyAuthProtectedProcedure
+export const getRanked = adminOrApiKeyProtectedProcedure
   .meta({
     openapi: {
       summary: "Get Ranked Results",
@@ -42,6 +42,7 @@ export const getRanked = anyAuthProtectedProcedure
       tags: [OPENAPI_TAGS.GAME_OBJECTS],
       method: "GET",
       path: "/game-objects/ranked",
+      protect: true,
     },
   })
   .input(input)

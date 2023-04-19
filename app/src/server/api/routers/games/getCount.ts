@@ -1,8 +1,8 @@
 import { z } from "zod";
 import { tagFilter, textFilter } from "../../../shared/z";
-import { anyAuthProtectedProcedure } from "../../trpc";
+import { adminOrApiKeyProtectedProcedure } from "../../trpc";
 
-export const getCount = anyAuthProtectedProcedure
+export const getCount = adminOrApiKeyProtectedProcedure
   .input(
     z
       .object({

@@ -1,7 +1,7 @@
 import { TRPCError } from "@trpc/server";
 import { output, z } from "zod";
 import { OPENAPI_TAGS } from "../../openapi/openApiTags";
-import { anyAuthProtectedProcedure } from "../../trpc";
+import { adminOrApiKeyProtectedProcedure } from "../../trpc";
 
 const output = z.object({
   deletedPlayer: z.object({
@@ -12,7 +12,7 @@ const output = z.object({
   }),
 });
 
-export const deleteById = anyAuthProtectedProcedure
+export const deleteById = adminOrApiKeyProtectedProcedure
   .meta({
     openapi: {
       summary: "Delete Player by ID",
@@ -20,6 +20,7 @@ export const deleteById = anyAuthProtectedProcedure
       tags: [OPENAPI_TAGS.PLAYERS],
       method: "DELETE",
       path: "/players/{id}",
+      protect: true,
     },
   })
   .input(

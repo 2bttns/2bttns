@@ -1,8 +1,8 @@
 import { z } from "zod";
 import { OPENAPI_TAGS } from "../../openapi/openApiTags";
-import { anyAuthProtectedProcedure } from "../../trpc";
+import { publicProcedure } from "../../trpc";
 
-export const getAll = anyAuthProtectedProcedure
+export const getAll = publicProcedure
   .meta({
     openapi: {
       summary: "Get all examples",

@@ -1,7 +1,7 @@
 import { z } from "zod";
-import { anyAuthProtectedProcedure } from "../../trpc";
+import { adminOrApiKeyProtectedProcedure } from "../../trpc";
 
-export const deleteRelationship = anyAuthProtectedProcedure
+export const deleteRelationship = adminOrApiKeyProtectedProcedure
   .input(
     z.object({
       gameObjectId1: z.string(),

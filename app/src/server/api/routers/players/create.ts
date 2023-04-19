@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { OPENAPI_TAGS } from "../../openapi/openApiTags";
-import { anyAuthProtectedProcedure } from "../../trpc";
+import { adminOrApiKeyProtectedProcedure } from "../../trpc";
 
 const output = z.object({
   createdPlayer: z.object({
@@ -11,7 +11,7 @@ const output = z.object({
   }),
 });
 
-export const create = anyAuthProtectedProcedure
+export const create = adminOrApiKeyProtectedProcedure
   .meta({
     openapi: {
       summary: "Create Player",
@@ -20,6 +20,7 @@ export const create = anyAuthProtectedProcedure
       tags: [OPENAPI_TAGS.PLAYERS],
       method: "POST",
       path: "/players/create",
+      protect: true,
     },
   })
   .input(
