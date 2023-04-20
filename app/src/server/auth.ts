@@ -10,6 +10,7 @@ import GitHubProvider from "next-auth/providers/github";
 import path from "path";
 import { env } from "../env/server.mjs";
 import { prisma } from "./db";
+import { logger } from "./helpers/logger.js";
 
 /**
  * Module augmentation for `next-auth` types
@@ -41,14 +42,25 @@ export const authOptions: NextAuthOptions = {
   callbacks: {
     async signIn({ user }) {
       try {
+        if (!user.email) {
+          throw new Error(
+            `No email found on user object: ${user}. Rejecting login.`
+          );
+        }
         const adminAllowList = fs.readFileSync(
           path.resolve("adminAllowList.json"),
           "utf8"
         );
-        const adminAllowListArray = JSON.parse(adminAllowList);
-        return adminAllowListArray.includes(user.email);
+        const adminAllowListArray = JSON.parse(adminAllowList) as string[];
+        const canSignIn = adminAllowListArray.includes(user.email);
+        if (canSignIn) {
+          logger.info(
+            `Found ${user.email} in adminAllowList.json. Allowing login.`
+          );
+        }
+        return canSignIn;
       } catch (error) {
-        console.error(error);
+        logger.error(error);
         return false;
       }
     },
