@@ -1,8 +1,8 @@
 import { z } from "zod";
 import { defaultMode } from "../../../../modes/availableModes";
-import { publicProcedure } from "../../trpc";
+import { adminOrApiKeyProtectedProcedure } from "../../trpc";
 
-export const create = publicProcedure
+export const create = adminOrApiKeyProtectedProcedure
   .input(
     z.object({
       id: z.string().optional(),

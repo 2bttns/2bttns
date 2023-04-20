@@ -1,7 +1,7 @@
 import { z } from "zod";
-import { publicProcedure } from "../../trpc";
+import { adminOrApiKeyProtectedProcedure } from "../../trpc";
 
-export const getRelationship = publicProcedure
+export const getRelationship = adminOrApiKeyProtectedProcedure
   .input(
     z.object({
       fromGameObjectId: z.string(),

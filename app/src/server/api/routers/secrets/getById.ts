@@ -1,7 +1,7 @@
 import { z } from "zod";
-import { publicProcedure } from "../../trpc";
+import { adminOrApiKeyProtectedProcedure } from "../../trpc";
 
-export const getById = publicProcedure
+export const getById = adminOrApiKeyProtectedProcedure
   .input(
     z.object({
       id: z.string(),

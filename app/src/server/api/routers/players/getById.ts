@@ -1,7 +1,7 @@
 import { TRPCError } from "@trpc/server";
 import { output, z } from "zod";
 import { OPENAPI_TAGS } from "../../openapi/openApiTags";
-import { publicProcedure } from "../../trpc";
+import { adminOrApiKeyProtectedProcedure } from "../../trpc";
 
 const output = z.object({
   player: z.object({
@@ -12,7 +12,7 @@ const output = z.object({
   }),
 });
 
-export const getById = publicProcedure
+export const getById = adminOrApiKeyProtectedProcedure
   .meta({
     openapi: {
       summary: "Get Player by ID",
@@ -20,6 +20,7 @@ export const getById = publicProcedure
       tags: [OPENAPI_TAGS.PLAYERS],
       method: "GET",
       path: "/players/{id}",
+      protect: true,
     },
   })
   .input(

@@ -10,6 +10,9 @@ import { createTRPCNext } from "@trpc/next";
 import { type inferRouterInputs, type inferRouterOutputs } from "@trpc/server";
 import superjson from "superjson";
 
+// Fetch polyfill -- Fixes "Error: No fetch implementation found" errors during testing
+import "whatwg-fetch";
+
 import { type AppRouter } from "../server/api/root";
 
 const getBaseUrl = () => {
@@ -17,6 +20,35 @@ const getBaseUrl = () => {
   if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`; // SSR should use vercel url
   return `http://localhost:${process.env.PORT ?? 3000}`; // dev SSR should use localhost
 };
+
+let playerToken: string | null = null;
+/**
+ * Setter for `playerToken`.
+ *
+ * When `playerToken` is set, TRPC API calls across the 2bttns admin panel will be authenticated with it.
+ *
+ * This is mainly used in the `/play` page so external players can make (limited) authenticated API calls on the admin panel.
+ *
+ * Note that setting `playerToken` will take precedence over an admin session cookie when making 2bttns API calls.
+ * Be sure to set `playerToken` to `null` when you want to use the admin session cookie again.
+ *
+ * @param newToken The new token to use for authentication
+ */
+export function setPlayerToken(newToken: typeof playerToken) {
+  if (typeof window === "undefined") {
+    throw new Error("setPlayerToken should only be called on the client side");
+  }
+
+  playerToken = newToken;
+}
+
+function headers() {
+  if (!playerToken) return {};
+
+  return {
+    Authorization: `Bearer ${playerToken}`,
+  };
+}
 
 /**
  * A set of typesafe react-query hooks for your tRPC API
@@ -42,6 +74,7 @@ export const api = createTRPCNext<AppRouter>({
         }),
         httpBatchLink({
           url: `${getBaseUrl()}/api/trpc`,
+          headers,
         }),
       ],
     };
@@ -72,6 +105,7 @@ export const apiClient = createTRPCProxyClient<AppRouter>({
     }),
     httpBatchLink({
       url: `${getBaseUrl()}/api/trpc`,
+      headers,
     }),
   ],
 });

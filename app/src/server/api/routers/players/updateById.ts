@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { OPENAPI_TAGS } from "../../openapi/openApiTags";
-import { publicProcedure } from "../../trpc";
+import { adminOrApiKeyProtectedProcedure } from "../../trpc";
 
 const output = z.object({
   updatedPlayer: z.object({
@@ -11,7 +11,7 @@ const output = z.object({
   }),
 });
 
-export const updateById = publicProcedure
+export const updateById = adminOrApiKeyProtectedProcedure
   .meta({
     openapi: {
       summary: "Update Player by ID",
@@ -19,6 +19,7 @@ export const updateById = publicProcedure
       tags: [OPENAPI_TAGS.PLAYERS],
       method: "PUT",
       path: "/players/{id}",
+      protect: true,
     },
   })
   .input(

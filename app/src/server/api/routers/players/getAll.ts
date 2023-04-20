@@ -1,8 +1,8 @@
 import { z } from "zod";
 import { OPENAPI_TAGS } from "../../openapi/openApiTags";
-import { publicProcedure } from "../../trpc";
+import { adminOrApiKeyProtectedProcedure } from "../../trpc";
 
-export const getAll = publicProcedure
+export const getAll = adminOrApiKeyProtectedProcedure
   .meta({
     openapi: {
       summary: "Get All Players",
@@ -10,6 +10,7 @@ export const getAll = publicProcedure
       tags: [OPENAPI_TAGS.PLAYERS],
       method: "GET",
       path: "/players",
+      protect: true,
     },
   })
   .input(z.void())

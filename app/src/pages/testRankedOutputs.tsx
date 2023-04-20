@@ -50,7 +50,7 @@ export default function testRankedOutputs(props: ReturnType) {
   const outputs = api.gameObjects.getRanked.useQuery(
     {
       playerId: selectedPlayer!,
-      inputTags: inputTags.map((tag) => tag.value).join(""),
+      inputTags: inputTags.map((tag) => tag.value).join(","),
       outputTag: outputTag!,
     },
     {

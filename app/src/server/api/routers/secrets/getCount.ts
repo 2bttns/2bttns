@@ -1,8 +1,8 @@
 import { z } from "zod";
 import { textFilter } from "../../../shared/z";
-import { publicProcedure } from "../../trpc";
+import { adminOrApiKeyProtectedProcedure } from "../../trpc";
 
-export const getCount = publicProcedure
+export const getCount = adminOrApiKeyProtectedProcedure
   .input(
     z
       .object({

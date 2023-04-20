@@ -22,9 +22,11 @@ import { type Session } from "next-auth";
 import { getServerAuthSession } from "../auth";
 import { prisma } from "../db";
 
-type CreateContextOptions = {
+export type CreateContextOptions = {
   session: Session | null;
   prisma?: PrismaClient;
+  headers?: NextApiRequest["headers"];
+  authData?: CheckUserAuthData;
 };
 
 /**
@@ -40,6 +42,8 @@ export const createInnerTRPCContext = (opts: CreateContextOptions) => {
   return {
     session: opts.session,
     prisma: opts.prisma || prisma,
+    headers: opts.headers,
+    authData: opts.authData,
   };
 };
 
@@ -56,6 +60,7 @@ export const createTRPCContext = async (opts: CreateNextContextOptions) => {
 
   return await createInnerTRPCContext({
     session,
+    headers: req.headers,
   });
 };
 
@@ -66,11 +71,13 @@ export const createTRPCContext = async (opts: CreateNextContextOptions) => {
  * transformer
  */
 import { PrismaClient } from "@prisma/client";
-import { initTRPC, TRPCError } from "@trpc/server";
+import { TRPCError, initTRPC } from "@trpc/server";
+import { NextApiRequest } from "next";
 import superjson from "superjson";
 import { OpenApiMeta } from "trpc-openapi";
+import { CheckUserAuthData, checkUserAuth } from "../helpers/checkUserAuth";
 
-const t = initTRPC
+export const t = initTRPC
   .context<typeof createTRPCContext>()
   .meta<OpenApiMeta>()
   .create({
@@ -103,28 +110,45 @@ export const createTRPCRouter = t.router;
 export const publicProcedure = t.procedure;
 
 /**
- * Reusable middleware that enforces users are logged in before running the
- * procedure
+ * Protected (authed) procedure for any of the following:
+ * 1. Logged in admin -- when an admin is logged in (has an active session) with the 2bttns admin panel
+ * 2. Authentication header with valid player_token -- particularly from users granted a play URL by an app integration
+ * 3. Authentication header with valid api_key_token -- particularly from 2bttns SDK API calls
  */
-const enforceUserIsAuthed = t.middleware(({ ctx, next }) => {
-  if (!ctx.session || !ctx.session.user) {
-    throw new TRPCError({ code: "UNAUTHORIZED" });
-  }
-  return next({
-    ctx: {
-      // infers the `session` as non-nullable
-      session: { ...ctx.session, user: ctx.session.user },
-    },
-  });
-});
+export const anyAuthProtectedProcedure = t.procedure.use(
+  t.middleware(async ({ ctx, next }) => {
+    let authData: CheckUserAuthData | undefined;
+    try {
+      authData = await checkUserAuth(ctx);
+    } catch (error) {
+      throw error;
+    }
+    return next({ ctx: { ...ctx, authData } });
+  })
+);
 
 /**
- * Protected (authed) procedure
+ * Protected (authed) procedure for either of the following:
+ * 1. Logged in admin -- when an admin is logged in (has an active session) with the 2bttns admin panel
+ * 2. Authentication header with valid api_key_token -- particularly from 2bttns SDK API calls
  *
- * If you want a query or mutation to ONLY be accessible to logged in users, use
- * this. It verifies the session is valid and guarantees ctx.session.user is not
- * null
- *
- * @see https://trpc.io/docs/procedures
+ * Does not allow player_token authentication -- use this for routes that should not be accessible to players
  */
-export const protectedProcedure = t.procedure.use(enforceUserIsAuthed);
+export const adminOrApiKeyProtectedProcedure = t.procedure.use(
+  t.middleware(async ({ ctx, next }) => {
+    let authData: CheckUserAuthData | undefined;
+    try {
+      authData = await checkUserAuth(ctx);
+
+      if (authData.type === "player_token") {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "You are not authorized to access this resource",
+        });
+      }
+    } catch (error) {
+      throw error;
+    }
+    return next({ ctx: { ...ctx, authData } });
+  })
+);

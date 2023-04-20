@@ -16,6 +16,7 @@ import jwt from "jsonwebtoken";
 import type { GetServerSideProps } from "next";
 import { getSession } from "next-auth/react";
 import Head from "next/head";
+import { useEffect, useMemo } from "react";
 import { z } from "zod";
 import AdminLayout from "../features/layouts/containers/AdminLayout";
 import UserLayout from "../features/layouts/containers/UserLayout";
@@ -24,7 +25,7 @@ import { AvailableModes } from "../modes/availableModes";
 import { getModeUI } from "../modes/modesUIRegistry";
 import { ModeUIProps } from "../modes/types";
 import { prisma } from "../server/db";
-import { api } from "../utils/api";
+import { api, setPlayerToken } from "../utils/api";
 import { NextPageWithLayout } from "./_app";
 
 const jwtSchema = z.object({
@@ -35,7 +36,8 @@ const jwtSchema = z.object({
 
 type ReturnType = {
   gameId: string;
-  isAdmin: boolean;
+  isAdmin: boolean; // Admins are the users who are actually signed into the admin app
+  playerToken: string | null; // If the user is a player, this is the JWT they will use to authenticate with the API
   gameModeData: {
     mode: AvailableModes;
     config: ModeUIProps<any>["config"];
@@ -61,19 +63,21 @@ export const getServerSideProps: GetServerSideProps<ReturnType> = async (
 
     const session = await getSession(context);
 
-    let userId: string;
+    let userId: string | null = null;
     if (session) {
       // The user is an admin signed into this 2bttns admin app
       // Note that users playing the game would never be signed into the admin app
       userId = session.user.id;
-    } else {
+    }
+
+    if (incomingJwt) {
       // The user was redirected here from an external app via JWT
       // Get the userId from that JWT
-      if (!incomingJwt) {
-        throw new Error("No jwt provided");
-      }
 
-      // Ensure the app id was provided, so it can be used to get verify the JWT against the corresponding secret
+      // This can override the admin user id if the JWT is valid, indicating that the logged in admin was redirected here with a player token
+      //  (this allows admins to test the game as if they are a player)
+
+      // Ensure the app id was provided, so it can be used to verify the JWT against its corresponding secret
       if (!appId) {
         throw new Error("No app id provided");
       }
@@ -91,6 +95,10 @@ export const getServerSideProps: GetServerSideProps<ReturnType> = async (
       const decodedJwtRaw = jwt.decode(incomingJwt, {});
       const decoded = jwtSchema.parse(decodedJwtRaw);
       userId = decoded.userId;
+    }
+
+    if (!userId) {
+      throw new Error("No user id found");
     }
 
     // Ensure the game exists while getting the necessary data
@@ -127,6 +135,7 @@ export const getServerSideProps: GetServerSideProps<ReturnType> = async (
       props: {
         gameId: gameId ?? "",
         isAdmin: !!session?.user,
+        playerToken: incomingJwt,
         gameModeData: {
           mode: game.mode as AvailableModes,
           config: game.modeConfigJson ? JSON.parse(game.modeConfigJson) : {},
@@ -153,9 +162,28 @@ export const getServerSideProps: GetServerSideProps<ReturnType> = async (
 };
 
 const Play: NextPageWithLayout<ReturnType> = (props) => {
-  const { gameId, isAdmin, gameModeData, gameData } = props;
+  const { gameId, isAdmin, playerToken, gameModeData, gameData } = props;
+
+  const showAdminLayout = useMemo(() => {
+    // If the user is a player, they should not see the admin layout
+    // Even if the admiin is logged in, they should not see the admin layout if they were redirected here with a player token
+    if (playerToken) {
+      return false;
+    }
+    return isAdmin;
+  }, [playerToken, isAdmin]);
+
+  useEffect(() => {
+    // This hook should only run on the client; not on the server
+    if (typeof window === "undefined") return;
+
+    // Set the player token so the API can use it to authenticate requests
+    // If null is passed, the token will be cleared, meaning the TRPC client will not send any auth headers & defer to other default auth methods (e.g. admin session or API key token)
+    setPlayerToken(playerToken);
+  }, []);
+
   return (
-    <Layout isAdmin={isAdmin} userId={gameData.playerId}>
+    <Layout showAdminLayout={showAdminLayout} userId={gameData.playerId}>
       <Head>
         <title>Play 2bttns</title>
         <meta
@@ -181,19 +209,19 @@ export default Play;
 type LayoutProps = {
   children: React.ReactNode;
   userId: string;
-  isAdmin: boolean;
+  showAdminLayout: boolean;
 };
 function Layout(props: LayoutProps) {
-  const { children, isAdmin, userId } = props;
+  const { children, showAdminLayout, userId } = props;
 
-  if (isAdmin) {
+  if (showAdminLayout) {
     return <AdminLayout>{children}</AdminLayout>;
   }
 
   return (
     <UserLayout
       navbarProps={{
-        additionalContent: <h1>Playing 2bttns | User: {userId}</h1>,
+        additionalContent: <h1>Playing 2bttns | User ID: {userId}</h1>,
       }}
     >
       {children}
@@ -215,7 +243,7 @@ function ScoresModal({ gameId, playerId }: ScoresModalProps) {
     {
       game_id: gameId,
       player_id: playerId,
-      include_game_objects: true,
+      include_game_objects: "true",
     },
     {
       cacheTime: 0,

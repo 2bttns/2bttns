@@ -1,8 +1,8 @@
 import { z } from "zod";
 import { sort, tagFilter, textFilter } from "../../../shared/z";
-import { publicProcedure } from "../../trpc";
+import { adminOrApiKeyProtectedProcedure } from "../../trpc";
 
-export const getAll = publicProcedure
+export const getAll = adminOrApiKeyProtectedProcedure
   .input(
     z
       .object({

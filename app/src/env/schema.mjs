@@ -21,6 +21,8 @@ export const serverSchema = z.object({
   ),
   GITHUB_ID: z.string(),
   GITHUB_SECRET: z.string(),
+  SERVER_LOG_LEVEL: z.string().optional(),
+  SERVER_LOG_LOCALE: z.string().optional(),
 });
 
 /**
@@ -35,6 +37,8 @@ export const serverEnv = {
   NEXTAUTH_URL: process.env.NEXTAUTH_URL,
   GITHUB_ID: process.env.GITHUB_ID,
   GITHUB_SECRET: process.env.GITHUB_SECRET,
+  SERVER_LOG_LEVEL: process.env.SERVER_LOG_LEVEL,
+  SERVER_LOG_LOCALE: process.env.SERVER_LOG_LOCALE,
 };
 
 /**

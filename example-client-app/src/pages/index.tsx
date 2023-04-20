@@ -4,15 +4,37 @@ import {
   TwoBttnsPlayer,
   TwoBttnsRankedOutput,
   TwoBttnsTag,
-  getPlayers,
-  getRanked,
-  getTags,
+  twobttns,
 } from "./utils/2bttns";
 
+import { GetServerSideProps, InferGetServerSidePropsType } from "next";
 import { useEffect, useState } from "react";
 import Select from "react-select";
+import { Get2bttnsRankedResponse } from "./api/get2bttnsRanked";
 
-export default function Home() {
+type ServerSideProps = {
+  players: TwoBttnsPlayer[];
+  tags: TwoBttnsTag[];
+};
+
+export const getServerSideProps: GetServerSideProps<
+  ServerSideProps
+> = async () => {
+  const {
+    data: { players },
+  } = await twobttns.callApi("/players", "get");
+
+  const {
+    data: { tags },
+  } = await twobttns.callApi("/tags", "get");
+
+  return { props: { players, tags } };
+};
+
+export default function Home(
+  props: InferGetServerSidePropsType<typeof getServerSideProps>
+) {
+  const { players, tags } = props;
   return (
     <>
       <Head>
@@ -24,7 +46,7 @@ export default function Home() {
       <main>
         <PlayGameButton />
         <hr />
-        <ViewResults />
+        <ViewResults players={players} tags={tags} />
       </main>
     </>
   );
@@ -74,7 +96,13 @@ function PlayGameButton() {
   return <button onClick={redirectToGame}>To Game</button>;
 }
 
-function ViewResults() {
+type ViewResultsProps = {
+  players: TwoBttnsPlayer[];
+  tags: TwoBttnsTag[];
+};
+
+function ViewResults(props: ViewResultsProps) {
+  const { players, tags } = props;
   const [selectedPlayer, setSelectedPlayer] = useState<TwoBttnsPlayer["id"]>();
   const [selectedInputTags, setSelectedInputTags] = useState<
     TwoBttnsTag["id"][]
@@ -83,38 +111,26 @@ function ViewResults() {
     useState<TwoBttnsTag["id"]>();
   const [rankedOutput, setRankedOutput] = useState<TwoBttnsRankedOutput>();
 
-  const twobttnsPlayersQuery = useQuery({
-    queryKey: ["players"],
-    queryFn: async () => {
-      const players = await getPlayers({});
-      return players.data.players;
-    },
-  });
-
-  const twobttnsTagsQuery = useQuery({
-    queryKey: ["tags"],
-    queryFn: async () => {
-      const players = await getTags({});
-      return players.data.tags;
-    },
-  });
-
   const hasRequiredInputs =
     !!selectedPlayer && selectedInputTags.length > 0 && !!selectedOutputTag;
 
   const twobttnsGetRankedQuery = useQuery({
     queryKey: ["getRanked"],
     queryFn: async () => {
-      const rankedResults = await getRanked({
-        inputTags: selectedInputTags.join(","),
-        outputTag: selectedOutputTag!,
-        playerId: selectedPlayer!,
-      });
-      return rankedResults.data;
+      const queryParams = new URLSearchParams();
+      queryParams.append("inputTags", selectedInputTags.join(","));
+      queryParams.append("outputTag", selectedOutputTag!);
+      queryParams.append("playerId", selectedPlayer!);
+      const url = `/api/get2bttnsRanked/?${queryParams.toString()}`;
+
+      const response = await fetch(url);
+      const responseData = (await response.json()) as Get2bttnsRankedResponse;
+      if (response.status !== 200) throw responseData;
+      return responseData;
     },
     enabled: hasRequiredInputs,
     onSuccess: (data) => {
-      setRankedOutput(data);
+      setRankedOutput(data as any);
     },
   });
 
@@ -129,7 +145,7 @@ function ViewResults() {
       <div style={{ border: "1px solid black", padding: "1rem" }}>
         <p style={{ fontWeight: "bold" }}>Player</p>
         <Select
-          options={twobttnsPlayersQuery.data?.map((tag) => ({
+          options={players.map((tag) => ({
             value: tag.id,
             label: tag.name ?? tag.id,
           }))}
@@ -146,7 +162,7 @@ function ViewResults() {
           </span>
         </p>
         <Select
-          options={twobttnsTagsQuery.data?.map((tag) => ({
+          options={tags.map((tag) => ({
             value: tag.id,
             label: tag.name ?? tag.id,
           }))}
@@ -156,13 +172,12 @@ function ViewResults() {
             );
           }}
           isMulti
-          closeMenuOnSelect={false}
           isSearchable
         />
 
         <p style={{ fontWeight: "bold" }}>Output Tag</p>
         <Select
-          options={twobttnsTagsQuery.data?.map((tag) => ({
+          options={tags.map((tag) => ({
             value: tag.id,
             label: tag.name ?? tag.id,
           }))}

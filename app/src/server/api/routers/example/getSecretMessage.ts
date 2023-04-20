@@ -1,12 +1,13 @@
 import { z } from "zod";
 import { OPENAPI_TAGS } from "../../openapi/openApiTags";
-import { protectedProcedure } from "../../trpc";
+import { anyAuthProtectedProcedure } from "../../trpc";
 
-export const getSecretMessage = protectedProcedure
+export const getSecretMessage = anyAuthProtectedProcedure
   .meta({
     openapi: {
       summary: "Get secret message",
-      description: "Get secret message",
+      description:
+        "This endpoint will return a message that tells you what type of authentication you used, if you are authenticated.",
       tags: [OPENAPI_TAGS.EXAMPLE],
       method: "GET",
       path: "/example/getSecretMessage",
@@ -15,6 +16,6 @@ export const getSecretMessage = protectedProcedure
   })
   .input(z.void())
   .output(z.string())
-  .query(() => {
-    return "you can now see this secret message!";
+  .query(({ ctx }) => {
+    return `You can now see this message! (via auth type of ${ctx.authData.type})`;
   });

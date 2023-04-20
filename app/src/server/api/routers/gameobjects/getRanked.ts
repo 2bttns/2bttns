@@ -4,7 +4,7 @@ import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { prisma } from "../../../db";
 import { OPENAPI_TAGS } from "../../openapi/openApiTags";
-import { publicProcedure } from "../../trpc";
+import { adminOrApiKeyProtectedProcedure } from "../../trpc";
 
 const input = z.object({
   playerId: z.string(),
@@ -12,7 +12,7 @@ const input = z.object({
   inputTags: z
     .string()
     .describe(
-      "Specify input tags that will be used to score the game objects associated with the output tag.\n\nIf the output tag is included in the input tags, the player's score for those game object will be used as base scores"
+      "Specify comma-separated input tags that will be used to score the game objects associated with the output tag.\n\nIf the output tag is included in the input tags, the player's score for those game object will be used as base scores"
     ),
 
   outputTag: z
@@ -34,7 +34,7 @@ const output = z.object({
   ),
 });
 
-export const getRanked = publicProcedure
+export const getRanked = adminOrApiKeyProtectedProcedure
   .meta({
     openapi: {
       summary: "Get Ranked Results",
@@ -42,6 +42,7 @@ export const getRanked = publicProcedure
       tags: [OPENAPI_TAGS.GAME_OBJECTS],
       method: "GET",
       path: "/game-objects/ranked",
+      protect: true,
     },
   })
   .input(input)
