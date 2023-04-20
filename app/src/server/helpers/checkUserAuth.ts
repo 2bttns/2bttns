@@ -86,7 +86,7 @@ export async function checkUserAuth(
     }
 
     if (tokenData.type) {
-      logger.silly("checkUserAuth - end (valid token)");
+      logger.silly("checkUserAuth - end (valid token found)");
       return tokenData;
     }
   }
@@ -97,7 +97,7 @@ export async function checkUserAuth(
   //  (end users don't log in to the admin panel; when they play a game they are referred to as "players")
   const isAdmin = ctx.session && ctx.session.user;
   if (isAdmin) {
-    logger.silly("checkUserAuth - end (admin session)");
+    logger.silly("checkUserAuth - end (admin session found)");
     return { type: "admin_session" };
   }
 
