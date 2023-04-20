@@ -1,6 +1,6 @@
 # 2bttns
 
-## First-time setup
+## Setup for Local Development
 
 ### Environment Variables
 
@@ -33,6 +33,12 @@ $ npm run init-db:dev
  # Start the app
 $ npm run dev
 ```
+
+---
+
+## Setup for Production
+
+TODO
 
 ---
 
