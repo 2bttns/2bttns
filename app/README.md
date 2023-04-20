@@ -115,7 +115,9 @@ Note that these NPM scripts are just for convenience. You can manage the `dev-db
 
 ## Testing
 
-To run tests, first ensure your `.env` file has the `DATABASE_URL` environment variable set to the test-db credentials:
+### Local machine setup for testing
+
+To run tests locally, first ensure your `.env` file has the `DATABASE_URL` environment variable set to the test-db credentials:
 
 ```bash
 
@@ -127,13 +129,24 @@ DATABASE_URL="postgresql://test-user:test-pass@localhost:5433/test-db"
 
 ```
 
-Then run the following command inside the root `app` folder:
+Additionally, be sure to have Node.js/NPM and Docker Compose available on your machine.
+
+### CI/CD setup for testing
+
+If you are running the tests in a CI/CD pipeline (e.g. GitHub Actions), set the `DATABASE_URL` environment variable in the pipeline configuration.
+
+Additionally, be sure to have Node.js/NPM and Docker Compose available in the pipeline.
+
+### Running tests
+
+Run the tests with the following command inside the root `app` folder:
 
 ```bash
+$ npm i              # Install npm dependencies, if you haven't already
 $ npm run test       # Run tests
 
 # Behind the scenes, this npm script will run the following commands:
-# You do NOT need to run these commands manually.
+# You do not need to run these commands manually
 
 # NPM script to stop existing db containers (e.g.
 # dev-db container; doesn't delete it), initialize test db container,
