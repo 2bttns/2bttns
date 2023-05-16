@@ -36,9 +36,27 @@ $ npm run dev
 
 ---
 
-## Setup for Production
+## Deploying 2bttns to Production
 
-TODO
+### Building the App
+
+You can build the admin app with the following command:
+
+```bash
+$ npm run build
+```
+
+Then, you can run the production-ready build with the following command:
+
+```bash
+$ npm run start
+```
+
+You can create a `.env.production` file to set environment variables for the production build. `npm run build` will automatically use the `.env.production` file if it exists. However, if you plan to deploy the admin app to a production server via CI/CD, you should set the environment variables in the CI/CD pipeline configuration instead.
+
+### 2bttns Docker Image
+
+@TODO Create a `2bttns/admin` Docker image. Should accept environment variables.
 
 ---
 
