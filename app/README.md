@@ -199,3 +199,9 @@ This means you have a db container already running. You can stop it by running t
 ```bash
 $ npm run docker:stop
 ```
+
+### Can't reach database server at `localhost`:`5433`
+
+The database corresponding to the `DATABASE_URL` in `.env` you've configured might not be running.
+
+For example, you might see this error if you run `npm run dev` before starting the `dev-db` container.
