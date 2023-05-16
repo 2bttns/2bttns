@@ -10,7 +10,7 @@ import GitHubProvider from "next-auth/providers/github";
 import path from "path";
 import { env } from "../env/server.mjs";
 import { prisma } from "./db";
-import { logger } from "./helpers/logger.js";
+import { logger } from "./helpers/logger";
 
 /**
  * Module augmentation for `next-auth` types
