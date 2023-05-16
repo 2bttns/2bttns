@@ -43,7 +43,8 @@ export default function TagsLayoutContainer(props: TagsLayoutContainerProps) {
       selectedTag={selectedTag}
       handleCreateTag={handleCreateTag}
       onTagSelect={onTagSelect}
-      children={children}
-    />
+    >
+      {children}
+    </TagsLayout>
   );
 }

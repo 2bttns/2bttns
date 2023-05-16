@@ -75,7 +75,7 @@ const TagByIdPage: NextPage<TagByIdPageProps> = (props) => {
   };
 
   const getTagByIdQuery = api.tags.getById.useQuery(
-    { id: tagId as string },
+    { id: tagId },
     {
       enabled: !!tagId || deleteTagMutation.status !== "loading",
       retry: false,

@@ -1,3 +1,9 @@
+///
+/// Component for editing a game based on its available mode configuration options
+/// For example, "classic" mode uses certain configuration options like "itemPolicy".
+/// This pattern supports the addition of new modes with custom configurations in the future.
+///
+
 import { Box, HStack, Select, Text, VStack } from "@chakra-ui/react";
 import { Game } from "@prisma/client";
 import { useState } from "react";

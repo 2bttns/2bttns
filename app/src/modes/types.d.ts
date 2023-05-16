@@ -20,5 +20,7 @@ type ConfigComponentProps<ConfigProps> = {
 
 type ModeUI<ConfigProps extends ModeUIProps> = {
   FrontendComponent: React.ComponentType<ConfigProps>;
-  ConfigComponent?: React.ComponentType<ConfigComponentProps<ConfigProps>>;
+  ConfigComponent?: React.ComponentType<
+    ConfigComponentProps<ConfigProps["config"]>
+  >;
 };

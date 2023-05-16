@@ -232,7 +232,7 @@ export default function GameObjectsTable(props: GameObjectsTableProps) {
       }),
       columnHelper.accessor("updatedAt", {
         header: "Last Updated",
-        cell: (info) => info.getValue().toLocaleString(),
+        cell: (info) => info.row.original.updatedAt.toLocaleString(),
         enableSorting: true,
       }),
     ];

@@ -19,7 +19,7 @@ export default function usePageCount(params: UsePageCountParams) {
   useEffect(() => {
     // If the page index is out of bounds, reset it to the last page
     if (pageIndex >= pageCount) {
-      let newPageIndex = pageCount - 1;
+      const newPageIndex = pageCount - 1;
       setPagination((prev) => ({ ...prev, pageIndex: newPageIndex }));
       return;
     }

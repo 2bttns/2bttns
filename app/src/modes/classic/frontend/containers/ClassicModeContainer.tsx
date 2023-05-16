@@ -79,6 +79,7 @@ export default function ClassicModeContainer(props: ClassicModeContainerProps) {
       replacePolicy={replacePolicy ?? defaultReplacePolicy}
       onFinish={handleFinish}
       loadItemsCallback={loadItemsCallback}
+      renderItem={(item) => item.name}
     />
   );
 }

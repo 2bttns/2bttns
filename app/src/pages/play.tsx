@@ -143,7 +143,6 @@ export const getServerSideProps: GetServerSideProps<ReturnType> = async (
         gameData: {
           playerId: userId,
           game: JSON.parse(JSON.stringify(game)),
-          // TODO: Just return #round items; individual modes will handle gameobject fetching
           numRoundItems: numItemsToGet,
           callbackUrl,
         },
