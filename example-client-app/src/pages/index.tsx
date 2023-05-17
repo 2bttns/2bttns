@@ -5,7 +5,7 @@ import {
   TwoBttnsRankedOutput,
   TwoBttnsTag,
   twobttns,
-} from "./utils/2bttns";
+} from "../utils/2bttns";
 
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
 import { useEffect, useState } from "react";
