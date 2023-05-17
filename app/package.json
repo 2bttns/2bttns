@@ -14,6 +14,7 @@
     "init-db:test": "npm run docker:up:test-db && sleep 1 && npm run db-sync:test",
     "init-db:prod": "npm run db-sync:prod && npm run db-seed:prod",
     "db-sync:dev": "npx prisma migrate dev",
+    "db-sync:test": "dotenv -e .env.test -- npx prisma migrate deploy",
     "db-sync:prod": "dotenv -e .env.production -- npx prisma migrate deploy",
     "db-seed:dev": "prisma db seed",
     "db-seed:test": "dotenv -e .env.test -- prisma db seed",
