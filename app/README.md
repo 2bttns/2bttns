@@ -196,7 +196,7 @@ For example, you might see this error if you run `npm run dev` before starting t
 
 #### Default ports used by this project
 
-- localhost:3001 - Dev app started via `npm run dev`
-- localhost:5433 - Postgres Docker dev db started via `npm run docker:up:dev-db`
-- localhost:5434 - Postgres Docker test db started via `npm run docker:up:test-db`
-- localhost:3262 - Production build started via `npm run build && npm run start`
+- `localhost:3001` - Dev app started via `npm run dev`
+- `localhost:5433` - Postgres Docker dev db started via `npm run docker:up:dev-db`
+- `localhost:5434` - Postgres Docker test db started via `npm run docker:up:test-db`
+- `localhost:3262` - Production build started via `npm run build && npm run start`
