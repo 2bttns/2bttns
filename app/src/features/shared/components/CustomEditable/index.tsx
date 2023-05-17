@@ -76,9 +76,12 @@ export default function CustomEditable(props: CustomEditableProps) {
       setLiveValue(value);
 
       console.error("Failed to save value", error);
-      window.alert(
-        `Invalid Update -- Reverting to previous value\n\n ${error.message}`
-      );
+
+      if (error instanceof Error) {
+        window.alert(
+          `Invalid Update -- Reverting to previous value\n\n ${error.message}`
+        );
+      }
     });
   };
 

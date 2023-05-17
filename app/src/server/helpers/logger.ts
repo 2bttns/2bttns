@@ -2,7 +2,7 @@ import winston from "winston";
 import { env } from "../../env/server.mjs";
 
 const logLevel =
-  (env.SERVER_LOG_LEVEL as keyof typeof config["levels"]) ?? "info";
+  (env.SERVER_LOG_LEVEL as keyof (typeof config)["levels"]) ?? "info";
 const locale = env.SERVER_LOG_LOCALE ?? "en-US";
 
 const config = {
@@ -29,45 +29,50 @@ winston.addColors(config.colors);
 
 function wLogger(input: {
   logName: string;
-  level: keyof typeof config["levels"];
+  level: keyof (typeof config)["levels"];
 }): winston.Logger {
   const { logName, level } = input;
 
   return winston.createLogger({
     levels: config.levels,
     level: `${level}`,
-    transports: [
-      new winston.transports.Console({
-        level: `${level}`,
-
-        format: winston.format.combine(
-          customPrintf(),
-          winston.format.colorize({ all: true })
-        ),
-      }),
-      new winston.transports.File({
-        filename: `./src/logs/${logName}/${logName}-error.log`,
-        level: "error",
-        format: customPrintf(),
-      }),
-      new winston.transports.File({
-        filename: `./src/logs/${logName}/${logName}-warn.log`,
-        level: "warn",
-        format: customPrintf(),
-      }),
-      new winston.transports.File({
-        filename: `./src/logs/${logName}/${logName}-all.log`,
-        level: "silly",
-        format: customPrintf(),
-      }),
-
-      new winston.transports.File({
-        format: customPrintf(),
-        filename: "./src/logs/global.log",
-        level: "silly",
-      }),
-    ],
+    transports: configureTransports(logName, level),
   });
+}
+
+function configureTransports(logName: string, level: string) {
+  return [
+    new winston.transports.Console({
+      level: `${level}`,
+
+      format: winston.format.combine(
+        customPrintf(),
+        winston.format.colorize({ all: true })
+      ),
+    }),
+    // @TODO: Re-enable file logging when we figure out how to make it work with deployment platforms like Vercel
+    // new winston.transports.File({
+    //   filename: `./src/logs/${logName}/${logName}-error.log`,
+    //   level: "error",
+    //   format: customPrintf(),
+    // }),
+    // new winston.transports.File({
+    //   filename: `./src/logs/${logName}/${logName}-warn.log`,
+    //   level: "warn",
+    //   format: customPrintf(),
+    // }),
+    // new winston.transports.File({
+    //   filename: `./src/logs/${logName}/${logName}-all.log`,
+    //   level: "silly",
+    //   format: customPrintf(),
+    // }),
+
+    // new winston.transports.File({
+    //   format: customPrintf(),
+    //   filename: "./src/logs/global.log",
+    //   level: "silly",
+    // }),
+  ];
 }
 
 function customPrintf(): winston.Logform.Format {

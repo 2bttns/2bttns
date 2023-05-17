@@ -204,7 +204,7 @@ export default function GamesTable(props: GamesTableProps) {
       }),
       columnHelper.accessor("updatedAt", {
         header: "Last Updated",
-        cell: (info) => info.getValue().toLocaleString(),
+        cell: (info) => info.row.original.updatedAt.toLocaleString(),
         enableSorting: true,
       }),
     ];

@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from "next";
-import { twobttns } from "../utils/2bttns";
+import { twobttns } from "../../utils/2bttns";
 import { GeneratePlayURLParams } from "./../../../../@2bttns/sdk";
 
 export default async function handler(

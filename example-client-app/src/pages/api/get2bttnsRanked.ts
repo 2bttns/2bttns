@@ -1,6 +1,6 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
 import type { NextApiRequest, NextApiResponse } from "next";
-import { TwoBttnsRankedOutput, twobttns } from "../utils/2bttns";
+import { TwoBttnsRankedOutput, twobttns } from "../../utils/2bttns";
 
 export type Get2bttnsRankedResponse =
   | TwoBttnsRankedOutput

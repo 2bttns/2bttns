@@ -60,8 +60,10 @@ export default function ClassicModeConfig(
           value={config.itemPolicy ?? defaultItemPolicy}
           sx={{ backgroundColor: "white" }}
         >
-          {itemPolicies.map((option) => (
-            <option value={option}>{option}</option>
+          {itemPolicies.map((option, i) => (
+            <option value={option} key={i}>
+              {option}
+            </option>
           ))}
         </Select>
       </HStack>
@@ -75,8 +77,10 @@ export default function ClassicModeConfig(
           value={config.replacePolicy ?? defaultReplacePolicy}
           sx={{ backgroundColor: "white" }}
         >
-          {replacePolicies.map((options) => (
-            <option value={options}>{options}</option>
+          {replacePolicies.map((option, i) => (
+            <option value={option} key={i}>
+              {option}
+            </option>
           ))}
         </Select>
       </HStack>

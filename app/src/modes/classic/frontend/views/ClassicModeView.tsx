@@ -10,6 +10,7 @@ export type ClassicModeViewProps<I extends Item> = {
   loadItemsCallback: ClassicModeProps<I>["loadItemsCallback"];
   replacePolicy: ClassicModeProps<I>["replace"];
   onFinish: ClassicModeProps<I>["onFinish"];
+  renderItem: ClassicModeProps<I>["renderItem"];
 };
 
 export default function ClassicModeView<I extends Item>(
@@ -22,6 +23,7 @@ export default function ClassicModeView<I extends Item>(
     onFinish,
     replacePolicy,
     loadItemsCallback,
+    renderItem,
   } = props;
 
   return (
@@ -40,7 +42,7 @@ export default function ClassicModeView<I extends Item>(
         itemPolicy={itemPolicy}
         numRoundItems={numRoundItems}
         loadItemsCallback={loadItemsCallback}
-        renderItem={(item) => item.name}
+        renderItem={renderItem}
         hotkeys={{
           first: ["w", "ArrowUp"],
           second: ["s", "ArrowDown"],

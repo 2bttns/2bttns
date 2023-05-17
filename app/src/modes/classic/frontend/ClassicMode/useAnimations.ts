@@ -27,6 +27,8 @@ export type Easing =
 export type UseAnimationsConfig = {
   duration?: number;
   ease?: Easing;
+  beforeAll?: () => Promise<void>;
+  afterAll?: () => Promise<void>;
 };
 
 export default function useAnimations(props?: UseAnimationsConfig) {
@@ -76,8 +78,8 @@ export default function useAnimations(props?: UseAnimationsConfig) {
   };
 
   const animate = {
-    beforeAll: async () => {},
-    afterAll: async () => {},
+    beforeAll: props?.beforeAll,
+    afterAll: props?.afterAll,
     first: getBttnAnimation("first"),
     second: getBttnAnimation("second"),
   };

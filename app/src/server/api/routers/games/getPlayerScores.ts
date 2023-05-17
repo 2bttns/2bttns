@@ -83,7 +83,7 @@ export const getPlayerScores = anyAuthProtectedProcedure
       },
     });
 
-    let playerScores: (PlayerScore & {
+    const playerScores: (PlayerScore & {
       gameObject?: GameObject;
     })[] = await ctx.prisma.playerScore.findMany({
       where: {

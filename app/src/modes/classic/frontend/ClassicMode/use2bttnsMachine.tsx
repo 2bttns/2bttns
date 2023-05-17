@@ -73,7 +73,10 @@ export default function use2bttnsMachine<I extends Item>({
         type: "PICK_ITEM",
         args: { key: button },
       });
-      await animate.beforeAll();
+
+      if (animate.beforeAll) {
+        await animate.beforeAll();
+      }
 
       const onPickAnimations = async () => {
         await Promise.all([
@@ -115,7 +118,10 @@ export default function use2bttnsMachine<I extends Item>({
       };
       await Promise.race([onPickPostAnimations(), wait(duration)]);
 
-      await animate.afterAll(), send({ type: "PICK_READY", args: {} });
+      if (animate.afterAll) {
+        await animate.afterAll();
+      }
+      send({ type: "PICK_READY", args: {} });
     };
 
   const registerButton: RegisterButton = ({ button, buttonComponent }) => {

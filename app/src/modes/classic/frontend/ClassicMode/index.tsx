@@ -64,9 +64,7 @@ export default function ClassicMode<I extends Item>(
       button: "first",
       buttonComponent: (
         <ClassicButton hotkey={hotkeys?.first[0]} {...button1Props}>
-          {current_options.first
-            ? renderItem(current_options.first as any)
-            : ""}
+          {current_options.first ? renderItem(current_options.first as I) : ""}
         </ClassicButton>
       ),
     }),
@@ -75,7 +73,7 @@ export default function ClassicMode<I extends Item>(
       buttonComponent: (
         <ClassicButton hotkey={hotkeys?.second[0]} {...button2Props}>
           {current_options.second
-            ? renderItem(current_options.second as any)
+            ? renderItem(current_options.second as I)
             : ""}
         </ClassicButton>
       ),

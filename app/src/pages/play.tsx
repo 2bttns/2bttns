@@ -25,6 +25,7 @@ import { AvailableModes } from "../modes/availableModes";
 import { getModeUI } from "../modes/modesUIRegistry";
 import { ModeUIProps } from "../modes/types";
 import { prisma } from "../server/db";
+import { logger } from "../server/helpers/logger";
 import { api, setPlayerToken } from "../utils/api";
 import { NextPageWithLayout } from "./_app";
 
@@ -48,15 +49,15 @@ type ReturnType = {
 export const getServerSideProps: GetServerSideProps<ReturnType> = async (
   context
 ) => {
-  const url = `${context.req.headers.host}${context.req.url}`;
-  const urlObj = new URL(url);
-  const gameId = urlObj.searchParams.get("game_id");
-  const appId = urlObj.searchParams.get("app_id");
-  const incomingJwt = urlObj.searchParams.get("jwt");
-  const numItems = urlObj.searchParams.get("num_items");
-  const callbackUrl = urlObj.searchParams.get("callback_url");
-
   try {
+    const urlSearchParamsString = context.req.url?.split("?")[1];
+    const urlSearchParams = new URLSearchParams(urlSearchParamsString);
+    const gameId = urlSearchParams.get("game_id");
+    const appId = urlSearchParams.get("app_id");
+    const incomingJwt = urlSearchParams.get("jwt");
+    const numItems = urlSearchParams.get("num_items");
+    const callbackUrl = urlSearchParams.get("callback_url");
+
     if (!gameId) {
       throw new Error("No game id provided");
     }
@@ -143,15 +144,15 @@ export const getServerSideProps: GetServerSideProps<ReturnType> = async (
         gameData: {
           playerId: userId,
           game: JSON.parse(JSON.stringify(game)),
-          // TODO: Just return #round items; individual modes will handle gameobject fetching
           numRoundItems: numItemsToGet,
           callbackUrl,
         },
       },
     };
   } catch (error) {
-    console.error(error);
-
+    if (error instanceof Error) {
+      logger.error(`/play - ${error.stack}`);
+    }
     return {
       redirect: {
         destination: "/404",

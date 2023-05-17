@@ -120,7 +120,7 @@ export default function SecretsTable(props: SecretsTableProps) {
       columnHelper.accessor("id", {
         cell: (info) => (
           <CustomEditable
-            value={info.getValue() ?? ""}
+            value={info.row.original.id ?? ""}
             placeholder="No ID"
             handleSave={async (nextValue) =>
               handleUpdateSecret({
@@ -137,7 +137,7 @@ export default function SecretsTable(props: SecretsTableProps) {
       columnHelper.accessor("name", {
         cell: (info) => (
           <CustomEditable
-            value={info.getValue() ?? ""}
+            value={info.row.original.name ?? ""}
             placeholder="No name"
             handleSave={async (nextValue) =>
               handleUpdateSecret({
@@ -154,7 +154,7 @@ export default function SecretsTable(props: SecretsTableProps) {
       columnHelper.accessor("description", {
         cell: (info) => (
           <CustomEditable
-            value={info.getValue() ?? ""}
+            value={info.row.original.description ?? ""}
             placeholder="No description"
             handleSave={async (nextValue) =>
               handleUpdateSecret({
@@ -181,7 +181,7 @@ export default function SecretsTable(props: SecretsTableProps) {
       }),
       columnHelper.accessor("updatedAt", {
         header: "Last Updated",
-        cell: (info) => info.getValue().toLocaleString(),
+        cell: (info) => info.row.original.updatedAt.toLocaleString(),
         enableSorting: true,
       }),
     ];

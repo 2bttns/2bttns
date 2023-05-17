@@ -36,7 +36,7 @@ export const getServerSideProps: GetServerSideProps<ReturnType> = async (
   };
 };
 
-export default function testRankedOutputs(props: ReturnType) {
+export default function TestRankedOutputs(props: ReturnType) {
   const { playerId, allPlayers } = props;
 
   const [inputTags, setInputTags] = useState<TagOption[]>([]);

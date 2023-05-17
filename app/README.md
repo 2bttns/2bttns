@@ -1,16 +1,16 @@
 # 2bttns
 
-## First-time setup
+## Setup for Local Development
 
 ### Environment Variables
 
-First, set up the environment variables folder by copying `.env.example` to a new `.env` file.
+First, set up the environment variables folder by copying `.env.example` to a new `.env` file. Follow the instructions in the `.env.example` file to set up your environment variables.
 
 ### Docker Compose
 
 We use Docker Compose to initialize `dev-db` and `test-db` PostgreSQL databases. Be sure to have Docker with Docker Compose installed and running before running tests.
 
-You can modify the database container credentials in `docker-compose.yml`.
+You can modify the Docker database configurations in `docker-compose.yml`.
 
 ### Local Development
 
@@ -36,7 +36,41 @@ $ npm run dev
 
 ---
 
+## Deploying 2bttns to Production
+
+### Building the App
+
+You can build the admin app with the following command:
+
+```bash
+$ npm run build
+```
+
+Then, you can run the production-ready build with the following command:
+
+```bash
+$ npm run start
+```
+
+### Production Environment Variables
+
+You can create a `.env.production` file to set environment variables for the production build. `npm run build` will automatically use the `.env.production` file if it exists.
+
+If you plan to deploy the admin app to a production server via CI/CD or via services like Vercel, you should set the environment variables in their respective places instead.
+
+### 2bttns Docker Image
+
+@TODO Create a `2bttns/admin` Docker image. Should accept environment variables.
+
+---
+
 ## Admin Login
+
+### "Admin Users" vs "Players"
+
+Any reference to "Users" in the 2bttns admin app refers to dmin users logged in via GitHub OAuth. Admin users manage the 2bttns dashboard, managing various aspects of the app, such as games, gameobjects, and 2bttns API secret keys.
+
+Customers who are sent to 2bttns to play games are referred to as "Players".
 
 ### GitHub OAuth
 
@@ -53,7 +87,7 @@ GITHUB_SECRET="<YOUR_GITHUB_SECRET>"
 You can get these credentials by creating a new OAuth app via...
 
 - a) Your GitHub account - `https://github.com/settings/developers`
-- b) Your GitHub organization - `https://github.com/organizations/<your-organization>/settings/applications/2114572`
+- b) Your GitHub organization - `https://github.com/organizations/<your-organization>/settings/applications`
 
 For local development, when configuring the OAuth app, set the homepage URL to `http://localhost:3001` and set the callback url to `http://localhost:3001/api/auth/callback/github` (or use a custom port you've configured).
 
@@ -69,7 +103,7 @@ To configure the admin allow list...
 
 ### Next Auth Secret
 
-2bttns uses Next Auth to authenticate users, and requires a NEXTAUTH_SECRET environment variable in the `.env` file:
+2bttns uses Next Auth to authenticate users, and requires a `NEXTAUTH_SECRET` environment variable in the `.env` file:
 
 ```
 # .env
@@ -98,7 +132,8 @@ $ npm run docker:stop
 # Start the dev-db container, from scratch or if it was stopped
 $ npm run docker:up:dev-db
 
-# Note that this does not run Prisma migrations or seed the db.
+# Note that the previous command does not run Prisma
+# migrations or seed the db.
 # To do that, run the following command:
 $ npm run init-db:dev
 ```
@@ -115,25 +150,20 @@ Note that these NPM scripts are just for convenience. You can manage the `dev-db
 
 ## Testing
 
-To run tests, first ensure your `.env` file has the `DATABASE_URL` environment variable set to the test-db credentials:
+### Prerequisites
+
+Be sure to have Node.js/NPM and Docker Compose available on the machine you're running the tests on.
+
+### Running tests
+
+Run the tests with the following command inside the root `app` folder:
 
 ```bash
-
-# Comment out the dev-db credentials
-# DATABASE_URL="postgresql://dev-user:dev-pass@localhost:5433/dev-db"
-
-# Uncomment the test-db credentials
-DATABASE_URL="postgresql://test-user:test-pass@localhost:5433/test-db"
-
-```
-
-Then run the following command inside the root `app` folder:
-
-```bash
+$ npm i              # Install npm dependencies, if you haven't already
 $ npm run test       # Run tests
 
 # Behind the scenes, this npm script will run the following commands:
-# You do NOT need to run these commands manually.
+# You do not need to run these commands manually
 
 # NPM script to stop existing db containers (e.g.
 # dev-db container; doesn't delete it), initialize test db container,
@@ -148,35 +178,25 @@ $ npm run init-db:test
  \ && npm run docker:rm:test-db
 ```
 
-### Handling Test Errors
+### Troubleshooting
 
-#### Authentication failed against database server
+#### Bind for 0.0.0.0:xxxx failed: port is already allocated
 
-You may see the following error when running tests:
-
-```
-Error: P1000: Authentication failed against database server at `localhost`, the provided database credentials for `dev-user` are not valid.
-```
-
-This means your DATABASE_URL in `.env` is not set correctly (it may still be set as your dev-db). You can fix this by setting the `DATABASE_URL` to the following based on your test-db credentials configured in `docker-compose.yml`:
-
-```bash
-# .env
-DATABASE_URL="postgresql://test-user:test-pass@localhost:5433/test-db"
-```
-
-When you're done testing, be sure to set `DATABASE_URL` back to your `dev-db` before running the app in development mode.
-
-If your `dev-db` container was stopped, you can restart it by running the following command inside the `app` folder:
-
-```bash
-$ npm run docker:up:dev-db
-```
-
-#### Bind for 0.0.0.0:5433 failed: port is already allocated
-
-This means you have a db container already running. You can stop it by running the following command inside the `app` folder:
+This means you have a db container on the specified port already running. You can stop it by running the following command inside the `app` folder:
 
 ```bash
 $ npm run docker:stop
 ```
+
+#### Can't reach database server at `localhost:xxxx`
+
+The database corresponding to the `DATABASE_URL` in `.env` you've configured might not be running.
+
+For example, you might see this error if you run `npm run dev` before starting the `dev-db` container.
+
+#### Default ports used by this project
+
+- `localhost:3001` - Dev app started via `npm run dev`
+- `localhost:5433` - Postgres Docker dev db started via `npm run docker:up:dev-db`
+- `localhost:5434` - Postgres Docker test db started via `npm run docker:up:test-db`
+- `localhost:3262` - Production build started via `npm run build && npm run start`

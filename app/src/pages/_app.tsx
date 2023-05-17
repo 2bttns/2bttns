@@ -32,4 +32,4 @@ const MyApp = ({
   );
 };
 
-export default api.withTRPC(MyApp as any);
+export default api.withTRPC(MyApp);

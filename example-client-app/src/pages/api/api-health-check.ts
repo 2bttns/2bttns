@@ -1,6 +1,6 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
 import type { NextApiRequest, NextApiResponse } from "next";
-import { twobttns } from "../utils/2bttns";
+import { twobttns } from "../../utils/2bttns";
 
 // Endpoint for checking if 2bttns SDK configured correctly
 // If you can't see the message, your 2bttns SDK configuration may be incorrect (e.g. invalid API key, app name, or 2bttns admin panel url)

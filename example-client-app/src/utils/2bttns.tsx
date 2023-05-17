@@ -1,9 +1,9 @@
 import TwoBttns, { ApiResponses } from "@2bttns/sdk";
 
 export const twobttns = new TwoBttns({
-  appId: "example-app",
-  secret: "example-secret-value",
-  url: "http://localhost:3001",
+  appId: process.env.TWOBTTNS_APP_ID,
+  secret: process.env.TWOBTTNS_APP_SECRET,
+  url: process.env.TWOBTTNS_BASE_URL,
 });
 
 export type TwoBttnsPlayer =
