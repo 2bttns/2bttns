@@ -9,7 +9,9 @@ import {
 import { useMemo, useState } from "react";
 import { tagFilter } from "../../../server/shared/z";
 import { api, RouterInputs, RouterOutputs } from "../../../utils/api";
-import ConstrainToRemainingSpace from "../../shared/components/ConstrainToRemainingSpace";
+import ConstrainToRemainingSpace, {
+  ConstrainToRemainingSpaceProps,
+} from "../../shared/components/ConstrainToRemainingSpace";
 import CustomEditable from "../../shared/components/CustomEditable";
 import PaginatedTable from "../../shared/components/Table/containers/PaginatedTable";
 import SearchAndCreateBar from "../../shared/components/Table/containers/SearchAndCreateBar";
@@ -34,6 +36,7 @@ export type GameObjectsTableProps = {
   gameObjectsToExclude?: GameObjectData["id"][];
   additionalTopBarContent?: React.ReactNode;
   editable?: boolean;
+  constrainToRemainingSpaceProps?: Partial<ConstrainToRemainingSpaceProps>;
 };
 
 export default function GameObjectsTable(props: GameObjectsTableProps) {
@@ -44,6 +47,7 @@ export default function GameObjectsTable(props: GameObjectsTableProps) {
     gameObjectsToExclude,
     additionalTopBarContent,
     editable = true,
+    constrainToRemainingSpaceProps,
   } = props;
 
   const utils = api.useContext();
@@ -255,7 +259,10 @@ export default function GameObjectsTable(props: GameObjectsTableProps) {
         />
         {additionalTopBarContent}
       </HStack>
-      <ConstrainToRemainingSpace boxProps={{ minHeight: "500px" }}>
+      <ConstrainToRemainingSpace
+        boxProps={{ minHeight: "500px" }}
+        {...constrainToRemainingSpaceProps}
+      >
         <PaginatedTable
           columns={columns}
           data={gameObjectsQuery.data?.gameObjects ?? []}

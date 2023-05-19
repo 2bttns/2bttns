@@ -6,7 +6,7 @@
 
 import { Box, BoxProps } from "@chakra-ui/react";
 import { useWindowHeight } from "@react-hook/window-size";
-import { useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 
 export type ConstrainToRemainingSpaceProps = {
   children: React.ReactNode;
@@ -29,11 +29,18 @@ export default function ConstrainToRemainingSpace(
       childComponentRef.current?.getBoundingClientRect().top ?? 0;
 
     const height = windowHeight - topOfChildComponent - bottomOffset;
+    console.log("foo", windowHeight, topOfChildComponent, bottomOffset, height);
+
+    if (height < 0) return 0;
     return height;
-  }, [childComponentRef.current, windowHeight]);
+  }, [childComponentRef.current, windowHeight, bottomOffset]);
+
+  useEffect(() => {
+    console.log("bottomOffset", bottomOffset);
+  }, [bottomOffset]);
 
   return (
-    <Box {...boxProps} height={wrapperHeight}>
+    <Box {...boxProps} height={wrapperHeight} overflow="hidden">
       <Box ref={childComponentRef} height="100%">
         {children}
       </Box>
