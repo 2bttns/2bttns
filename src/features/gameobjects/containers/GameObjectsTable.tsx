@@ -1,12 +1,13 @@
 import { Box, HStack } from "@chakra-ui/react";
 import { Tag } from "@prisma/client";
+import { useWindowHeight } from "@react-hook/window-size";
 import {
   ColumnDef,
   createColumnHelper,
   PaginationState,
   SortingState,
 } from "@tanstack/react-table";
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { tagFilter } from "../../../server/shared/z";
 import { api, RouterInputs, RouterOutputs } from "../../../utils/api";
 import CustomEditable from "../../shared/components/CustomEditable";
@@ -244,9 +245,36 @@ export default function GameObjectsTable(props: GameObjectsTableProps) {
     return items;
   }, [editable, ...(additionalColumns ? additionalColumns.dependencies : [])]);
 
+  const windowHeight = useWindowHeight();
+  const tableContainerRef = useRef<HTMLDivElement>(null);
+  const bottomPadding = 5;
+
+  const tableContainerHeight = useMemo(() => {
+    if (typeof window === "undefined") return;
+
+    const topOfTableContainer =
+      tableContainerRef.current?.getBoundingClientRect().top ?? 0;
+
+    const height = windowHeight - topOfTableContainer - bottomPadding;
+    console.log(height);
+    return height;
+  }, [tableContainerRef.current, windowHeight]);
+
+  const additionalTopBarContentRef = useRef<HTMLDivElement>(null);
+  const additionalTopBarContentHeight = useMemo(() => {
+    if (typeof window === "undefined") return;
+    const height =
+      additionalTopBarContentRef.current?.getBoundingClientRect().height;
+    return height;
+  }, [additionalTopBarContentRef.current]);
+
   return (
-    <Box height="100%">
-      <HStack width="100%">
+    <Box
+      height={tableContainerHeight}
+      minHeight="500px"
+      ref={tableContainerRef}
+    >
+      <HStack width="100%" ref={additionalTopBarContentRef}>
         <SearchAndCreateBar
           value={globalFilter}
           onChange={setGlobalFilter}
@@ -254,15 +282,17 @@ export default function GameObjectsTable(props: GameObjectsTableProps) {
         />
         {additionalTopBarContent}
       </HStack>
-      <PaginatedTable
-        columns={columns}
-        data={gameObjectsQuery.data?.gameObjects ?? []}
-        onPaginationChange={setPagination}
-        pagination={pagination}
-        pageCount={pageCount}
-        sorting={sorting}
-        onSortingChange={setSorting}
-      />
+      <Box height={`calc(100% - ${additionalTopBarContentHeight}px)`}>
+        <PaginatedTable
+          columns={columns}
+          data={gameObjectsQuery.data?.gameObjects ?? []}
+          onPaginationChange={setPagination}
+          pagination={pagination}
+          pageCount={pageCount}
+          sorting={sorting}
+          onSortingChange={setSorting}
+        />
+      </Box>
     </Box>
   );
 }
