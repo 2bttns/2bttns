@@ -12,6 +12,7 @@ import { api, RouterInputs, RouterOutputs } from "../../../utils/api";
 import TagMultiSelect, {
   TagOption,
 } from "../../gameobjects/containers/TagMultiSelect";
+import ConstrainToRemainingSpace from "../../shared/components/ConstrainToRemainingSpace";
 import CustomEditable from "../../shared/components/CustomEditable";
 import PaginatedTable from "../../shared/components/Table/containers/PaginatedTable";
 import SearchAndCreateBar from "../../shared/components/Table/containers/SearchAndCreateBar";
@@ -233,15 +234,17 @@ export default function GamesTable(props: GamesTableProps) {
         onChange={setGlobalFilter}
         onCreate={handleCreateGame}
       />
-      <PaginatedTable
-        columns={columns}
-        data={gamesQuery.data?.games ?? []}
-        onPaginationChange={setPagination}
-        pagination={pagination}
-        pageCount={pageCount}
-        sorting={sorting}
-        onSortingChange={setSorting}
-      />
+      <ConstrainToRemainingSpace boxProps={{ minHeight: "500px" }}>
+        <PaginatedTable
+          columns={columns}
+          data={gamesQuery.data?.games ?? []}
+          onPaginationChange={setPagination}
+          pagination={pagination}
+          pageCount={pageCount}
+          sorting={sorting}
+          onSortingChange={setSorting}
+        />
+      </ConstrainToRemainingSpace>
     </Box>
   );
 }
