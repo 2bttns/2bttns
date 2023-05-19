@@ -19,9 +19,7 @@ export default function UserLayout(props: UserLayoutProps) {
       <Box position="sticky" top="0" zIndex="99">
         <Navbar {...navbarProps} />
       </Box>
-      <Box width="100vw" padding="1rem">
-        {children}
-      </Box>
+      <Box width="100vw">{children}</Box>
     </Box>
   );
 }
