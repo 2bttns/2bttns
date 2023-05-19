@@ -259,10 +259,7 @@ export default function GameObjectsTable(props: GameObjectsTableProps) {
         />
         {additionalTopBarContent}
       </HStack>
-      <ConstrainToRemainingSpace
-        boxProps={{ minHeight: "500px" }}
-        {...constrainToRemainingSpaceProps}
-      >
+      <ConstrainToRemainingSpace {...constrainToRemainingSpaceProps}>
         <PaginatedTable
           columns={columns}
           data={gameObjectsQuery.data?.gameObjects ?? []}

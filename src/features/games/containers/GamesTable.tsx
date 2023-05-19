@@ -234,7 +234,7 @@ export default function GamesTable(props: GamesTableProps) {
         onChange={setGlobalFilter}
         onCreate={handleCreateGame}
       />
-      <ConstrainToRemainingSpace boxProps={{ minHeight: "500px" }}>
+      <ConstrainToRemainingSpace>
         <PaginatedTable
           columns={columns}
           data={gamesQuery.data?.games ?? []}

@@ -235,7 +235,6 @@ const TagByIdPage: NextPage<TagByIdPageProps> = (props) => {
             }
             additionalColumns={getAdditionalColumns(tagId)}
             constrainToRemainingSpaceProps={{
-              boxProps: { minHeight: "250px" },
               bottomOffset: 150,
             }}
           />

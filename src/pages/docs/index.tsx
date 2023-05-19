@@ -27,12 +27,14 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   };
 };
 
-const Home: NextPage<DocsPageProps> = (props) => {
+const Docs: NextPage<DocsPageProps> = (props) => {
   return (
-    <Box height="100%" overflowY="scroll" bgColor="white" paddingBottom="250px">
-      <SwaggerUI url="/api/openapi.json" />
+    <Box height="100vh" bgColor="white">
+      <Box height="100%" overflowY="scroll" paddingBottom="250px">
+        <SwaggerUI url="/api/openapi.json" />
+      </Box>
     </Box>
   );
 };
 
-export default Home;
+export default Docs;

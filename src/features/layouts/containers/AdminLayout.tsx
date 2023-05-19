@@ -11,9 +11,10 @@ export default function AdminLayout(props: AdminLayoutProps) {
   return (
     <Box
       width="100vw"
-      minHeight="100vh"
+      height="100vh"
       backgroundColor="gray.300"
       position="relative"
+      overflow="hidden"
     >
       <Box position="sticky" top="0" zIndex="99">
         <AdminNavbar />
