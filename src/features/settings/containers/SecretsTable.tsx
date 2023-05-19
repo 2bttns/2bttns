@@ -7,6 +7,7 @@ import {
 } from "@tanstack/react-table";
 import { useMemo, useState } from "react";
 import { api, RouterInputs, RouterOutputs } from "../../../utils/api";
+import ConstrainToRemainingSpace from "../../shared/components/ConstrainToRemainingSpace";
 import CustomEditable from "../../shared/components/CustomEditable";
 import PaginatedTable from "../../shared/components/Table/containers/PaginatedTable";
 import SearchAndCreateBar from "../../shared/components/Table/containers/SearchAndCreateBar";
@@ -209,15 +210,17 @@ export default function SecretsTable(props: SecretsTableProps) {
         <SearchAndCreateBar value={globalFilter} onChange={setGlobalFilter} />
         <Button onClick={handleCreateSecret}>Create New Secret</Button>
       </HStack>
-      <PaginatedTable
-        columns={columns}
-        data={secretsQuery.data?.secrets ?? []}
-        onPaginationChange={setPagination}
-        pagination={pagination}
-        pageCount={pageCount}
-        sorting={sorting}
-        onSortingChange={setSorting}
-      />
+      <ConstrainToRemainingSpace>
+        <PaginatedTable
+          columns={columns}
+          data={secretsQuery.data?.secrets ?? []}
+          onPaginationChange={setPagination}
+          pagination={pagination}
+          pageCount={pageCount}
+          sorting={sorting}
+          onSortingChange={setSorting}
+        />
+      </ConstrainToRemainingSpace>
     </Box>
   );
 }

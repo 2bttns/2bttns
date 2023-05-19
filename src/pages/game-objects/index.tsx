@@ -1,5 +1,5 @@
 import { Box, ButtonGroup } from "@chakra-ui/react";
-import type { GetServerSideProps, NextPage } from "next";
+import type { GetServerSideProps } from "next";
 import { Session } from "next-auth";
 import Head from "next/head";
 import CsvImport from "../../features/csv/CsvImport";
@@ -11,6 +11,7 @@ import ManageGameObjectButton from "../../features/gameobjects/containers/Manage
 import TagFilterToggles from "../../features/tags/containers/TagFilterToggles";
 import useAllTagFilters from "../../features/tags/hooks/useAllTagFilters";
 import getSessionWithSignInRedirect from "../../utils/getSessionWithSignInRedirect";
+import { NextPageWithLayout } from "../_app";
 
 export type GameObjectsPageProps = {
   session: Session;
@@ -32,7 +33,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   };
 };
 
-const GameObjects: NextPage<GameObjectsPageProps> = (props) => {
+const GameObjects: NextPageWithLayout<GameObjectsPageProps> = (props) => {
   const tagFilter = useAllTagFilters();
 
   return (
@@ -42,15 +43,15 @@ const GameObjects: NextPage<GameObjectsPageProps> = (props) => {
         <meta name="description" content="Game object management panel" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <Box marginY="1rem">
-        <TagFilterToggles
-          filter={tagFilter.state.tagFilter}
-          setFilter={tagFilter.state.setTagFilter}
-          allowMultiple
-          allAndNoneToggles
-        />
-      </Box>
-      <Box width="100%" height="100%" overflow="scroll">
+      <Box overflow="hidden">
+        <Box marginY="1rem">
+          <TagFilterToggles
+            filter={tagFilter.state.tagFilter}
+            setFilter={tagFilter.state.setTagFilter}
+            allowMultiple
+            allAndNoneToggles
+          />
+        </Box>
         <GameObjectsTable
           tag={{
             include: tagFilter.results.includeTags,

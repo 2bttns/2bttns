@@ -234,7 +234,11 @@ const TagByIdPage: NextPage<TagByIdPageProps> = (props) => {
               </>
             }
             additionalColumns={getAdditionalColumns(tagId)}
+            constrainToRemainingSpaceProps={{
+              bottomOffset: 150,
+            }}
           />
+
           <Divider />
           <Heading size="md" color="red.500">
             DANGER ZONE

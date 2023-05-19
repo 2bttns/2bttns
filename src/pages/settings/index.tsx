@@ -70,7 +70,7 @@ export default function SettingsPage(props: SettingsPageProps) {
   return (
     <>
       <Heading size="2xl">Settings</Heading>
-      <Box padding="1rem">
+      <Box>
         <Tabs>
           <TabList>
             <Tab>Secrets</Tab>
