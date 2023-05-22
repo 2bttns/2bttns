@@ -1,52 +1,49 @@
-import { Box, Button, ButtonGroup, HStack, Text } from "@chakra-ui/react";
-import {
-  ColumnDef,
-  createColumnHelper,
-  PaginationState,
-  SortingState,
-} from "@tanstack/react-table";
+import { Box, Button, HStack } from "@chakra-ui/react";
 import { useMemo, useState } from "react";
+import { tagFilter } from "../../../server/shared/z";
 import { api, RouterInputs, RouterOutputs } from "../../../utils/api";
-import ConstrainToRemainingSpace from "../../shared/components/ConstrainToRemainingSpace";
+import ConstrainToRemainingSpace, {
+  ConstrainToRemainingSpaceProps,
+} from "../../shared/components/ConstrainToRemainingSpace";
 import CustomEditable from "../../shared/components/CustomEditable";
-import PaginatedTable from "../../shared/components/Table/containers/PaginatedTable";
+import PaginatedTable, {
+  PaginatedTableProps,
+} from "../../shared/components/Table/containers/PaginatedTable";
 import SearchAndCreateBar from "../../shared/components/Table/containers/SearchAndCreateBar";
-import usePageCount from "../../shared/components/Table/hooks/usePageCount";
+import usePagination from "../../shared/components/Table/hooks/usePagination";
+import useSort from "../../shared/components/Table/hooks/useSort";
 
 export type SecretData = RouterOutputs["secrets"]["getAll"]["secrets"][0];
 
-const columnHelper = createColumnHelper<SecretData>();
-
 export type SecretsTableProps = {
-  additionalActions?: (secretData: SecretData) => React.ReactNode;
+  tag?: typeof tagFilter._type;
+  onSecretCreated?: (secret: SecretData) => Promise<void>;
+  additionalColumns?: PaginatedTableProps<SecretData>["additionalColumns"];
+  additionalTopBarContent?: React.ReactNode;
+  editable?: boolean;
+  constrainToRemainingSpaceProps?: Partial<ConstrainToRemainingSpaceProps>;
 };
 
 export default function SecretsTable(props: SecretsTableProps) {
-  const { additionalActions } = props;
+  const {
+    onSecretCreated,
+    additionalColumns,
+    additionalTopBarContent,
+    editable = true,
+    constrainToRemainingSpaceProps,
+  } = props;
+
+  const { perPage, currentPage, handlePageChange, handlePerRowsChange } =
+    usePagination();
+  const { getSort, handleSort } = useSort<SecretData>();
 
   const utils = api.useContext();
-
-  const [pagination, setPagination] = useState<PaginationState>({
-    pageIndex: 0,
-    pageSize: 10,
-  });
-  const { pageIndex, pageSize } = pagination;
-
   const [globalFilter, setGlobalFilter] = useState("");
-  const [sorting, setSorting] = useState<SortingState>([]);
-  const getSort = (id: keyof SecretData) => {
-    const result = sorting.find((s) => s.id === id);
-    if (result === undefined) {
-      return undefined;
-    }
-
-    return result.desc ? "desc" : "asc";
-  };
 
   const secretsQuery = api.secrets.getAll.useQuery(
     {
-      skip: pageIndex * pageSize,
-      take: pageSize,
+      skip: (currentPage! - 1) * perPage,
+      take: perPage,
       filter: globalFilter
         ? {
             mode: "OR",
@@ -67,6 +64,7 @@ export default function SecretsTable(props: SecretsTableProps) {
       refetchOnWindowFocus: false,
     }
   );
+  const data: SecretData[] = secretsQuery.data?.secrets ?? [];
 
   const secretsCountQuery = api.secrets.getCount.useQuery(
     {
@@ -84,19 +82,13 @@ export default function SecretsTable(props: SecretsTableProps) {
     }
   );
 
-  const { pageCount } = usePageCount({
-    pagination,
-    setPagination,
-    itemCount: secretsCountQuery.data?.count ?? 0,
-  });
-
   const updateSecretMutation = api.secrets.updateById.useMutation();
-
   const handleUpdateSecret = async (
-    input: RouterInputs["secrets"]["updateById"]
+    id: string,
+    data: RouterInputs["secrets"]["updateById"]["data"]
   ) => {
     try {
-      await updateSecretMutation.mutateAsync(input);
+      await updateSecretMutation.mutateAsync({ id, data });
       await utils.secrets.invalidate();
     } catch (error) {
       // This will be caught by CustomEditable component using this function
@@ -105,10 +97,11 @@ export default function SecretsTable(props: SecretsTableProps) {
     }
   };
 
-  const createSecretMutation = api.secrets.create.useMutation();
+  const createSecretsMutation = api.secrets.create.useMutation();
   const handleCreateSecret = async () => {
     try {
-      await createSecretMutation.mutateAsync({});
+      const result = await createSecretsMutation.mutateAsync({});
+      if (onSecretCreated) await onSecretCreated(result.createdSecret);
       await utils.secrets.invalidate();
     } catch (error) {
       window.alert("Error creating Secret\n See console for details");
@@ -116,110 +109,110 @@ export default function SecretsTable(props: SecretsTableProps) {
     }
   };
 
-  const columns = useMemo<ColumnDef<SecretData, any>[]>(() => {
-    const items: ColumnDef<SecretData, any>[] = [
-      columnHelper.accessor("id", {
-        cell: (info) => (
+  const columns = useMemo<PaginatedTableProps<SecretData>["columns"]>(() => {
+    return [
+      {
+        name: "ID",
+        cell: (row) => (
           <CustomEditable
-            value={info.row.original.id ?? ""}
+            value={row.id}
             placeholder="No ID"
             handleSave={async (nextValue) =>
-              handleUpdateSecret({
-                id: info.row.original.id,
-                data: {
-                  id: nextValue,
-                },
+              handleUpdateSecret(row.id, {
+                id: nextValue,
               })
             }
+            isEditable={editable}
           />
         ),
-        enableSorting: true,
-      }),
-      columnHelper.accessor("name", {
-        cell: (info) => (
+        sortable: true,
+        sortField: "id",
+        minWidth: "256px",
+      },
+      {
+        name: "Name",
+        cell: (row) => (
           <CustomEditable
-            value={info.row.original.name ?? ""}
+            value={row.name ?? undefined}
             placeholder="No name"
             handleSave={async (nextValue) =>
-              handleUpdateSecret({
-                id: info.row.original.id,
-                data: {
-                  name: nextValue,
-                },
+              handleUpdateSecret(row.id, {
+                name: nextValue,
               })
             }
+            isEditable={editable}
           />
         ),
-        enableSorting: true,
-      }),
-      columnHelper.accessor("description", {
-        cell: (info) => (
+        sortable: true,
+        sortField: "name",
+        minWidth: "256px",
+      },
+      {
+        name: "Description",
+        cell: (row) => (
           <CustomEditable
-            value={info.row.original.description ?? ""}
+            value={row.description ?? undefined}
             placeholder="No description"
             handleSave={async (nextValue) =>
-              handleUpdateSecret({
-                id: info.row.original.id,
-                data: {
-                  description: nextValue,
-                },
+              handleUpdateSecret(row.id, {
+                description: nextValue,
               })
             }
+            isEditable={editable}
+            isTextarea
           />
         ),
-        enableSorting: true,
-      }),
-      columnHelper.accessor("secret", {
-        cell: (info) => {
-          return (
-            <Box>
-              {/* TODO: hide the secret with a reveal ui */}
-              <Text>{info.row.original.secret ?? ""}</Text>
-            </Box>
-          );
-        },
-        enableSorting: true,
-      }),
-      columnHelper.accessor("updatedAt", {
-        header: "Last Updated",
-        cell: (info) => info.row.original.updatedAt.toLocaleString(),
-        enableSorting: true,
-      }),
+        sortable: true,
+        sortField: "description",
+        minWidth: "512px",
+      },
+      {
+        name: "Secret",
+        cell: (row) => row.secret ?? "",
+        minWidth: "256px",
+        sortable: true,
+        sortField: "secret",
+      },
+      {
+        name: "Last Updated",
+        cell: (row) => row.updatedAt.toLocaleString(),
+        sortable: true,
+        sortField: "updatedAt",
+        minWidth: "256px",
+      },
     ];
+  }, [editable]);
 
-    if (additionalActions) {
-      items.push({
-        id: "actions",
-        header: "",
-        cell: (info) => {
-          return (
-            <ButtonGroup width="100%" justifyContent="end">
-              {additionalActions(info.row.original)}
-            </ButtonGroup>
-          );
-        },
-      });
-    }
-
-    return items;
-  }, []);
+  const [selectedRows, setSelectedRows] = useState<SecretData[]>([]);
+  const handleSelectedRowsChange: PaginatedTableProps<SecretData>["onSelectedRowsChange"] =
+    (selected) => {
+      setSelectedRows(selected.selectedRows);
+    };
 
   return (
-    <Box height="100%">
+    <Box>
       <HStack width="100%">
         <SearchAndCreateBar value={globalFilter} onChange={setGlobalFilter} />
         <Button onClick={handleCreateSecret}>Create New Secret</Button>
+        {additionalTopBarContent}
       </HStack>
-      <ConstrainToRemainingSpace>
-        <PaginatedTable
-          columns={columns}
-          data={secretsQuery.data?.secrets ?? []}
-          onPaginationChange={setPagination}
-          pagination={pagination}
-          pageCount={pageCount}
-          sorting={sorting}
-          onSortingChange={setSorting}
-        />
+      <ConstrainToRemainingSpace {...constrainToRemainingSpaceProps}>
+        {(remainingHeight) => {
+          return (
+            <PaginatedTable<SecretData>
+              columns={columns}
+              data={data}
+              onSort={handleSort}
+              additionalColumns={additionalColumns}
+              loading={secretsQuery.isLoading}
+              totalRows={secretsCountQuery.data?.count ?? 0}
+              onChangePage={handlePageChange}
+              onChangeRowsPerPage={handlePerRowsChange}
+              fixedHeight={remainingHeight}
+              onSelectedRowsChange={handleSelectedRowsChange}
+            />
+          );
+        }}
       </ConstrainToRemainingSpace>
     </Box>
   );

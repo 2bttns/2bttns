@@ -1,6 +1,7 @@
 import { DeleteIcon, RepeatIcon } from "@chakra-ui/icons";
 import {
   Box,
+  ButtonGroup,
   Heading,
   IconButton,
   Tab,
@@ -11,8 +12,9 @@ import {
   Tooltip,
 } from "@chakra-ui/react";
 import { Secret } from "@prisma/client";
-import { GetServerSideProps } from "next";
+import { GetServerSideProps, NextPage } from "next";
 import { Session } from "next-auth";
+import Head from "next/head";
 import SecretsTable from "../../features/settings/containers/SecretsTable";
 import { api } from "../../utils/api";
 import getSessionWithSignInRedirect from "../../utils/getSessionWithSignInRedirect";
@@ -37,9 +39,51 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   };
 };
 
-export type SettingsPage = {};
+const SettingsPage: NextPage<SettingsPageProps> = (props) => {
+  return (
+    <>
+      <Head>
+        <title>Settings | 2bttns</title>
+        <meta name="description" content="Settings" />
+        <link rel="icon" href="/favicon.ico" />
+      </Head>
 
-export default function SettingsPage(props: SettingsPageProps) {
+      <>
+        <Heading size="2xl">Settings</Heading>
+        <Box>
+          <Tabs>
+            <TabList>
+              <Tab>Secrets</Tab>
+              <Tab>Foo</Tab>
+            </TabList>
+
+            <TabPanels>
+              <TabPanel>
+                <SecretsTable
+                  additionalColumns={{
+                    columns: [
+                      { cell: (row) => <CellActions secretId={row.id} /> },
+                    ],
+                    dependencies: [],
+                  }}
+                />
+              </TabPanel>
+              <TabPanel>
+                <h2>Foo</h2>
+              </TabPanel>
+            </TabPanels>
+          </Tabs>
+        </Box>
+      </>
+    </>
+  );
+};
+
+export type CellActionsProps = {
+  secretId: Secret["id"];
+};
+function CellActions(props: CellActionsProps) {
+  const { secretId } = props;
   const utils = api.useContext();
 
   const updateSecretMutation = api.secrets.updateById.useMutation();
@@ -68,57 +112,33 @@ export default function SettingsPage(props: SettingsPageProps) {
   };
 
   return (
-    <>
-      <Heading size="2xl">Settings</Heading>
-      <Box>
-        <Tabs>
-          <TabList>
-            <Tab>Secrets</Tab>
-            <Tab>Foo</Tab>
-          </TabList>
-
-          <TabPanels>
-            <TabPanel>
-              <SecretsTable
-                additionalActions={(secretData) => {
-                  const { id } = secretData;
-                  return (
-                    <>
-                      <Tooltip label={`Regenerate Secret`} placement="top">
-                        <IconButton
-                          colorScheme="blue"
-                          onClick={() => {
-                            regenerateSecret(id);
-                          }}
-                          icon={<RepeatIcon />}
-                          aria-label={`Regenerate secret`}
-                          size="sm"
-                          variant="outline"
-                        />
-                      </Tooltip>
-                      <Tooltip label={`Delete`} placement="top">
-                        <IconButton
-                          colorScheme="red"
-                          onClick={() => {
-                            handleDeleteSecret(id);
-                          }}
-                          icon={<DeleteIcon />}
-                          aria-label={`Delete secret with ID: ${id}`}
-                          size="sm"
-                          variant="outline"
-                        />
-                      </Tooltip>
-                    </>
-                  );
-                }}
-              />
-            </TabPanel>
-            <TabPanel>
-              <h2>Foo</h2>
-            </TabPanel>
-          </TabPanels>
-        </Tabs>
-      </Box>
-    </>
+    <ButtonGroup width="100%" justifyContent="end">
+      <Tooltip label={`Regenerate Secret`} placement="top">
+        <IconButton
+          colorScheme="blue"
+          onClick={() => {
+            regenerateSecret(secretId);
+          }}
+          icon={<RepeatIcon />}
+          aria-label={`Regenerate secret`}
+          size="sm"
+          variant="outline"
+        />
+      </Tooltip>
+      <Tooltip label={`Delete`} placement="top">
+        <IconButton
+          colorScheme="red"
+          onClick={() => {
+            handleDeleteSecret(secretId);
+          }}
+          icon={<DeleteIcon />}
+          aria-label={`Delete secret with ID: ${secretId}`}
+          size="sm"
+          variant="outline"
+        />
+      </Tooltip>
+    </ButtonGroup>
   );
 }
+
+export default SettingsPage;
