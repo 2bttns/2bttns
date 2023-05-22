@@ -98,15 +98,35 @@ export default function CustomEditable(props: CustomEditableProps) {
           onChange={(updated) => {
             setLiveValue(updated);
           }}
+          width="100%"
         >
-          <Stack direction="row">
+          <Stack
+            direction="row"
+            justifyContent="space-between"
+            alignItems="center"
+            width="100%"
+          >
             <EditablePreview
               as="span"
               sx={{
                 whiteSpace: "pre-wrap",
+                maxHeight: "64px",
+                overflowY: "scroll",
+                flex: 1,
               }}
             />
-            {isTextarea ? <EditableTextarea /> : <EditableInput />}
+            {isTextarea ? (
+              <EditableTextarea
+                height="64px"
+                sx={{
+                  maxHeight: "64px",
+                  overflowY: "scroll",
+                  flex: 1,
+                }}
+              />
+            ) : (
+              <EditableInput />
+            )}
             <EditableControls />
           </Stack>
         </Editable>

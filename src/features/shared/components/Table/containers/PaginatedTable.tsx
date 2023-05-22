@@ -63,6 +63,10 @@ export default function PaginatedTable<T>(props: PaginatedTableProps<T>) {
         fixedHeaderScrollHeight={`calc(${fixedHeight} - 64px)`}
         selectableRows
         onSelectedRowsChange={onSelectedRowsChange}
+        paginationRowsPerPageOptions={[5, 10, 25, 50, 100]}
+        customStyles={{
+          cells: { style: { alignItems: "center", padding: "1rem" } },
+        }}
       />
     </Box>
   );

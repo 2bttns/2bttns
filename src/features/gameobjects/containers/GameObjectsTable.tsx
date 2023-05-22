@@ -173,6 +173,7 @@ export default function GameObjectsTable(props: GameObjectsTableProps) {
         ),
         sortable: true,
         sortField: "id",
+        minWidth: "256px",
       },
       {
         name: "Name",
@@ -190,6 +191,7 @@ export default function GameObjectsTable(props: GameObjectsTableProps) {
         ),
         sortable: true,
         sortField: "name",
+        minWidth: "256px",
       },
       {
         name: "Description",
@@ -203,10 +205,12 @@ export default function GameObjectsTable(props: GameObjectsTableProps) {
               })
             }
             isEditable={editable}
+            isTextarea
           />
         ),
         sortable: true,
         sortField: "description",
+        minWidth: "512px",
       },
       {
         name: "Tags",
@@ -233,12 +237,14 @@ export default function GameObjectsTable(props: GameObjectsTableProps) {
         },
         sortable: true,
         sortField: "tags",
+        minWidth: "256px",
       },
       {
         name: "Last Updated",
         cell: (row) => row.updatedAt.toLocaleString(),
         sortable: true,
         sortField: "updatedAt",
+        minWidth: "256px",
       },
     ];
   }, [editable]);
