@@ -1,11 +1,5 @@
 import { Box, HStack } from "@chakra-ui/react";
 import { Tag } from "@prisma/client";
-import {
-  ColumnDef,
-  createColumnHelper,
-  PaginationState,
-  SortingState,
-} from "@tanstack/react-table";
 import { useMemo, useState } from "react";
 import { tagFilter } from "../../../server/shared/z";
 import { api, RouterInputs, RouterOutputs } from "../../../utils/api";
@@ -13,26 +7,19 @@ import ConstrainToRemainingSpace, {
   ConstrainToRemainingSpaceProps,
 } from "../../shared/components/ConstrainToRemainingSpace";
 import CustomEditable from "../../shared/components/CustomEditable";
-import PaginatedTable from "../../shared/components/Table/containers/PaginatedTable";
+import PaginatedTable, {
+  PaginatedTableProps,
+} from "../../shared/components/Table/containers/PaginatedTable";
 import SearchAndCreateBar from "../../shared/components/Table/containers/SearchAndCreateBar";
-import usePageCount from "../../shared/components/Table/hooks/usePageCount";
 import TagMultiSelect, { TagOption } from "./TagMultiSelect";
 
 export type GameObjectData =
   RouterOutputs["gameObjects"]["getAll"]["gameObjects"][0];
 
-export const columnHelper = createColumnHelper<GameObjectData>();
-
-export type AdditionalColumns = {
-  columns: ColumnDef<GameObjectData>[];
-  // The dependencies of the columns. If any of these change, the columns will be re-created.
-  dependencies: any[];
-};
-
 export type GameObjectsTableProps = {
   tag?: typeof tagFilter._type;
   onGameObjectCreated?: (gameObjectId: string) => Promise<void>;
-  additionalColumns?: AdditionalColumns;
+  additionalColumns?: PaginatedTableProps<GameObjectData>["additionalColumns"];
   gameObjectsToExclude?: GameObjectData["id"][];
   additionalTopBarContent?: React.ReactNode;
   editable?: boolean;
@@ -50,38 +37,46 @@ export default function GameObjectsTable(props: GameObjectsTableProps) {
     constrainToRemainingSpaceProps,
   } = props;
 
+  const [perPage, setPerPage] = useState(10);
+  const [currentPage, setCurrentPage] = useState<number | null>(null);
+  const handlePageChange: PaginatedTableProps<GameObjectData>["onChangePage"] =
+    (page) => {
+      setCurrentPage(page);
+    };
+  const handlePerRowsChange: PaginatedTableProps<GameObjectData>["onChangeRowsPerPage"] =
+    async (newPerPage, page) => {
+      setCurrentPage(page);
+      setPerPage(newPerPage);
+    };
+
   const utils = api.useContext();
-
-  const [pagination, setPagination] = useState<PaginationState>({
-    pageIndex: 0,
-    pageSize: 10,
-  });
-  const { pageIndex, pageSize } = pagination;
-
   const [globalFilter, setGlobalFilter] = useState("");
-  const [sorting, setSorting] = useState<SortingState>([]);
-  const getSort = (id: keyof GameObjectData) => {
-    const result = sorting.find((s) => s.id === id);
-    if (result === undefined) {
-      return undefined;
-    }
 
-    return result.desc ? "desc" : "asc";
+  const [sorting, setSorting] = useState<{
+    column: keyof GameObjectData;
+    order: "asc" | "desc";
+  } | null>(null);
+  const handleSort: PaginatedTableProps<GameObjectData>["onSort"] = (
+    column,
+    sortDirection
+  ) => {
+    setSorting({
+      column: column.sortField as keyof GameObjectData,
+      order: sortDirection,
+    });
   };
 
-  const skip = useMemo(() => {
-    let result = pageIndex * pageSize;
-    if (result < 0) {
-      result = 0;
-    }
-    return result;
-  }, [pageIndex, pageSize]);
+  const getSort = (column: keyof GameObjectData) => {
+    if (!sorting) return undefined;
+    if (sorting.column !== column) return undefined;
+    return sorting.order;
+  };
 
   const gameObjectsQuery = api.gameObjects.getAll.useQuery(
     {
       includeTags: true,
-      skip: skip,
-      take: pageSize,
+      skip: (currentPage! - 1) * perPage,
+      take: perPage,
       filter: globalFilter
         ? {
             mode: "OR",
@@ -102,10 +97,12 @@ export default function GameObjectsTable(props: GameObjectsTableProps) {
       excludeGameObjects: gameObjectsToExclude,
     },
     {
+      enabled: currentPage !== null,
       keepPreviousData: true,
       refetchOnWindowFocus: false,
     }
   );
+  const data: GameObjectData[] = gameObjectsQuery.data?.gameObjects ?? [];
 
   const gameObjectsCountQuery = api.gameObjects.getCount.useQuery(
     {
@@ -127,14 +124,7 @@ export default function GameObjectsTable(props: GameObjectsTableProps) {
     }
   );
 
-  const { pageCount } = usePageCount({
-    pagination,
-    setPagination,
-    itemCount: gameObjectsCountQuery.data?.count ?? 0,
-  });
-
   const updateGameObjectMutation = api.gameObjects.updateById.useMutation();
-
   const handleUpdateGameObject = async (
     id: string,
     data: RouterInputs["gameObjects"]["updateById"]["data"]
@@ -163,58 +153,66 @@ export default function GameObjectsTable(props: GameObjectsTableProps) {
     }
   };
 
-  const columns = useMemo<ColumnDef<GameObjectData, any>[]>(() => {
-    const items: ColumnDef<GameObjectData, any>[] = [
-      columnHelper.accessor("id", {
-        cell: (info) => (
+  const columns = useMemo<
+    PaginatedTableProps<GameObjectData>["columns"]
+  >(() => {
+    return [
+      {
+        name: "ID",
+        cell: (row) => (
           <CustomEditable
-            value={info.getValue()}
+            value={row.id}
             placeholder="No ID"
             handleSave={async (nextValue) =>
-              handleUpdateGameObject(info.row.original.id, {
+              handleUpdateGameObject(row.id, {
                 id: nextValue,
               })
             }
             isEditable={editable}
           />
         ),
-        enableSorting: true,
-      }),
-      columnHelper.accessor("name", {
-        cell: (info) => (
+        sortable: true,
+        sortField: "id",
+      },
+      {
+        name: "Name",
+        cell: (row) => (
           <CustomEditable
-            value={info.getValue()}
+            value={row.name}
             placeholder="No name"
             handleSave={async (nextValue) =>
-              handleUpdateGameObject(info.row.original.id, {
+              handleUpdateGameObject(row.id, {
                 name: nextValue,
               })
             }
             isEditable={editable}
           />
         ),
-        enableSorting: true,
-      }),
-      columnHelper.accessor("description", {
-        cell: (info) => (
+        sortable: true,
+        sortField: "name",
+      },
+      {
+        name: "Description",
+        cell: (row) => (
           <CustomEditable
-            value={info.getValue() ?? ""}
+            value={row.description ?? undefined}
             placeholder="No description"
             handleSave={async (nextValue) =>
-              handleUpdateGameObject(info.row.original.id, {
+              handleUpdateGameObject(row.id, {
                 description: nextValue,
               })
             }
             isEditable={editable}
           />
         ),
-        enableSorting: true,
-      }),
-      columnHelper.accessor("tags", {
-        cell: (info) => {
-          const tags = (info.getValue() as Tag[]) || undefined;
+        sortable: true,
+        sortField: "description",
+      },
+      {
+        name: "Tags",
+        cell: (row) => {
           const selected: TagOption[] =
-            tags?.map((tag: Tag) => ({
+            row.tags?.map((tag: Tag) => ({
               label: tag.name || "Untitled Tag",
               value: tag.id,
             })) || [];
@@ -224,7 +222,7 @@ export default function GameObjectsTable(props: GameObjectsTableProps) {
               <TagMultiSelect
                 selected={selected}
                 onChange={(nextTags) => {
-                  handleUpdateGameObject(info.row.original.id, {
+                  handleUpdateGameObject(row.id, {
                     tags: nextTags,
                   });
                 }}
@@ -233,21 +231,23 @@ export default function GameObjectsTable(props: GameObjectsTableProps) {
             </Box>
           );
         },
-        enableSorting: true,
-      }),
-      columnHelper.accessor("updatedAt", {
-        header: "Last Updated",
-        cell: (info) => info.row.original.updatedAt.toLocaleString(),
-        enableSorting: true,
-      }),
+        sortable: true,
+        sortField: "tags",
+      },
+      {
+        name: "Last Updated",
+        cell: (row) => row.updatedAt.toLocaleString(),
+        sortable: true,
+        sortField: "updatedAt",
+      },
     ];
+  }, [editable]);
 
-    if (additionalColumns) {
-      items.push(...additionalColumns.columns);
-    }
-
-    return items;
-  }, [editable, ...(additionalColumns ? additionalColumns.dependencies : [])]);
+  const [selectedRows, setSelectedRows] = useState<GameObjectData[]>([]);
+  const handleSelectedRowsChange: PaginatedTableProps<GameObjectData>["onSelectedRowsChange"] =
+    (selected) => {
+      setSelectedRows(selected.selectedRows);
+    };
 
   return (
     <Box>
@@ -260,15 +260,22 @@ export default function GameObjectsTable(props: GameObjectsTableProps) {
         {additionalTopBarContent}
       </HStack>
       <ConstrainToRemainingSpace {...constrainToRemainingSpaceProps}>
-        <PaginatedTable
-          columns={columns}
-          data={gameObjectsQuery.data?.gameObjects ?? []}
-          onPaginationChange={setPagination}
-          pagination={pagination}
-          pageCount={pageCount}
-          sorting={sorting}
-          onSortingChange={setSorting}
-        />
+        {(remainingHeight) => {
+          return (
+            <PaginatedTable<GameObjectData>
+              columns={columns}
+              data={data}
+              onSort={handleSort}
+              additionalColumns={additionalColumns}
+              loading={gameObjectsQuery.isLoading}
+              totalRows={gameObjectsCountQuery.data?.count ?? 0}
+              onChangePage={handlePageChange}
+              onChangeRowsPerPage={handlePerRowsChange}
+              fixedHeight={remainingHeight}
+              onSelectedRowsChange={handleSelectedRowsChange}
+            />
+          );
+        }}
       </ConstrainToRemainingSpace>
     </Box>
   );

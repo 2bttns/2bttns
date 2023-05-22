@@ -5,9 +5,10 @@ import Head from "next/head";
 import CsvImport from "../../features/csv/CsvImport";
 import DeleteGameObjectButton from "../../features/gameobjects/containers/DeleteGameObjectButton";
 import GameObjectsTable, {
-  AdditionalColumns,
+  GameObjectData,
 } from "../../features/gameobjects/containers/GameObjectsTable";
 import ManageGameObjectButton from "../../features/gameobjects/containers/ManageGameObjectButton";
+import { AdditionalColumns } from "../../features/shared/components/Table/containers/PaginatedTable";
 import TagFilterToggles from "../../features/tags/containers/TagFilterToggles";
 import useAllTagFilters from "../../features/tags/hooks/useAllTagFilters";
 import getSessionWithSignInRedirect from "../../utils/getSessionWithSignInRedirect";
@@ -66,18 +67,16 @@ const GameObjects: NextPageWithLayout<GameObjectsPageProps> = (props) => {
   );
 };
 
-function getAdditionalColumns(): AdditionalColumns {
+function getAdditionalColumns(): AdditionalColumns<GameObjectData> {
   return {
     columns: [
       {
         id: "actions",
-        header: "",
-        cell: (info) => {
-          const { id } = info.row.original;
+        cell: (row) => {
           return (
             <ButtonGroup width="100%" justifyContent="end">
-              <ManageGameObjectButton gameObjectId={id} />
-              <DeleteGameObjectButton gameObjectId={id} />
+              <ManageGameObjectButton gameObjectId={row.id} />
+              <DeleteGameObjectButton gameObjectId={row.id} />
             </ButtonGroup>
           );
         },

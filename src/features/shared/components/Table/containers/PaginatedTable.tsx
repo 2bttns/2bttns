@@ -1,202 +1,69 @@
-import {
-  Box,
-  Button,
-  ButtonGroup,
-  Select,
-  Stack,
-  Table,
-  Tbody,
-  Td,
-  Text,
-  Th,
-  Thead,
-  Tr,
-  VStack,
-} from "@chakra-ui/react";
-import {
-  ColumnDef,
-  flexRender,
-  getCoreRowModel,
-  getSortedRowModel,
-  OnChangeFn,
-  PaginationState,
-  SortingState,
-  useReactTable,
-} from "@tanstack/react-table";
+import { Box } from "@chakra-ui/react";
+import { useMemo } from "react";
+import DataTable, { IDataTableProps } from "react-data-table-component";
 
 export type PaginatedTableProps<T> = {
-  data: T[];
-  columns: ColumnDef<T, any>[];
-  pageCount: number;
-  pagination: PaginationState;
-  onPaginationChange: OnChangeFn<PaginationState>;
+  data: IDataTableProps<T>["data"];
+  columns: IDataTableProps<T>["columns"];
+  onSort: IDataTableProps<T>["onSort"];
+  additionalColumns?: AdditionalColumns<T>;
+  loading: boolean;
+  totalRows: number;
+  onChangePage: IDataTableProps<T>["onChangePage"];
+  onChangeRowsPerPage: IDataTableProps<T>["onChangeRowsPerPage"];
+  fixedHeight: IDataTableProps<T>["fixedHeaderScrollHeight"];
+  onSelectedRowsChange?: IDataTableProps<T>["onSelectedRowsChange"];
+};
 
-  sorting?: SortingState;
-  onSortingChange?: OnChangeFn<SortingState>;
+export type AdditionalColumns<T> = {
+  columns: IDataTableProps<T>["columns"];
+  // The dependencies of the columns. If any of these change, the columns will be re-created.
+  dependencies: any[];
 };
 
 export default function PaginatedTable<T>(props: PaginatedTableProps<T>) {
   const {
-    data,
     columns,
-    pageCount,
-    pagination,
-    onPaginationChange,
-    sorting,
-    onSortingChange,
+    data,
+    onSort,
+    additionalColumns,
+    loading,
+    totalRows,
+    onChangePage,
+    onChangeRowsPerPage,
+    fixedHeight,
+    onSelectedRowsChange,
   } = props;
 
-  const table = useReactTable({
-    data: data,
-    columns,
-    pageCount,
-    state: {
-      pagination,
-      sorting,
-    },
-    getCoreRowModel: getCoreRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-    onPaginationChange,
-    manualPagination: true,
-    enableSorting: true,
-    manualSorting: true,
-    onSortingChange,
-    debugTable: true,
-  });
+  const controlledColumns = useMemo<PaginatedTableProps<T>["columns"]>(() => {
+    const columnsToUse = [...columns];
+
+    if (additionalColumns) {
+      columnsToUse.push(...additionalColumns.columns);
+    }
+
+    return columnsToUse;
+  }, [...(additionalColumns ? additionalColumns.dependencies : [])]);
 
   return (
-    <VStack height="100%">
-      <Box overflow="auto" width="100%">
-        <Table>
-          <Thead>
-            {table.getHeaderGroups().map((headerGroup) => (
-              <Tr key={headerGroup.id}>
-                {headerGroup.headers.map((header) => {
-                  return (
-                    <Th key={header.id} colSpan={header.colSpan}>
-                      {header.isPlaceholder ? null : (
-                        <Box
-                          sx={{
-                            cursor: header.column.getCanSort()
-                              ? "pointer"
-                              : "default",
-                          }}
-                          onClick={() => {
-                            if (!header.column.getCanSort()) return;
-                            header.column.toggleSorting();
-                          }}
-                        >
-                          {flexRender(
-                            header.column.columnDef.header,
-                            header.getContext()
-                          )}
-                          {{
-                            asc: " 🔼",
-                            desc: " 🔽",
-                          }[header.column.getIsSorted() as string] ?? null}
-                        </Box>
-                      )}
-                    </Th>
-                  );
-                })}
-              </Tr>
-            ))}
-          </Thead>
-          <Tbody>
-            {table.getRowModel().rows.map((row) => {
-              return (
-                <Tr key={row.id}>
-                  {row.getVisibleCells().map((cell) => {
-                    return (
-                      <Td key={cell.id}>
-                        {flexRender(
-                          cell.column.columnDef.cell,
-                          cell.getContext()
-                        )}
-                      </Td>
-                    );
-                  })}
-                </Tr>
-              );
-            })}
-          </Tbody>
-        </Table>
-      </Box>
-
-      <Stack
-        direction="row"
-        spacing="1rem"
-        alignItems="center"
-        alignSelf="end"
-        padding="1rem"
-      >
-        <ButtonGroup>
-          <Button
-            onClick={() => table.setPageIndex(0)}
-            disabled={!table.getCanPreviousPage()}
-          >
-            {"<<"}
-          </Button>
-          <Button
-            onClick={() => table.previousPage()}
-            disabled={!table.getCanPreviousPage()}
-          >
-            {"<"}
-          </Button>
-          <Select
-            defaultValue={table.getState().pagination.pageIndex + 1}
-            value={table.getState().pagination.pageIndex + 1}
-            onChange={(e) => {
-              const page = e.target.value ? Number(e.target.value) - 1 : 0;
-              table.setPageIndex(page);
-            }}
-            sx={{
-              backgroundColor: "gray.200",
-              minWidth: "150px",
-            }}
-          >
-            {Array.from({ length: pageCount }).map((_, i) => (
-              <option key={i + 1} value={i + 1}>
-                Page{" "}
-                <strong>
-                  {i + 1} of {pageCount}
-                </strong>
-              </option>
-            ))}
-          </Select>
-          <Button
-            onClick={() => table.nextPage()}
-            disabled={!table.getCanNextPage()}
-          >
-            {">"}
-          </Button>
-          <Button
-            onClick={() => table.setPageIndex(table.getPageCount() - 1)}
-            disabled={!table.getCanNextPage()}
-          >
-            {">>"}
-          </Button>
-        </ButtonGroup>
-
-        <Select
-          value={table.getState().pagination.pageSize}
-          onChange={(e) => {
-            table.setPageSize(Number(e.target.value));
-          }}
-          sx={{
-            backgroundColor: "gray.200",
-          }}
-        >
-          {[10, 20, 30, 40, 50].map((pageSize) => (
-            <option key={pageSize} value={pageSize}>
-              Show {pageSize}
-            </option>
-          ))}
-        </Select>
-        <Text sx={{ minWidth: "64px" }}>
-          {table.getRowModel().rows.length} Rows
-        </Text>
-      </Stack>
-    </VStack>
+    <Box height="100%" width="100%" overflow="scroll">
+      <DataTable
+        columns={controlledColumns}
+        data={data}
+        sortServer
+        onSort={onSort}
+        pagination
+        paginationServer
+        paginationTotalRows={totalRows}
+        onChangePage={onChangePage}
+        onChangeRowsPerPage={onChangeRowsPerPage}
+        progressPending={loading}
+        fixedHeader
+        // Fixed table height; subtract 64px for the pagination bar
+        fixedHeaderScrollHeight={`calc(${fixedHeight} - 64px)`}
+        selectableRows
+        onSelectedRowsChange={onSelectedRowsChange}
+      />
+    </Box>
   );
 }

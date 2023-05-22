@@ -9,7 +9,7 @@ import { useWindowHeight } from "@react-hook/window-size";
 import { useMemo, useRef } from "react";
 
 export type ConstrainToRemainingSpaceProps = {
-  children: React.ReactNode;
+  children: (remainingHeight: string) => React.ReactNode;
   bottomOffset?: number;
   boxProps?: BoxProps;
 };
@@ -37,7 +37,7 @@ export default function ConstrainToRemainingSpace(
   return (
     <Box {...boxProps} height={wrapperHeight} overflow="hidden">
       <Box ref={childComponentRef} height="100%">
-        {children}
+        {children(`${wrapperHeight}px`)}
       </Box>
     </Box>
   );
