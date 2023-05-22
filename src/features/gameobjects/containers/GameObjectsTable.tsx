@@ -190,7 +190,7 @@ export default function GameObjectsTable(props: GameObjectsTableProps) {
         name: "Tags",
         cell: (row) => {
           const selected: TagOption[] =
-            row.tags?.map((tag: Tag) => ({
+            row.tags.map((tag: Tag) => ({
               label: tag.name || "Untitled Tag",
               value: tag.id,
             })) || [];

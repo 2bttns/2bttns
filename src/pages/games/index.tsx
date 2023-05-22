@@ -1,12 +1,14 @@
-import { SettingsIcon } from "@chakra-ui/icons";
-import { Heading, IconButton, Tooltip } from "@chakra-ui/react";
+import { ButtonGroup, Heading } from "@chakra-ui/react";
 import { GetServerSideProps, NextPage } from "next";
 import { Session } from "next-auth";
 import Head from "next/head";
 import DeleteGameButton from "../../features/games/containers/DeleteGameButton";
-import GamesTable from "../../features/games/containers/GamesTable";
+import GamesTable, {
+  GameData,
+} from "../../features/games/containers/GamesTable";
 import ManageGameButton from "../../features/games/containers/ManageGameButton";
 import PlayGameButton from "../../features/games/containers/PlayGameButton";
+import { AdditionalColumns } from "../../features/shared/components/Table/containers/PaginatedTable";
 import getSessionWithSignInRedirect from "../../utils/getSessionWithSignInRedirect";
 
 export type GamesPageProps = {
@@ -42,20 +44,33 @@ const GamesPage: NextPage<GamesPageProps> = (props) => {
         Manage Games
       </Heading>
 
-      <GamesTable
-        additionalActions={(gameData) => {
-          const { id } = gameData;
-          return (
-            <>
-              <PlayGameButton gameId={id} />
-              <ManageGameButton gameId={id} />
-              <DeleteGameButton gameId={id} />
-            </>
-          );
-        }}
-      />
+      <GamesTable additionalColumns={getAdditionalColumns()} />
     </>
   );
 };
+
+function getAdditionalColumns(): AdditionalColumns<GameData> {
+  return {
+    columns: [
+      {
+        id: "actions",
+        cell: (row) => {
+          const { id } = row;
+          return (
+            <ButtonGroup width="100%" justifyContent="end">
+              <PlayGameButton gameId={id} />
+              <ManageGameButton gameId={id} />
+              <DeleteGameButton gameId={id} />
+            </ButtonGroup>
+          );
+        },
+      },
+    ],
+
+    // Re-render the table the game objects table when these change
+    // Without this, relationship weights might not update correctly when navigating to another game object's page
+    dependencies: [],
+  };
+}
 
 export default GamesPage;

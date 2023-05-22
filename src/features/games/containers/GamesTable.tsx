@@ -1,60 +1,55 @@
-import { Box, ButtonGroup } from "@chakra-ui/react";
+import { Box, HStack } from "@chakra-ui/react";
 import { Tag } from "@prisma/client";
-import {
-  ColumnDef,
-  createColumnHelper,
-  PaginationState,
-  SortingState,
-} from "@tanstack/react-table";
 import { useMemo, useState } from "react";
 import { tagFilter } from "../../../server/shared/z";
 import { api, RouterInputs, RouterOutputs } from "../../../utils/api";
 import TagMultiSelect, {
   TagOption,
 } from "../../gameobjects/containers/TagMultiSelect";
-import ConstrainToRemainingSpace from "../../shared/components/ConstrainToRemainingSpace";
+import ConstrainToRemainingSpace, {
+  ConstrainToRemainingSpaceProps,
+} from "../../shared/components/ConstrainToRemainingSpace";
 import CustomEditable from "../../shared/components/CustomEditable";
-import PaginatedTable from "../../shared/components/Table/containers/PaginatedTable";
+import PaginatedTable, {
+  PaginatedTableProps,
+} from "../../shared/components/Table/containers/PaginatedTable";
 import SearchAndCreateBar from "../../shared/components/Table/containers/SearchAndCreateBar";
-import usePageCount from "../../shared/components/Table/hooks/usePageCount";
+import usePagination from "../../shared/components/Table/hooks/usePagination";
+import useSort from "../../shared/components/Table/hooks/useSort";
 
 export type GameData = RouterOutputs["games"]["getAll"]["games"][0];
-
-const columnHelper = createColumnHelper<GameData>();
 
 export type GamesTableProps = {
   tag?: typeof tagFilter._type;
   onGameCreated?: (gameId: string) => Promise<void>;
-  additionalActions?: (gameData: GameData) => React.ReactNode;
+  additionalColumns?: PaginatedTableProps<GameData>["additionalColumns"];
+  additionalTopBarContent?: React.ReactNode;
+  editable?: boolean;
+  constrainToRemainingSpaceProps?: Partial<ConstrainToRemainingSpaceProps>;
 };
 
 export default function GamesTable(props: GamesTableProps) {
-  const { tag, onGameCreated, additionalActions } = props;
+  const {
+    tag,
+    onGameCreated,
+    additionalColumns,
+    additionalTopBarContent,
+    editable = true,
+    constrainToRemainingSpaceProps,
+  } = props;
+
+  const { perPage, currentPage, handlePageChange, handlePerRowsChange } =
+    usePagination();
+  const { getSort, handleSort } = useSort<GameData>();
 
   const utils = api.useContext();
-
-  const [pagination, setPagination] = useState<PaginationState>({
-    pageIndex: 0,
-    pageSize: 10,
-  });
-  const { pageIndex, pageSize } = pagination;
-
   const [globalFilter, setGlobalFilter] = useState("");
-  const [sorting, setSorting] = useState<SortingState>([]);
-  const getSort = (id: keyof GameData) => {
-    const result = sorting.find((s) => s.id === id);
-    if (result === undefined) {
-      return undefined;
-    }
-
-    return result.desc ? "desc" : "asc";
-  };
 
   const gamesQuery = api.games.getAll.useQuery(
     {
       includeTags: true,
-      skip: pageIndex * pageSize,
-      take: pageSize,
+      skip: (currentPage! - 1) * perPage,
+      take: perPage,
       filter: globalFilter
         ? {
             mode: "OR",
@@ -74,12 +69,14 @@ export default function GamesTable(props: GamesTableProps) {
       },
     },
     {
+      enabled: currentPage !== null,
       keepPreviousData: true,
       refetchOnWindowFocus: false,
     }
   );
+  const data: GameData[] = gamesQuery.data?.games ?? [];
 
-  const gameCountQuery = api.games.getCount.useQuery(
+  const gamesCountQuery = api.games.getCount.useQuery(
     {
       filter: globalFilter
         ? {
@@ -98,14 +95,7 @@ export default function GamesTable(props: GamesTableProps) {
     }
   );
 
-  const { pageCount } = usePageCount({
-    pagination,
-    setPagination,
-    itemCount: gameCountQuery.data?.count ?? 0,
-  });
-
   const updateGameMutation = api.games.updateById.useMutation();
-
   const handleUpdateGame = async (
     id: string,
     data: RouterInputs["games"]["updateById"]["data"]
@@ -134,56 +124,68 @@ export default function GamesTable(props: GamesTableProps) {
     }
   };
 
-  const columns = useMemo<ColumnDef<GameData, any>[]>(() => {
-    const items: ColumnDef<GameData, any>[] = [
-      columnHelper.accessor("id", {
-        cell: (info) => (
+  const columns = useMemo<PaginatedTableProps<GameData>["columns"]>(() => {
+    return [
+      {
+        name: "ID",
+        cell: (row) => (
           <CustomEditable
-            value={info.getValue()}
+            value={row.id}
             placeholder="No ID"
             handleSave={async (nextValue) =>
-              handleUpdateGame(info.row.original.id, {
+              handleUpdateGame(row.id, {
                 id: nextValue,
               })
             }
+            isEditable={editable}
           />
         ),
-        enableSorting: true,
-      }),
-      columnHelper.accessor("name", {
-        cell: (info) => (
+        sortable: true,
+        sortField: "id",
+        minWidth: "256px",
+      },
+      {
+        name: "Name",
+        cell: (row) => (
           <CustomEditable
-            value={info.getValue()}
+            value={row.name}
             placeholder="No name"
             handleSave={async (nextValue) =>
-              handleUpdateGame(info.row.original.id, {
+              handleUpdateGame(row.id, {
                 name: nextValue,
               })
             }
+            isEditable={editable}
           />
         ),
-        enableSorting: true,
-      }),
-      columnHelper.accessor("description", {
-        cell: (info) => (
+        sortable: true,
+        sortField: "name",
+        minWidth: "256px",
+      },
+      {
+        name: "Description",
+        cell: (row) => (
           <CustomEditable
-            value={info.getValue() ?? ""}
+            value={row.description ?? undefined}
             placeholder="No description"
             handleSave={async (nextValue) =>
-              handleUpdateGame(info.row.original.id, {
+              handleUpdateGame(row.id, {
                 description: nextValue,
               })
             }
+            isEditable={editable}
+            isTextarea
           />
         ),
-        enableSorting: true,
-      }),
-      columnHelper.accessor("inputTags", {
-        header: "Input Tags",
-        cell: (info) => {
-          const tags = (info.getValue() as Tag[]) || undefined;
+        sortable: true,
+        sortField: "description",
+        minWidth: "512px",
+      },
+      {
+        name: "Input Tags",
+        cell: (row) => {
           const selected: TagOption[] =
-            tags?.map((tag: Tag) => ({
+            row.inputTags.map((tag: Tag) => ({
               label: tag.name || "Untitled Tag",
               value: tag.id,
             })) || [];
@@ -193,57 +195,67 @@ export default function GamesTable(props: GamesTableProps) {
               <TagMultiSelect
                 selected={selected}
                 onChange={(nextTags) => {
-                  handleUpdateGame(info.row.original.id, {
+                  handleUpdateGame(row.id, {
                     inputTags: nextTags,
                   });
                 }}
+                isEditable={editable}
               />
             </Box>
           );
         },
-        enableSorting: true,
-      }),
-      columnHelper.accessor("updatedAt", {
-        header: "Last Updated",
-        cell: (info) => info.row.original.updatedAt.toLocaleString(),
-        enableSorting: true,
-      }),
+        sortable: true,
+        sortField: "tags",
+        minWidth: "256px",
+      },
+      {
+        name: "Mode",
+        cell: (row) => row.mode ?? "",
+        minWidth: "128px",
+      },
+      {
+        name: "Last Updated",
+        cell: (row) => row.updatedAt.toLocaleString(),
+        sortable: true,
+        sortField: "updatedAt",
+        minWidth: "256px",
+      },
     ];
+  }, [editable]);
 
-    if (additionalActions) {
-      items.push({
-        id: "actions",
-        header: "",
-        cell: (info) => {
-          return (
-            <ButtonGroup width="100%" justifyContent="end">
-              {additionalActions(info.row.original)}
-            </ButtonGroup>
-          );
-        },
-      });
-    }
-
-    return items;
-  }, []);
+  const [selectedRows, setSelectedRows] = useState<GameData[]>([]);
+  const handleSelectedRowsChange: PaginatedTableProps<GameData>["onSelectedRowsChange"] =
+    (selected) => {
+      setSelectedRows(selected.selectedRows);
+    };
 
   return (
-    <Box height="100%">
-      <SearchAndCreateBar
-        value={globalFilter}
-        onChange={setGlobalFilter}
-        onCreate={handleCreateGame}
-      />
-      <ConstrainToRemainingSpace>
-        <PaginatedTable
-          columns={columns}
-          data={gamesQuery.data?.games ?? []}
-          onPaginationChange={setPagination}
-          pagination={pagination}
-          pageCount={pageCount}
-          sorting={sorting}
-          onSortingChange={setSorting}
+    <Box>
+      <HStack width="100%">
+        <SearchAndCreateBar
+          value={globalFilter}
+          onChange={setGlobalFilter}
+          onCreate={handleCreateGame}
         />
+        {additionalTopBarContent}
+      </HStack>
+      <ConstrainToRemainingSpace {...constrainToRemainingSpaceProps}>
+        {(remainingHeight) => {
+          return (
+            <PaginatedTable<GameData>
+              columns={columns}
+              data={data}
+              onSort={handleSort}
+              additionalColumns={additionalColumns}
+              loading={gamesQuery.isLoading}
+              totalRows={gamesCountQuery.data?.count ?? 0}
+              onChangePage={handlePageChange}
+              onChangeRowsPerPage={handlePerRowsChange}
+              fixedHeight={remainingHeight}
+              onSelectedRowsChange={handleSelectedRowsChange}
+            />
+          );
+        }}
       </ConstrainToRemainingSpace>
     </Box>
   );
