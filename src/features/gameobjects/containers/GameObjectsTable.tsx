@@ -12,6 +12,7 @@ import PaginatedTable, {
 } from "../../shared/components/Table/containers/PaginatedTable";
 import SearchAndCreateBar from "../../shared/components/Table/containers/SearchAndCreateBar";
 import usePagination from "../../shared/components/Table/hooks/usePagination";
+import useSort from "../../shared/components/Table/hooks/useSort";
 import TagMultiSelect, { TagOption } from "./TagMultiSelect";
 
 export type GameObjectData =
@@ -40,29 +41,10 @@ export default function GameObjectsTable(props: GameObjectsTableProps) {
 
   const { perPage, currentPage, handlePageChange, handlePerRowsChange } =
     usePagination();
+  const { getSort, handleSort } = useSort<GameObjectData>();
 
   const utils = api.useContext();
   const [globalFilter, setGlobalFilter] = useState("");
-
-  const [sorting, setSorting] = useState<{
-    column: keyof GameObjectData;
-    order: "asc" | "desc";
-  } | null>(null);
-  const handleSort: PaginatedTableProps<GameObjectData>["onSort"] = (
-    column,
-    sortDirection
-  ) => {
-    setSorting({
-      column: column.sortField as keyof GameObjectData,
-      order: sortDirection,
-    });
-  };
-
-  const getSort = (column: keyof GameObjectData) => {
-    if (!sorting) return undefined;
-    if (sorting.column !== column) return undefined;
-    return sorting.order;
-  };
 
   const gameObjectsQuery = api.gameObjects.getAll.useQuery(
     {
