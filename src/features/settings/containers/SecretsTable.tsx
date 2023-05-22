@@ -1,6 +1,5 @@
 import { Box, Button, HStack } from "@chakra-ui/react";
 import { useMemo, useState } from "react";
-import { tagFilter } from "../../../server/shared/z";
 import { api, RouterInputs, RouterOutputs } from "../../../utils/api";
 import ConstrainToRemainingSpace, {
   ConstrainToRemainingSpaceProps,
@@ -16,7 +15,6 @@ import useSort from "../../shared/components/Table/hooks/useSort";
 export type SecretData = RouterOutputs["secrets"]["getAll"]["secrets"][0];
 
 export type SecretsTableProps = {
-  tag?: typeof tagFilter._type;
   onSecretCreated?: (secret: SecretData) => Promise<void>;
   additionalColumns?: PaginatedTableProps<SecretData>["additionalColumns"];
   additionalTopBarContent?: React.ReactNode;
@@ -35,7 +33,7 @@ export default function SecretsTable(props: SecretsTableProps) {
 
   const { perPage, currentPage, handlePageChange, handlePerRowsChange } =
     usePagination();
-  const { getSort, handleSort } = useSort<SecretData>();
+  const { getSortOrder: getSort, handleSort } = useSort<SecretData>();
 
   const utils = api.useContext();
   const [globalFilter, setGlobalFilter] = useState("");

@@ -33,7 +33,7 @@ export default function useSort<T extends Object = any>() {
    * @param sortField sort field to check
    * @returns Sort order of the given column, or `undefined` if the column is not the current sorting column
    */
-  const getSort = (sortField: keyof T) => {
+  const getSortOrder = (sortField: keyof T) => {
     if (!sorting) return undefined;
     if (sorting.sortField !== sortField) return undefined;
     return sorting.order;
@@ -41,6 +41,7 @@ export default function useSort<T extends Object = any>() {
 
   return {
     handleSort,
-    getSort,
+    sorting,
+    getSortOrder,
   };
 }

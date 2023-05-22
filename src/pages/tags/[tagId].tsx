@@ -15,11 +15,12 @@ import { useMemo, useState } from "react";
 import CsvExport from "../../features/csv/CsvExport";
 import CsvImport from "../../features/csv/CsvImport";
 import GameObjectsTable, {
-  AdditionalColumns,
+  GameObjectData,
   GameObjectsTableProps,
 } from "../../features/gameobjects/containers/GameObjectsTable";
 import ManageGameObjectButton from "../../features/gameobjects/containers/ManageGameObjectButton";
 import CustomEditable from "../../features/shared/components/CustomEditable";
+import { AdditionalColumns } from "../../features/shared/components/Table/containers/PaginatedTable";
 import TagFilterToggles, {
   TagFilter,
 } from "../../features/tags/containers/TagFilterToggles";
@@ -260,14 +261,13 @@ const TagByIdPage: NextPage<TagByIdPageProps> = (props) => {
   );
 };
 
-function getAdditionalColumns(tagId: Tag["id"]): AdditionalColumns {
+function getAdditionalColumns(
+  tagId: Tag["id"]
+): AdditionalColumns<GameObjectData> {
   return {
     columns: [
       {
-        id: "actions",
-        header: "",
-        cell: (info) => {
-          const { id } = info.row.original;
+        cell: ({ id }) => {
           return (
             <ButtonGroup width="100%" justifyContent="end">
               <ToggleTagButton gameObjectId={id} tagId={tagId} />

@@ -15,7 +15,75 @@ describe("tags router", () => {
     await clearDbsTest(prisma);
   });
 
+  describe("tags.create", () => {
+    test("create tag using name only", async () => {
+      const ctx = createInnerTRPCContextWithSessionForTest();
+      const caller = appRouter.createCaller(ctx);
+
+      const tagName = "test-tag-name";
+      await caller.tags.create({
+        name: tagName,
+      });
+      const result = await prisma.tag.findFirst({
+        where: {
+          name: tagName,
+        },
+      });
+      expect(result).not.toBeNull();
+      expect(result?.name).toEqual(tagName);
+      expect(result?.description).toBeNull();
+      expect(result?.id).not.toBeNull();
+    });
+
+    test("throw error upon duplicate tag id", async () => {
+      const ctx = createInnerTRPCContextWithSessionForTest();
+      const caller = appRouter.createCaller(ctx);
+
+      const input = {
+        id: "test-tag-id",
+        name: "test-tag-name",
+      };
+      await caller.tags.create(input);
+      await expect(() => caller.tags.create(input)).rejects.toThrowError();
+    });
+  });
+
+  describe("tags.getCount", () => {
+    test("get count", async () => {
+      const ctx = createInnerTRPCContextWithSessionForTest();
+      const caller = appRouter.createCaller(ctx);
+
+      const totalNumberOfTags = 101;
+      await createTags(totalNumberOfTags);
+
+      const result = await caller.tags.getCount({});
+      expect(result.count).toEqual(totalNumberOfTags);
+    });
+
+    test("get filtered count", async () => {
+      const ctx = createInnerTRPCContextWithSessionForTest();
+      const caller = appRouter.createCaller(ctx);
+
+      const totalNumberOfTags = 101;
+      await createTags(totalNumberOfTags);
+
+      const result = await caller.tags.getCount({ idFilter: "test-tag-id-0" });
+      expect(result.count).toEqual(1);
+    });
+  });
+
   describe("tags.getAll", () => {
+    test("take 10 by default", async () => {
+      const ctx = createInnerTRPCContextWithSessionForTest();
+      const caller = appRouter.createCaller(ctx);
+
+      const totalNumberOfTags = 101;
+      await createTags(totalNumberOfTags);
+
+      const result = await caller.tags.getAll({});
+      expect(result.tags).length(10);
+    });
+
     test("get all", async () => {
       const ctx = createInnerTRPCContextWithSessionForTest();
       const caller = appRouter.createCaller(ctx);
@@ -23,8 +91,8 @@ describe("tags router", () => {
       const numberOfTags = 101;
       await createTags(numberOfTags);
 
-      const result = await caller.tags.getAll();
-      expect(result.tags).length(numberOfTags);
+      const result = await caller.tags.getAll({ take: numberOfTags });
+      expect(result.tags).length(101);
       for (const tag of result.tags) {
         expect(tag.id).toBeDefined();
         expect(new Date(tag.createdAt)).toBeInstanceOf(Date);
@@ -32,28 +100,42 @@ describe("tags router", () => {
       }
     });
 
-    test("filter by comma-separated list of tags", async () => {
+    test("filter by tags by ID", async () => {
       const ctx = createInnerTRPCContextWithSessionForTest();
       const caller = appRouter.createCaller(ctx);
 
       const totalNumberOfTags = 101;
       await createTags(totalNumberOfTags);
 
-      const createdTags = await prisma.tag.findMany({ select: { id: true } });
-      const numTagsToFilterBy = 10;
-      const tagIdsToFilterBy = createdTags
-        .map((tag) => tag.id)
-        .slice(0, numTagsToFilterBy);
-      const commaSeparatedRandomTagIds = tagIdsToFilterBy.join(",");
-
       const result = await caller.tags.getAll({
-        id: commaSeparatedRandomTagIds,
+        idFilter: "test-tag-id-0",
       });
-      expect(result.tags).length(numTagsToFilterBy);
+      expect(result.tags).length(1);
       for (const tag of result.tags) {
         expect(tag.id).toBeDefined();
         expect(new Date(tag.createdAt)).toBeInstanceOf(Date);
         expect(new Date(tag.updatedAt)).toBeInstanceOf(Date);
+      }
+    });
+
+    test("able to sort by ID", async () => {
+      const ctx = createInnerTRPCContextWithSessionForTest();
+      const caller = appRouter.createCaller(ctx);
+
+      const totalNumberOfTags = 101;
+      await createTags(totalNumberOfTags);
+
+      const result = await caller.tags.getAll({
+        sortField: "id",
+        sortOrder: "asc",
+      });
+
+      const expectedSortedResult = [...result.tags].sort((a, b) =>
+        a.id.localeCompare(b.id)
+      );
+
+      for (let i = 0; i < result.tags.length; i++) {
+        expect(result.tags[i]!.id).toEqual(expectedSortedResult[i]!.id);
       }
     });
   });

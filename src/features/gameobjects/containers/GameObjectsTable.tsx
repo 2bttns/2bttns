@@ -41,7 +41,7 @@ export default function GameObjectsTable(props: GameObjectsTableProps) {
 
   const { perPage, currentPage, handlePageChange, handlePerRowsChange } =
     usePagination();
-  const { getSort, handleSort } = useSort<GameObjectData>();
+  const { getSortOrder: getSort, handleSort } = useSort<GameObjectData>();
 
   const utils = api.useContext();
   const [globalFilter, setGlobalFilter] = useState("");
