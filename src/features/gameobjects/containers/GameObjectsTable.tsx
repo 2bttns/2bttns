@@ -11,6 +11,7 @@ import PaginatedTable, {
   PaginatedTableProps,
 } from "../../shared/components/Table/containers/PaginatedTable";
 import SearchAndCreateBar from "../../shared/components/Table/containers/SearchAndCreateBar";
+import usePagination from "../../shared/components/Table/hooks/usePagination";
 import TagMultiSelect, { TagOption } from "./TagMultiSelect";
 
 export type GameObjectData =
@@ -37,17 +38,8 @@ export default function GameObjectsTable(props: GameObjectsTableProps) {
     constrainToRemainingSpaceProps,
   } = props;
 
-  const [perPage, setPerPage] = useState(10);
-  const [currentPage, setCurrentPage] = useState<number | null>(null);
-  const handlePageChange: PaginatedTableProps<GameObjectData>["onChangePage"] =
-    (page) => {
-      setCurrentPage(page);
-    };
-  const handlePerRowsChange: PaginatedTableProps<GameObjectData>["onChangeRowsPerPage"] =
-    async (newPerPage, page) => {
-      setCurrentPage(page);
-      setPerPage(newPerPage);
-    };
+  const { perPage, currentPage, handlePageChange, handlePerRowsChange } =
+    usePagination();
 
   const utils = api.useContext();
   const [globalFilter, setGlobalFilter] = useState("");
