@@ -117,9 +117,9 @@ function getAdditionalColumns(
             />
           );
         },
+        minWidth: "500px",
       },
       {
-        name: "Actions",
         cell: ({ id }) => {
           return (
             <ButtonGroup width="100%" justifyContent="end">
