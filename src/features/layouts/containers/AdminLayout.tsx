@@ -19,7 +19,9 @@ export default function AdminLayout(props: AdminLayoutProps) {
       <Box position="sticky" top="0" zIndex="99">
         <AdminNavbar />
       </Box>
-      <Box width="100vw">{children}</Box>
+      <Box width="100%" height="100%">
+        {children}
+      </Box>
     </Box>
   );
 }
