@@ -77,8 +77,6 @@ export default function ClassicModeView<I extends Item>(
               >
                 {isFinished ? "Round over!" : "Which is more fun?"}
               </Text>
-              <>{state}</>
-
               {!isFinished && (
                 <>
                   {button1}
