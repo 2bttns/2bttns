@@ -73,13 +73,13 @@ const GameObjectById: NextPage<GameObjectByIdPageProps> = (props) => {
 
   return (
     <>
-      <Box width="100%">
+      <Box width="100%" height="100%" padding="1rem">
         <Box>
           <GameObjectDetails gameObjectId={gameObjectId} />
           <Divider />
         </Box>
 
-        <Box marginY="1rem">
+        <Box marginY="4px">
           <TagFilterToggles
             filter={tagFilter.state.tagFilter}
             setFilter={tagFilter.state.setTagFilter}
@@ -96,6 +96,9 @@ const GameObjectById: NextPage<GameObjectByIdPageProps> = (props) => {
             includeUntagged: tagFilter.results.includeUntagged,
           }}
           additionalColumns={getAdditionalColumns(gameObjectId)}
+          constrainToRemainingSpaceProps={{
+            bottomOffset: 120,
+          }}
         />
       </Box>
     </>

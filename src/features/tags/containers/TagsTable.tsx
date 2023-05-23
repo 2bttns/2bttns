@@ -1,4 +1,4 @@
-import { Box, HStack } from "@chakra-ui/react";
+import { Box, HStack, StackProps } from "@chakra-ui/react";
 import { useMemo, useState } from "react";
 import { api, RouterInputs, RouterOutputs } from "../../../utils/api";
 import ConstrainToRemainingSpace, {
@@ -20,6 +20,7 @@ export type TagsTableProps = {
   additionalTopBarContent?: (selectedRows: TagData[]) => React.ReactNode;
   editable?: boolean;
   constrainToRemainingSpaceProps?: Partial<ConstrainToRemainingSpaceProps>;
+  topBarProps?: Partial<StackProps>;
 };
 
 export default function TagsTable(props: TagsTableProps) {
@@ -29,6 +30,7 @@ export default function TagsTable(props: TagsTableProps) {
     additionalTopBarContent,
     editable = true,
     constrainToRemainingSpaceProps,
+    topBarProps,
   } = props;
 
   const { perPage, currentPage, handlePageChange, handlePerRowsChange } =
@@ -169,7 +171,7 @@ export default function TagsTable(props: TagsTableProps) {
 
   return (
     <Box>
-      <HStack width="100%">
+      <HStack spacing="4px" marginBottom="4px" width="100%" {...topBarProps}>
         <SearchAndCreateBar
           value={globalFilter}
           onChange={setGlobalFilter}

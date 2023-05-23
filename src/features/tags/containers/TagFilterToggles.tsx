@@ -40,7 +40,7 @@ export default function TagFilterToggles(props: TagFilterTogglesProps) {
 
   return (
     <>
-      <ButtonGroup size="sm">
+      <ButtonGroup size="sm" spacing="4px">
         {allAndNoneToggles && (
           <>
             <Button

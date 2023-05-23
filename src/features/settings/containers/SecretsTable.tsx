@@ -1,4 +1,4 @@
-import { Box, Button, HStack } from "@chakra-ui/react";
+import { Box, HStack, StackProps } from "@chakra-ui/react";
 import { useMemo, useState } from "react";
 import { api, RouterInputs, RouterOutputs } from "../../../utils/api";
 import ConstrainToRemainingSpace, {
@@ -20,6 +20,7 @@ export type SecretsTableProps = {
   additionalTopBarContent?: (selectedRows: SecretData[]) => React.ReactNode;
   editable?: boolean;
   constrainToRemainingSpaceProps?: Partial<ConstrainToRemainingSpaceProps>;
+  topBarProps?: Partial<StackProps>;
 };
 
 export default function SecretsTable(props: SecretsTableProps) {
@@ -29,6 +30,7 @@ export default function SecretsTable(props: SecretsTableProps) {
     additionalTopBarContent,
     editable = true,
     constrainToRemainingSpaceProps,
+    topBarProps,
   } = props;
 
   const { perPage, currentPage, handlePageChange, handlePerRowsChange } =
@@ -189,9 +191,12 @@ export default function SecretsTable(props: SecretsTableProps) {
 
   return (
     <Box>
-      <HStack width="100%">
-        <SearchAndCreateBar value={globalFilter} onChange={setGlobalFilter} />
-        <Button onClick={handleCreateSecret}>Create New Secret</Button>
+      <HStack spacing="4px" marginBottom="4px" width="100%" {...topBarProps}>
+        <SearchAndCreateBar
+          value={globalFilter}
+          onChange={setGlobalFilter}
+          onCreate={handleCreateSecret}
+        />
         {additionalTopBarContent && additionalTopBarContent(selectedRows)}
       </HStack>
       <ConstrainToRemainingSpace {...constrainToRemainingSpaceProps}>

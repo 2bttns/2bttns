@@ -2,7 +2,6 @@ import { DeleteIcon, RepeatIcon } from "@chakra-ui/icons";
 import {
   Box,
   ButtonGroup,
-  Heading,
   IconButton,
   Tab,
   TabList,
@@ -48,33 +47,30 @@ const SettingsPage: NextPage<SettingsPageProps> = (props) => {
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <>
-        <Heading size="2xl">Settings</Heading>
-        <Box>
-          <Tabs>
-            <TabList>
-              <Tab>Secrets</Tab>
-              <Tab>Foo</Tab>
-            </TabList>
+      <Box padding="1rem">
+        <Tabs>
+          <TabList>
+            <Tab>Secrets</Tab>
+            <Tab>Foo</Tab>
+          </TabList>
 
-            <TabPanels>
-              <TabPanel>
-                <SecretsTable
-                  additionalColumns={{
-                    columns: [
-                      { cell: (row) => <CellActions secretId={row.id} /> },
-                    ],
-                    dependencies: [],
-                  }}
-                />
-              </TabPanel>
-              <TabPanel>
-                <h2>Foo</h2>
-              </TabPanel>
-            </TabPanels>
-          </Tabs>
-        </Box>
-      </>
+          <TabPanels>
+            <TabPanel>
+              <SecretsTable
+                additionalColumns={{
+                  columns: [
+                    { cell: (row) => <CellActions secretId={row.id} /> },
+                  ],
+                  dependencies: [],
+                }}
+              />
+            </TabPanel>
+            <TabPanel>
+              <h2>Foo</h2>
+            </TabPanel>
+          </TabPanels>
+        </Tabs>
+      </Box>
     </>
   );
 };

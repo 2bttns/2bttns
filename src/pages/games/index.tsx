@@ -1,4 +1,4 @@
-import { ButtonGroup, Heading } from "@chakra-ui/react";
+import { Box, ButtonGroup } from "@chakra-ui/react";
 import { GetServerSideProps, NextPage } from "next";
 import { Session } from "next-auth";
 import Head from "next/head";
@@ -40,11 +40,9 @@ const GamesPage: NextPage<GamesPageProps> = (props) => {
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <Heading as="h1" size="2xl">
-        Manage Games
-      </Heading>
-
-      <GamesTable additionalColumns={getAdditionalColumns()} />
+      <Box padding="1rem">
+        <GamesTable additionalColumns={getAdditionalColumns()} />
+      </Box>
     </>
   );
 };

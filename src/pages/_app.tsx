@@ -9,6 +9,7 @@ import { ChakraProvider } from "@chakra-ui/react";
 import type { NextPage } from "next";
 import type { ReactElement, ReactNode } from "react";
 import AdminLayout from "../features/layouts/containers/AdminLayout";
+import theme from "../style/theme";
 
 export type NextPageWithLayout<P = {}, IP = P> = NextPage<P, IP> & {
   getLayout?: (page: ReactElement) => ReactNode;
@@ -27,7 +28,9 @@ const MyApp = ({
 
   return (
     <SessionProvider session={session}>
-      <ChakraProvider>{getLayout(<Component {...pageProps} />)}</ChakraProvider>
+      <ChakraProvider theme={theme}>
+        {getLayout(<Component {...pageProps} />)}
+      </ChakraProvider>
     </SessionProvider>
   );
 };

@@ -53,7 +53,7 @@ const GameObjects: NextPageWithLayout<GameObjectsPageProps> = (props) => {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <Box overflow="hidden" padding="1rem">
-        <Box marginY="1rem">
+        <Box marginY="4px">
           <TagFilterToggles
             filter={tagFilter.state.tagFilter}
             setFilter={tagFilter.state.setTagFilter}

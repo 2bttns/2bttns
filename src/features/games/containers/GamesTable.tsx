@@ -1,4 +1,4 @@
-import { Box, HStack } from "@chakra-ui/react";
+import { Box, HStack, StackProps } from "@chakra-ui/react";
 import { Tag } from "@prisma/client";
 import { useMemo, useState } from "react";
 import { tagFilter } from "../../../server/shared/z";
@@ -26,6 +26,7 @@ export type GamesTableProps = {
   additionalTopBarContent?: (selectedRows: GameData[]) => React.ReactNode;
   editable?: boolean;
   constrainToRemainingSpaceProps?: Partial<ConstrainToRemainingSpaceProps>;
+  topBarProps?: Partial<StackProps>;
 };
 
 export default function GamesTable(props: GamesTableProps) {
@@ -36,6 +37,7 @@ export default function GamesTable(props: GamesTableProps) {
     additionalTopBarContent,
     editable = true,
     constrainToRemainingSpaceProps,
+    topBarProps,
   } = props;
 
   const { perPage, currentPage, handlePageChange, handlePerRowsChange } =
@@ -231,7 +233,7 @@ export default function GamesTable(props: GamesTableProps) {
 
   return (
     <Box>
-      <HStack width="100%">
+      <HStack spacing="4px" marginBottom="4px" width="100%" {...topBarProps}>
         <SearchAndCreateBar
           value={globalFilter}
           onChange={setGlobalFilter}

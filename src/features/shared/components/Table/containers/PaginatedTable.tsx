@@ -74,7 +74,30 @@ export default function PaginatedTable<T>(props: PaginatedTableProps<T>) {
         onSelectedRowsChange={onSelectedRowsChange}
         paginationRowsPerPageOptions={[5, 10, 25, 50, 100]}
         customStyles={{
-          cells: { style: { alignItems: "center", padding: "1rem" } },
+          cells: {
+            style: {
+              alignItems: "center",
+              padding: "1rem",
+              borderLeftWidth: ".5px",
+              borderRightWidth: ".5px",
+              borderColor: "rgba(200, 200, 200, .25)",
+            },
+          },
+          headCells: {
+            style: {
+              borderColor: "rgba(200, 200, 200, .25)",
+              borderLeftWidth: ".5px",
+              borderRightWidth: ".5px",
+            },
+          },
+          pagination: {
+            pageButtonsStyle: {
+              borderRadius: "0",
+            },
+            style: {
+              borderRadius: "0",
+            },
+          },
         }}
         striped
         progressPending={progressPending}

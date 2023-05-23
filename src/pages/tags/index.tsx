@@ -1,11 +1,5 @@
 import { DeleteIcon, SettingsIcon } from "@chakra-ui/icons";
-import {
-  Box,
-  ButtonGroup,
-  Heading,
-  IconButton,
-  Tooltip,
-} from "@chakra-ui/react";
+import { Box, ButtonGroup, IconButton, Tooltip } from "@chakra-ui/react";
 import { Tag } from "@prisma/client";
 import { GetServerSideProps, NextPage } from "next";
 import { Session } from "next-auth";
@@ -44,17 +38,14 @@ const TagsPage: NextPage<TagsPageProps> = (props) => {
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <>
-        <Heading size="2xl">Tags</Heading>
-        <Box>
-          <TagsTable
-            additionalColumns={{
-              columns: [{ cell: (row) => <CellActions tagId={row.id} /> }],
-              dependencies: [],
-            }}
-          />
-        </Box>
-      </>
+      <Box padding="1rem">
+        <TagsTable
+          additionalColumns={{
+            columns: [{ cell: (row) => <CellActions tagId={row.id} /> }],
+            dependencies: [],
+          }}
+        />
+      </Box>
     </>
   );
 };
