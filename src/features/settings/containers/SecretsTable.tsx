@@ -17,7 +17,7 @@ export type SecretData = RouterOutputs["secrets"]["getAll"]["secrets"][0];
 export type SecretsTableProps = {
   onSecretCreated?: (secret: SecretData) => Promise<void>;
   additionalColumns?: PaginatedTableProps<SecretData>["additionalColumns"];
-  additionalTopBarContent?: React.ReactNode;
+  additionalTopBarContent?: (selectedRows: SecretData[]) => React.ReactNode;
   editable?: boolean;
   constrainToRemainingSpaceProps?: Partial<ConstrainToRemainingSpaceProps>;
 };
@@ -192,7 +192,7 @@ export default function SecretsTable(props: SecretsTableProps) {
       <HStack width="100%">
         <SearchAndCreateBar value={globalFilter} onChange={setGlobalFilter} />
         <Button onClick={handleCreateSecret}>Create New Secret</Button>
-        {additionalTopBarContent}
+        {additionalTopBarContent && additionalTopBarContent(selectedRows)}
       </HStack>
       <ConstrainToRemainingSpace {...constrainToRemainingSpaceProps}>
         {(remainingHeight) => {

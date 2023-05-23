@@ -17,7 +17,7 @@ export type TagData = RouterOutputs["tags"]["getAll"]["tags"][0];
 export type TagsTableProps = {
   onTagCreated?: (tag: TagData) => Promise<void>;
   additionalColumns?: PaginatedTableProps<TagData>["additionalColumns"];
-  additionalTopBarContent?: React.ReactNode;
+  additionalTopBarContent?: (selectedRows: TagData[]) => React.ReactNode;
   editable?: boolean;
   constrainToRemainingSpaceProps?: Partial<ConstrainToRemainingSpaceProps>;
 };
@@ -175,7 +175,7 @@ export default function TagsTable(props: TagsTableProps) {
           onChange={setGlobalFilter}
           onCreate={handleCreateTag}
         />
-        {additionalTopBarContent}
+        {additionalTopBarContent && additionalTopBarContent(selectedRows)}
       </HStack>
       <ConstrainToRemainingSpace {...constrainToRemainingSpaceProps}>
         {(remainingHeight) => {

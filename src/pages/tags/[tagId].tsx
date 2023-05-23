@@ -246,12 +246,12 @@ const TagByIdPage: NextPage<TagByIdPageProps> = (props) => {
             includeUntagged,
           }}
           onGameObjectCreated={handleGameObjectCreated}
-          additionalTopBarContent={
+          additionalTopBarContent={() => (
             <>
               <CsvImport parentTags={[tagId]} />
               <CsvExport tagsToExportBy={[tagId]} />
             </>
-          }
+          )}
           additionalColumns={getAdditionalColumns(tagId)}
           constrainToRemainingSpaceProps={{
             bottomOffset: 150,

@@ -23,7 +23,7 @@ export type GamesTableProps = {
   tag?: typeof tagFilter._type;
   onGameCreated?: (gameId: string) => Promise<void>;
   additionalColumns?: PaginatedTableProps<GameData>["additionalColumns"];
-  additionalTopBarContent?: React.ReactNode;
+  additionalTopBarContent?: (selectedRows: GameData[]) => React.ReactNode;
   editable?: boolean;
   constrainToRemainingSpaceProps?: Partial<ConstrainToRemainingSpaceProps>;
 };
@@ -237,7 +237,7 @@ export default function GamesTable(props: GamesTableProps) {
           onChange={setGlobalFilter}
           onCreate={handleCreateGame}
         />
-        {additionalTopBarContent}
+        {additionalTopBarContent && additionalTopBarContent(selectedRows)}
       </HStack>
       <ConstrainToRemainingSpace {...constrainToRemainingSpaceProps}>
         {(remainingHeight) => {

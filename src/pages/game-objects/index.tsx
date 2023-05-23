@@ -59,7 +59,7 @@ const GameObjects: NextPageWithLayout<GameObjectsPageProps> = (props) => {
             exclude: tagFilter.results.excludeTags,
             includeUntagged: tagFilter.results.includeUntagged,
           }}
-          additionalTopBarContent={<CsvImport />}
+          additionalTopBarContent={() => <CsvImport />}
           additionalColumns={getAdditionalColumns()}
         />
       </Box>
