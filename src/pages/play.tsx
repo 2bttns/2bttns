@@ -222,7 +222,7 @@ function Layout(props: LayoutProps) {
   return (
     <UserLayout
       navbarProps={{
-        additionalContent: <h1>Playing 2bttns | User ID: {userId}</h1>,
+        additionalContentEnd: <h1>Playing 2bttns | User ID: {userId}</h1>,
       }}
     >
       {children}

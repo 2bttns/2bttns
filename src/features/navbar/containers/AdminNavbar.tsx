@@ -1,5 +1,7 @@
 import { Box, Link as ChakraLink, Text, VStack } from "@chakra-ui/react";
 import { signIn, signOut, useSession } from "next-auth/react";
+import Image from "next/image";
+import Link from "next/link";
 import Navbar, { NavbarLink } from "../views/Navbar";
 
 export type AdminNavbarProps = {};
@@ -18,7 +20,17 @@ export default function AdminNavbar(props: AdminNavbarProps) {
   return (
     <Navbar
       links={links}
-      additionalContent={
+      additionalContentStart={
+        <Link href="/">
+          <Image
+            src="/2btnns-webgif-compressed.gif"
+            alt="2bttns"
+            width={48}
+            height={48}
+          />
+        </Link>
+      }
+      additionalContentEnd={
         <>
           <AdminLoginLogout />
         </>
