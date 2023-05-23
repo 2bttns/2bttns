@@ -1,8 +1,16 @@
-import { Box, ButtonGroup } from "@chakra-ui/react";
+import { ChevronDownIcon } from "@chakra-ui/icons";
+import {
+  Box,
+  Button,
+  ButtonGroup,
+  Menu,
+  MenuButton,
+  MenuItem,
+  MenuList,
+} from "@chakra-ui/react";
 import type { GetServerSideProps } from "next";
 import { Session } from "next-auth";
 import Head from "next/head";
-import CsvImport from "../../features/csv/CsvImport";
 import DeleteGameObjectButton from "../../features/gameobjects/containers/DeleteGameObjectButton";
 import GameObjectsTable, {
   GameObjectData,
@@ -44,7 +52,7 @@ const GameObjects: NextPageWithLayout<GameObjectsPageProps> = (props) => {
         <meta name="description" content="Game object management panel" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <Box overflow="hidden">
+      <Box overflow="hidden" padding="1rem">
         <Box marginY="1rem">
           <TagFilterToggles
             filter={tagFilter.state.tagFilter}
@@ -59,13 +67,49 @@ const GameObjects: NextPageWithLayout<GameObjectsPageProps> = (props) => {
             exclude: tagFilter.results.excludeTags,
             includeUntagged: tagFilter.results.includeUntagged,
           }}
-          additionalTopBarContent={() => <CsvImport />}
+          additionalTopBarContent={(selectedRows) => (
+            <AdditionalTopBarContent selectedRows={selectedRows} />
+          )}
           additionalColumns={getAdditionalColumns()}
         />
       </Box>
     </>
   );
 };
+
+type AdditionalTopBarContentProps = {
+  selectedRows: GameObjectData[];
+};
+
+function AdditionalTopBarContent(props: AdditionalTopBarContentProps) {
+  const { selectedRows } = props;
+
+  return (
+    <>
+      <ButtonGroup>
+        {/* <CsvImport />- @TODO: Move to Menu */}
+        <Menu>
+          <MenuButton as={Button} rightIcon={<ChevronDownIcon />}>
+            Actions
+          </MenuButton>
+          <MenuList zIndex={99}>
+            <MenuItem
+              onClick={() => {
+                window.alert(`Delete ${selectedRows.length} selected items?`);
+              }}
+            >
+              Delete
+            </MenuItem>
+            <MenuItem>Tag</MenuItem>
+            <MenuItem>Export CSV</MenuItem>
+            {/* Update CsvImport function & export selected items */}
+            <MenuItem>Import CSV</MenuItem>
+          </MenuList>
+        </Menu>
+      </ButtonGroup>
+    </>
+  );
+}
 
 function getAdditionalColumns(): AdditionalColumns<GameObjectData> {
   return {
