@@ -1,10 +1,15 @@
+import { ChevronRightIcon } from "@chakra-ui/icons";
 import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
   Button,
   ButtonGroup,
   Code,
   Divider,
   Heading,
   Stack,
+  Text,
 } from "@chakra-ui/react";
 import { Tag } from "@prisma/client";
 import { GetServerSideProps, NextPage } from "next";
@@ -24,7 +29,6 @@ import { AdditionalColumns } from "../../features/shared/components/Table/contai
 import TagFilterToggles, {
   TagFilter,
 } from "../../features/tags/containers/TagFilterToggles";
-import TagsLayoutContainer from "../../features/tags/containers/TagsLayoutContainer";
 import ToggleTagButton from "../../features/tags/containers/ToggleTagButton";
 import { api, RouterInputs } from "../../utils/api";
 import getSessionWithSignInRedirect from "../../utils/getSessionWithSignInRedirect";
@@ -162,9 +166,6 @@ const TagByIdPage: NextPage<TagByIdPageProps> = (props) => {
           <meta name="description" content="2bttns Tag Management" />
           <link rel="icon" href="/favicon.ico" />
         </Head>
-        <TagsLayoutContainer>
-          <div>Loading...</div>
-        </TagsLayoutContainer>
       </>
     );
   }
@@ -177,10 +178,8 @@ const TagByIdPage: NextPage<TagByIdPageProps> = (props) => {
           <meta name="description" content="2bttns Tag Management" />
           <link rel="icon" href="/favicon.ico" />
         </Head>
-        <TagsLayoutContainer>
-          <div>Failed to load tag.</div>
-          <Code>{getTagByIdQuery.error?.message}</Code>
-        </TagsLayoutContainer>
+        <div>Failed to load tag.</div>
+        <Code>{getTagByIdQuery.error?.message}</Code>
       </>
     );
   }
@@ -195,68 +194,86 @@ const TagByIdPage: NextPage<TagByIdPageProps> = (props) => {
         <meta name="description" content="2bttns Tag Management" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <TagsLayoutContainer selectedTag={tag}>
-        <Stack direction="column" spacing="1rem" sx={{ padding: "1rem" }}>
-          <Heading size="xl">
-            <CustomEditable
-              value={tag?.name || ""}
-              placeholder="Untitled Tag"
-              handleSave={async (value) => {
-                handleUpdateTag({ id: tag.id, data: { name: value } });
-              }}
-            />
-          </Heading>
-          <CustomEditable
-            isTextarea
-            value={tag?.description || ""}
-            placeholder="No description"
-            handleSave={async (value) => {
-              handleUpdateTag({ id: tag.id, data: { description: value } });
-            }}
-          />
-          <Divider />
-          <Heading size="md">Tagged Game Objects</Heading>
-          <TagFilterToggles
-            filter={tagFilter}
-            setFilter={setTagFilter}
-            allAndNoneToggles
-          />
-          <GameObjectsTable
-            tag={{
-              include: includeTags,
-              exclude: excludeTags,
-              includeUntagged,
-            }}
-            onGameObjectCreated={handleGameObjectCreated}
-            additionalTopBarContent={
-              <>
-                <CsvImport parentTags={[tagId]} />
-                <CsvExport tagsToExportBy={[tagId]} />
-              </>
-            }
-            additionalColumns={getAdditionalColumns(tagId)}
-            constrainToRemainingSpaceProps={{
-              bottomOffset: 150,
-            }}
-          />
+      <Stack direction="column" spacing="1rem" sx={{ padding: "1rem" }}>
+        {tag && (
+          <Breadcrumb
+            spacing="4px"
+            separator={<ChevronRightIcon color="gray.500" />}
+            marginBottom="1rem"
+          >
+            <BreadcrumbItem>
+              <BreadcrumbLink href="/tags">Tags</BreadcrumbLink>
+            </BreadcrumbItem>
 
-          <Divider />
-          <Heading size="md" color="red.500">
-            DANGER ZONE
-          </Heading>
-          <ButtonGroup>
-            <Button
-              colorScheme="red"
-              aria-label="Delete tag"
-              variant="outline"
-              size="sm"
-              onClick={handleDeleteTag}
-            >
-              Delete Tag
-            </Button>
-          </ButtonGroup>
-        </Stack>
-      </TagsLayoutContainer>
+            <BreadcrumbItem isCurrentPage>
+              <BreadcrumbLink href={`/tags/${tag.id}`}>
+                {tag.name || "Untitled Tag"}
+                <Text color="blue.500" display="inline">
+                  ({tag.id})
+                </Text>
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+          </Breadcrumb>
+        )}
+        <Heading size="xl">
+          <CustomEditable
+            value={tag?.name || ""}
+            placeholder="Untitled Tag"
+            handleSave={async (value) => {
+              handleUpdateTag({ id: tag.id, data: { name: value } });
+            }}
+          />
+        </Heading>
+        <CustomEditable
+          isTextarea
+          value={tag?.description || ""}
+          placeholder="No description"
+          handleSave={async (value) => {
+            handleUpdateTag({ id: tag.id, data: { description: value } });
+          }}
+        />
+        <Divider />
+        <Heading size="md">Tagged Game Objects</Heading>
+        <TagFilterToggles
+          filter={tagFilter}
+          setFilter={setTagFilter}
+          allAndNoneToggles
+        />
+        <GameObjectsTable
+          tag={{
+            include: includeTags,
+            exclude: excludeTags,
+            includeUntagged,
+          }}
+          onGameObjectCreated={handleGameObjectCreated}
+          additionalTopBarContent={
+            <>
+              <CsvImport parentTags={[tagId]} />
+              <CsvExport tagsToExportBy={[tagId]} />
+            </>
+          }
+          additionalColumns={getAdditionalColumns(tagId)}
+          constrainToRemainingSpaceProps={{
+            bottomOffset: 150,
+          }}
+        />
+
+        <Divider />
+        <Heading size="md" color="red.500">
+          DANGER ZONE
+        </Heading>
+        <ButtonGroup>
+          <Button
+            colorScheme="red"
+            aria-label="Delete tag"
+            variant="outline"
+            size="sm"
+            onClick={handleDeleteTag}
+          >
+            Delete Tag
+          </Button>
+        </ButtonGroup>
+      </Stack>
     </>
   );
 };

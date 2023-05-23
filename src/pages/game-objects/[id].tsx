@@ -17,7 +17,7 @@ import Head from "next/head";
 import { useRouter } from "next/router";
 import DeleteGameObjectButton from "../../features/gameobjects/containers/DeleteGameObjectButton";
 import GameObjectsTable, {
-  AdditionalColumns,
+  GameObjectData,
 } from "../../features/gameobjects/containers/GameObjectsTable";
 import ManageGameObjectButton from "../../features/gameobjects/containers/ManageGameObjectButton";
 import RelateGameObjects from "../../features/gameobjects/containers/RelateGameObjects";
@@ -25,6 +25,7 @@ import TagMultiSelect, {
   TagOption,
 } from "../../features/gameobjects/containers/TagMultiSelect";
 import CustomEditable from "../../features/shared/components/CustomEditable";
+import { AdditionalColumns } from "../../features/shared/components/Table/containers/PaginatedTable";
 import TagFilterToggles from "../../features/tags/containers/TagFilterToggles";
 import useAllTagFilters from "../../features/tags/hooks/useAllTagFilters";
 import { prisma } from "../../server/db";
@@ -103,28 +104,26 @@ const GameObjectById: NextPage<GameObjectByIdPageProps> = (props) => {
 
 function getAdditionalColumns(
   gameObjectId: GameObject["id"]
-): AdditionalColumns {
+): AdditionalColumns<GameObjectData> {
   return {
     columns: [
       {
-        id: "Relationships",
-        header: "Relationship Weight",
-        cell: (info) => {
+        name: "Relationship Weight",
+        cell: ({ id }) => {
           return (
             <RelateGameObjects
               gameObjectId1={gameObjectId}
-              gameObjectId2={info.row.original.id}
+              gameObjectId2={id}
             />
           );
         },
       },
       {
-        id: "actions",
-        header: "",
-        cell: (info) => {
+        name: "Actions",
+        cell: ({ id }) => {
           return (
             <ButtonGroup width="100%" justifyContent="end">
-              <ManageGameObjectButton gameObjectId={info.row.original.id} />
+              <ManageGameObjectButton gameObjectId={id} />
             </ButtonGroup>
           );
         },
