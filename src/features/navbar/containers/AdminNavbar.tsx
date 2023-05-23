@@ -10,14 +10,16 @@ export default function AdminNavbar(props: AdminNavbarProps) {
   return (
     <Navbar
       additionalContentStart={
-        <Link href="/">
-          <Image
-            src="/2btnns-webgif-compressed.gif"
-            alt="2bttns"
-            width={48}
-            height={48}
-          />
-        </Link>
+        <Box minWidth="48px">
+          <Link href="/">
+            <Image
+              src="/2btnns-webgif-compressed.gif"
+              alt="2bttns"
+              width={48}
+              height={48}
+            />
+          </Link>
+        </Box>
       }
       additionalContentEnd={
         <>

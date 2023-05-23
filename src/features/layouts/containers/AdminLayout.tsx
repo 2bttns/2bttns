@@ -45,6 +45,7 @@ export default function AdminLayout(props: AdminLayoutProps) {
         <VStack
           backgroundColor="blue.700"
           height="100%"
+          minWidth="200px"
           width="200px"
           spacing={0}
           color="gray.100"
