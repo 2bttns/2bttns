@@ -1,5 +1,5 @@
-import { Box } from "@chakra-ui/react";
-import { useMemo } from "react";
+import { Box, Skeleton } from "@chakra-ui/react";
+import { useEffect, useMemo, useState } from "react";
 import DataTable, { IDataTableProps } from "react-data-table-component";
 
 export type PaginatedTableProps<T> = {
@@ -45,6 +45,16 @@ export default function PaginatedTable<T>(props: PaginatedTableProps<T>) {
     return columnsToUse;
   }, [...(additionalColumns ? additionalColumns.dependencies : [])]);
 
+  const [progressPending, setProgressPending] = useState(false);
+  useEffect(() => {
+    if (loading) {
+      setProgressPending(true);
+    } else {
+      // Delay hiding the loading indicator so that it doesn't flash when loading is fast
+      setTimeout(() => setProgressPending(false), 1000);
+    }
+  }, [loading]);
+
   return (
     <Box height="100%" width="100%" overflow="scroll">
       <DataTable
@@ -57,17 +67,55 @@ export default function PaginatedTable<T>(props: PaginatedTableProps<T>) {
         paginationTotalRows={totalRows}
         onChangePage={onChangePage}
         onChangeRowsPerPage={onChangeRowsPerPage}
-        progressPending={loading}
         fixedHeader
         // Fixed table height; subtract 64px for the pagination bar
-        fixedHeaderScrollHeight={`calc(${fixedHeight} - 64px)`}
+        fixedHeaderScrollHeight={`calc(${fixedHeight} - 64px - 64px)`}
         selectableRows
         onSelectedRowsChange={onSelectedRowsChange}
         paginationRowsPerPageOptions={[5, 10, 25, 50, 100]}
         customStyles={{
           cells: { style: { alignItems: "center", padding: "1rem" } },
         }}
+        striped
+        progressPending={progressPending}
+        progressComponent={<ProgressComponent />}
       />
     </Box>
+  );
+}
+
+function ProgressComponent() {
+  const placeholderData = useMemo(() => new Array(10).fill({}), []);
+
+  return (
+    <DataTable
+      striped
+      columns={[
+        {
+          name: <Skeleton height="1rem" width="16px" />,
+          cell: () => <Skeleton height="1rem" width="16px" />,
+          grow: 0,
+        },
+        {
+          name: (
+            <Skeleton
+              height="1.5rem"
+              position="absolute"
+              right="16px"
+              left="-48px"
+            />
+          ),
+          cell: () => (
+            <Skeleton
+              height="1.5rem"
+              position="absolute"
+              right="16px"
+              left="-48px"
+            />
+          ),
+        },
+      ]}
+      data={placeholderData.map((_, i) => ({}))}
+    />
   );
 }
