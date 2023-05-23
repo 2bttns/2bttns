@@ -41,7 +41,7 @@ export default function AdminLayout(props: AdminLayoutProps) {
       <Box position="sticky" top="0" zIndex="99">
         <AdminNavbar />
       </Box>
-      <Stack width="100%" height="100%" direction="row">
+      <Stack width="100%" height="100%" direction="row" spacing={0}>
         <VStack
           backgroundColor="blue.700"
           height="100%"
