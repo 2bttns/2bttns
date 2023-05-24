@@ -1,4 +1,4 @@
-import { AddIcon, SearchIcon } from "@chakra-ui/icons";
+import { AddIcon, CloseIcon, SearchIcon } from "@chakra-ui/icons";
 import {
   IconButton,
   Input,
@@ -27,6 +27,10 @@ export default function SearchAndCreateBar(props: SearchAndCreateBarProps) {
     onCreate(value);
   };
 
+  const clearInput = () => {
+    onChange("");
+  };
+
   return (
     <Stack direction="row" width="100%">
       <InputGroup>
@@ -49,7 +53,7 @@ export default function SearchAndCreateBar(props: SearchAndCreateBarProps) {
           bgColor="gray.200"
         />
         {onCreate && (
-          <InputRightElement fontSize="1.2em">
+          <InputRightElement>
             <Tooltip
               label={
                 <Stack
@@ -59,7 +63,7 @@ export default function SearchAndCreateBar(props: SearchAndCreateBarProps) {
                   spacing="0"
                   padding="0.5rem"
                 >
-                  <div>Create new item with input as name!</div>
+                  <div>Create new item with input as name</div>
                   <div>
                     <Kbd backgroundColor="gray.900">shift</Kbd>
                     <span>+</span>
@@ -80,6 +84,16 @@ export default function SearchAndCreateBar(props: SearchAndCreateBarProps) {
             </Tooltip>
           </InputRightElement>
         )}
+        <InputRightElement marginRight={onCreate ? "2rem" : "0rem"}>
+          <Tooltip label="Clear input" placement="bottom-end" hasArrow>
+            <CloseIcon
+              color="gray.500"
+              display={value ? "block" : "none"}
+              onClick={clearInput}
+              cursor="pointer"
+            />
+          </Tooltip>
+        </InputRightElement>
       </InputGroup>
     </Stack>
   );
