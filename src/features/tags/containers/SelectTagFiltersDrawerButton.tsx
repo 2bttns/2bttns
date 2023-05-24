@@ -9,28 +9,33 @@ import {
   DrawerOverlay,
   useDisclosure,
 } from "@chakra-ui/react";
-import { useMemo } from "react";
-import TagFilterToggles from "./TagFilterToggles";
-import useAllTagFilters from "../hooks/useAllTagFilters";
+import { Dispatch, SetStateAction, useMemo } from "react";
+import TagFilterToggles, {
+  TagFilter,
+  TagFilterTogglesProps,
+} from "./TagFilterToggles";
 
 export type SelectTagFiltersDrawerButtonProps = {
-  tagFilter: ReturnType<typeof useAllTagFilters>;
+  tagFilter: TagFilter;
+  setTagFilter: Dispatch<SetStateAction<TagFilter>>;
+  drawerTitle?: string;
+  allAndNoneToggles?: TagFilterTogglesProps["allAndNoneToggles"];
 };
 export function SelectTagFiltersDrawerButton(
   props: SelectTagFiltersDrawerButtonProps
 ) {
-  const { tagFilter } = props;
+  const {
+    tagFilter,
+    setTagFilter,
+    drawerTitle = "Tag Filters",
+    allAndNoneToggles = true,
+  } = props;
   const { isOpen, onOpen, onClose } = useDisclosure();
 
   const selectedTagsCount = useMemo(() => {
-    const selectedCustomTags = tagFilter.results.includeTags.map((tag) => tag);
-    let count = selectedCustomTags.length;
-    if (tagFilter.results.includeUntagged) {
-      count += 1;
-    }
-    return count;
-  }, [tagFilter.state.tagFilter]);
-  const totalTagsCount = Object.keys(tagFilter.state.tagFilter).length;
+    return Object.values(tagFilter).filter((f) => f.on).length;
+  }, [tagFilter]);
+  const totalTagsCount = Object.keys(tagFilter).length;
 
   return (
     <>
@@ -45,13 +50,13 @@ export function SelectTagFiltersDrawerButton(
         <DrawerOverlay />
         <DrawerContent>
           <DrawerCloseButton />
-          <DrawerHeader>Tag Filters</DrawerHeader>
+          <DrawerHeader>{drawerTitle}</DrawerHeader>
 
           <DrawerBody>
             <TagFilterToggles
-              filter={tagFilter.state.tagFilter}
-              setFilter={tagFilter.state.setTagFilter}
-              allAndNoneToggles
+              filter={tagFilter}
+              setFilter={setTagFilter}
+              allAndNoneToggles={allAndNoneToggles}
             />
           </DrawerBody>
 

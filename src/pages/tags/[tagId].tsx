@@ -17,8 +17,6 @@ import { Session } from "next-auth";
 import Head from "next/head";
 import { useRouter } from "next/router";
 import { useMemo, useState } from "react";
-import CsvExport from "../../features/csv/CsvExport";
-import CsvImport from "../../features/csv/CsvImport";
 import GameObjectsTable, {
   GameObjectData,
   GameObjectsTableProps,
@@ -26,9 +24,11 @@ import GameObjectsTable, {
 import ManageGameObjectButton from "../../features/gameobjects/containers/ManageGameObjectButton";
 import CustomEditable from "../../features/shared/components/CustomEditable";
 import { AdditionalColumns } from "../../features/shared/components/Table/containers/PaginatedTable";
-import TagFilterToggles, {
-  TagFilter,
-} from "../../features/tags/containers/TagFilterToggles";
+import {
+  SelectTagFiltersDrawerButton,
+  SelectTagFiltersDrawerButtonProps,
+} from "../../features/tags/containers/SelectTagFiltersDrawerButton";
+import { TagFilter } from "../../features/tags/containers/TagFilterToggles";
 import ToggleTagButton from "../../features/tags/containers/ToggleTagButton";
 import { api, RouterInputs } from "../../utils/api";
 import getSessionWithSignInRedirect from "../../utils/getSessionWithSignInRedirect";
@@ -234,11 +234,6 @@ const TagByIdPage: NextPage<TagByIdPageProps> = (props) => {
         />
         <Divider />
         <Heading size="md">Tagged Game Objects</Heading>
-        <TagFilterToggles
-          filter={tagFilter}
-          setFilter={setTagFilter}
-          allAndNoneToggles
-        />
         <GameObjectsTable
           tag={{
             include: includeTags,
@@ -246,11 +241,13 @@ const TagByIdPage: NextPage<TagByIdPageProps> = (props) => {
             includeUntagged,
           }}
           onGameObjectCreated={handleGameObjectCreated}
-          additionalTopBarContent={() => (
-            <>
-              <CsvImport parentTags={[tagId]} />
-              <CsvExport tagsToExportBy={[tagId]} />
-            </>
+          additionalTopBarContent={(selectedRows) => (
+            <AdditionalTopBarContent
+              selectedRows={selectedRows}
+              tagId={tagId}
+              tagFilter={tagFilter}
+              setTagFilter={setTagFilter}
+            />
           )}
           additionalColumns={getAdditionalColumns(tagId)}
           constrainToRemainingSpaceProps={{
@@ -277,6 +274,30 @@ const TagByIdPage: NextPage<TagByIdPageProps> = (props) => {
     </>
   );
 };
+
+type AdditionalTopBarContentProps = {
+  selectedRows: GameObjectData[];
+  tagId: Tag["id"];
+  tagFilter: SelectTagFiltersDrawerButtonProps["tagFilter"];
+  setTagFilter: SelectTagFiltersDrawerButtonProps["setTagFilter"];
+};
+function AdditionalTopBarContent(props: AdditionalTopBarContentProps) {
+  const { selectedRows, tagId, tagFilter, setTagFilter } = props;
+  return (
+    <>
+      {/* @TODO: Move to actions menu */}
+      {/* <CsvImport parentTags={[tagId]} />
+      <CsvExport tagsToExportBy={[tagId]} /> */}
+      <ButtonGroup>
+        <Button>Actions</Button>
+        <SelectTagFiltersDrawerButton
+          tagFilter={tagFilter}
+          setTagFilter={setTagFilter}
+        />
+      </ButtonGroup>
+    </>
+  );
+}
 
 function getAdditionalColumns(
   tagId: Tag["id"]

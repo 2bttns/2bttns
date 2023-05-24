@@ -103,7 +103,10 @@ function AdditionalTopBarContent(props: AdditionalTopBarContentProps) {
             <MenuItem>Import CSV</MenuItem>
           </MenuList>
         </Menu>
-        <SelectTagFiltersDrawerButton tagFilter={tagFilter} />
+        <SelectTagFiltersDrawerButton
+          tagFilter={tagFilter.state.tagFilter}
+          setTagFilter={tagFilter.state.setTagFilter}
+        />
       </ButtonGroup>
     </>
   );
