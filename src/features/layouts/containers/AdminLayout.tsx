@@ -49,6 +49,7 @@ export default function AdminLayout(props: AdminLayoutProps) {
           width="200px"
           spacing={0}
           color="gray.100"
+          zIndex={99}
         >
           {links.map((link) => {
             if (link === "divider") {

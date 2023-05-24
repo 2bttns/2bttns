@@ -21,6 +21,15 @@ export type TagsTableProps = {
   editable?: boolean;
   constrainToRemainingSpaceProps?: Partial<ConstrainToRemainingSpaceProps>;
   topBarProps?: Partial<StackProps>;
+  hideColumns?: HideTagsTableColumn;
+  areRowsSelectable?: boolean;
+  allowCreate?: boolean;
+};
+
+export type TagsTableColumns = "id" | "name" | "description" | "updatedAt";
+
+export type HideTagsTableColumn = {
+  [key in TagsTableColumns]?: boolean;
 };
 
 export default function TagsTable(props: TagsTableProps) {
@@ -31,6 +40,9 @@ export default function TagsTable(props: TagsTableProps) {
     editable = true,
     constrainToRemainingSpaceProps,
     topBarProps,
+    hideColumns,
+    areRowsSelectable,
+    allowCreate = true,
   } = props;
 
   const { perPage, currentPage, handlePageChange, handlePerRowsChange } =
@@ -96,6 +108,10 @@ export default function TagsTable(props: TagsTableProps) {
     }
   };
 
+  const numColumnsToHide = useMemo<number>(() => {
+    return Object.values(hideColumns ?? {}).filter((v) => v === true).length;
+  }, [hideColumns]);
+
   const columns = useMemo<PaginatedTableProps<TagData>["columns"]>(() => {
     return [
       {
@@ -115,6 +131,7 @@ export default function TagsTable(props: TagsTableProps) {
         sortable: true,
         sortField: "id",
         minWidth: "256px",
+        omit: hideColumns?.id,
       },
       {
         name: "Name",
@@ -133,6 +150,7 @@ export default function TagsTable(props: TagsTableProps) {
         sortable: true,
         sortField: "name",
         minWidth: "256px",
+        omit: hideColumns?.name,
       },
       {
         name: "Description",
@@ -152,6 +170,7 @@ export default function TagsTable(props: TagsTableProps) {
         sortable: true,
         sortField: "description",
         minWidth: "512px",
+        omit: hideColumns?.description,
       },
       {
         name: "Last Updated",
@@ -159,9 +178,10 @@ export default function TagsTable(props: TagsTableProps) {
         sortable: true,
         sortField: "updatedAt",
         minWidth: "256px",
+        omit: hideColumns?.updatedAt,
       },
     ];
-  }, [editable]);
+  }, [editable, numColumnsToHide]);
 
   const [selectedRows, setSelectedRows] = useState<TagData[]>([]);
   const handleSelectedRowsChange: PaginatedTableProps<TagData>["onSelectedRowsChange"] =
@@ -175,7 +195,7 @@ export default function TagsTable(props: TagsTableProps) {
         <SearchAndCreateBar
           value={globalFilter}
           onChange={setGlobalFilter}
-          onCreate={handleCreateTag}
+          onCreate={allowCreate ? handleCreateTag : undefined}
         />
         {additionalTopBarContent && additionalTopBarContent(selectedRows)}
       </HStack>
@@ -192,6 +212,7 @@ export default function TagsTable(props: TagsTableProps) {
               onChangePage={handlePageChange}
               onChangeRowsPerPage={handlePerRowsChange}
               fixedHeight={remainingHeight}
+              areRowsSelectable={areRowsSelectable}
               onSelectedRowsChange={handleSelectedRowsChange}
             />
           );

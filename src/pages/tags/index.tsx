@@ -1,10 +1,10 @@
-import { DeleteIcon, SettingsIcon } from "@chakra-ui/icons";
-import { Box, ButtonGroup, IconButton, Tooltip } from "@chakra-ui/react";
+import { Box, ButtonGroup } from "@chakra-ui/react";
 import { Tag } from "@prisma/client";
 import { GetServerSideProps, NextPage } from "next";
 import { Session } from "next-auth";
 import Head from "next/head";
-import Link from "next/link";
+import DeleteTagButton from "../../features/tags/containers/DeleteTagButton";
+import ManageTagButton from "../../features/tags/containers/ManageTagButton";
 import TagsTable from "../../features/tags/containers/TagsTable";
 import { api } from "../../utils/api";
 import getSessionWithSignInRedirect from "../../utils/getSessionWithSignInRedirect";
@@ -57,42 +57,10 @@ function CellActions(props: CellActionsProps) {
   const { tagId } = props;
   const utils = api.useContext();
 
-  const deleteTagMutation = api.tags.deleteById.useMutation();
-  const handleDeleteTag = async (id: Tag["id"]) => {
-    try {
-      await deleteTagMutation.mutateAsync({ id });
-      await utils.tags.invalidate();
-    } catch (error) {
-      console.error(error);
-      window.alert("Error deleting tag\n See console for details");
-    }
-  };
-
   return (
     <ButtonGroup width="100%" justifyContent="end">
-      <Tooltip label={`Manage Tag`} placement="top">
-        <Link href={`/tags/${tagId}`}>
-          <IconButton
-            colorScheme="blue"
-            icon={<SettingsIcon />}
-            aria-label={`Manage tag with ID: ${tagId}`}
-            size="sm"
-            variant="solid"
-          />
-        </Link>
-      </Tooltip>
-      <Tooltip label={`Delete`} placement="top">
-        <IconButton
-          colorScheme="red"
-          onClick={() => {
-            handleDeleteTag(tagId);
-          }}
-          icon={<DeleteIcon />}
-          aria-label={`Delete tag with ID: ${tagId}`}
-          size="sm"
-          variant="outline"
-        />
-      </Tooltip>
+      <ManageTagButton tagId={tagId} />
+      <DeleteTagButton tagId={tagId} />
     </ButtonGroup>
   );
 }

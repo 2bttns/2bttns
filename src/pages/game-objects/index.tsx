@@ -17,6 +17,7 @@ import GameObjectsTable, {
 } from "../../features/gameobjects/containers/GameObjectsTable";
 import ManageGameObjectButton from "../../features/gameobjects/containers/ManageGameObjectButton";
 import { AdditionalColumns } from "../../features/shared/components/Table/containers/PaginatedTable";
+import { EditTagsForGameObjectsButtonDrawer } from "../../features/tags/containers/EditTagsForGameObjectsButtonDrawer";
 import TagFilterToggles from "../../features/tags/containers/TagFilterToggles";
 import useAllTagFilters from "../../features/tags/hooks/useAllTagFilters";
 import getSessionWithSignInRedirect from "../../utils/getSessionWithSignInRedirect";
@@ -117,20 +118,33 @@ function getAdditionalColumns(): AdditionalColumns<GameObjectData> {
       {
         id: "actions",
         cell: (row) => {
-          return (
-            <ButtonGroup width="100%" justifyContent="end">
-              <ManageGameObjectButton gameObjectId={row.id} />
-              <DeleteGameObjectButton gameObjectId={row.id} />
-            </ButtonGroup>
-          );
+          return <Actions gameObjectId={row.id} gameObjectName={row.name} />;
         },
       },
     ],
-
-    // Re-render the table the game objects table when these change
-    // Without this, relationship weights might not update correctly when navigating to another game object's page
     dependencies: [],
   };
+}
+
+type ActionsProps = {
+  gameObjectId: GameObjectData["id"];
+  gameObjectName: GameObjectData["name"];
+};
+function Actions(props: ActionsProps) {
+  const { gameObjectId, gameObjectName } = props;
+
+  return (
+    <>
+      <ButtonGroup width="100%" justifyContent="center">
+        <EditTagsForGameObjectsButtonDrawer
+          gameObjectId={gameObjectId}
+          gameObjectName={gameObjectName}
+        />
+        <ManageGameObjectButton gameObjectId={gameObjectId} />
+        <DeleteGameObjectButton gameObjectId={gameObjectId} />
+      </ButtonGroup>
+    </>
+  );
 }
 
 export default GameObjects;

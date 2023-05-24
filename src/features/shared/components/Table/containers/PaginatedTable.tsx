@@ -12,6 +12,7 @@ export type PaginatedTableProps<T> = {
   onChangePage: IDataTableProps<T>["onChangePage"];
   onChangeRowsPerPage: IDataTableProps<T>["onChangeRowsPerPage"];
   fixedHeight: IDataTableProps<T>["fixedHeaderScrollHeight"];
+  areRowsSelectable?: boolean;
   onSelectedRowsChange?: IDataTableProps<T>["onSelectedRowsChange"];
 };
 
@@ -32,6 +33,7 @@ export default function PaginatedTable<T>(props: PaginatedTableProps<T>) {
     onChangePage,
     onChangeRowsPerPage,
     fixedHeight,
+    areRowsSelectable = true,
     onSelectedRowsChange,
   } = props;
 
@@ -43,7 +45,7 @@ export default function PaginatedTable<T>(props: PaginatedTableProps<T>) {
     }
 
     return columnsToUse;
-  }, [...(additionalColumns ? additionalColumns.dependencies : [])]);
+  }, [columns, additionalColumns]);
 
   const [progressPending, setProgressPending] = useState(false);
   useEffect(() => {
@@ -70,7 +72,7 @@ export default function PaginatedTable<T>(props: PaginatedTableProps<T>) {
         fixedHeader
         // Fixed table height; subtract 64px for the pagination bar
         fixedHeaderScrollHeight={`calc(${fixedHeight} - 64px - 64px)`}
-        selectableRows
+        selectableRows={areRowsSelectable}
         onSelectedRowsChange={onSelectedRowsChange}
         paginationRowsPerPageOptions={[5, 10, 25, 50, 100]}
         customStyles={{
@@ -101,24 +103,34 @@ export default function PaginatedTable<T>(props: PaginatedTableProps<T>) {
         }}
         striped
         progressPending={progressPending}
-        progressComponent={<ProgressComponent />}
+        progressComponent={
+          <ProgressComponent areRowsSelectable={areRowsSelectable} />
+        }
       />
     </Box>
   );
 }
 
-function ProgressComponent() {
+type ProgressComponentProps = {
+  areRowsSelectable?: boolean;
+};
+
+function ProgressComponent(props: ProgressComponentProps) {
+  const { areRowsSelectable = true } = props;
   const placeholderData = useMemo(() => new Array(10).fill({}), []);
 
   return (
     <DataTable
       striped
       columns={[
-        {
-          name: <Skeleton height="1rem" width="16px" />,
-          cell: () => <Skeleton height="1rem" width="16px" />,
-          grow: 0,
-        },
+        ...[
+          // Add a checkbox-looking skeleton loader to the beginning of the table if rows are selectable
+          {
+            name: <Skeleton height="1rem" width="16px" />,
+            cell: () => <Skeleton height="1rem" width="16px" />,
+            grow: 0,
+          },
+        ].filter(() => areRowsSelectable),
         {
           name: (
             <Skeleton
