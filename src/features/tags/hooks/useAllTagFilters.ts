@@ -1,29 +1,33 @@
-import { useMemo, useRef, useState } from "react";
+import { useMemo, useState } from "react";
 import { api } from "../../../utils/api";
 import { TagFilter } from "../containers/TagFilterToggles";
+
+export const UNTAGGED_ID = "Untagged";
 
 export default function useAllTagFilters() {
   const [tagFilter, setTagFilter] = useState<TagFilter>({
     Untagged: {
-      tagName: "Untagged",
+      tagName: UNTAGGED_ID,
       on: true,
       colorScheme: "blackAlpha",
     },
   });
 
-  const didFetchRef = useRef(false);
+  const tagsCountQuery = api.tags.getCount.useQuery();
   const tagsQuery = api.tags.getAll.useQuery(
-    {},
+    {
+      take: tagsCountQuery.data?.count ?? 0,
+      sortField: "name",
+      sortOrder: "asc",
+    },
     {
       refetchOnWindowFocus: false,
-      enabled: !didFetchRef.current,
-
+      enabled:
+        !tagsCountQuery.isLoading &&
+        tagsCountQuery.data?.count !== undefined &&
+        tagsCountQuery.data?.count > 0,
       keepPreviousData: true,
       onSuccess: (data) => {
-        if (didFetchRef.current) {
-          return;
-        }
-
         const fetchedTagFilters: TagFilter = {};
         data.tags.forEach((tag) => {
           fetchedTagFilters[tag.id] = {
@@ -37,7 +41,6 @@ export default function useAllTagFilters() {
           ...prev,
           ...fetchedTagFilters,
         }));
-        didFetchRef.current = true;
       },
     }
   );
@@ -45,7 +48,7 @@ export default function useAllTagFilters() {
   const includeTags = useMemo(() => {
     return Object.keys(tagFilter)
       .filter((tagId) => {
-        if (tagId === "Untagged") {
+        if (tagId === UNTAGGED_ID) {
           return false;
         }
         return tagFilter[tagId]!.on;
@@ -61,7 +64,7 @@ export default function useAllTagFilters() {
     if (allOff) {
       return Object.keys(tagFilter)
         .filter((tagId) => {
-          if (tagId === "Untagged") {
+          if (tagId === UNTAGGED_ID) {
             return false;
           }
           return true;

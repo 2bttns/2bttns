@@ -108,6 +108,11 @@ const TagByIdPage: NextPage<TagByIdPageProps> = (props) => {
     { refetchOnWindowFocus: false }
   );
   const [tagFilter, setTagFilter] = useState<TagFilter>({
+    Untagged: {
+      tagName: "Untagged",
+      on: false,
+      colorScheme: "blackAlpha",
+    },
     Applied: {
       tagName: "Applied",
       on: true,
@@ -117,11 +122,6 @@ const TagByIdPage: NextPage<TagByIdPageProps> = (props) => {
       tagName: "Not Applied",
       on: false,
       colorScheme: "red",
-    },
-    Untagged: {
-      tagName: "Untagged",
-      on: false,
-      colorScheme: "blackAlpha",
     },
   });
 

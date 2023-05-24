@@ -58,7 +58,6 @@ const GameObjects: NextPageWithLayout<GameObjectsPageProps> = (props) => {
           <TagFilterToggles
             filter={tagFilter.state.tagFilter}
             setFilter={tagFilter.state.setTagFilter}
-            allowMultiple
             allAndNoneToggles
           />
         </Box>

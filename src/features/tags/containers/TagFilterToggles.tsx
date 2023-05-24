@@ -1,4 +1,4 @@
-import { Button, ButtonGroup, ButtonProps } from "@chakra-ui/react";
+import { Button, ButtonProps, Flex } from "@chakra-ui/react";
 import { Dispatch, SetStateAction } from "react";
 
 export type TagFilter = {
@@ -18,7 +18,6 @@ export type TagFilterTogglesProps = {
   filter: TagFilter;
   setFilter: Dispatch<SetStateAction<TagFilter>>;
   allAndNoneToggles?: boolean;
-  allowMultiple?: boolean;
 };
 export default function TagFilterToggles(props: TagFilterTogglesProps) {
   const { filter, setFilter, allAndNoneToggles = false } = props;
@@ -40,7 +39,7 @@ export default function TagFilterToggles(props: TagFilterTogglesProps) {
 
   return (
     <>
-      <ButtonGroup size="sm" spacing="4px">
+      <Flex gap="4px" flexWrap="wrap">
         {allAndNoneToggles && (
           <>
             <Button
@@ -48,6 +47,7 @@ export default function TagFilterToggles(props: TagFilterTogglesProps) {
               colorScheme="blackAlpha"
               onClick={() => handleToggleAll(true)}
               variant={areAllOn ? "solid" : "ghost"}
+              size="sm"
             >
               All
             </Button>
@@ -56,6 +56,7 @@ export default function TagFilterToggles(props: TagFilterTogglesProps) {
               colorScheme="blackAlpha"
               onClick={() => handleToggleAll(false)}
               variant={areAllOff ? "solid" : "ghost"}
+              size="sm"
             >
               None
             </Button>
@@ -78,12 +79,13 @@ export default function TagFilterToggles(props: TagFilterTogglesProps) {
               colorScheme={colorScheme}
               onClick={handleClick}
               variant={on ? "solid" : "outline"}
+              size="sm"
             >
               {tagName}
             </Button>
           );
         })}
-      </ButtonGroup>
+      </Flex>
     </>
   );
 }
