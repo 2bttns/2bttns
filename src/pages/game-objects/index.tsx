@@ -18,7 +18,7 @@ import GameObjectsTable, {
 import ManageGameObjectButton from "../../features/gameobjects/containers/ManageGameObjectButton";
 import { AdditionalColumns } from "../../features/shared/components/Table/containers/PaginatedTable";
 import { EditTagsForGameObjectsButtonDrawer } from "../../features/tags/containers/EditTagsForGameObjectsButtonDrawer";
-import TagFilterToggles from "../../features/tags/containers/TagFilterToggles";
+import { SelectTagFiltersDrawerButton } from "../../features/tags/containers/SelectTagFiltersDrawerButton";
 import useAllTagFilters from "../../features/tags/hooks/useAllTagFilters";
 import getSessionWithSignInRedirect from "../../utils/getSessionWithSignInRedirect";
 import { NextPageWithLayout } from "../_app";
@@ -54,13 +54,6 @@ const GameObjects: NextPageWithLayout<GameObjectsPageProps> = (props) => {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <Box overflow="hidden" padding="1rem">
-        <Box marginY="4px">
-          <TagFilterToggles
-            filter={tagFilter.state.tagFilter}
-            setFilter={tagFilter.state.setTagFilter}
-            allAndNoneToggles
-          />
-        </Box>
         <GameObjectsTable
           tag={{
             include: tagFilter.results.includeTags,
@@ -68,7 +61,10 @@ const GameObjects: NextPageWithLayout<GameObjectsPageProps> = (props) => {
             includeUntagged: tagFilter.results.includeUntagged,
           }}
           additionalTopBarContent={(selectedRows) => (
-            <AdditionalTopBarContent selectedRows={selectedRows} />
+            <AdditionalTopBarContent
+              selectedRows={selectedRows}
+              tagFilter={tagFilter}
+            />
           )}
           additionalColumns={getAdditionalColumns()}
         />
@@ -79,10 +75,11 @@ const GameObjects: NextPageWithLayout<GameObjectsPageProps> = (props) => {
 
 type AdditionalTopBarContentProps = {
   selectedRows: GameObjectData[];
+  tagFilter: ReturnType<typeof useAllTagFilters>;
 };
 
 function AdditionalTopBarContent(props: AdditionalTopBarContentProps) {
-  const { selectedRows } = props;
+  const { selectedRows, tagFilter } = props;
 
   return (
     <>
@@ -106,6 +103,7 @@ function AdditionalTopBarContent(props: AdditionalTopBarContentProps) {
             <MenuItem>Import CSV</MenuItem>
           </MenuList>
         </Menu>
+        <SelectTagFiltersDrawerButton tagFilter={tagFilter} />
       </ButtonGroup>
     </>
   );
