@@ -106,6 +106,7 @@ function AdditionalTopBarContent(props: AdditionalTopBarContentProps) {
         <SelectTagFiltersDrawerButton
           tagFilter={tagFilter.state.tagFilter}
           setTagFilter={tagFilter.state.setTagFilter}
+          tagFilterLoading={tagFilter.tagsQuery.isLoading}
         />
       </ButtonGroup>
     </>

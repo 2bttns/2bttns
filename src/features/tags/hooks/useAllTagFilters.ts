@@ -4,14 +4,25 @@ import { TagFilter } from "../containers/TagFilterToggles";
 
 export const UNTAGGED_ID = "Untagged";
 
-export default function useAllTagFilters() {
-  const [tagFilter, setTagFilter] = useState<TagFilter>({
-    Untagged: {
-      tagName: UNTAGGED_ID,
-      on: true,
-      colorScheme: "blackAlpha",
-    },
-  });
+export type UseAllTagFiltersProps = {
+  enableUntaggedFilter?: boolean;
+  defaultOn?: boolean;
+};
+
+export default function useAllTagFilters(props: UseAllTagFiltersProps = {}) {
+  const { enableUntaggedFilter = true, defaultOn = true } = props;
+
+  const [tagFilter, setTagFilter] = useState<TagFilter>(
+    enableUntaggedFilter
+      ? {
+          [UNTAGGED_ID]: {
+            tagName: UNTAGGED_ID,
+            on: true,
+            colorScheme: "blackAlpha",
+          },
+        }
+      : {}
+  );
 
   const tagsCountQuery = api.tags.getCount.useQuery();
   const tagsQuery = api.tags.getAll.useQuery(
@@ -29,10 +40,11 @@ export default function useAllTagFilters() {
       keepPreviousData: true,
       onSuccess: (data) => {
         const fetchedTagFilters: TagFilter = {};
+
         data.tags.forEach((tag) => {
           fetchedTagFilters[tag.id] = {
             tagName: tag.name,
-            on: true,
+            on: defaultOn,
             colorScheme: "green",
           };
         });
@@ -76,7 +88,11 @@ export default function useAllTagFilters() {
   }, [tagFilter]);
 
   const includeUntagged = useMemo(() => {
-    return tagFilter.Untagged!.on;
+    if (tagFilter[UNTAGGED_ID] === undefined) {
+      return false;
+    }
+
+    return tagFilter[UNTAGGED_ID]!.on;
   }, [tagFilter]);
 
   return {

@@ -18,7 +18,7 @@ import DeleteGameButton from "../../features/games/containers/DeleteGameButton";
 import EditGameMode from "../../features/games/containers/EditGameMode";
 import PlayGameButton from "../../features/games/containers/PlayGameButton";
 import CustomEditable from "../../features/shared/components/CustomEditable";
-import GameInputTagsMultiSelect from "../../features/tags/containers/GameInputTagsMultiSelect";
+import GameInputTagsFilterToggles from "../../features/tags/containers/GameInputTagsFilterToggles";
 import { prisma } from "../../server/db";
 import { api, RouterInputs } from "../../utils/api";
 import getSessionWithSignInRedirect from "../../utils/getSessionWithSignInRedirect";
@@ -62,13 +62,15 @@ const GameById: NextPage<GameByIdPageProps> = (props) => {
 
   return (
     <>
-      <Box width="100%" height="100vh" overflowY="scroll">
+      <Box width="100%" height="100%" padding="1rem">
         <VStack spacing="1rem" width="100%" alignItems="start">
           <GameDetails gameId={gameId} />
-          <HStack>
-            <Text fontWeight="bold">Input Tags:</Text>
-            <Box width="256px">
-              <GameInputTagsMultiSelect gameId={gameId} />
+          <HStack alignItems="start" width="100%">
+            <Text fontWeight="bold" minWidth="128px">
+              Input Tags:
+            </Text>
+            <Box flex={1} backgroundColor="white" padding="1rem">
+              <GameInputTagsFilterToggles gameId={gameId} />
             </Box>
           </HStack>
         </VStack>

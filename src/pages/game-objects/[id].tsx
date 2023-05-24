@@ -21,9 +21,7 @@ import GameObjectsTable, {
 } from "../../features/gameobjects/containers/GameObjectsTable";
 import ManageGameObjectButton from "../../features/gameobjects/containers/ManageGameObjectButton";
 import RelateGameObjects from "../../features/gameobjects/containers/RelateGameObjects";
-import TagMultiSelect, {
-  TagOption,
-} from "../../features/gameobjects/containers/TagMultiSelect";
+import TagBadges, { TagOption } from "../../features/tags/containers/TagBadges";
 import CustomEditable from "../../features/shared/components/CustomEditable";
 import { AdditionalColumns } from "../../features/shared/components/Table/containers/PaginatedTable";
 import TagFilterToggles from "../../features/tags/containers/TagFilterToggles";
@@ -237,7 +235,7 @@ function GameObjectDetails(props: GameObjectDetailsProps) {
         }}
       />
       <Box marginTop="1rem">
-        <TagMultiSelect
+        <TagBadges
           selected={selected}
           onChange={(nextTags) => {
             handleUpdateGameObject({

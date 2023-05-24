@@ -1,5 +1,4 @@
 import { Box, HStack, StackProps } from "@chakra-ui/react";
-import { Tag } from "@prisma/client";
 import { useMemo, useState } from "react";
 import { tagFilter } from "../../../server/shared/z";
 import { api, RouterInputs, RouterOutputs } from "../../../utils/api";
@@ -13,7 +12,7 @@ import PaginatedTable, {
 import SearchAndCreateBar from "../../shared/components/Table/containers/SearchAndCreateBar";
 import usePagination from "../../shared/components/Table/hooks/usePagination";
 import useSort from "../../shared/components/Table/hooks/useSort";
-import TagMultiSelect, { TagOption } from "./TagMultiSelect";
+import TagBadges from "../../tags/containers/TagBadges";
 
 export type GameObjectData =
   RouterOutputs["gameObjects"]["getAll"]["gameObjects"][0];
@@ -191,24 +190,12 @@ export default function GameObjectsTable(props: GameObjectsTableProps) {
       {
         name: "Tags",
         cell: (row) => {
-          const selected: TagOption[] =
-            row.tags.map((tag: Tag) => ({
-              label: tag.name || "Untitled Tag",
-              value: tag.id,
-            })) || [];
-
           return (
-            <Box width="256px">
-              <TagMultiSelect
-                selected={selected}
-                onChange={(nextTags) => {
-                  handleUpdateGameObject(row.id, {
-                    tags: nextTags,
-                  });
-                }}
-                isEditable={editable}
-              />
-            </Box>
+            <TagBadges
+              selectedTags={row.tags.map((t) => {
+                return { id: t.id, name: t.name };
+              })}
+            />
           );
         },
         sortable: true,

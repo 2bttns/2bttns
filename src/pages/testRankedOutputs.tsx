@@ -2,10 +2,9 @@ import { Box, Code, HStack, Select, Stack, Text } from "@chakra-ui/react";
 import { Player } from "@prisma/client";
 import { GetServerSideProps } from "next";
 import { useState } from "react";
-import TagMultiSelect, {
-  TagOption,
-} from "../features/gameobjects/containers/TagMultiSelect";
+import { MultiSelect } from "react-multi-select-component";
 import { NAVBAR_HEIGHT_PX } from "../features/navbar/views/Navbar";
+import { TagOption } from "../features/tags/containers/TagBadges";
 import { prisma } from "../server/db";
 import { api } from "../utils/api";
 import getSessionWithSignInRedirect from "../utils/getSessionWithSignInRedirect";
@@ -120,20 +119,21 @@ export default function TestRankedOutputs(props: ReturnType) {
 
         <HStack justifyContent="space-between">
           <Text fontWeight="bold">Input Tags</Text>
-          <Box width="250px">
-            <TagMultiSelect
-              selected={inputTags}
-              onChange={(nextTags) => {
-                setInputTags(
-                  nextTags.map((tag) => ({
-                    value: tag,
-                    label:
-                      tagsQuery.data?.tags.find((t) => t.id === tag)?.name ||
-                      "Unknown",
-                  }))
-                );
+          {/* TODO: Replace with filter tags sidebar */}
+          <Box width="250px" color="black">
+            <MultiSelect
+              options={
+                tagsQuery.data?.tags.map((tag) => ({
+                  label: tag.name,
+                  value: tag.id,
+                })) ?? []
+              }
+              value={inputTags}
+              onChange={(nextTags: any) => {
+                setInputTags(nextTags as any);
                 utils.gameObjects.getRanked.invalidate();
               }}
+              labelledBy="Select Input Tags"
             />
           </Box>
         </HStack>

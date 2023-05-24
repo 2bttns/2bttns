@@ -18,6 +18,7 @@ import TagFilterToggles, {
 export type SelectTagFiltersDrawerButtonProps = {
   tagFilter: TagFilter;
   setTagFilter: Dispatch<SetStateAction<TagFilter>>;
+  tagFilterLoading?: boolean;
   drawerTitle?: string;
   allAndNoneToggles?: TagFilterTogglesProps["allAndNoneToggles"];
 };
@@ -27,6 +28,7 @@ export function SelectTagFiltersDrawerButton(
   const {
     tagFilter,
     setTagFilter,
+    tagFilterLoading = false,
     drawerTitle = "Tag Filters",
     allAndNoneToggles = true,
   } = props;
@@ -37,6 +39,10 @@ export function SelectTagFiltersDrawerButton(
   }, [tagFilter]);
   const totalTagsCount = Object.keys(tagFilter).length;
 
+  const countString = tagFilterLoading
+    ? ""
+    : ` (${selectedTagsCount}/${totalTagsCount})`;
+
   return (
     <>
       <Button
@@ -44,7 +50,7 @@ export function SelectTagFiltersDrawerButton(
         variant={selectedTagsCount === 0 ? "outline" : "solid"}
         onClick={onOpen}
       >
-        Filters ({selectedTagsCount}/{totalTagsCount})
+        Filters{countString}
       </Button>
       <Drawer isOpen={isOpen} placement="right" onClose={onClose}>
         <DrawerOverlay />

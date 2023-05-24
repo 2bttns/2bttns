@@ -103,48 +103,6 @@ const TagByIdPage: NextPage<TagByIdPageProps> = (props) => {
     }
   };
 
-  const tagsQuery = api.tags.getAll.useQuery(
-    {},
-    { refetchOnWindowFocus: false }
-  );
-  const [tagFilter, setTagFilter] = useState<TagFilter>({
-    Untagged: {
-      tagName: "Untagged",
-      on: false,
-      colorScheme: "blackAlpha",
-    },
-    Applied: {
-      tagName: "Applied",
-      on: true,
-      colorScheme: "green",
-    },
-    "Not Applied": {
-      tagName: "Not Applied",
-      on: false,
-      colorScheme: "red",
-    },
-  });
-
-  const tagsToFilterGameObjectsBy = useMemo(() => {
-    return tagsQuery.data?.tags.filter((tag) => {
-      if (tag.id === tagId && tagFilter["Applied"]!.on) return true;
-      return tagFilter["Not Applied"]!.on;
-    });
-  }, [tagsQuery.data, tagFilter, tagId]);
-
-  const includeUntagged = tagFilter["Untagged"]!.on;
-
-  const includeTags = useMemo(() => {
-    return tagsToFilterGameObjectsBy?.map((tag) => tag.id) || [];
-  }, [tagsToFilterGameObjectsBy]);
-
-  const excludeTags = useMemo(() => {
-    if (tagFilter["Not Applied"]!.on && !tagFilter["Applied"]!.on) {
-      return [tagId];
-    }
-    return [];
-  }, [tagFilter]);
-
   const handleGameObjectCreated: GameObjectsTableProps["onGameObjectCreated"] =
     async (gameObjectId) => {
       try {
@@ -157,6 +115,8 @@ const TagByIdPage: NextPage<TagByIdPageProps> = (props) => {
         console.error(error);
       }
     };
+
+  const appliedTagFilters = useAppliedTagFilters({ tagId });
 
   if (getTagByIdQuery.isFetching) {
     return (
@@ -236,17 +196,17 @@ const TagByIdPage: NextPage<TagByIdPageProps> = (props) => {
         <Heading size="md">Tagged Game Objects</Heading>
         <GameObjectsTable
           tag={{
-            include: includeTags,
-            exclude: excludeTags,
-            includeUntagged,
+            include: appliedTagFilters.outputs.includeTags,
+            exclude: appliedTagFilters.outputs.excludeTags,
+            includeUntagged: appliedTagFilters.outputs.includeUntagged,
           }}
           onGameObjectCreated={handleGameObjectCreated}
           additionalTopBarContent={(selectedRows) => (
             <AdditionalTopBarContent
               selectedRows={selectedRows}
               tagId={tagId}
-              tagFilter={tagFilter}
-              setTagFilter={setTagFilter}
+              tagFilter={appliedTagFilters.state.tagFilter}
+              setTagFilter={appliedTagFilters.state.setTagFilter}
             />
           )}
           additionalColumns={getAdditionalColumns(tagId)}
@@ -274,6 +234,73 @@ const TagByIdPage: NextPage<TagByIdPageProps> = (props) => {
     </>
   );
 };
+
+// Tag Filters hook that provides "Applied", "Not Applied" , and "Untagged" filters
+// Exposes the tagFilter state and the include/exclude tags and includeUntagged outputs
+type UseAppliedTagFiltersProps = {
+  tagId: Tag["id"];
+};
+function useAppliedTagFilters(props: UseAppliedTagFiltersProps) {
+  const { tagId } = props;
+
+  const tagsCountQuery = api.tags.getCount.useQuery();
+  const tagsQuery = api.tags.getAll.useQuery(
+    { take: tagsCountQuery.data?.count },
+    {
+      enabled: tagsCountQuery.data?.count !== undefined,
+      refetchOnWindowFocus: false,
+    }
+  );
+  const [tagFilter, setTagFilter] = useState<TagFilter>({
+    Untagged: {
+      tagName: "Untagged",
+      on: false,
+      colorScheme: "blackAlpha",
+    },
+    Applied: {
+      tagName: "Applied",
+      on: true,
+      colorScheme: "green",
+    },
+    "Not Applied": {
+      tagName: "Not Applied",
+      on: false,
+      colorScheme: "red",
+    },
+  });
+
+  const tagsToFilterGameObjectsBy = useMemo(() => {
+    return tagsQuery.data?.tags.filter((tag) => {
+      if (tag.id === tagId && tagFilter["Applied"]!.on) return true;
+      return tagFilter["Not Applied"]!.on;
+    });
+  }, [tagsQuery.data, tagFilter, tagId]);
+
+  const includeUntagged = tagFilter["Untagged"]!.on;
+
+  const includeTags = useMemo(() => {
+    return tagsToFilterGameObjectsBy?.map((tag) => tag.id) || [];
+  }, [tagsToFilterGameObjectsBy]);
+
+  const excludeTags = useMemo(() => {
+    if (tagFilter["Not Applied"]!.on && !tagFilter["Applied"]!.on) {
+      return [tagId];
+    }
+    return [];
+  }, [tagFilter]);
+
+  return {
+    state: {
+      tagFilter,
+      setTagFilter,
+    },
+    outputs: {
+      includeTags,
+      excludeTags,
+      includeUntagged,
+    },
+  };
+}
 
 type AdditionalTopBarContentProps = {
   selectedRows: GameObjectData[];

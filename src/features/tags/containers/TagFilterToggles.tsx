@@ -18,9 +18,10 @@ export type TagFilterTogglesProps = {
   filter: TagFilter;
   setFilter: Dispatch<SetStateAction<TagFilter>>;
   allAndNoneToggles?: boolean;
+  handleChange?: (filter: TagFilter) => void;
 };
 export default function TagFilterToggles(props: TagFilterTogglesProps) {
-  const { filter, setFilter, allAndNoneToggles = false } = props;
+  const { filter, setFilter, allAndNoneToggles = false, handleChange } = props;
 
   const handleToggleAll = (on: boolean) => {
     setFilter((prevFilter) => {
@@ -30,6 +31,9 @@ export default function TagFilterToggles(props: TagFilterTogglesProps) {
         newFilter[tagId]!.on = on;
         newFilter[tagId]!.onToggle?.(on, newFilter, setFilter);
       });
+      if (handleChange) {
+        handleChange(newFilter);
+      }
       return newFilter;
     });
   };
@@ -70,6 +74,10 @@ export default function TagFilterToggles(props: TagFilterTogglesProps) {
               const newFilter = { ...prevFilter };
               newFilter[tagId]!.on = !on;
               newFilter[tagId]!.onToggle?.(!on, newFilter, setFilter);
+
+              if (handleChange) {
+                handleChange(newFilter);
+              }
               return newFilter;
             });
           };
