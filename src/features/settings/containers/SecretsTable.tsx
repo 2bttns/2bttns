@@ -98,9 +98,9 @@ export default function SecretsTable(props: SecretsTableProps) {
   };
 
   const createSecretsMutation = api.secrets.create.useMutation();
-  const handleCreateSecret = async () => {
+  const handleCreateSecret = async (name: string) => {
     try {
-      const result = await createSecretsMutation.mutateAsync({});
+      const result = await createSecretsMutation.mutateAsync({ name });
       if (onSecretCreated) await onSecretCreated(result.createdSecret);
       await utils.secrets.invalidate();
     } catch (error) {
@@ -195,7 +195,7 @@ export default function SecretsTable(props: SecretsTableProps) {
         <SearchAndCreateBar
           value={globalFilter}
           onChange={setGlobalFilter}
-          onCreate={handleCreateSecret}
+          onCreate={(name) => handleCreateSecret(name)}
         />
         {additionalTopBarContent && additionalTopBarContent(selectedRows)}
       </HStack>
