@@ -96,8 +96,6 @@ export default function TagsTable(props: TagsTableProps) {
 
   const createTagMutation = api.tags.create.useMutation();
   const handleCreateTag = async () => {
-    if (!allowCreate) return;
-
     try {
       const result = await createTagMutation.mutateAsync({
         name: globalFilter,
@@ -197,7 +195,7 @@ export default function TagsTable(props: TagsTableProps) {
         <SearchAndCreateBar
           value={globalFilter}
           onChange={setGlobalFilter}
-          onCreate={handleCreateTag}
+          onCreate={allowCreate ? handleCreateTag : undefined}
         />
         {additionalTopBarContent && additionalTopBarContent(selectedRows)}
       </HStack>

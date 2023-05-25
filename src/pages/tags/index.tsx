@@ -3,9 +3,10 @@ import { Tag } from "@prisma/client";
 import { GetServerSideProps, NextPage } from "next";
 import { Session } from "next-auth";
 import Head from "next/head";
+import TableActionMenu from "../../features/shared/components/Table/containers/TableActionsMenu";
 import DeleteTagButton from "../../features/tags/containers/DeleteTagButton";
 import ManageTagButton from "../../features/tags/containers/ManageTagButton";
-import TagsTable from "../../features/tags/containers/TagsTable";
+import TagsTable, { TagData } from "../../features/tags/containers/TagsTable";
 import { api } from "../../utils/api";
 import getSessionWithSignInRedirect from "../../utils/getSessionWithSignInRedirect";
 
@@ -44,11 +45,26 @@ const TagsPage: NextPage<TagsPageProps> = (props) => {
             columns: [{ cell: (row) => <CellActions tagId={row.id} /> }],
             dependencies: [],
           }}
+          additionalTopBarContent={(selectedRows) => (
+            <AdditionalTopBarContent selectedRows={selectedRows} />
+          )}
         />
       </Box>
     </>
   );
 };
+
+type AdditionalTopBarContentProps = {
+  selectedRows: TagData[];
+};
+function AdditionalTopBarContent(props: AdditionalTopBarContentProps) {
+  const { selectedRows } = props;
+  return (
+    <ButtonGroup>
+      <TableActionMenu selectedRows={selectedRows} />
+    </ButtonGroup>
+  );
+}
 
 export type CellActionsProps = {
   tagId: Tag["id"];

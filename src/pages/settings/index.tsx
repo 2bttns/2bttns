@@ -14,7 +14,10 @@ import { Secret } from "@prisma/client";
 import { GetServerSideProps, NextPage } from "next";
 import { Session } from "next-auth";
 import Head from "next/head";
-import SecretsTable from "../../features/settings/containers/SecretsTable";
+import SecretsTable, {
+  SecretData,
+} from "../../features/settings/containers/SecretsTable";
+import TableActionMenu from "../../features/shared/components/Table/containers/TableActionsMenu";
 import { api } from "../../utils/api";
 import getSessionWithSignInRedirect from "../../utils/getSessionWithSignInRedirect";
 
@@ -63,6 +66,9 @@ const SettingsPage: NextPage<SettingsPageProps> = (props) => {
                   ],
                   dependencies: [],
                 }}
+                additionalTopBarContent={(selectedRows) => (
+                  <AdditionalTopBarContent selectedRows={selectedRows} />
+                )}
               />
             </TabPanel>
             <TabPanel>
@@ -74,6 +80,18 @@ const SettingsPage: NextPage<SettingsPageProps> = (props) => {
     </>
   );
 };
+
+type AdditionalTopBarContentProps = {
+  selectedRows: SecretData[];
+};
+function AdditionalTopBarContent(props: AdditionalTopBarContentProps) {
+  const { selectedRows } = props;
+  return (
+    <ButtonGroup>
+      <TableActionMenu selectedRows={selectedRows} />
+    </ButtonGroup>
+  );
+}
 
 export type CellActionsProps = {
   secretId: Secret["id"];

@@ -26,6 +26,7 @@ export type GameObjectsTableProps = {
   editable?: boolean;
   constrainToRemainingSpaceProps?: Partial<ConstrainToRemainingSpaceProps>;
   topBarProps?: Partial<StackProps>;
+  allowCreate?: boolean;
 };
 
 export default function GameObjectsTable(props: GameObjectsTableProps) {
@@ -38,6 +39,7 @@ export default function GameObjectsTable(props: GameObjectsTableProps) {
     editable = true,
     constrainToRemainingSpaceProps,
     topBarProps,
+    allowCreate = true,
   } = props;
 
   const { perPage, currentPage, handlePageChange, handlePerRowsChange } =
@@ -224,7 +226,7 @@ export default function GameObjectsTable(props: GameObjectsTableProps) {
         <SearchAndCreateBar
           value={globalFilter}
           onChange={setGlobalFilter}
-          onCreate={handleCreateGameObject}
+          onCreate={allowCreate ? handleCreateGameObject : undefined}
         />
         {additionalTopBarContent && additionalTopBarContent(selectedRows)}
       </HStack>

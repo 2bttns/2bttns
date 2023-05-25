@@ -10,7 +10,7 @@ import {
   HStack,
   Text,
 } from "@chakra-ui/react";
-import { GameObject, Tag } from "@prisma/client";
+import { GameObject } from "@prisma/client";
 import type { GetServerSideProps, NextPage } from "next";
 import { Session } from "next-auth";
 import Head from "next/head";
@@ -21,10 +21,11 @@ import GameObjectsTable, {
 } from "../../features/gameobjects/containers/GameObjectsTable";
 import ManageGameObjectButton from "../../features/gameobjects/containers/ManageGameObjectButton";
 import RelateGameObjects from "../../features/gameobjects/containers/RelateGameObjects";
-import TagBadges, { TagOption } from "../../features/tags/containers/TagBadges";
 import CustomEditable from "../../features/shared/components/CustomEditable";
 import { AdditionalColumns } from "../../features/shared/components/Table/containers/PaginatedTable";
-import TagFilterToggles from "../../features/tags/containers/TagFilterToggles";
+import TableActionMenu from "../../features/shared/components/Table/containers/TableActionsMenu";
+import { SelectTagFiltersDrawerButton } from "../../features/tags/containers/SelectTagFiltersDrawerButton";
+import TagBadges from "../../features/tags/containers/TagBadges";
 import useAllTagFilters from "../../features/tags/hooks/useAllTagFilters";
 import { prisma } from "../../server/db";
 import { api, RouterInputs } from "../../utils/api";
@@ -77,15 +78,8 @@ const GameObjectById: NextPage<GameObjectByIdPageProps> = (props) => {
           <Divider />
         </Box>
 
-        <Box marginY="4px">
-          <TagFilterToggles
-            filter={tagFilter.state.tagFilter}
-            setFilter={tagFilter.state.setTagFilter}
-            allAndNoneToggles
-          />
-        </Box>
-
         <GameObjectsTable
+          allowCreate={false}
           gameObjectsToExclude={[gameObjectId]}
           tag={{
             include: tagFilter.results.includeTags,
@@ -93,14 +87,38 @@ const GameObjectById: NextPage<GameObjectByIdPageProps> = (props) => {
             includeUntagged: tagFilter.results.includeUntagged,
           }}
           additionalColumns={getAdditionalColumns(gameObjectId)}
+          // TODO: Fix table fitting -- maybe delay rendering until after the game object details have rendered?
           constrainToRemainingSpaceProps={{
             bottomOffset: 120,
           }}
+          additionalTopBarContent={(selectedRows) => (
+            <AdditionalTopBarContent
+              selectedRows={selectedRows}
+              tagFilter={tagFilter}
+            />
+          )}
         />
       </Box>
     </>
   );
 };
+
+type AdditionalTopBarContentProps = {
+  selectedRows: GameObjectData[];
+  tagFilter: ReturnType<typeof useAllTagFilters>;
+};
+function AdditionalTopBarContent(props: AdditionalTopBarContentProps) {
+  const { selectedRows, tagFilter } = props;
+  return (
+    <ButtonGroup>
+      <TableActionMenu selectedRows={selectedRows} />
+      <SelectTagFiltersDrawerButton
+        tagFilter={tagFilter.state.tagFilter}
+        setTagFilter={tagFilter.state.setTagFilter}
+      />
+    </ButtonGroup>
+  );
+}
 
 function getAdditionalColumns(
   gameObjectId: GameObject["id"]
@@ -162,12 +180,6 @@ function GameObjectDetails(props: GameObjectDetailsProps) {
       window.alert("Error updating game object. See console for details.");
     }
   };
-
-  const selected: TagOption[] =
-    gameObject?.tags?.map((tag: Tag) => ({
-      label: tag.name || "Untitled Tag",
-      value: tag.id,
-    })) || [];
 
   const router = useRouter();
   const onDeleted = () => {
@@ -236,14 +248,8 @@ function GameObjectDetails(props: GameObjectDetailsProps) {
       />
       <Box marginTop="1rem">
         <TagBadges
-          selected={selected}
-          onChange={(nextTags) => {
-            handleUpdateGameObject({
-              id: gameObject.id,
-              data: { tags: nextTags },
-            });
-          }}
-          isEditable
+          selectedTags={gameObject.tags}
+          collapseLetterLimit="disabled"
         />
       </Box>
     </Box>
