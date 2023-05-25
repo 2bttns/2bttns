@@ -1,13 +1,4 @@
-import { ChevronDownIcon } from "@chakra-ui/icons";
-import {
-  Box,
-  Button,
-  ButtonGroup,
-  Menu,
-  MenuButton,
-  MenuItem,
-  MenuList,
-} from "@chakra-ui/react";
+import { Box, ButtonGroup } from "@chakra-ui/react";
 import type { GetServerSideProps } from "next";
 import { Session } from "next-auth";
 import Head from "next/head";
@@ -17,6 +8,7 @@ import GameObjectsTable, {
 } from "../../features/gameobjects/containers/GameObjectsTable";
 import ManageGameObjectButton from "../../features/gameobjects/containers/ManageGameObjectButton";
 import { AdditionalColumns } from "../../features/shared/components/Table/containers/PaginatedTable";
+import TableActionsMenu from "../../features/shared/components/Table/containers/TableActionsMenu";
 import { EditTagsForGameObjectsButtonDrawer } from "../../features/tags/containers/EditTagsForGameObjectsButtonDrawer";
 import { SelectTagFiltersDrawerButton } from "../../features/tags/containers/SelectTagFiltersDrawerButton";
 import useAllTagFilters from "../../features/tags/hooks/useAllTagFilters";
@@ -85,24 +77,7 @@ function AdditionalTopBarContent(props: AdditionalTopBarContentProps) {
     <>
       <ButtonGroup>
         {/* <CsvImport />- @TODO: Move to Menu */}
-        <Menu>
-          <MenuButton as={Button} rightIcon={<ChevronDownIcon />}>
-            Actions
-          </MenuButton>
-          <MenuList zIndex={99}>
-            <MenuItem
-              onClick={() => {
-                window.alert(`Delete ${selectedRows.length} selected items?`);
-              }}
-            >
-              Delete
-            </MenuItem>
-            <MenuItem>Tag</MenuItem>
-            <MenuItem>Export CSV</MenuItem>
-            {/* Update CsvImport function & export selected items */}
-            <MenuItem>Import CSV</MenuItem>
-          </MenuList>
-        </Menu>
+        <TableActionsMenu selectedRows={selectedRows} />
         <SelectTagFiltersDrawerButton
           tagFilter={tagFilter.state.tagFilter}
           setTagFilter={tagFilter.state.setTagFilter}
