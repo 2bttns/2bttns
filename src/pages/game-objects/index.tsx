@@ -10,6 +10,7 @@ import ManageGameObjectButton from "../../features/gameobjects/containers/Manage
 import useDeleteGameObjects from "../../features/gameobjects/hooks/useDeleteGameObjects";
 import { AdditionalColumns } from "../../features/shared/components/Table/containers/PaginatedTable";
 import TableActionsMenu, {
+  TableActionsMenuItemBulkTag,
   TableActionsMenuItemDelete,
 } from "../../features/shared/components/Table/containers/TableActionsMenu";
 import { EditTagsForGameObjectsButtonDrawer } from "../../features/tags/containers/EditTagsForGameObjectsButtonDrawer";
@@ -85,6 +86,7 @@ function AdditionalTopBarContent(props: AdditionalTopBarContentProps) {
           selectedRows={selectedRows}
           actionItems={(context) => (
             <>
+              <TableActionsMenuItemBulkTag context={context} />
               <TableActionsMenuItemDelete
                 context={context}
                 handleDelete={async () => {
@@ -112,7 +114,7 @@ function getAdditionalColumns(): AdditionalColumns<GameObjectData> {
       {
         id: "actions",
         cell: (row) => {
-          return <Actions gameObjectId={row.id} gameObjectName={row.name} />;
+          return <Actions gameObjectId={row.id} />;
         },
       },
     ],
@@ -122,18 +124,14 @@ function getAdditionalColumns(): AdditionalColumns<GameObjectData> {
 
 type ActionsProps = {
   gameObjectId: GameObjectData["id"];
-  gameObjectName: GameObjectData["name"];
 };
 function Actions(props: ActionsProps) {
-  const { gameObjectId, gameObjectName } = props;
+  const { gameObjectId } = props;
 
   return (
     <>
       <ButtonGroup width="100%" justifyContent="center">
-        <EditTagsForGameObjectsButtonDrawer
-          gameObjectId={gameObjectId}
-          gameObjectName={gameObjectName}
-        />
+        <EditTagsForGameObjectsButtonDrawer gameObjectIds={[gameObjectId]} />
         <ManageGameObjectButton gameObjectId={gameObjectId} />
         <DeleteGameObjectButton gameObjectId={gameObjectId} />
       </ButtonGroup>

@@ -8,6 +8,8 @@ import {
   useDisclosure,
 } from "@chakra-ui/react";
 import React from "react";
+import { GameObjectData } from "../../../../gameobjects/containers/GameObjectsTable";
+import { EditTagsForGameObjectsDrawer } from "../../../../tags/containers/EditTagsForGameObjectsButtonDrawer";
 import { ConfirmAlert } from "../../ConfirmAlert";
 
 export type TableActionMenuProps<T extends Object> = {
@@ -50,6 +52,9 @@ export type TableActionsMenuItemDeleteProps<T extends Object> = {
   ) => Promise<void>;
 };
 
+/**
+ * Add this to the `actionItems` prop of a `TableActionMenu` to add a delete button for bulk-deleting selected items
+ */
 export function TableActionsMenuItemDelete<T extends Object>(
   props: TableActionsMenuItemDeleteProps<T>
 ) {
@@ -83,6 +88,42 @@ export function TableActionsMenuItemDelete<T extends Object>(
         isDisabled={context.selectedRows.length === 0}
       >
         Delete Selected ({context.selectedRows.length})
+      </MenuItem>
+    </>
+  );
+}
+
+//
+//
+//
+
+export type TableActionsMenuItemBulkTag<T extends Object> = {
+  context: TableActionMenuContext<T>;
+};
+
+/**
+ * Add this to the `actionItems` prop of a `TableActionMenu` to add bulk-tagging UI that can manage tags for multiple selected items
+ *
+ * Supported for Game Objects only
+ *
+ * TODO: Add support for Games
+ */
+export function TableActionsMenuItemBulkTag(
+  props: TableActionsMenuItemBulkTag<GameObjectData>
+) {
+  const { context } = props;
+
+  const { isOpen, onOpen, onClose } = useDisclosure();
+
+  return (
+    <>
+      <EditTagsForGameObjectsDrawer
+        isOpen={isOpen}
+        onClose={onClose}
+        gameObjectIds={context.selectedRows.map((row) => row.id)}
+      />
+      <MenuItem onClick={onOpen} isDisabled={context.selectedRows.length === 0}>
+        Bulk Tag ({context.selectedRows.length})
       </MenuItem>
     </>
   );

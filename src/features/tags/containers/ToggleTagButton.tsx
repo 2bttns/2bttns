@@ -2,46 +2,19 @@ import { LinkIcon } from "@chakra-ui/icons";
 import { ButtonProps, IconButton, Spinner, Tooltip } from "@chakra-ui/react";
 import { GameObject, Tag } from "@prisma/client";
 import { useEffect, useMemo, useState } from "react";
-import { api } from "../../../utils/api";
+import { useToggleTagForGameObjects } from "../hooks/useToggleTagForGameObjects";
 
 export type ToggleTagButtonProps = {
   tagId: Tag["id"];
-  gameObjectId: GameObject["id"];
+  gameObjectIds: GameObject["id"][];
   loadingDelayMs?: number;
 };
 
 export default function ToggleTagButton(props: ToggleTagButtonProps) {
-  const { tagId, gameObjectId, loadingDelayMs = 250 } = props;
+  const { tagId, gameObjectIds, loadingDelayMs = 250 } = props;
 
-  const utils = api.useContext();
-  const getGameObjectQuery = api.gameObjects.getById.useQuery({
-    id: gameObjectId,
-    includeTags: true,
-  });
-  const isTagApplied = getGameObjectQuery.data?.gameObject?.tags.some(
-    (tag) => tag.id === tagId
-  );
-
-  const updateTagMutation = api.tags.updateById.useMutation();
-  const handleApplyTag = async () => {
-    try {
-      await updateTagMutation.mutateAsync({
-        id: tagId,
-        data: {
-          addGameObjects: isTagApplied ? undefined : [gameObjectId],
-          removeGameObjects: isTagApplied ? [gameObjectId] : undefined,
-        },
-      });
-      await utils.gameObjects.invalidate();
-    } catch (error) {
-      window.alert("Error deleting game object\n See console for details");
-      console.error(error);
-    }
-  };
-
-  const areQueriesLoading = useMemo(() => {
-    return getGameObjectQuery.isLoading || updateTagMutation.isLoading;
-  }, [getGameObjectQuery.isLoading, updateTagMutation.isLoading]);
+  const { isTagAppliedToAll, handleApplyTag, areQueriesLoading } =
+    useToggleTagForGameObjects({ tagId, gameObjectIds });
 
   const [isWaitingForLoadDelay, setIsWaitingForLoadDelay] = useState(false);
   useEffect(() => {
@@ -61,24 +34,27 @@ export default function ToggleTagButton(props: ToggleTagButtonProps) {
   }, [areQueriesLoading, isWaitingForLoadDelay]);
 
   const label = useMemo(() => {
+    if (gameObjectIds.length > 1) {
+      if (isLoading) return `Loading`;
+      if (isTagAppliedToAll) return `Remove tag from all`;
+      return `Apply tag to all`;
+    }
     if (isLoading) return undefined;
-    if (isTagApplied) return "Remove tag";
+    if (isTagAppliedToAll) return "Remove tag";
     return "Apply tag";
-  }, [isTagApplied, isLoading]);
+  }, [isTagAppliedToAll, isLoading]);
 
   const ariaLabel = useMemo(() => {
-    if (isLoading)
-      return `Loading - Toggle tag id ${tagId} for game object with ID: ${gameObjectId}`;
-    if (isTagApplied)
-      return `Remove tag with ID: ${tagId} for game object with ID: ${gameObjectId}`;
-    return `Apply tag with ID: ${tagId} for game object with ID: ${gameObjectId}`;
-  }, [isTagApplied, isLoading, gameObjectId, tagId]);
+    if (isLoading) return `Loading`;
+    if (isTagAppliedToAll) return `Remove tag with ID: ${tagId}`;
+    return `Apply tag with ID: ${tagId}`;
+  }, [isTagAppliedToAll, isLoading, tagId]);
 
   const colorScheme = useMemo<ButtonProps["colorScheme"]>(() => {
     if (isLoading) return "gray";
-    if (isTagApplied) return "red";
+    if (isTagAppliedToAll) return "red";
     return "green";
-  }, [isTagApplied, isLoading]);
+  }, [isTagAppliedToAll, isLoading]);
 
   const icon = useMemo(() => {
     if (isLoading) return <Spinner size="sm" />;
@@ -95,6 +71,7 @@ export default function ToggleTagButton(props: ToggleTagButtonProps) {
         aria-label={ariaLabel}
         size="sm"
         variant="outline"
+        isDisabled={isLoading}
       />
     </Tooltip>
   );

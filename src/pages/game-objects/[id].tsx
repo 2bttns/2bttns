@@ -27,6 +27,7 @@ import { AdditionalColumns } from "../../features/shared/components/Table/contai
 import TableActionMenu, {
   TableActionsMenuItemDelete,
 } from "../../features/shared/components/Table/containers/TableActionsMenu";
+import { EditTagsForGameObjectsButtonDrawer } from "../../features/tags/containers/EditTagsForGameObjectsButtonDrawer";
 import { SelectTagFiltersDrawerButton } from "../../features/tags/containers/SelectTagFiltersDrawerButton";
 import TagBadges from "../../features/tags/containers/TagBadges";
 import useAllTagFilters from "../../features/tags/hooks/useAllTagFilters";
@@ -160,6 +161,7 @@ function getAdditionalColumns(
         cell: ({ id }) => {
           return (
             <ButtonGroup width="100%" justifyContent="end">
+              <EditTagsForGameObjectsButtonDrawer gameObjectIds={[id]} />
               <ManageGameObjectButton gameObjectId={id} />
             </ButtonGroup>
           );

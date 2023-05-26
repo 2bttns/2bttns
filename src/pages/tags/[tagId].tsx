@@ -306,7 +306,7 @@ function getAdditionalColumns(
         cell: ({ id }) => {
           return (
             <ButtonGroup width="100%" justifyContent="end">
-              <ToggleTagButton gameObjectId={id} tagId={tagId} />
+              <ToggleTagButton gameObjectIds={[id]} tagId={tagId} />
               <ManageGameObjectButton gameObjectId={id} />
             </ButtonGroup>
           );
