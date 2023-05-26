@@ -215,7 +215,15 @@ export default function GamesTable(props: GamesTableProps) {
     ];
   }, [editable]);
 
-  const { selectedRows, handleSelectedRowsChange } = useSelectRows<GameData>();
+  const { selectedRows, handleSelectedRowsChange, toggleCleared } =
+    useSelectRows<GameData>({
+      clearRowsUponChangeDependencies: [
+        globalFilter,
+        tag,
+        perPage,
+        currentPage,
+      ],
+    });
 
   return (
     <Box>
@@ -244,6 +252,7 @@ export default function GamesTable(props: GamesTableProps) {
               onSort={handleSort}
               selectedRows={selectedRows}
               totalRows={gamesCountQuery.data?.count ?? 0}
+              toggleCleared={toggleCleared}
             />
           );
         }}

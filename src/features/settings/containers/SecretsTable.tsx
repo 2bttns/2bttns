@@ -186,8 +186,10 @@ export default function SecretsTable(props: SecretsTableProps) {
     ];
   }, [editable]);
 
-  const { selectedRows, handleSelectedRowsChange } =
-    useSelectRows<SecretData>();
+  const { selectedRows, handleSelectedRowsChange, toggleCleared } =
+    useSelectRows<SecretData>({
+      clearRowsUponChangeDependencies: [globalFilter, perPage, currentPage],
+    });
 
   return (
     <Box>
@@ -216,6 +218,7 @@ export default function SecretsTable(props: SecretsTableProps) {
               onSort={handleSort}
               selectedRows={selectedRows}
               totalRows={secretsCountQuery.data?.count ?? 0}
+              toggleCleared={toggleCleared}
             />
           );
         }}

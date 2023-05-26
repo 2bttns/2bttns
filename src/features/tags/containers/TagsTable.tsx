@@ -184,7 +184,10 @@ export default function TagsTable(props: TagsTableProps) {
     ];
   }, [editable, numColumnsToHide]);
 
-  const { selectedRows, handleSelectedRowsChange } = useSelectRows<TagData>();
+  const { selectedRows, handleSelectedRowsChange, toggleCleared } =
+    useSelectRows<TagData>({
+      clearRowsUponChangeDependencies: [globalFilter, perPage, currentPage],
+    });
 
   return (
     <Box>
@@ -213,6 +216,7 @@ export default function TagsTable(props: TagsTableProps) {
               onSort={handleSort}
               selectedRows={selectedRows}
               totalRows={tagsCountQuery.data?.count ?? 0}
+              toggleCleared={toggleCleared}
             />
           );
         }}
