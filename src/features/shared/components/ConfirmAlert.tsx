@@ -6,6 +6,7 @@ import {
   AlertDialogHeader,
   AlertDialogOverlay,
   Button,
+  ButtonProps,
 } from "@chakra-ui/react";
 import { useRef } from "react";
 
@@ -17,6 +18,8 @@ export type ConfirmAlertProps = {
   isOpen: boolean;
   onClose: () => void;
   children?: React.ReactNode;
+  cancelButtonProps?: ButtonProps;
+  confirmButtonProps?: ButtonProps;
 };
 
 export function ConfirmAlert(props: ConfirmAlertProps) {
@@ -28,6 +31,8 @@ export function ConfirmAlert(props: ConfirmAlertProps) {
     isOpen,
     onClose,
     children,
+    cancelButtonProps,
+    confirmButtonProps,
   } = props;
 
   const cancelRef = useRef<HTMLButtonElement>(null);
@@ -54,10 +59,19 @@ export function ConfirmAlert(props: ConfirmAlertProps) {
               <AlertDialogBody>{children}</AlertDialogBody>
 
               <AlertDialogFooter>
-                <Button ref={cancelRef} onClick={onClose}>
+                <Button
+                  ref={cancelRef}
+                  onClick={onClose}
+                  {...cancelButtonProps}
+                >
                   {cancelText}
                 </Button>
-                <Button colorScheme="red" onClick={handleConfirmClicked} ml={3}>
+                <Button
+                  colorScheme="red"
+                  onClick={handleConfirmClicked}
+                  ml={3}
+                  {...confirmButtonProps}
+                >
                   {confirmText}
                 </Button>
               </AlertDialogFooter>

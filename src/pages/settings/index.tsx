@@ -9,17 +9,14 @@ import {
   TabPanels,
   Tabs,
   Tooltip,
+  useDisclosure,
 } from "@chakra-ui/react";
 import { Secret } from "@prisma/client";
 import { GetServerSideProps, NextPage } from "next";
 import { Session } from "next-auth";
 import Head from "next/head";
-import SecretsTable, {
-  SecretData,
-} from "../../features/settings/containers/SecretsTable";
-import TableActionMenu, {
-  TableActionsMenuItemDelete,
-} from "../../features/shared/components/Table/containers/TableActionsMenu";
+import SecretsTable from "../../features/settings/containers/SecretsTable";
+import { ConfirmAlert } from "../../features/shared/components/ConfirmAlert";
 import { api } from "../../utils/api";
 import getSessionWithSignInRedirect from "../../utils/getSessionWithSignInRedirect";
 
@@ -68,9 +65,6 @@ const SettingsPage: NextPage<SettingsPageProps> = (props) => {
                   ],
                   dependencies: [],
                 }}
-                additionalTopBarContent={(selectedRows) => (
-                  <AdditionalTopBarContent selectedRows={selectedRows} />
-                )}
               />
             </TabPanel>
             <TabPanel>
@@ -83,28 +77,6 @@ const SettingsPage: NextPage<SettingsPageProps> = (props) => {
   );
 };
 
-type AdditionalTopBarContentProps = {
-  selectedRows: SecretData[];
-};
-function AdditionalTopBarContent(props: AdditionalTopBarContentProps) {
-  const { selectedRows } = props;
-  return (
-    <ButtonGroup>
-      <TableActionMenu
-        selectedRows={selectedRows}
-        actionItems={(context) => (
-          <>
-            <TableActionsMenuItemDelete
-              context={context}
-              handleDelete={console.log}
-            />
-          </>
-        )}
-      />
-    </ButtonGroup>
-  );
-}
-
 export type CellActionsProps = {
   secretId: Secret["id"];
 };
@@ -112,6 +84,7 @@ function CellActions(props: CellActionsProps) {
   const { secretId } = props;
   const utils = api.useContext();
 
+  const regenerateSecretDisclosure = useDisclosure();
   const updateSecretMutation = api.secrets.updateById.useMutation();
   const regenerateSecret = async (id: Secret["id"]) => {
     try {
@@ -126,6 +99,7 @@ function CellActions(props: CellActionsProps) {
     }
   };
 
+  const deleteSecretDisclosure = useDisclosure();
   const deleteSecretMutation = api.secrets.deleteById.useMutation();
   const handleDeleteSecret = async (id: Secret["id"]) => {
     try {
@@ -139,30 +113,48 @@ function CellActions(props: CellActionsProps) {
 
   return (
     <ButtonGroup width="100%" justifyContent="end">
-      <Tooltip label={`Regenerate Secret`} placement="top">
-        <IconButton
-          colorScheme="blue"
-          onClick={() => {
-            regenerateSecret(secretId);
-          }}
-          icon={<RepeatIcon />}
-          aria-label={`Regenerate secret`}
-          size="sm"
-          variant="outline"
-        />
-      </Tooltip>
-      <Tooltip label={`Delete`} placement="top">
-        <IconButton
-          colorScheme="red"
-          onClick={() => {
-            handleDeleteSecret(secretId);
-          }}
-          icon={<DeleteIcon />}
-          aria-label={`Delete secret with ID: ${secretId}`}
-          size="sm"
-          variant="outline"
-        />
-      </Tooltip>
+      <>
+        <ConfirmAlert
+          alertTitle={`Regenerate secret: ${secretId}?`}
+          isOpen={regenerateSecretDisclosure.isOpen}
+          onClose={regenerateSecretDisclosure.onClose}
+          handleConfirm={() => regenerateSecret(secretId)}
+          confirmButtonProps={{ colorScheme: "blue" }}
+        >
+          Your current secret will be invalidated.
+        </ConfirmAlert>
+        <Tooltip label={`Regenerate Secret`} placement="top">
+          <IconButton
+            colorScheme="blue"
+            onClick={regenerateSecretDisclosure.onOpen}
+            icon={<RepeatIcon />}
+            aria-label={`Regenerate secret`}
+            size="sm"
+            variant="outline"
+          />
+        </Tooltip>
+      </>
+
+      <>
+        <ConfirmAlert
+          alertTitle={`Delete secret: ${secretId}?`}
+          isOpen={deleteSecretDisclosure.isOpen}
+          onClose={deleteSecretDisclosure.onClose}
+          handleConfirm={() => handleDeleteSecret(secretId)}
+        >
+          This action cannot be undone.
+        </ConfirmAlert>
+        <Tooltip label={`Delete`} placement="top">
+          <IconButton
+            colorScheme="red"
+            onClick={deleteSecretDisclosure.onOpen}
+            icon={<DeleteIcon />}
+            aria-label={`Delete secret with ID: ${secretId}`}
+            size="sm"
+            variant="outline"
+          />
+        </Tooltip>
+      </>
     </ButtonGroup>
   );
 }
