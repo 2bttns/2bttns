@@ -1,11 +1,5 @@
 import { ChevronDownIcon } from "@chakra-ui/icons";
 import {
-  AlertDialog,
-  AlertDialogBody,
-  AlertDialogContent,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogOverlay,
   Button,
   Menu,
   MenuButton,
@@ -14,6 +8,7 @@ import {
   useDisclosure,
 } from "@chakra-ui/react";
 import React, { useRef } from "react";
+import { ConfirmAlert } from "../../ConfirmAlert";
 
 export type TableActionMenuProps<T extends Object> = {
   selectedRows: T[];
@@ -74,34 +69,14 @@ export function TableActionsMenuItemDelete<T extends Object>(
 
   return (
     <>
-      <>
-        <AlertDialog
-          isOpen={isOpen}
-          leastDestructiveRef={cancelRef}
-          onClose={onClose}
-        >
-          <AlertDialogOverlay>
-            <AlertDialogContent>
-              <AlertDialogHeader fontSize="lg" fontWeight="bold">
-                Delete {context.selectedRows.length} selected items?
-              </AlertDialogHeader>
-
-              <AlertDialogBody>
-                Are you sure? You can't undo this action afterwards.
-              </AlertDialogBody>
-
-              <AlertDialogFooter>
-                <Button ref={cancelRef} onClick={onClose}>
-                  Cancel
-                </Button>
-                <Button colorScheme="red" onClick={handleConfirmDelete} ml={3}>
-                  Delete
-                </Button>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialogOverlay>
-        </AlertDialog>
-      </>
+      <ConfirmAlert
+        alertTitle={`Delete ${context.selectedRows.length} selected items?`}
+        handleConfirm={handleConfirmDelete}
+        isOpen={isOpen}
+        onClose={onClose}
+      >
+        Are you sure? You can't undo this action afterwards.
+      </ConfirmAlert>
       <MenuItem
         onClick={onOpen}
         color="red.500"
