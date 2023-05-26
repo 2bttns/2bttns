@@ -21,6 +21,7 @@ import GameObjectsTable, {
 } from "../../features/gameobjects/containers/GameObjectsTable";
 import ManageGameObjectButton from "../../features/gameobjects/containers/ManageGameObjectButton";
 import RelateGameObjects from "../../features/gameobjects/containers/RelateGameObjects";
+import useDeleteGameObjects from "../../features/gameobjects/hooks/useDeleteGameObjects";
 import CustomEditable from "../../features/shared/components/CustomEditable";
 import { AdditionalColumns } from "../../features/shared/components/Table/containers/PaginatedTable";
 import TableActionMenu, {
@@ -111,6 +112,8 @@ type AdditionalTopBarContentProps = {
 };
 function AdditionalTopBarContent(props: AdditionalTopBarContentProps) {
   const { selectedRows, tagFilter } = props;
+
+  const { handleDeleteGameObjects } = useDeleteGameObjects();
   return (
     <ButtonGroup>
       <TableActionMenu
@@ -119,7 +122,11 @@ function AdditionalTopBarContent(props: AdditionalTopBarContentProps) {
           <>
             <TableActionsMenuItemDelete
               context={context}
-              handleDelete={console.log}
+              handleDelete={async (selectedRows) => {
+                await handleDeleteGameObjects(
+                  selectedRows.map((row) => row.id)
+                );
+              }}
             />
           </>
         )}
