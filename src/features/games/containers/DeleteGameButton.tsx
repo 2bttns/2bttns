@@ -1,7 +1,8 @@
 import { DeleteIcon } from "@chakra-ui/icons";
-import { IconButton, Tooltip } from "@chakra-ui/react";
+import { IconButton, Tooltip, useDisclosure } from "@chakra-ui/react";
 import { Game } from "@prisma/client";
 import { api } from "../../../utils/api";
+import { ConfirmAlert } from "../../shared/components/ConfirmAlert";
 
 export type DeleteGameButtonProps = {
   gameId: Game["id"];
@@ -10,6 +11,8 @@ export type DeleteGameButtonProps = {
 
 export default function DeleteGameButton(props: DeleteGameButtonProps) {
   const { gameId, onDeleted } = props;
+
+  const { isOpen, onOpen, onClose } = useDisclosure();
 
   const utils = api.useContext();
   const deleteGameMutation = api.games.deleteById.useMutation();
@@ -27,15 +30,25 @@ export default function DeleteGameButton(props: DeleteGameButtonProps) {
   };
 
   return (
-    <Tooltip label={`Delete`} placement="top">
-      <IconButton
-        colorScheme="red"
-        onClick={handleDeleteGame}
-        icon={<DeleteIcon />}
-        aria-label={`Delete game with ID: ${gameId}`}
-        size="sm"
-        variant="outline"
-      />
-    </Tooltip>
+    <>
+      <ConfirmAlert
+        alertTitle={`Delete Game: ${gameId}?`}
+        isOpen={isOpen}
+        onClose={onClose}
+        handleConfirm={handleDeleteGame}
+      >
+        This action cannot be undone.
+      </ConfirmAlert>
+      <Tooltip label={`Delete`} placement="top">
+        <IconButton
+          colorScheme="red"
+          onClick={onOpen}
+          icon={<DeleteIcon />}
+          aria-label={`Delete game with ID: ${gameId}`}
+          size="sm"
+          variant="outline"
+        />
+      </Tooltip>
+    </>
   );
 }

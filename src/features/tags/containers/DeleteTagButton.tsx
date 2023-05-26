@@ -1,7 +1,7 @@
 import { DeleteIcon } from "@chakra-ui/icons";
-import { IconButton, Tooltip } from "@chakra-ui/react";
-import { Tag } from "@prisma/client";
+import { IconButton, Tooltip, useDisclosure } from "@chakra-ui/react";
 import { api } from "../../../utils/api";
+import { ConfirmAlert } from "../../shared/components/ConfirmAlert";
 import { TagData } from "./TagsTable";
 
 export type DeleteTagButtonProps = {
@@ -10,11 +10,13 @@ export type DeleteTagButtonProps = {
 export default function DeleteTagButton(props: DeleteTagButtonProps) {
   const { tagId } = props;
 
+  const { isOpen, onOpen, onClose } = useDisclosure();
+
   const utils = api.useContext();
   const deleteTagMutation = api.tags.deleteById.useMutation();
-  const handleDeleteTag = async (id: Tag["id"]) => {
+  const handleDeleteTag = async () => {
     try {
-      await deleteTagMutation.mutateAsync({ id });
+      await deleteTagMutation.mutateAsync({ id: tagId });
       await utils.tags.invalidate();
     } catch (error) {
       console.error(error);
@@ -23,17 +25,25 @@ export default function DeleteTagButton(props: DeleteTagButtonProps) {
   };
 
   return (
-    <Tooltip label={`Delete`} placement="top">
-      <IconButton
-        colorScheme="red"
-        onClick={() => {
-          handleDeleteTag(tagId);
-        }}
-        icon={<DeleteIcon />}
-        aria-label={`Delete tag with ID: ${tagId}`}
-        size="sm"
-        variant="outline"
-      />
-    </Tooltip>
+    <>
+      <ConfirmAlert
+        alertTitle={`Delete Game: ${tagId}?`}
+        isOpen={isOpen}
+        onClose={onClose}
+        handleConfirm={handleDeleteTag}
+      >
+        This action cannot be undone.
+      </ConfirmAlert>
+      <Tooltip label={`Delete`} placement="top">
+        <IconButton
+          colorScheme="red"
+          onClick={onOpen}
+          icon={<DeleteIcon />}
+          aria-label={`Delete tag with ID: ${tagId}`}
+          size="sm"
+          variant="outline"
+        />
+      </Tooltip>
+    </>
   );
 }
