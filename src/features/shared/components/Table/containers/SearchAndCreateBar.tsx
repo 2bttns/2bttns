@@ -98,14 +98,16 @@ export default function SearchAndCreateBar(props: SearchAndCreateBarProps) {
           </InputRightElement>
         )}
         <InputRightElement marginRight={onCreate ? "2rem" : "0rem"}>
-          <Tooltip label="Clear input" placement="bottom-end" hasArrow>
-            <CloseIcon
-              color="gray.500"
-              display={value ? "block" : "none"}
-              onClick={clearInput}
-              cursor="pointer"
-            />
-          </Tooltip>
+          {!isCreating && (
+            <Tooltip label="Clear input" placement="bottom-end" hasArrow>
+              <CloseIcon
+                color="gray.500"
+                display={value ? "block" : "none"}
+                onClick={clearInput}
+                cursor="pointer"
+              />
+            </Tooltip>
+          )}
         </InputRightElement>
       </InputGroup>
     </Stack>
