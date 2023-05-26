@@ -52,7 +52,12 @@ export default function TagBadges(props: TagBadgesProps) {
 
   const tagBadges = selectedTags.map(({ id, name }) => {
     return (
-      <Tooltip label={`Click to view tag: ${name}`} placement="top" hasArrow>
+      <Tooltip
+        label={`Click to view tag: ${name}`}
+        placement="top"
+        hasArrow
+        key={`tag-badge-${id}`}
+      >
         <NextLink href={`/tags/${id}`}>
           <ChakraTag size="sm" variant="solid" colorScheme={"green"} mr={1}>
             {name}

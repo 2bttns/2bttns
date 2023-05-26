@@ -10,20 +10,21 @@ import PaginatedTable, {
 } from "../../shared/components/Table/containers/PaginatedTable";
 import SearchAndCreateBar from "../../shared/components/Table/containers/SearchAndCreateBar";
 import usePagination from "../../shared/components/Table/hooks/usePagination";
+import useSelectRows from "../../shared/components/Table/hooks/useSelectRows";
 import useSort from "../../shared/components/Table/hooks/useSort";
 
 export type TagData = RouterOutputs["tags"]["getAll"]["tags"][0];
 
 export type TagsTableProps = {
-  onTagCreated?: (tag: TagData) => Promise<void>;
   additionalColumns?: PaginatedTableProps<TagData>["additionalColumns"];
   additionalTopBarContent?: (selectedRows: TagData[]) => React.ReactNode;
-  editable?: boolean;
-  constrainToRemainingSpaceProps?: Partial<ConstrainToRemainingSpaceProps>;
-  topBarProps?: Partial<StackProps>;
-  hideColumns?: HideTagsTableColumn;
-  areRowsSelectable?: boolean;
   allowCreate?: boolean;
+  areRowsSelectable?: boolean;
+  constrainToRemainingSpaceProps?: Partial<ConstrainToRemainingSpaceProps>;
+  editable?: boolean;
+  hideColumns?: HideTagsTableColumn;
+  onTagCreated?: (tag: TagData) => Promise<void>;
+  topBarProps?: Partial<StackProps>;
 };
 
 export type TagsTableColumns = "id" | "name" | "description" | "updatedAt";
@@ -34,15 +35,15 @@ export type HideTagsTableColumn = {
 
 export default function TagsTable(props: TagsTableProps) {
   const {
-    onTagCreated,
     additionalColumns,
     additionalTopBarContent,
-    editable = true,
-    constrainToRemainingSpaceProps,
-    topBarProps,
-    hideColumns,
-    areRowsSelectable,
     allowCreate = true,
+    areRowsSelectable,
+    constrainToRemainingSpaceProps,
+    editable = true,
+    hideColumns,
+    onTagCreated,
+    topBarProps,
   } = props;
 
   const { perPage, currentPage, handlePageChange, handlePerRowsChange } =
@@ -183,11 +184,7 @@ export default function TagsTable(props: TagsTableProps) {
     ];
   }, [editable, numColumnsToHide]);
 
-  const [selectedRows, setSelectedRows] = useState<TagData[]>([]);
-  const handleSelectedRowsChange: PaginatedTableProps<TagData>["onSelectedRowsChange"] =
-    (selected) => {
-      setSelectedRows(selected.selectedRows);
-    };
+  const { selectedRows, handleSelectedRowsChange } = useSelectRows<TagData>();
 
   return (
     <Box>
@@ -203,17 +200,19 @@ export default function TagsTable(props: TagsTableProps) {
         {(remainingHeight) => {
           return (
             <PaginatedTable<TagData>
+              additionalColumns={additionalColumns}
+              areRowsSelectable={areRowsSelectable}
               columns={columns}
               data={data}
-              onSort={handleSort}
-              additionalColumns={additionalColumns}
+              fixedHeight={remainingHeight}
+              itemIdField="id"
               loading={tagsQuery.isLoading}
-              totalRows={tagsCountQuery.data?.count ?? 0}
               onChangePage={handlePageChange}
               onChangeRowsPerPage={handlePerRowsChange}
-              fixedHeight={remainingHeight}
-              areRowsSelectable={areRowsSelectable}
               onSelectedRowsChange={handleSelectedRowsChange}
+              onSort={handleSort}
+              selectedRows={selectedRows}
+              totalRows={tagsCountQuery.data?.count ?? 0}
             />
           );
         }}

@@ -11,6 +11,7 @@ import PaginatedTable, {
 } from "../../shared/components/Table/containers/PaginatedTable";
 import SearchAndCreateBar from "../../shared/components/Table/containers/SearchAndCreateBar";
 import usePagination from "../../shared/components/Table/hooks/usePagination";
+import useSelectRows from "../../shared/components/Table/hooks/useSelectRows";
 import useSort from "../../shared/components/Table/hooks/useSort";
 import TagBadges from "../../tags/containers/TagBadges";
 
@@ -25,6 +26,7 @@ export type GamesTableProps = {
   constrainToRemainingSpaceProps?: Partial<ConstrainToRemainingSpaceProps>;
   topBarProps?: Partial<StackProps>;
   allowCreate?: boolean;
+  areRowsSelectable?: boolean;
 };
 
 export default function GamesTable(props: GamesTableProps) {
@@ -37,6 +39,7 @@ export default function GamesTable(props: GamesTableProps) {
     constrainToRemainingSpaceProps,
     topBarProps,
     allowCreate = true,
+    areRowsSelectable = true,
   } = props;
 
   const { perPage, currentPage, handlePageChange, handlePerRowsChange } =
@@ -212,11 +215,7 @@ export default function GamesTable(props: GamesTableProps) {
     ];
   }, [editable]);
 
-  const [selectedRows, setSelectedRows] = useState<GameData[]>([]);
-  const handleSelectedRowsChange: PaginatedTableProps<GameData>["onSelectedRowsChange"] =
-    (selected) => {
-      setSelectedRows(selected.selectedRows);
-    };
+  const { selectedRows, handleSelectedRowsChange } = useSelectRows<GameData>();
 
   return (
     <Box>
@@ -232,16 +231,19 @@ export default function GamesTable(props: GamesTableProps) {
         {(remainingHeight) => {
           return (
             <PaginatedTable<GameData>
+              additionalColumns={additionalColumns}
+              areRowsSelectable={areRowsSelectable}
               columns={columns}
               data={data}
-              onSort={handleSort}
-              additionalColumns={additionalColumns}
+              fixedHeight={remainingHeight}
+              itemIdField="id"
               loading={gamesQuery.isLoading}
-              totalRows={gamesCountQuery.data?.count ?? 0}
               onChangePage={handlePageChange}
               onChangeRowsPerPage={handlePerRowsChange}
-              fixedHeight={remainingHeight}
               onSelectedRowsChange={handleSelectedRowsChange}
+              onSort={handleSort}
+              selectedRows={selectedRows}
+              totalRows={gamesCountQuery.data?.count ?? 0}
             />
           );
         }}

@@ -1,19 +1,23 @@
 import { Box, Skeleton } from "@chakra-ui/react";
+import { intersectionBy } from "lodash";
 import { useEffect, useMemo, useState } from "react";
 import DataTable, { IDataTableProps } from "react-data-table-component";
 
 export type PaginatedTableProps<T> = {
-  data: IDataTableProps<T>["data"];
-  columns: IDataTableProps<T>["columns"];
-  onSort: IDataTableProps<T>["onSort"];
   additionalColumns?: AdditionalColumns<T>;
+  areRowsSelectable?: boolean;
+  columns: IDataTableProps<T>["columns"];
+  data: IDataTableProps<T>["data"];
+  fixedHeight: IDataTableProps<T>["fixedHeaderScrollHeight"];
+  itemIdField: keyof T;
   loading: boolean;
-  totalRows: number;
   onChangePage: IDataTableProps<T>["onChangePage"];
   onChangeRowsPerPage: IDataTableProps<T>["onChangeRowsPerPage"];
-  fixedHeight: IDataTableProps<T>["fixedHeaderScrollHeight"];
-  areRowsSelectable?: boolean;
   onSelectedRowsChange?: IDataTableProps<T>["onSelectedRowsChange"];
+  onSort: IDataTableProps<T>["onSort"];
+  selectedRows: T[];
+  totalRows: number;
+  toggleCleared?: IDataTableProps<T>["clearSelectedRows"];
 };
 
 export type AdditionalColumns<T> = {
@@ -24,17 +28,20 @@ export type AdditionalColumns<T> = {
 
 export default function PaginatedTable<T>(props: PaginatedTableProps<T>) {
   const {
+    additionalColumns,
+    areRowsSelectable = true,
     columns,
     data,
-    onSort,
-    additionalColumns,
+    fixedHeight,
+    itemIdField,
     loading,
-    totalRows,
     onChangePage,
     onChangeRowsPerPage,
-    fixedHeight,
-    areRowsSelectable = true,
     onSelectedRowsChange,
+    onSort,
+    selectedRows,
+    totalRows,
+    toggleCleared,
   } = props;
 
   const controlledColumns = useMemo<PaginatedTableProps<T>["columns"]>(() => {
@@ -57,6 +64,21 @@ export default function PaginatedTable<T>(props: PaginatedTableProps<T>) {
     }
   }, [loading]);
 
+  useEffect(() => {
+    if (!onSelectedRowsChange) return;
+
+    const commonElements = intersectionBy(selectedRows, data, itemIdField);
+    if (commonElements.length !== selectedRows.length) {
+      // If any selected rows are no longer in the data, deselect them by setting the selected rows to the intersection of the selected rows and the data,
+      // which are the rows that are still in the data
+      onSelectedRowsChange({
+        allSelected: commonElements.length === data.length,
+        selectedCount: commonElements.length,
+        selectedRows: commonElements,
+      });
+    }
+  }, [selectedRows, onSelectedRowsChange, data, itemIdField]);
+
   return (
     <Box height="100%" width="100%" overflow="scroll">
       <DataTable
@@ -74,6 +96,8 @@ export default function PaginatedTable<T>(props: PaginatedTableProps<T>) {
         fixedHeaderScrollHeight={`calc(${fixedHeight} - 64px - 64px)`}
         selectableRows={areRowsSelectable}
         onSelectedRowsChange={onSelectedRowsChange}
+        selectableRowsHighlight
+        clearSelectedRows={toggleCleared}
         paginationRowsPerPageOptions={[5, 10, 25, 50, 100]}
         customStyles={{
           cells: {

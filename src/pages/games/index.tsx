@@ -9,7 +9,9 @@ import GamesTable, {
 import ManageGameButton from "../../features/games/containers/ManageGameButton";
 import PlayGameButton from "../../features/games/containers/PlayGameButton";
 import { AdditionalColumns } from "../../features/shared/components/Table/containers/PaginatedTable";
-import TableActionMenu from "../../features/shared/components/Table/containers/TableActionsMenu";
+import TableActionMenu, {
+  TableActionsMenuItemDelete,
+} from "../../features/shared/components/Table/containers/TableActionsMenu";
 import getSessionWithSignInRedirect from "../../utils/getSessionWithSignInRedirect";
 
 export type GamesPageProps = {
@@ -60,7 +62,17 @@ function AdditionalTopBarContent(props: AdditionalTopBarContentProps) {
   const { selectedRows } = props;
   return (
     <ButtonGroup>
-      <TableActionMenu selectedRows={selectedRows} />
+      <TableActionMenu
+        selectedRows={selectedRows}
+        actionItems={(context) => (
+          <>
+            <TableActionsMenuItemDelete
+              context={context}
+              handleDelete={console.log}
+            />
+          </>
+        )}
+      />
     </ButtonGroup>
   );
 }

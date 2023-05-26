@@ -11,6 +11,7 @@ import PaginatedTable, {
 } from "../../shared/components/Table/containers/PaginatedTable";
 import SearchAndCreateBar from "../../shared/components/Table/containers/SearchAndCreateBar";
 import usePagination from "../../shared/components/Table/hooks/usePagination";
+import useSelectRows from "../../shared/components/Table/hooks/useSelectRows";
 import useSort from "../../shared/components/Table/hooks/useSort";
 import TagBadges from "../../tags/containers/TagBadges";
 
@@ -214,11 +215,15 @@ export default function GameObjectsTable(props: GameObjectsTableProps) {
     ];
   }, [editable]);
 
-  const [selectedRows, setSelectedRows] = useState<GameObjectData[]>([]);
-  const handleSelectedRowsChange: PaginatedTableProps<GameObjectData>["onSelectedRowsChange"] =
-    (selected) => {
-      setSelectedRows(selected.selectedRows);
-    };
+  const { selectedRows, handleSelectedRowsChange, toggleCleared } =
+    useSelectRows<GameObjectData>({
+      clearRowsUponChangeDependencies: [
+        globalFilter,
+        tag,
+        perPage,
+        currentPage,
+      ],
+    });
 
   return (
     <Box>
@@ -234,16 +239,19 @@ export default function GameObjectsTable(props: GameObjectsTableProps) {
         {(remainingHeight) => {
           return (
             <PaginatedTable<GameObjectData>
+              additionalColumns={additionalColumns}
               columns={columns}
               data={data}
-              onSort={handleSort}
-              additionalColumns={additionalColumns}
+              fixedHeight={remainingHeight}
+              itemIdField="id"
               loading={gameObjectsQuery.isLoading}
-              totalRows={gameObjectsCountQuery.data?.count ?? 0}
               onChangePage={handlePageChange}
               onChangeRowsPerPage={handlePerRowsChange}
-              fixedHeight={remainingHeight}
               onSelectedRowsChange={handleSelectedRowsChange}
+              onSort={handleSort}
+              selectedRows={selectedRows}
+              totalRows={gameObjectsCountQuery.data?.count ?? 0}
+              toggleCleared={toggleCleared}
             />
           );
         }}

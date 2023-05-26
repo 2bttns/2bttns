@@ -7,8 +7,11 @@ import GameObjectsTable, {
   GameObjectData,
 } from "../../features/gameobjects/containers/GameObjectsTable";
 import ManageGameObjectButton from "../../features/gameobjects/containers/ManageGameObjectButton";
+import useDeleteGameObjects from "../../features/gameobjects/hooks/useDeleteGameObjects";
 import { AdditionalColumns } from "../../features/shared/components/Table/containers/PaginatedTable";
-import TableActionsMenu from "../../features/shared/components/Table/containers/TableActionsMenu";
+import TableActionsMenu, {
+  TableActionsMenuItemDelete,
+} from "../../features/shared/components/Table/containers/TableActionsMenu";
 import { EditTagsForGameObjectsButtonDrawer } from "../../features/tags/containers/EditTagsForGameObjectsButtonDrawer";
 import { SelectTagFiltersDrawerButton } from "../../features/tags/containers/SelectTagFiltersDrawerButton";
 import useAllTagFilters from "../../features/tags/hooks/useAllTagFilters";
@@ -72,12 +75,27 @@ type AdditionalTopBarContentProps = {
 
 function AdditionalTopBarContent(props: AdditionalTopBarContentProps) {
   const { selectedRows, tagFilter } = props;
+  const { handleDeleteGameObjects } = useDeleteGameObjects();
 
   return (
     <>
       <ButtonGroup>
         {/* <CsvImport />- @TODO: Move to Menu */}
-        <TableActionsMenu selectedRows={selectedRows} />
+        <TableActionsMenu
+          selectedRows={selectedRows}
+          actionItems={(context) => (
+            <>
+              <TableActionsMenuItemDelete
+                context={context}
+                handleDelete={async () => {
+                  await handleDeleteGameObjects(
+                    context.selectedRows.map((row) => row.id)
+                  );
+                }}
+              />
+            </>
+          )}
+        />
         <SelectTagFiltersDrawerButton
           tagFilter={tagFilter.state.tagFilter}
           setTagFilter={tagFilter.state.setTagFilter}

@@ -10,6 +10,7 @@ import PaginatedTable, {
 } from "../../shared/components/Table/containers/PaginatedTable";
 import SearchAndCreateBar from "../../shared/components/Table/containers/SearchAndCreateBar";
 import usePagination from "../../shared/components/Table/hooks/usePagination";
+import useSelectRows from "../../shared/components/Table/hooks/useSelectRows";
 import useSort from "../../shared/components/Table/hooks/useSort";
 
 export type SecretData = RouterOutputs["secrets"]["getAll"]["secrets"][0];
@@ -21,15 +22,17 @@ export type SecretsTableProps = {
   editable?: boolean;
   constrainToRemainingSpaceProps?: Partial<ConstrainToRemainingSpaceProps>;
   topBarProps?: Partial<StackProps>;
+  areRowsSelectable?: boolean;
 };
 
 export default function SecretsTable(props: SecretsTableProps) {
   const {
-    onSecretCreated,
     additionalColumns,
     additionalTopBarContent,
-    editable = true,
+    areRowsSelectable = true,
     constrainToRemainingSpaceProps,
+    editable = true,
+    onSecretCreated,
     topBarProps,
   } = props;
 
@@ -183,11 +186,8 @@ export default function SecretsTable(props: SecretsTableProps) {
     ];
   }, [editable]);
 
-  const [selectedRows, setSelectedRows] = useState<SecretData[]>([]);
-  const handleSelectedRowsChange: PaginatedTableProps<SecretData>["onSelectedRowsChange"] =
-    (selected) => {
-      setSelectedRows(selected.selectedRows);
-    };
+  const { selectedRows, handleSelectedRowsChange } =
+    useSelectRows<SecretData>();
 
   return (
     <Box>
@@ -203,16 +203,19 @@ export default function SecretsTable(props: SecretsTableProps) {
         {(remainingHeight) => {
           return (
             <PaginatedTable<SecretData>
+              additionalColumns={additionalColumns}
+              areRowsSelectable={areRowsSelectable}
               columns={columns}
               data={data}
-              onSort={handleSort}
-              additionalColumns={additionalColumns}
+              fixedHeight={remainingHeight}
+              itemIdField="id"
               loading={secretsQuery.isLoading}
-              totalRows={secretsCountQuery.data?.count ?? 0}
               onChangePage={handlePageChange}
               onChangeRowsPerPage={handlePerRowsChange}
-              fixedHeight={remainingHeight}
               onSelectedRowsChange={handleSelectedRowsChange}
+              onSort={handleSort}
+              selectedRows={selectedRows}
+              totalRows={secretsCountQuery.data?.count ?? 0}
             />
           );
         }}

@@ -23,7 +23,9 @@ import ManageGameObjectButton from "../../features/gameobjects/containers/Manage
 import RelateGameObjects from "../../features/gameobjects/containers/RelateGameObjects";
 import CustomEditable from "../../features/shared/components/CustomEditable";
 import { AdditionalColumns } from "../../features/shared/components/Table/containers/PaginatedTable";
-import TableActionMenu from "../../features/shared/components/Table/containers/TableActionsMenu";
+import TableActionMenu, {
+  TableActionsMenuItemDelete,
+} from "../../features/shared/components/Table/containers/TableActionsMenu";
 import { SelectTagFiltersDrawerButton } from "../../features/tags/containers/SelectTagFiltersDrawerButton";
 import TagBadges from "../../features/tags/containers/TagBadges";
 import useAllTagFilters from "../../features/tags/hooks/useAllTagFilters";
@@ -111,7 +113,17 @@ function AdditionalTopBarContent(props: AdditionalTopBarContentProps) {
   const { selectedRows, tagFilter } = props;
   return (
     <ButtonGroup>
-      <TableActionMenu selectedRows={selectedRows} />
+      <TableActionMenu
+        selectedRows={selectedRows}
+        actionItems={(context) => (
+          <>
+            <TableActionsMenuItemDelete
+              context={context}
+              handleDelete={console.log}
+            />
+          </>
+        )}
+      />
       <SelectTagFiltersDrawerButton
         tagFilter={tagFilter.state.tagFilter}
         setTagFilter={tagFilter.state.setTagFilter}

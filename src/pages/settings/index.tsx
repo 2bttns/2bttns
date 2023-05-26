@@ -17,7 +17,9 @@ import Head from "next/head";
 import SecretsTable, {
   SecretData,
 } from "../../features/settings/containers/SecretsTable";
-import TableActionMenu from "../../features/shared/components/Table/containers/TableActionsMenu";
+import TableActionMenu, {
+  TableActionsMenuItemDelete,
+} from "../../features/shared/components/Table/containers/TableActionsMenu";
 import { api } from "../../utils/api";
 import getSessionWithSignInRedirect from "../../utils/getSessionWithSignInRedirect";
 
@@ -88,7 +90,17 @@ function AdditionalTopBarContent(props: AdditionalTopBarContentProps) {
   const { selectedRows } = props;
   return (
     <ButtonGroup>
-      <TableActionMenu selectedRows={selectedRows} />
+      <TableActionMenu
+        selectedRows={selectedRows}
+        actionItems={(context) => (
+          <>
+            <TableActionsMenuItemDelete
+              context={context}
+              handleDelete={console.log}
+            />
+          </>
+        )}
+      />
     </ButtonGroup>
   );
 }

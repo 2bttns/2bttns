@@ -51,9 +51,9 @@ export default function AdminLayout(props: AdminLayoutProps) {
           color="gray.100"
           zIndex={99}
         >
-          {links.map((link) => {
+          {links.map((link, i) => {
             if (link === "divider") {
-              return <Divider />;
+              return <Divider key={`divider-index-${i}`} />;
             }
 
             const isCurrentRootPage = currentRootPage === link.href;

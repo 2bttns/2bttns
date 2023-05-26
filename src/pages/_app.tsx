@@ -7,7 +7,7 @@ import { api } from "../utils/api";
 import { ChakraProvider } from "@chakra-ui/react";
 
 import type { NextPage } from "next";
-import type { ReactElement, ReactNode } from "react";
+import { ReactElement, ReactNode } from "react";
 import AdminLayout from "../features/layouts/containers/AdminLayout";
 import theme from "../style/theme";
 
