@@ -1,15 +1,17 @@
 import { LinkIcon } from "@chakra-ui/icons";
-import { IconButton, Tooltip } from "@chakra-ui/react";
+import { ButtonProps, IconButton, Spinner, Tooltip } from "@chakra-ui/react";
 import { GameObject, Tag } from "@prisma/client";
+import { useEffect, useMemo, useState } from "react";
 import { api } from "../../../utils/api";
 
 export type ToggleTagButtonProps = {
   tagId: Tag["id"];
   gameObjectId: GameObject["id"];
+  loadingDelayMs?: number;
 };
 
 export default function ToggleTagButton(props: ToggleTagButtonProps) {
-  const { tagId, gameObjectId } = props;
+  const { tagId, gameObjectId, loadingDelayMs = 250 } = props;
 
   const utils = api.useContext();
   const getGameObjectQuery = api.gameObjects.getById.useQuery({
@@ -37,15 +39,60 @@ export default function ToggleTagButton(props: ToggleTagButtonProps) {
     }
   };
 
-  const label = isTagApplied ? "Remove tag" : "Apply tag";
+  const areQueriesLoading = useMemo(() => {
+    return getGameObjectQuery.isLoading || updateTagMutation.isLoading;
+  }, [getGameObjectQuery.isLoading, updateTagMutation.isLoading]);
+
+  const [isWaitingForLoadDelay, setIsWaitingForLoadDelay] = useState(false);
+  useEffect(() => {
+    if (isWaitingForLoadDelay) return;
+
+    if (!areQueriesLoading) {
+      setIsWaitingForLoadDelay(true);
+      const timeout = setTimeout(() => {
+        setIsWaitingForLoadDelay(false);
+      }, loadingDelayMs);
+      return () => clearTimeout(timeout);
+    }
+  }, [areQueriesLoading, loadingDelayMs]);
+
+  const isLoading = useMemo(() => {
+    return areQueriesLoading || isWaitingForLoadDelay;
+  }, [areQueriesLoading, isWaitingForLoadDelay]);
+
+  const label = useMemo(() => {
+    if (isLoading) return undefined;
+    if (isTagApplied) return "Remove tag";
+    return "Apply tag";
+  }, [isTagApplied, isLoading]);
+
+  const ariaLabel = useMemo(() => {
+    if (isLoading)
+      return `Loading - Toggle tag id ${tagId} for game object with ID: ${gameObjectId}`;
+    if (isTagApplied)
+      return `Remove tag with ID: ${tagId} for game object with ID: ${gameObjectId}`;
+    return `Apply tag with ID: ${tagId} for game object with ID: ${gameObjectId}`;
+  }, [isTagApplied, isLoading, gameObjectId, tagId]);
+
+  const colorScheme = useMemo<ButtonProps["colorScheme"]>(() => {
+    if (isLoading) return "gray";
+    if (isTagApplied) return "red";
+    return "green";
+  }, [isTagApplied, isLoading]);
+
+  const icon = useMemo(() => {
+    if (isLoading) return <Spinner size="sm" />;
+    return <LinkIcon />;
+  }, [isLoading]);
 
   return (
     <Tooltip label={label} placement="top">
       <IconButton
-        colorScheme={isTagApplied ? "red" : "green"}
+        transition="0.1s !important"
+        colorScheme={colorScheme}
         onClick={handleApplyTag}
-        icon={<LinkIcon />}
-        aria-label={`${label} for gameobject with ID: ${tagId}`}
+        icon={icon}
+        aria-label={ariaLabel}
         size="sm"
         variant="outline"
       />
