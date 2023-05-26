@@ -10,7 +10,7 @@ import {
   Stack,
   Tooltip,
 } from "@chakra-ui/react";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 export type SearchAndCreateBarProps = {
   value: string | undefined;
@@ -23,6 +23,8 @@ export type SearchAndCreateBarProps = {
 export default function SearchAndCreateBar(props: SearchAndCreateBarProps) {
   const { value, onChange, onCreate } = props;
 
+  const inputRef = useRef<HTMLInputElement>(null);
+
   const [isCreating, setIsCreating] = useState(false);
   const handleCreate = async () => {
     if (!onCreate) return;
@@ -33,6 +35,13 @@ export default function SearchAndCreateBar(props: SearchAndCreateBarProps) {
     await onCreate(value);
     setIsCreating(false);
   };
+
+  useEffect(() => {
+    // Return focus to input when creating is done
+    if (!isCreating) {
+      inputRef.current?.focus();
+    }
+  }, [isCreating]);
 
   const clearInput = () => {
     onChange("");
@@ -59,6 +68,7 @@ export default function SearchAndCreateBar(props: SearchAndCreateBarProps) {
           }}
           bgColor="gray.200"
           isDisabled={isCreating}
+          ref={inputRef}
         />
         {onCreate && (
           <InputRightElement>
