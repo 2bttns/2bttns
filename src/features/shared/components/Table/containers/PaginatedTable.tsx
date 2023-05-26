@@ -18,6 +18,7 @@ export type PaginatedTableProps<T> = {
   selectedRows: T[];
   totalRows: number;
   toggleCleared?: IDataTableProps<T>["clearSelectedRows"];
+  loadDelayMs?: number;
 };
 
 export type AdditionalColumns<T> = {
@@ -42,6 +43,7 @@ export default function PaginatedTable<T>(props: PaginatedTableProps<T>) {
     selectedRows,
     totalRows,
     toggleCleared,
+    loadDelayMs = 500,
   } = props;
 
   const controlledColumns = useMemo<PaginatedTableProps<T>["columns"]>(() => {
@@ -60,7 +62,7 @@ export default function PaginatedTable<T>(props: PaginatedTableProps<T>) {
       setProgressPending(true);
     } else {
       // Delay hiding the loading indicator so that it doesn't flash when loading is fast
-      setTimeout(() => setProgressPending(false), 1000);
+      setTimeout(() => setProgressPending(false), loadDelayMs);
     }
   }, [loading]);
 

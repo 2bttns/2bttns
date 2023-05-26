@@ -20,7 +20,7 @@ export type GameInputTagsFilterTogglesProps = {
 export default function GameInputTagsFilterToggles(
   props: GameInputTagsFilterTogglesProps
 ) {
-  const { gameId, initDelayMs = 1000 } = props;
+  const { gameId, initDelayMs = 500 } = props;
 
   const utils = api.useContext();
   const tagFilters = useAllTagFilters({
