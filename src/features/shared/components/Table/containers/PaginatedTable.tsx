@@ -64,7 +64,7 @@ export default function PaginatedTable<T>(props: PaginatedTableProps<T>) {
       // Delay hiding the loading indicator so that it doesn't flash when loading is fast
       setTimeout(() => setProgressPending(false), loadDelayMs);
     }
-  }, [loading]);
+  }, [loading, loadDelayMs]);
 
   useEffect(() => {
     if (!onSelectedRowsChange) return;

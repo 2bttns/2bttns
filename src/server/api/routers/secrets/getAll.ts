@@ -1,13 +1,18 @@
 import { z } from "zod";
-import { sort, textFilter } from "../../../shared/z";
+import {
+  paginationSkip,
+  paginationTake,
+  sort,
+  textFilter,
+} from "../../../shared/z";
 import { adminOrApiKeyProtectedProcedure } from "../../trpc";
 
 export const getAll = adminOrApiKeyProtectedProcedure
   .input(
     z
       .object({
-        take: z.number().optional().default(10),
-        skip: z.number().optional(),
+        take: paginationTake,
+        skip: paginationSkip,
         filter: z
           .object({
             mode: z.enum(["AND", "OR"]).optional(),

@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { paginationSkip, paginationTake } from "../../../shared/z";
 import { OPENAPI_TAGS } from "../../openapi/openApiTags";
 import { adminOrApiKeyProtectedProcedure } from "../../trpc";
 
@@ -37,8 +38,8 @@ export const getAll = adminOrApiKeyProtectedProcedure
           .string()
           .describe("Tag name to filter by. Can be used with other filters.")
           .optional(),
-        take: z.number().default(10),
-        skip: z.number().default(0),
+        take: paginationTake,
+        skip: paginationSkip,
         sortField: z
           .enum(["id", "name", "description", "updatedAt", "createdAt"])
           .describe("Field to sort by")

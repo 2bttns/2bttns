@@ -14,7 +14,7 @@ export type UsePaginationParams = {
 
 export default function usePagination(params?: UsePaginationParams) {
   const initialPerPage = params?.initialPerPage ?? 10;
-  const initialPage = params?.initialPage;
+  const initialPage = params?.initialPage ?? 1;
 
   const [perPage, setPerPage] = useState(initialPerPage);
   const [currentPage, setCurrentPage] = useState<number | null>(
