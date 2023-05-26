@@ -143,7 +143,8 @@ type ProgressComponentProps = {
 
 function ProgressComponent(props: ProgressComponentProps) {
   const { areRowsSelectable = true } = props;
-  const placeholderData = useMemo(() => new Array(10).fill({}), []);
+
+  const placeholderData = useMemo(() => new Array<null>(10).fill(null), []);
 
   return (
     <DataTable

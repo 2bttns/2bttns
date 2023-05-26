@@ -75,7 +75,7 @@ export function TableActionsMenuItemDelete<T extends Object>(
         isOpen={isOpen}
         onClose={onClose}
       >
-        Are you sure? You can't undo this action afterwards.
+        Are you sure? You can&apos;t undo this action afterwards.
       </ConfirmAlert>
       <MenuItem
         onClick={onOpen}

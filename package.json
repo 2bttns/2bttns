@@ -6,7 +6,7 @@
     "build": "next build",
     "dev": "next dev -p 3001",
     "postinstall": "prisma generate",
-    "lint": "next lint",
+    "lint": "next lint --quiet",
     "start": "next start -p 3262",
     "test": "dotenv -e .env.test -- npm run init-db:test && vitest && npm run docker:rm:test-db",
     "test:nowatch": "dotenv -e .env.test -- npm run init-db:test && vitest --run && npm run docker:rm:test-db",
