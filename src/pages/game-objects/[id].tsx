@@ -10,22 +10,26 @@ import {
   HStack,
   Text,
 } from "@chakra-ui/react";
-import { GameObject, Tag } from "@prisma/client";
+import { GameObject } from "@prisma/client";
 import type { GetServerSideProps, NextPage } from "next";
 import { Session } from "next-auth";
 import Head from "next/head";
 import { useRouter } from "next/router";
 import DeleteGameObjectButton from "../../features/gameobjects/containers/DeleteGameObjectButton";
 import GameObjectsTable, {
-  AdditionalColumns,
+  GameObjectData,
 } from "../../features/gameobjects/containers/GameObjectsTable";
 import ManageGameObjectButton from "../../features/gameobjects/containers/ManageGameObjectButton";
 import RelateGameObjects from "../../features/gameobjects/containers/RelateGameObjects";
-import TagMultiSelect, {
-  TagOption,
-} from "../../features/gameobjects/containers/TagMultiSelect";
+import useDeleteGameObjects from "../../features/gameobjects/hooks/useDeleteGameObjects";
 import CustomEditable from "../../features/shared/components/CustomEditable";
-import TagFilterToggles from "../../features/tags/containers/TagFilterToggles";
+import { AdditionalColumns } from "../../features/shared/components/Table/containers/PaginatedTable";
+import TableActionMenu, {
+  TableActionsMenuItemDelete,
+} from "../../features/shared/components/Table/containers/TableActionsMenu";
+import { EditTagsForGameObjectsButtonDrawer } from "../../features/tags/containers/EditTagsForGameObjectsButtonDrawer";
+import { SelectTagFiltersDrawerButton } from "../../features/tags/containers/SelectTagFiltersDrawerButton";
+import TagBadges from "../../features/tags/containers/TagBadges";
 import useAllTagFilters from "../../features/tags/hooks/useAllTagFilters";
 import { prisma } from "../../server/db";
 import { api, RouterInputs } from "../../utils/api";
@@ -72,22 +76,14 @@ const GameObjectById: NextPage<GameObjectByIdPageProps> = (props) => {
 
   return (
     <>
-      <Box width="100%">
+      <Box width="100%" height="100%" padding="1rem">
         <Box>
           <GameObjectDetails gameObjectId={gameObjectId} />
           <Divider />
         </Box>
 
-        <Box marginY="1rem">
-          <TagFilterToggles
-            filter={tagFilter.state.tagFilter}
-            setFilter={tagFilter.state.setTagFilter}
-            allowMultiple
-            allAndNoneToggles
-          />
-        </Box>
-
         <GameObjectsTable
+          allowCreate={false}
           gameObjectsToExclude={[gameObjectId]}
           tag={{
             include: tagFilter.results.includeTags,
@@ -95,36 +91,78 @@ const GameObjectById: NextPage<GameObjectByIdPageProps> = (props) => {
             includeUntagged: tagFilter.results.includeUntagged,
           }}
           additionalColumns={getAdditionalColumns(gameObjectId)}
+          // TODO: Fix table fitting -- maybe delay rendering until after the game object details have rendered?
+          constrainToRemainingSpaceProps={{
+            bottomOffset: 120,
+          }}
+          additionalTopBarContent={(selectedRows) => (
+            <AdditionalTopBarContent
+              selectedRows={selectedRows}
+              tagFilter={tagFilter}
+            />
+          )}
         />
       </Box>
     </>
   );
 };
 
+type AdditionalTopBarContentProps = {
+  selectedRows: GameObjectData[];
+  tagFilter: ReturnType<typeof useAllTagFilters>;
+};
+function AdditionalTopBarContent(props: AdditionalTopBarContentProps) {
+  const { selectedRows, tagFilter } = props;
+
+  const { handleDeleteGameObjects } = useDeleteGameObjects();
+  return (
+    <ButtonGroup>
+      <TableActionMenu
+        selectedRows={selectedRows}
+        actionItems={(context) => (
+          <>
+            <TableActionsMenuItemDelete
+              context={context}
+              handleDelete={async (selectedRows) => {
+                await handleDeleteGameObjects(
+                  selectedRows.map((row) => row.id)
+                );
+              }}
+            />
+          </>
+        )}
+      />
+      <SelectTagFiltersDrawerButton
+        tagFilter={tagFilter.state.tagFilter}
+        setTagFilter={tagFilter.state.setTagFilter}
+      />
+    </ButtonGroup>
+  );
+}
+
 function getAdditionalColumns(
   gameObjectId: GameObject["id"]
-): AdditionalColumns {
+): AdditionalColumns<GameObjectData> {
   return {
     columns: [
       {
-        id: "Relationships",
-        header: "Relationship Weight",
-        cell: (info) => {
+        name: "Relationship Weight",
+        cell: ({ id }) => {
           return (
             <RelateGameObjects
               gameObjectId1={gameObjectId}
-              gameObjectId2={info.row.original.id}
+              gameObjectId2={id}
             />
           );
         },
+        minWidth: "500px",
       },
       {
-        id: "actions",
-        header: "",
-        cell: (info) => {
+        cell: ({ id }) => {
           return (
             <ButtonGroup width="100%" justifyContent="end">
-              <ManageGameObjectButton gameObjectId={info.row.original.id} />
+              <EditTagsForGameObjectsButtonDrawer gameObjectIds={[id]} />
+              <ManageGameObjectButton gameObjectId={id} />
             </ButtonGroup>
           );
         },
@@ -163,12 +201,6 @@ function GameObjectDetails(props: GameObjectDetailsProps) {
       window.alert("Error updating game object. See console for details.");
     }
   };
-
-  const selected: TagOption[] =
-    gameObject?.tags?.map((tag: Tag) => ({
-      label: tag.name || "Untitled Tag",
-      value: tag.id,
-    })) || [];
 
   const router = useRouter();
   const onDeleted = () => {
@@ -236,15 +268,9 @@ function GameObjectDetails(props: GameObjectDetailsProps) {
         }}
       />
       <Box marginTop="1rem">
-        <TagMultiSelect
-          selected={selected}
-          onChange={(nextTags) => {
-            handleUpdateGameObject({
-              id: gameObject.id,
-              data: { tags: nextTags },
-            });
-          }}
-          isEditable
+        <TagBadges
+          selectedTags={gameObject.tags}
+          collapseLetterLimit="disabled"
         />
       </Box>
     </Box>

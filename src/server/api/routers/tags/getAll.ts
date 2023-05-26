@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { paginationSkip, paginationTake } from "../../../shared/z";
 import { OPENAPI_TAGS } from "../../openapi/openApiTags";
 import { adminOrApiKeyProtectedProcedure } from "../../trpc";
 
@@ -29,28 +30,56 @@ export const getAll = adminOrApiKeyProtectedProcedure
   .input(
     z
       .object({
-        id: z
+        idFilter: z
           .string()
-          .optional()
-          .describe("Comma separated list of tag ids to filter by"),
+          .describe("Tag ID to filter by. Can be used with other filters.")
+          .optional(),
+        nameFilter: z
+          .string()
+          .describe("Tag name to filter by. Can be used with other filters.")
+          .optional(),
+        take: paginationTake,
+        skip: paginationSkip,
+        sortField: z
+          .enum(["id", "name", "description", "updatedAt", "createdAt"])
+          .describe("Field to sort by")
+          .optional(),
+        sortOrder: z
+          .enum(["asc", "desc"])
+          .describe("Sort order for the selected field")
+          .optional(),
       })
       .optional()
   )
   .output(output)
   .query(async ({ ctx, input }) => {
-    const tagsToFilterBy = input?.id?.split(",");
-
     const tags = await ctx.prisma.tag.findMany({
       where: {
-        id: tagsToFilterBy
-          ? {
-              in: tagsToFilterBy,
-            }
-          : undefined,
+        OR:
+          input?.idFilter || input?.nameFilter
+            ? [
+                { id: { contains: input?.idFilter } },
+                { name: { contains: input?.nameFilter } },
+              ]
+            : undefined,
       },
+      skip: input?.skip,
+      take: input?.take,
+      orderBy: input?.sortOrder
+        ? {
+            id: input?.sortField === "id" ? input.sortOrder : undefined,
+            name: input?.sortField === "name" ? input?.sortOrder : undefined,
+            description:
+              input?.sortField === "description" ? input?.sortOrder : undefined,
+            updatedAt:
+              input?.sortField === "updatedAt" ? input?.sortOrder : undefined,
+            createdAt:
+              input?.sortField === "createdAt" ? input?.sortOrder : undefined,
+          }
+        : undefined,
     });
 
-    const processedTags: typeof output._type["tags"] = tags.map((tag) => {
+    const processedTags: (typeof output._type)["tags"] = tags.map((tag) => {
       return {
         ...tag,
         createdAt: tag.createdAt.toISOString(),

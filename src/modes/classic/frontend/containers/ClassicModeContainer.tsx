@@ -1,8 +1,11 @@
+import { Box, Text } from "@chakra-ui/react";
 import { GameObject } from "@prisma/client";
+import Link from "next/link";
 import { api, apiClient } from "../../../../utils/api";
 import { ModeUIProps } from "../../../types";
 import { ItemPolicyType, ReplacePolicy } from "../ClassicMode/types";
 import { Use2bttnsMachineConfig } from "../ClassicMode/use2bttnsMachine";
+import { useGameCallbackRedirect } from "../hooks/useGameCallbackRedirect";
 import ClassicModeView, {
   ClassicModeViewProps,
 } from "../views/ClassicModeView";
@@ -21,13 +24,9 @@ export default function ClassicModeContainer(props: ClassicModeContainerProps) {
     gameData,
   } = props;
 
-  const redirectToCallbackUrl = () => {
-    console.log(`Try redirecting to ${gameData.callbackUrl}`);
-    if (typeof window === "undefined") return;
-    if (!gameData.callbackUrl) return;
-
-    window.location.href = gameData.callbackUrl;
-  };
+  const { isRedirecting, redirectToCallbackUrl } = useGameCallbackRedirect({
+    callbackUrl: gameData.callbackUrl,
+  });
 
   const processGameResultsMutation =
     api.modes.modeBackendRouter.classicMode.processGameResults.useMutation();
@@ -72,14 +71,28 @@ export default function ClassicModeContainer(props: ClassicModeContainerProps) {
     };
 
   return (
-    <ClassicModeView
-      game={gameData.game}
-      itemPolicy={itemPolicy ?? defaultItemPolicy}
-      numRoundItems={gameData.numRoundItems}
-      replacePolicy={replacePolicy ?? defaultReplacePolicy}
-      onFinish={handleFinish}
-      loadItemsCallback={loadItemsCallback}
-      renderItem={(item) => item.name}
-    />
+    <>
+      <ClassicModeView
+        game={gameData.game}
+        itemPolicy={itemPolicy ?? defaultItemPolicy}
+        numRoundItems={gameData.numRoundItems}
+        replacePolicy={replacePolicy ?? defaultReplacePolicy}
+        onFinish={handleFinish}
+        loadItemsCallback={loadItemsCallback}
+        renderItem={(item) => item.name}
+      />
+      {gameData.callbackUrl && isRedirecting && (
+        <Box textAlign="center" maxWidth="500px" marginX="auto">
+          <Text display="inline">Returning to {gameData.callbackUrl}. </Text>
+          <Text display="inline">If you are not redirected, </Text>
+          <Link href={gameData.callbackUrl}>
+            <Text color="blue.500" fontWeight="bold" display="inline">
+              click here{" "}
+            </Text>
+          </Link>
+          <Text display="inline">to return immediately.</Text>
+        </Box>
+      )}
+    </>
   );
 }

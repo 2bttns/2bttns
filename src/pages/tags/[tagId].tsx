@@ -1,10 +1,14 @@
+import { ChevronRightIcon } from "@chakra-ui/icons";
 import {
-  Button,
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
   ButtonGroup,
-  Code,
   Divider,
   Heading,
+  HStack,
   Stack,
+  Text,
 } from "@chakra-ui/react";
 import { Tag } from "@prisma/client";
 import { GetServerSideProps, NextPage } from "next";
@@ -12,18 +16,23 @@ import { Session } from "next-auth";
 import Head from "next/head";
 import { useRouter } from "next/router";
 import { useMemo, useState } from "react";
-import CsvExport from "../../features/csv/CsvExport";
-import CsvImport from "../../features/csv/CsvImport";
 import GameObjectsTable, {
-  AdditionalColumns,
+  GameObjectData,
   GameObjectsTableProps,
 } from "../../features/gameobjects/containers/GameObjectsTable";
 import ManageGameObjectButton from "../../features/gameobjects/containers/ManageGameObjectButton";
+import useDeleteGameObjects from "../../features/gameobjects/hooks/useDeleteGameObjects";
 import CustomEditable from "../../features/shared/components/CustomEditable";
-import TagFilterToggles, {
-  TagFilter,
-} from "../../features/tags/containers/TagFilterToggles";
-import TagsLayoutContainer from "../../features/tags/containers/TagsLayoutContainer";
+import { AdditionalColumns } from "../../features/shared/components/Table/containers/PaginatedTable";
+import TableActionMenu, {
+  TableActionsMenuItemDelete,
+} from "../../features/shared/components/Table/containers/TableActionsMenu";
+import DeleteTagButton from "../../features/tags/containers/DeleteTagButton";
+import {
+  SelectTagFiltersDrawerButton,
+  SelectTagFiltersDrawerButtonProps,
+} from "../../features/tags/containers/SelectTagFiltersDrawerButton";
+import { TagFilter } from "../../features/tags/containers/TagFilterToggles";
 import ToggleTagButton from "../../features/tags/containers/ToggleTagButton";
 import { api, RouterInputs } from "../../utils/api";
 import getSessionWithSignInRedirect from "../../utils/getSessionWithSignInRedirect";
@@ -54,33 +63,13 @@ const TagByIdPage: NextPage<TagByIdPageProps> = (props) => {
 
   const utils = api.useContext();
 
-  const deleteTagMutation = api.tags.deleteById.useMutation();
-  const handleDeleteTag = async () => {
-    try {
-      const prompt = window.prompt(
-        `Are you sure you want to delete this tag? \n\nType "DELETE" to confirm.`
-      );
-      if (prompt !== "DELETE") {
-        window.alert("Cancelled");
-        return;
-      }
-      if (typeof tagId !== "string") throw new Error("Invalid tag ID");
-      await deleteTagMutation.mutateAsync({ id: tagId });
-      router.push("/tags");
-      utils.tags.invalidate();
-    } catch (error) {
-      window.alert("Error deleting tag. See console for details.");
-      console.error(error);
-    }
-  };
-
   const getTagByIdQuery = api.tags.getById.useQuery(
     { id: tagId },
     {
-      enabled: !!tagId || deleteTagMutation.status !== "loading",
+      enabled: !!tagId,
       retry: false,
       onError: (error) => {
-        console.error(error);
+        router.push("/tags");
       },
       keepPreviousData: true,
       refetchOnWindowFocus: false,
@@ -91,18 +80,141 @@ const TagByIdPage: NextPage<TagByIdPageProps> = (props) => {
   const handleUpdateTag = async (input: RouterInputs["tags"]["updateById"]) => {
     try {
       await updateTagMutation.mutateAsync(input);
-      utils.tags.invalidate();
+      await utils.tags.invalidate();
     } catch (error) {
       window.alert("Error updating tag. See console for details.");
       console.error(error);
     }
   };
 
+  const handleGameObjectCreated: GameObjectsTableProps["onGameObjectCreated"] =
+    async (gameObjectId) => {
+      try {
+        await updateTagMutation.mutateAsync({
+          id: tagId,
+          data: { addGameObjects: [gameObjectId] },
+        });
+        await utils.gameObjects.invalidate();
+      } catch (error) {
+        window.alert("Error creating game object. See console for details.");
+        console.error(error);
+      }
+    };
+
+  const appliedTagFilters = useAppliedTagFilters({ tagId });
+
+  if (getTagByIdQuery.isFetching) {
+    return (
+      <>
+        <Head>
+          <title>Tags - Loading... | 2bttns</title>
+          <meta name="description" content="2bttns Tag Management" />
+          <link rel="icon" href="/favicon.ico" />
+        </Head>
+      </>
+    );
+  }
+
+  const tag = getTagByIdQuery.data?.tag;
+  if (!tag) return <></>;
+
+  return (
+    <>
+      <Head>
+        <title>Tags - {tag?.name} | 2bttns</title>
+        <meta name="description" content="2bttns Tag Management" />
+        <link rel="icon" href="/favicon.ico" />
+      </Head>
+      <Stack direction="column" width="100%" spacing="1rem" padding="1rem">
+        {
+          <HStack justifyContent="space-between">
+            <Breadcrumb
+              spacing="4px"
+              separator={<ChevronRightIcon color="gray.500" />}
+              marginBottom="1rem"
+            >
+              <BreadcrumbItem>
+                <BreadcrumbLink href="/tags">Tags</BreadcrumbLink>
+              </BreadcrumbItem>
+
+              <BreadcrumbItem isCurrentPage>
+                <BreadcrumbLink href={`/tags/${tag.id}`}>
+                  {tag.name || "Untitled Tag"}
+                  <Text color="blue.500" display="inline">
+                    ({tag.id})
+                  </Text>
+                </BreadcrumbLink>
+              </BreadcrumbItem>
+            </Breadcrumb>
+
+            <ButtonGroup>
+              <DeleteTagButton tagId={tag.id} />
+            </ButtonGroup>
+          </HStack>
+        }
+        <Heading size="xl">
+          <CustomEditable
+            value={tag?.name || ""}
+            placeholder="Untitled Tag"
+            handleSave={async (value) => {
+              handleUpdateTag({ id: tag.id, data: { name: value } });
+            }}
+          />
+        </Heading>
+        <CustomEditable
+          isTextarea
+          value={tag?.description || ""}
+          placeholder="No description"
+          handleSave={async (value) => {
+            handleUpdateTag({ id: tag.id, data: { description: value } });
+          }}
+        />
+        <Divider />
+        <Heading size="md">Tagged Game Objects</Heading>
+        <GameObjectsTable
+          tag={{
+            include: appliedTagFilters.outputs.includeTags,
+            exclude: appliedTagFilters.outputs.excludeTags,
+            includeUntagged: appliedTagFilters.outputs.includeUntagged,
+          }}
+          onGameObjectCreated={handleGameObjectCreated}
+          additionalTopBarContent={(selectedRows) => (
+            <AdditionalTopBarContent
+              selectedGameObjectRows={selectedRows}
+              tagId={tagId}
+              tagFilter={appliedTagFilters.state.tagFilter}
+              setTagFilter={appliedTagFilters.state.setTagFilter}
+            />
+          )}
+          additionalColumns={getAdditionalColumns(tagId)}
+        />
+      </Stack>
+    </>
+  );
+};
+
+// Tag Filters hook that provides "Applied", "Not Applied" , and "Untagged" filters
+// Exposes the tagFilter state and the include/exclude tags and includeUntagged outputs
+type UseAppliedTagFiltersProps = {
+  tagId: Tag["id"];
+};
+function useAppliedTagFilters(props: UseAppliedTagFiltersProps) {
+  const { tagId } = props;
+
+  const tagsCountQuery = api.tags.getCount.useQuery();
   const tagsQuery = api.tags.getAll.useQuery(
-    {},
-    { refetchOnWindowFocus: false }
+    { take: tagsCountQuery.data?.count },
+    {
+      enabled: tagsCountQuery.data?.count !== undefined,
+      refetchOnWindowFocus: false,
+    }
   );
   const [tagFilter, setTagFilter] = useState<TagFilter>({
+    Untagged: {
+      tagName: "Untagged",
+      on: false,
+      colorScheme: "blackAlpha",
+    },
     Applied: {
       tagName: "Applied",
       on: true,
@@ -112,11 +224,6 @@ const TagByIdPage: NextPage<TagByIdPageProps> = (props) => {
       tagName: "Not Applied",
       on: false,
       colorScheme: "red",
-    },
-    Untagged: {
-      tagName: "Untagged",
-      on: false,
-      colorScheme: "blackAlpha",
     },
   });
 
@@ -140,137 +247,66 @@ const TagByIdPage: NextPage<TagByIdPageProps> = (props) => {
     return [];
   }, [tagFilter]);
 
-  const handleGameObjectCreated: GameObjectsTableProps["onGameObjectCreated"] =
-    async (gameObjectId) => {
-      try {
-        await updateTagMutation.mutateAsync({
-          id: tagId,
-          data: { addGameObjects: [gameObjectId] },
-        });
-      } catch (error) {
-        window.alert("Error creating game object. See console for details.");
-        console.error(error);
-      }
-    };
+  return {
+    state: {
+      tagFilter,
+      setTagFilter,
+    },
+    outputs: {
+      includeTags,
+      excludeTags,
+      includeUntagged,
+    },
+  };
+}
 
-  if (getTagByIdQuery.isFetching) {
-    return (
-      <>
-        <Head>
-          <title>Tags - Loading... | 2bttns</title>
-          <meta name="description" content="2bttns Tag Management" />
-          <link rel="icon" href="/favicon.ico" />
-        </Head>
-        <TagsLayoutContainer>
-          <div>Loading...</div>
-        </TagsLayoutContainer>
-      </>
-    );
-  }
-
-  if (getTagByIdQuery.isError) {
-    return (
-      <>
-        <Head>
-          <title>Tags - Failed to load | 2bttns</title>
-          <meta name="description" content="2bttns Tag Management" />
-          <link rel="icon" href="/favicon.ico" />
-        </Head>
-        <TagsLayoutContainer>
-          <div>Failed to load tag.</div>
-          <Code>{getTagByIdQuery.error?.message}</Code>
-        </TagsLayoutContainer>
-      </>
-    );
-  }
-
-  const tag = getTagByIdQuery.data?.tag;
-  if (!tag) return null;
+type AdditionalTopBarContentProps = {
+  selectedGameObjectRows: GameObjectData[];
+  tagId: Tag["id"];
+  tagFilter: SelectTagFiltersDrawerButtonProps["tagFilter"];
+  setTagFilter: SelectTagFiltersDrawerButtonProps["setTagFilter"];
+};
+function AdditionalTopBarContent(props: AdditionalTopBarContentProps) {
+  const { selectedGameObjectRows, tagId, tagFilter, setTagFilter } = props;
+  const { handleDeleteGameObjects } = useDeleteGameObjects();
 
   return (
     <>
-      <Head>
-        <title>Tags - {tag?.name} | 2bttns</title>
-        <meta name="description" content="2bttns Tag Management" />
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
-      <TagsLayoutContainer selectedTag={tag}>
-        <Stack direction="column" spacing="1rem" sx={{ padding: "1rem" }}>
-          <Heading size="xl">
-            <CustomEditable
-              value={tag?.name || ""}
-              placeholder="Untitled Tag"
-              handleSave={async (value) => {
-                handleUpdateTag({ id: tag.id, data: { name: value } });
-              }}
-            />
-          </Heading>
-          <CustomEditable
-            isTextarea
-            value={tag?.description || ""}
-            placeholder="No description"
-            handleSave={async (value) => {
-              handleUpdateTag({ id: tag.id, data: { description: value } });
-            }}
-          />
-          <Divider />
-          <Heading size="md">Tagged Game Objects</Heading>
-          <TagFilterToggles
-            filter={tagFilter}
-            setFilter={setTagFilter}
-            allAndNoneToggles
-          />
-          <GameObjectsTable
-            tag={{
-              include: includeTags,
-              exclude: excludeTags,
-              includeUntagged,
-            }}
-            onGameObjectCreated={handleGameObjectCreated}
-            additionalTopBarContent={
-              <>
-                <CsvImport parentTags={[tagId]} />
-                <CsvExport tagsToExportBy={[tagId]} />
-              </>
-            }
-            additionalColumns={getAdditionalColumns(tagId)}
-            constrainToRemainingSpaceProps={{
-              bottomOffset: 150,
-            }}
-          />
-
-          <Divider />
-          <Heading size="md" color="red.500">
-            DANGER ZONE
-          </Heading>
-          <ButtonGroup>
-            <Button
-              colorScheme="red"
-              aria-label="Delete tag"
-              variant="outline"
-              size="sm"
-              onClick={handleDeleteTag}
-            >
-              Delete Tag
-            </Button>
-          </ButtonGroup>
-        </Stack>
-      </TagsLayoutContainer>
+      <ButtonGroup>
+        <TableActionMenu
+          selectedRows={selectedGameObjectRows}
+          actionItems={(context) => (
+            <>
+              <TableActionsMenuItemDelete
+                context={context}
+                handleDelete={async (selectedRows) => {
+                  await handleDeleteGameObjects(
+                    selectedRows.map((row) => row.id)
+                  );
+                }}
+              />
+            </>
+          )}
+        />
+        <SelectTagFiltersDrawerButton
+          tagFilter={tagFilter}
+          setTagFilter={setTagFilter}
+        />
+      </ButtonGroup>
     </>
   );
-};
+}
 
-function getAdditionalColumns(tagId: Tag["id"]): AdditionalColumns {
+function getAdditionalColumns(
+  tagId: Tag["id"]
+): AdditionalColumns<GameObjectData> {
   return {
     columns: [
       {
-        id: "actions",
-        header: "",
-        cell: (info) => {
-          const { id } = info.row.original;
+        cell: ({ id }) => {
           return (
             <ButtonGroup width="100%" justifyContent="end">
-              <ToggleTagButton gameObjectId={id} tagId={tagId} />
+              <ToggleTagButton gameObjectIds={[id]} tagId={tagId} />
               <ManageGameObjectButton gameObjectId={id} />
             </ButtonGroup>
           );

@@ -1,11 +1,4 @@
-import { Box, HStack } from "@chakra-ui/react";
-import { Tag } from "@prisma/client";
-import {
-  ColumnDef,
-  createColumnHelper,
-  PaginationState,
-  SortingState,
-} from "@tanstack/react-table";
+import { Box, HStack, StackProps } from "@chakra-ui/react";
 import { useMemo, useState } from "react";
 import { tagFilter } from "../../../server/shared/z";
 import { api, RouterInputs, RouterOutputs } from "../../../utils/api";
@@ -13,30 +6,28 @@ import ConstrainToRemainingSpace, {
   ConstrainToRemainingSpaceProps,
 } from "../../shared/components/ConstrainToRemainingSpace";
 import CustomEditable from "../../shared/components/CustomEditable";
-import PaginatedTable from "../../shared/components/Table/containers/PaginatedTable";
+import PaginatedTable, {
+  PaginatedTableProps,
+} from "../../shared/components/Table/containers/PaginatedTable";
 import SearchAndCreateBar from "../../shared/components/Table/containers/SearchAndCreateBar";
-import usePageCount from "../../shared/components/Table/hooks/usePageCount";
-import TagMultiSelect, { TagOption } from "./TagMultiSelect";
+import usePagination from "../../shared/components/Table/hooks/usePagination";
+import useSelectRows from "../../shared/components/Table/hooks/useSelectRows";
+import useSort from "../../shared/components/Table/hooks/useSort";
+import TagBadges from "../../tags/containers/TagBadges";
 
 export type GameObjectData =
   RouterOutputs["gameObjects"]["getAll"]["gameObjects"][0];
 
-export const columnHelper = createColumnHelper<GameObjectData>();
-
-export type AdditionalColumns = {
-  columns: ColumnDef<GameObjectData>[];
-  // The dependencies of the columns. If any of these change, the columns will be re-created.
-  dependencies: any[];
-};
-
 export type GameObjectsTableProps = {
   tag?: typeof tagFilter._type;
   onGameObjectCreated?: (gameObjectId: string) => Promise<void>;
-  additionalColumns?: AdditionalColumns;
+  additionalColumns?: PaginatedTableProps<GameObjectData>["additionalColumns"];
   gameObjectsToExclude?: GameObjectData["id"][];
-  additionalTopBarContent?: React.ReactNode;
+  additionalTopBarContent?: (selectedRows: GameObjectData[]) => React.ReactNode;
   editable?: boolean;
   constrainToRemainingSpaceProps?: Partial<ConstrainToRemainingSpaceProps>;
+  topBarProps?: Partial<StackProps>;
+  allowCreate?: boolean;
 };
 
 export default function GameObjectsTable(props: GameObjectsTableProps) {
@@ -48,40 +39,22 @@ export default function GameObjectsTable(props: GameObjectsTableProps) {
     additionalTopBarContent,
     editable = true,
     constrainToRemainingSpaceProps,
+    topBarProps,
+    allowCreate = true,
   } = props;
 
+  const { perPage, currentPage, handlePageChange, handlePerRowsChange } =
+    usePagination();
+  const { getSortOrder: getSort, handleSort } = useSort<GameObjectData>();
+
   const utils = api.useContext();
-
-  const [pagination, setPagination] = useState<PaginationState>({
-    pageIndex: 0,
-    pageSize: 10,
-  });
-  const { pageIndex, pageSize } = pagination;
-
   const [globalFilter, setGlobalFilter] = useState("");
-  const [sorting, setSorting] = useState<SortingState>([]);
-  const getSort = (id: keyof GameObjectData) => {
-    const result = sorting.find((s) => s.id === id);
-    if (result === undefined) {
-      return undefined;
-    }
-
-    return result.desc ? "desc" : "asc";
-  };
-
-  const skip = useMemo(() => {
-    let result = pageIndex * pageSize;
-    if (result < 0) {
-      result = 0;
-    }
-    return result;
-  }, [pageIndex, pageSize]);
 
   const gameObjectsQuery = api.gameObjects.getAll.useQuery(
     {
       includeTags: true,
-      skip: skip,
-      take: pageSize,
+      skip: (currentPage! - 1) * perPage,
+      take: perPage,
       filter: globalFilter
         ? {
             mode: "OR",
@@ -102,10 +75,12 @@ export default function GameObjectsTable(props: GameObjectsTableProps) {
       excludeGameObjects: gameObjectsToExclude,
     },
     {
+      enabled: currentPage !== null,
       keepPreviousData: true,
       refetchOnWindowFocus: false,
     }
   );
+  const data: GameObjectData[] = gameObjectsQuery.data?.gameObjects ?? [];
 
   const gameObjectsCountQuery = api.gameObjects.getCount.useQuery(
     {
@@ -127,14 +102,7 @@ export default function GameObjectsTable(props: GameObjectsTableProps) {
     }
   );
 
-  const { pageCount } = usePageCount({
-    pagination,
-    setPagination,
-    itemCount: gameObjectsCountQuery.data?.count ?? 0,
-  });
-
   const updateGameObjectMutation = api.gameObjects.updateById.useMutation();
-
   const handleUpdateGameObject = async (
     id: string,
     data: RouterInputs["gameObjects"]["updateById"]["data"]
@@ -163,112 +131,130 @@ export default function GameObjectsTable(props: GameObjectsTableProps) {
     }
   };
 
-  const columns = useMemo<ColumnDef<GameObjectData, any>[]>(() => {
-    const items: ColumnDef<GameObjectData, any>[] = [
-      columnHelper.accessor("id", {
-        cell: (info) => (
+  const columns = useMemo<
+    PaginatedTableProps<GameObjectData>["columns"]
+  >(() => {
+    return [
+      {
+        name: "ID",
+        cell: (row) => (
           <CustomEditable
-            value={info.getValue()}
+            value={row.id}
             placeholder="No ID"
             handleSave={async (nextValue) =>
-              handleUpdateGameObject(info.row.original.id, {
+              handleUpdateGameObject(row.id, {
                 id: nextValue,
               })
             }
             isEditable={editable}
           />
         ),
-        enableSorting: true,
-      }),
-      columnHelper.accessor("name", {
-        cell: (info) => (
+        sortable: true,
+        sortField: "id",
+        minWidth: "256px",
+      },
+      {
+        name: "Name",
+        cell: (row) => (
           <CustomEditable
-            value={info.getValue()}
+            value={row.name}
             placeholder="No name"
             handleSave={async (nextValue) =>
-              handleUpdateGameObject(info.row.original.id, {
+              handleUpdateGameObject(row.id, {
                 name: nextValue,
               })
             }
             isEditable={editable}
           />
         ),
-        enableSorting: true,
-      }),
-      columnHelper.accessor("description", {
-        cell: (info) => (
+        sortable: true,
+        sortField: "name",
+        minWidth: "256px",
+      },
+      {
+        name: "Description",
+        cell: (row) => (
           <CustomEditable
-            value={info.getValue() ?? ""}
+            value={row.description ?? undefined}
             placeholder="No description"
             handleSave={async (nextValue) =>
-              handleUpdateGameObject(info.row.original.id, {
+              handleUpdateGameObject(row.id, {
                 description: nextValue,
               })
             }
             isEditable={editable}
+            isTextarea
           />
         ),
-        enableSorting: true,
-      }),
-      columnHelper.accessor("tags", {
-        cell: (info) => {
-          const tags = (info.getValue() as Tag[]) || undefined;
-          const selected: TagOption[] =
-            tags?.map((tag: Tag) => ({
-              label: tag.name || "Untitled Tag",
-              value: tag.id,
-            })) || [];
-
+        sortable: true,
+        sortField: "description",
+        minWidth: "512px",
+      },
+      {
+        name: "Tags",
+        cell: (row) => {
           return (
-            <Box width="256px">
-              <TagMultiSelect
-                selected={selected}
-                onChange={(nextTags) => {
-                  handleUpdateGameObject(info.row.original.id, {
-                    tags: nextTags,
-                  });
-                }}
-                isEditable={editable}
-              />
-            </Box>
+            <TagBadges
+              selectedTags={row.tags.map((t) => {
+                return { id: t.id, name: t.name };
+              })}
+            />
           );
         },
-        enableSorting: true,
-      }),
-      columnHelper.accessor("updatedAt", {
-        header: "Last Updated",
-        cell: (info) => info.row.original.updatedAt.toLocaleString(),
-        enableSorting: true,
-      }),
+        sortable: true,
+        sortField: "tags",
+        minWidth: "256px",
+      },
+      {
+        name: "Last Updated",
+        cell: (row) => row.updatedAt.toLocaleString(),
+        sortable: true,
+        sortField: "updatedAt",
+        minWidth: "256px",
+      },
     ];
+  }, [editable]);
 
-    if (additionalColumns) {
-      items.push(...additionalColumns.columns);
-    }
-
-    return items;
-  }, [editable, ...(additionalColumns ? additionalColumns.dependencies : [])]);
+  const { selectedRows, handleSelectedRowsChange, toggleCleared } =
+    useSelectRows<GameObjectData>({
+      clearRowsUponChangeDependencies: [
+        globalFilter,
+        tag,
+        perPage,
+        currentPage,
+      ],
+    });
 
   return (
     <Box>
-      <HStack width="100%">
+      <HStack spacing="4px" marginBottom="4px" width="100%" {...topBarProps}>
         <SearchAndCreateBar
           value={globalFilter}
           onChange={setGlobalFilter}
-          onCreate={handleCreateGameObject}
+          onCreate={allowCreate ? handleCreateGameObject : undefined}
         />
-        {additionalTopBarContent}
+        {additionalTopBarContent && additionalTopBarContent(selectedRows)}
       </HStack>
       <ConstrainToRemainingSpace {...constrainToRemainingSpaceProps}>
-        <PaginatedTable
-          columns={columns}
-          data={gameObjectsQuery.data?.gameObjects ?? []}
-          onPaginationChange={setPagination}
-          pagination={pagination}
-          pageCount={pageCount}
-          sorting={sorting}
-          onSortingChange={setSorting}
-        />
+        {(remainingHeight) => {
+          return (
+            <PaginatedTable<GameObjectData>
+              additionalColumns={additionalColumns}
+              columns={columns}
+              data={data}
+              fixedHeight={remainingHeight}
+              itemIdField="id"
+              loading={gameObjectsQuery.isLoading}
+              onChangePage={handlePageChange}
+              onChangeRowsPerPage={handlePerRowsChange}
+              onSelectedRowsChange={handleSelectedRowsChange}
+              onSort={handleSort}
+              selectedRows={selectedRows}
+              totalRows={gameObjectsCountQuery.data?.count ?? 0}
+              toggleCleared={toggleCleared}
+            />
+          );
+        }}
       </ConstrainToRemainingSpace>
     </Box>
   );

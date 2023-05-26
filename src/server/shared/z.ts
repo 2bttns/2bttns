@@ -12,3 +12,6 @@ export const tagFilter = z.object({
 });
 
 export const sort = z.enum(["asc", "desc"]);
+
+export const paginationTake = z.number().min(0).optional().default(10);
+export const paginationSkip = z.number().min(0).optional().default(0);

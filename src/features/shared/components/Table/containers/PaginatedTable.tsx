@@ -1,202 +1,183 @@
-import {
-  Box,
-  Button,
-  ButtonGroup,
-  Select,
-  Stack,
-  Table,
-  Tbody,
-  Td,
-  Text,
-  Th,
-  Thead,
-  Tr,
-  VStack,
-} from "@chakra-ui/react";
-import {
-  ColumnDef,
-  flexRender,
-  getCoreRowModel,
-  getSortedRowModel,
-  OnChangeFn,
-  PaginationState,
-  SortingState,
-  useReactTable,
-} from "@tanstack/react-table";
+import { Box, Skeleton } from "@chakra-ui/react";
+import { intersectionBy } from "lodash";
+import { useEffect, useMemo, useState } from "react";
+import DataTable, { IDataTableProps } from "react-data-table-component";
 
 export type PaginatedTableProps<T> = {
-  data: T[];
-  columns: ColumnDef<T, any>[];
-  pageCount: number;
-  pagination: PaginationState;
-  onPaginationChange: OnChangeFn<PaginationState>;
+  additionalColumns?: AdditionalColumns<T>;
+  areRowsSelectable?: boolean;
+  columns: IDataTableProps<T>["columns"];
+  data: IDataTableProps<T>["data"];
+  fixedHeight: IDataTableProps<T>["fixedHeaderScrollHeight"];
+  itemIdField: keyof T;
+  loading: boolean;
+  onChangePage: IDataTableProps<T>["onChangePage"];
+  onChangeRowsPerPage: IDataTableProps<T>["onChangeRowsPerPage"];
+  onSelectedRowsChange?: IDataTableProps<T>["onSelectedRowsChange"];
+  onSort: IDataTableProps<T>["onSort"];
+  selectedRows: T[];
+  totalRows: number;
+  toggleCleared?: IDataTableProps<T>["clearSelectedRows"];
+  loadDelayMs?: number;
+};
 
-  sorting?: SortingState;
-  onSortingChange?: OnChangeFn<SortingState>;
+export type AdditionalColumns<T> = {
+  columns: IDataTableProps<T>["columns"];
+  // The dependencies of the columns. If any of these change, the columns will be re-created.
+  dependencies: any[];
 };
 
 export default function PaginatedTable<T>(props: PaginatedTableProps<T>) {
   const {
-    data,
+    additionalColumns,
+    areRowsSelectable = true,
     columns,
-    pageCount,
-    pagination,
-    onPaginationChange,
-    sorting,
-    onSortingChange,
+    data,
+    fixedHeight,
+    itemIdField,
+    loading,
+    onChangePage,
+    onChangeRowsPerPage,
+    onSelectedRowsChange,
+    onSort,
+    selectedRows,
+    totalRows,
+    toggleCleared,
+    loadDelayMs = 500,
   } = props;
 
-  const table = useReactTable({
-    data: data,
-    columns,
-    pageCount,
-    state: {
-      pagination,
-      sorting,
-    },
-    getCoreRowModel: getCoreRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-    onPaginationChange,
-    manualPagination: true,
-    enableSorting: true,
-    manualSorting: true,
-    onSortingChange,
-    debugTable: true,
-  });
+  const controlledColumns = useMemo<PaginatedTableProps<T>["columns"]>(() => {
+    const columnsToUse = [...columns];
+
+    if (additionalColumns) {
+      columnsToUse.push(...additionalColumns.columns);
+    }
+
+    return columnsToUse;
+  }, [columns, additionalColumns]);
+
+  const [progressPending, setProgressPending] = useState(false);
+  useEffect(() => {
+    if (loading) {
+      setProgressPending(true);
+    } else {
+      // Delay hiding the loading indicator so that it doesn't flash when loading is fast
+      setTimeout(() => setProgressPending(false), loadDelayMs);
+    }
+  }, [loading, loadDelayMs]);
+
+  useEffect(() => {
+    if (!onSelectedRowsChange) return;
+
+    const commonElements = intersectionBy(selectedRows, data, itemIdField);
+    if (commonElements.length !== selectedRows.length) {
+      // If any selected rows are no longer in the data, deselect them by setting the selected rows to the intersection of the selected rows and the data,
+      // which are the rows that are still in the data
+      onSelectedRowsChange({
+        allSelected: commonElements.length === data.length,
+        selectedCount: commonElements.length,
+        selectedRows: commonElements,
+      });
+    }
+  }, [selectedRows, onSelectedRowsChange, data, itemIdField]);
 
   return (
-    <VStack height="100%">
-      <Box overflow="auto" width="100%">
-        <Table>
-          <Thead>
-            {table.getHeaderGroups().map((headerGroup) => (
-              <Tr key={headerGroup.id}>
-                {headerGroup.headers.map((header) => {
-                  return (
-                    <Th key={header.id} colSpan={header.colSpan}>
-                      {header.isPlaceholder ? null : (
-                        <Box
-                          sx={{
-                            cursor: header.column.getCanSort()
-                              ? "pointer"
-                              : "default",
-                          }}
-                          onClick={() => {
-                            if (!header.column.getCanSort()) return;
-                            header.column.toggleSorting();
-                          }}
-                        >
-                          {flexRender(
-                            header.column.columnDef.header,
-                            header.getContext()
-                          )}
-                          {{
-                            asc: " 🔼",
-                            desc: " 🔽",
-                          }[header.column.getIsSorted() as string] ?? null}
-                        </Box>
-                      )}
-                    </Th>
-                  );
-                })}
-              </Tr>
-            ))}
-          </Thead>
-          <Tbody>
-            {table.getRowModel().rows.map((row) => {
-              return (
-                <Tr key={row.id}>
-                  {row.getVisibleCells().map((cell) => {
-                    return (
-                      <Td key={cell.id}>
-                        {flexRender(
-                          cell.column.columnDef.cell,
-                          cell.getContext()
-                        )}
-                      </Td>
-                    );
-                  })}
-                </Tr>
-              );
-            })}
-          </Tbody>
-        </Table>
-      </Box>
+    <Box height="100%" width="100%" overflow="scroll">
+      <DataTable
+        columns={controlledColumns}
+        data={data}
+        sortServer
+        onSort={onSort}
+        pagination
+        paginationServer
+        paginationTotalRows={totalRows}
+        onChangePage={onChangePage}
+        onChangeRowsPerPage={onChangeRowsPerPage}
+        fixedHeader
+        // Fixed table height; subtract 64px for the pagination bar
+        fixedHeaderScrollHeight={`calc(${fixedHeight} - 64px - 64px)`}
+        selectableRows={areRowsSelectable}
+        onSelectedRowsChange={onSelectedRowsChange}
+        selectableRowsHighlight
+        clearSelectedRows={toggleCleared}
+        paginationRowsPerPageOptions={[5, 10, 25, 50, 100]}
+        customStyles={{
+          cells: {
+            style: {
+              alignItems: "center",
+              padding: "1rem",
+              borderLeftWidth: ".5px",
+              borderRightWidth: ".5px",
+              borderColor: "rgba(200, 200, 200, .25)",
+            },
+          },
+          headCells: {
+            style: {
+              borderColor: "rgba(200, 200, 200, .25)",
+              borderLeftWidth: ".5px",
+              borderRightWidth: ".5px",
+            },
+          },
+          pagination: {
+            pageButtonsStyle: {
+              borderRadius: "0",
+            },
+            style: {
+              borderRadius: "0",
+            },
+          },
+        }}
+        striped
+        progressPending={progressPending}
+        progressComponent={
+          <ProgressComponent areRowsSelectable={areRowsSelectable} />
+        }
+      />
+    </Box>
+  );
+}
 
-      <Stack
-        direction="row"
-        spacing="1rem"
-        alignItems="center"
-        alignSelf="end"
-        padding="1rem"
-      >
-        <ButtonGroup>
-          <Button
-            onClick={() => table.setPageIndex(0)}
-            disabled={!table.getCanPreviousPage()}
-          >
-            {"<<"}
-          </Button>
-          <Button
-            onClick={() => table.previousPage()}
-            disabled={!table.getCanPreviousPage()}
-          >
-            {"<"}
-          </Button>
-          <Select
-            defaultValue={table.getState().pagination.pageIndex + 1}
-            value={table.getState().pagination.pageIndex + 1}
-            onChange={(e) => {
-              const page = e.target.value ? Number(e.target.value) - 1 : 0;
-              table.setPageIndex(page);
-            }}
-            sx={{
-              backgroundColor: "gray.200",
-              minWidth: "150px",
-            }}
-          >
-            {Array.from({ length: pageCount }).map((_, i) => (
-              <option key={i + 1} value={i + 1}>
-                Page{" "}
-                <strong>
-                  {i + 1} of {pageCount}
-                </strong>
-              </option>
-            ))}
-          </Select>
-          <Button
-            onClick={() => table.nextPage()}
-            disabled={!table.getCanNextPage()}
-          >
-            {">"}
-          </Button>
-          <Button
-            onClick={() => table.setPageIndex(table.getPageCount() - 1)}
-            disabled={!table.getCanNextPage()}
-          >
-            {">>"}
-          </Button>
-        </ButtonGroup>
+type ProgressComponentProps = {
+  areRowsSelectable?: boolean;
+};
 
-        <Select
-          value={table.getState().pagination.pageSize}
-          onChange={(e) => {
-            table.setPageSize(Number(e.target.value));
-          }}
-          sx={{
-            backgroundColor: "gray.200",
-          }}
-        >
-          {[10, 20, 30, 40, 50].map((pageSize) => (
-            <option key={pageSize} value={pageSize}>
-              Show {pageSize}
-            </option>
-          ))}
-        </Select>
-        <Text sx={{ minWidth: "64px" }}>
-          {table.getRowModel().rows.length} Rows
-        </Text>
-      </Stack>
-    </VStack>
+function ProgressComponent(props: ProgressComponentProps) {
+  const { areRowsSelectable = true } = props;
+
+  const placeholderData = useMemo(() => new Array<null>(10).fill(null), []);
+
+  return (
+    <DataTable
+      striped
+      columns={[
+        ...[
+          // Add a checkbox-looking skeleton loader to the beginning of the table if rows are selectable
+          {
+            name: <Skeleton height="1rem" width="16px" />,
+            cell: () => <Skeleton height="1rem" width="16px" />,
+            grow: 0,
+          },
+        ].filter(() => areRowsSelectable),
+        {
+          name: (
+            <Skeleton
+              height="1.5rem"
+              position="absolute"
+              right="16px"
+              left="-48px"
+            />
+          ),
+          cell: () => (
+            <Skeleton
+              height="1.5rem"
+              position="absolute"
+              right="16px"
+              left="-48px"
+            />
+          ),
+        },
+      ]}
+      data={placeholderData.map((_, i) => ({}))}
+    />
   );
 }

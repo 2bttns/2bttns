@@ -128,11 +128,33 @@ describe("gameobjects router", () => {
       expect(result.scores[0]!.score).toEqual(1);
     });
   });
-});
 
-async function clearGameObjects() {
-  return await prisma.gameObject.deleteMany();
-}
+  describe("gameobjects.delete", () => {
+    test("delete many", async () => {
+      const ctx = createInnerTRPCContextWithSessionForTest();
+      const caller = appRouter.createCaller(ctx);
+
+      const count = 10;
+      await createTestGameObjects({
+        count,
+      });
+      const testGameObjects = await getAllGameObjects();
+
+      const numToDelete = 5;
+      const idsToDelete = testGameObjects
+        .slice(0, numToDelete)
+        .map((g) => g.id);
+
+      const result = await caller.gameObjects.delete({
+        id: idsToDelete.join(","),
+      });
+
+      const remainingGameObjects = await getAllGameObjects();
+      expect(result.deletedCount).toBe(numToDelete);
+      expect(remainingGameObjects).length(count - numToDelete);
+    });
+  });
+});
 
 async function createTestGameObjects(options: {
   count: number;

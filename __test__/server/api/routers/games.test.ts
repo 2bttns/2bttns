@@ -259,6 +259,28 @@ describe("games router", () => {
       expect(() => caller.games.getPlayerScores(input)).rejects.toThrow();
     });
   });
+
+  describe("games.delete", () => {
+    test("delete many", async () => {
+      const ctx = createInnerTRPCContextWithSessionForTest();
+      const caller = appRouter.createCaller(ctx);
+
+      const count = 10;
+      await createTestGames(count);
+      const testGames = await getAllGames();
+
+      const numToDelete = 5;
+      const idsToDelete = testGames.slice(0, numToDelete).map((g) => g.id);
+
+      const result = await caller.games.delete({
+        id: idsToDelete.join(","),
+      });
+
+      const remainingGames = await getAllGames();
+      expect(result.deletedCount).toBe(numToDelete);
+      expect(remainingGames).length(count - numToDelete);
+    });
+  });
 });
 
 async function createTestGames(count: number) {

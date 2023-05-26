@@ -1,4 +1,4 @@
-import { Button, ButtonGroup, ButtonProps } from "@chakra-ui/react";
+import { Button, ButtonProps, Flex } from "@chakra-ui/react";
 import { Dispatch, SetStateAction } from "react";
 
 export type TagFilter = {
@@ -18,10 +18,10 @@ export type TagFilterTogglesProps = {
   filter: TagFilter;
   setFilter: Dispatch<SetStateAction<TagFilter>>;
   allAndNoneToggles?: boolean;
-  allowMultiple?: boolean;
+  handleChange?: (filter: TagFilter) => void;
 };
 export default function TagFilterToggles(props: TagFilterTogglesProps) {
-  const { filter, setFilter, allAndNoneToggles = false } = props;
+  const { filter, setFilter, allAndNoneToggles = false, handleChange } = props;
 
   const handleToggleAll = (on: boolean) => {
     setFilter((prevFilter) => {
@@ -31,6 +31,9 @@ export default function TagFilterToggles(props: TagFilterTogglesProps) {
         newFilter[tagId]!.on = on;
         newFilter[tagId]!.onToggle?.(on, newFilter, setFilter);
       });
+      if (handleChange) {
+        handleChange(newFilter);
+      }
       return newFilter;
     });
   };
@@ -40,7 +43,7 @@ export default function TagFilterToggles(props: TagFilterTogglesProps) {
 
   return (
     <>
-      <ButtonGroup size="sm">
+      <Flex gap="4px" flexWrap="wrap">
         {allAndNoneToggles && (
           <>
             <Button
@@ -48,6 +51,7 @@ export default function TagFilterToggles(props: TagFilterTogglesProps) {
               colorScheme="blackAlpha"
               onClick={() => handleToggleAll(true)}
               variant={areAllOn ? "solid" : "ghost"}
+              size="sm"
             >
               All
             </Button>
@@ -56,6 +60,7 @@ export default function TagFilterToggles(props: TagFilterTogglesProps) {
               colorScheme="blackAlpha"
               onClick={() => handleToggleAll(false)}
               variant={areAllOff ? "solid" : "ghost"}
+              size="sm"
             >
               None
             </Button>
@@ -69,6 +74,10 @@ export default function TagFilterToggles(props: TagFilterTogglesProps) {
               const newFilter = { ...prevFilter };
               newFilter[tagId]!.on = !on;
               newFilter[tagId]!.onToggle?.(!on, newFilter, setFilter);
+
+              if (handleChange) {
+                handleChange(newFilter);
+              }
               return newFilter;
             });
           };
@@ -78,12 +87,13 @@ export default function TagFilterToggles(props: TagFilterTogglesProps) {
               colorScheme={colorScheme}
               onClick={handleClick}
               variant={on ? "solid" : "outline"}
+              size="sm"
             >
               {tagName}
             </Button>
           );
         })}
-      </ButtonGroup>
+      </Flex>
     </>
   );
 }
