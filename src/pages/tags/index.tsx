@@ -9,6 +9,7 @@ import TableActionMenu, {
 import DeleteTagButton from "../../features/tags/containers/DeleteTagButton";
 import ManageTagButton from "../../features/tags/containers/ManageTagButton";
 import TagsTable, { TagData } from "../../features/tags/containers/TagsTable";
+import useDeleteTags from "../../features/tags/hooks/useDeleteTags";
 import { api } from "../../utils/api";
 import getSessionWithSignInRedirect from "../../utils/getSessionWithSignInRedirect";
 
@@ -61,6 +62,9 @@ type AdditionalTopBarContentProps = {
 };
 function AdditionalTopBarContent(props: AdditionalTopBarContentProps) {
   const { selectedRows } = props;
+
+  const { handleDeleteTag } = useDeleteTags();
+
   return (
     <ButtonGroup>
       <TableActionMenu
@@ -70,7 +74,7 @@ function AdditionalTopBarContent(props: AdditionalTopBarContentProps) {
             <TableActionsMenuItemDelete
               context={context}
               handleDelete={async (selectedRows) => {
-                console.log(selectedRows);
+                await handleDeleteTag(selectedRows.map((row) => row.id));
               }}
             />
           </>

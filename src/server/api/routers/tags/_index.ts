@@ -1,5 +1,6 @@
 import { createTRPCRouter } from "../../trpc";
 import { create } from "./create";
+import { deleteTags } from "./delete";
 import { deleteById } from "./deleteById";
 import { getAll } from "./getAll";
 import { getById } from "./getById";
@@ -11,6 +12,7 @@ export const tagsRouter = createTRPCRouter({
   getAll,
   getCount,
   getById,
+  delete: deleteTags,
   deleteById,
   updateById,
 });

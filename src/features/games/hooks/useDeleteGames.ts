@@ -2,7 +2,7 @@ import { Game } from "@prisma/client";
 import { api } from "../../../utils/api";
 
 export type UseDeleteGamesConfig = {
-  onDeleted?: (gameObjectIds: Game["id"][]) => void;
+  onDeleted?: (gameIds: Game["id"][]) => void;
 };
 
 export default function useDeleteGames(props: UseDeleteGamesConfig = {}) {

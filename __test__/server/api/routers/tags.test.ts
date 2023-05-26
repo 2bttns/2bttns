@@ -139,6 +139,28 @@ describe("tags router", () => {
       }
     });
   });
+
+  describe("tags.delete", () => {
+    test("delete many", async () => {
+      const ctx = createInnerTRPCContextWithSessionForTest();
+      const caller = appRouter.createCaller(ctx);
+
+      const count = 10;
+      await createTags(count);
+
+      const testTags = await getAllTags();
+      const numToDelete = 5;
+      const idsToDelete = testTags.slice(0, numToDelete).map((t) => t.id);
+
+      const result = await caller.tags.delete({
+        id: idsToDelete.join(","),
+      });
+
+      const remainingTags = await getAllTags();
+      expect(result.deletedCount).toBe(numToDelete);
+      expect(remainingTags).length(count - numToDelete);
+    });
+  });
 });
 
 async function createTags(count: number) {
@@ -148,4 +170,8 @@ async function createTags(count: number) {
       name: `test-tag-${i}`,
     })),
   });
+}
+
+async function getAllTags() {
+  return await prisma.tag.findMany();
 }
