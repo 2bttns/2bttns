@@ -27,7 +27,7 @@ export default function DeleteTagButton(props: DeleteTagButtonProps) {
   return (
     <>
       <ConfirmAlert
-        alertTitle={`Delete Game: ${tagId}?`}
+        alertTitle={`Delete Tag: ${tagId}?`}
         isOpen={isOpen}
         onClose={onClose}
         handleConfirm={handleDeleteTag}
