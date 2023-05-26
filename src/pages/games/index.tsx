@@ -8,6 +8,7 @@ import GamesTable, {
 } from "../../features/games/containers/GamesTable";
 import ManageGameButton from "../../features/games/containers/ManageGameButton";
 import PlayGameButton from "../../features/games/containers/PlayGameButton";
+import useDeleteGames from "../../features/games/hooks/useDeleteGames";
 import { AdditionalColumns } from "../../features/shared/components/Table/containers/PaginatedTable";
 import TableActionMenu, {
   TableActionsMenuItemDelete,
@@ -60,6 +61,9 @@ type AdditionalTopBarContentProps = {
 };
 function AdditionalTopBarContent(props: AdditionalTopBarContentProps) {
   const { selectedRows } = props;
+
+  const { handleDeleteGame } = useDeleteGames();
+
   return (
     <ButtonGroup>
       <TableActionMenu
@@ -68,7 +72,9 @@ function AdditionalTopBarContent(props: AdditionalTopBarContentProps) {
           <>
             <TableActionsMenuItemDelete
               context={context}
-              handleDelete={console.log}
+              handleDelete={async () => {
+                await handleDeleteGame(context.selectedRows.map((r) => r.id));
+              }}
             />
           </>
         )}
