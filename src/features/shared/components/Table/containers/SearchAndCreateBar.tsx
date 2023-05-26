@@ -6,14 +6,16 @@ import {
   InputLeftElement,
   InputRightElement,
   Kbd,
+  Spinner,
   Stack,
   Tooltip,
 } from "@chakra-ui/react";
+import { useState } from "react";
 
 export type SearchAndCreateBarProps = {
   value: string | undefined;
   onChange: (search: string) => void;
-  onCreate?: (name: string) => void;
+  onCreate?: (name: string) => Promise<void>;
 };
 
 // Input for updating a search string state variable
@@ -21,10 +23,15 @@ export type SearchAndCreateBarProps = {
 export default function SearchAndCreateBar(props: SearchAndCreateBarProps) {
   const { value, onChange, onCreate } = props;
 
-  const handleCreate = () => {
-    if (!value) return;
+  const [isCreating, setIsCreating] = useState(false);
+  const handleCreate = async () => {
     if (!onCreate) return;
-    onCreate(value);
+    if (!value) return;
+    if (isCreating) return;
+
+    setIsCreating(true);
+    await onCreate(value);
+    setIsCreating(false);
   };
 
   const clearInput = () => {
@@ -45,41 +52,47 @@ export default function SearchAndCreateBar(props: SearchAndCreateBarProps) {
           value={value ?? ""}
           onChange={(e) => onChange(e.target.value)}
           placeholder="Search by name or id"
-          onKeyUp={(e) => {
+          onKeyUp={async (e) => {
             if (e.key === "Enter" && e.shiftKey) {
-              handleCreate();
+              await handleCreate();
             }
           }}
           bgColor="gray.200"
+          isDisabled={isCreating}
         />
         {onCreate && (
           <InputRightElement>
             <Tooltip
               label={
-                <Stack
-                  direction="column"
-                  alignItems="center"
-                  justifyContent="center"
-                  spacing="0"
-                  padding="0.5rem"
-                >
-                  <div>Create new item with input as name</div>
-                  <div>
-                    <Kbd backgroundColor="gray.900">shift</Kbd>
-                    <span>+</span>
-                    <Kbd backgroundColor="gray.900">enter</Kbd>
-                  </div>
-                </Stack>
+                isCreating ? (
+                  "Creating..."
+                ) : (
+                  <Stack
+                    direction="column"
+                    alignItems="center"
+                    justifyContent="center"
+                    spacing="0"
+                    padding="0.5rem"
+                  >
+                    <div>Create new item with input as name</div>
+                    <div>
+                      <Kbd backgroundColor="gray.900">shift</Kbd>
+                      <span>+</span>
+                      <Kbd backgroundColor="gray.900">enter</Kbd>
+                    </div>
+                  </Stack>
+                )
               }
               placement="bottom-end"
               hasArrow
             >
               <IconButton
                 colorScheme="blue"
-                icon={<AddIcon />}
+                icon={isCreating ? <Spinner size="sm" /> : <AddIcon />}
                 aria-label="Create new item"
                 size="sm"
                 onClick={handleCreate}
+                isDisabled={isCreating}
               />
             </Tooltip>
           </InputRightElement>
