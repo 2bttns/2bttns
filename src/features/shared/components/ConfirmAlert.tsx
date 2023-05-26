@@ -8,7 +8,7 @@ import {
   Button,
   ButtonProps,
 } from "@chakra-ui/react";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 
 export type ConfirmAlertProps = {
   alertTitle: string;
@@ -20,6 +20,7 @@ export type ConfirmAlertProps = {
   children?: React.ReactNode;
   cancelButtonProps?: ButtonProps;
   confirmButtonProps?: ButtonProps;
+  performingConfirmActionText?: string;
 };
 
 export function ConfirmAlert(props: ConfirmAlertProps) {
@@ -33,13 +34,19 @@ export function ConfirmAlert(props: ConfirmAlertProps) {
     children,
     cancelButtonProps,
     confirmButtonProps,
+    performingConfirmActionText,
   } = props;
 
   const cancelRef = useRef<HTMLButtonElement>(null);
 
+  const [isPerformingConfirmAction, setIsPerformingConfirmAction] =
+    useState(false);
+
   const handleConfirmClicked = async () => {
+    setIsPerformingConfirmAction(true);
     await handleConfirm();
     onClose();
+    setIsPerformingConfirmAction(false);
   };
 
   return (
@@ -49,6 +56,8 @@ export function ConfirmAlert(props: ConfirmAlertProps) {
           isOpen={isOpen}
           leastDestructiveRef={cancelRef}
           onClose={onClose}
+          closeOnEsc={false}
+          closeOnOverlayClick={false}
         >
           <AlertDialogOverlay>
             <AlertDialogContent>
@@ -62,6 +71,7 @@ export function ConfirmAlert(props: ConfirmAlertProps) {
                 <Button
                   ref={cancelRef}
                   onClick={onClose}
+                  isDisabled={isPerformingConfirmAction}
                   {...cancelButtonProps}
                 >
                   {cancelText}
@@ -70,9 +80,12 @@ export function ConfirmAlert(props: ConfirmAlertProps) {
                   colorScheme="red"
                   onClick={handleConfirmClicked}
                   ml={3}
+                  isDisabled={isPerformingConfirmAction}
                   {...confirmButtonProps}
                 >
-                  {confirmText}
+                  {isPerformingConfirmAction && performingConfirmActionText
+                    ? performingConfirmActionText
+                    : confirmText}
                 </Button>
               </AlertDialogFooter>
             </AlertDialogContent>

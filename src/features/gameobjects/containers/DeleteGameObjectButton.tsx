@@ -38,6 +38,7 @@ export default function DeleteGameObjectButton(
         isOpen={isOpen}
         onClose={onClose}
         handleConfirm={handleDeleteGameObject}
+        performingConfirmActionText="Deleting..."
       >
         This action cannot be undone.
       </ConfirmAlert>

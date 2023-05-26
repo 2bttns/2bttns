@@ -31,6 +31,7 @@ export default function DeleteTagButton(props: DeleteTagButtonProps) {
         isOpen={isOpen}
         onClose={onClose}
         handleConfirm={handleDeleteTag}
+        performingConfirmActionText="Deleting..."
       >
         This action cannot be undone.
       </ConfirmAlert>

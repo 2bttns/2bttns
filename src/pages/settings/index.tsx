@@ -120,6 +120,7 @@ function CellActions(props: CellActionsProps) {
           onClose={regenerateSecretDisclosure.onClose}
           handleConfirm={() => regenerateSecret(secretId)}
           confirmButtonProps={{ colorScheme: "blue" }}
+          performingConfirmActionText="Generating New Secret..."
         >
           Your current secret will be invalidated.
         </ConfirmAlert>
@@ -141,6 +142,7 @@ function CellActions(props: CellActionsProps) {
           isOpen={deleteSecretDisclosure.isOpen}
           onClose={deleteSecretDisclosure.onClose}
           handleConfirm={() => handleDeleteSecret(secretId)}
+          performingConfirmActionText="Deleting..."
         >
           This action cannot be undone.
         </ConfirmAlert>

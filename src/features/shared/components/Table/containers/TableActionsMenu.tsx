@@ -7,7 +7,7 @@ import {
   MenuList,
   useDisclosure,
 } from "@chakra-ui/react";
-import React, { useRef } from "react";
+import React from "react";
 import { ConfirmAlert } from "../../ConfirmAlert";
 
 export type TableActionMenuProps<T extends Object> = {
@@ -56,7 +56,6 @@ export function TableActionsMenuItemDelete<T extends Object>(
   const { context, handleDelete } = props;
 
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const cancelRef = useRef<HTMLButtonElement>(null);
 
   const handleConfirmDelete = async () => {
     try {
@@ -74,6 +73,7 @@ export function TableActionsMenuItemDelete<T extends Object>(
         handleConfirm={handleConfirmDelete}
         isOpen={isOpen}
         onClose={onClose}
+        performingConfirmActionText="Deleting..."
       >
         Are you sure? You can&apos;t undo this action afterwards.
       </ConfirmAlert>

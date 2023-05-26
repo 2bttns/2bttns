@@ -36,6 +36,7 @@ export default function DeleteGameButton(props: DeleteGameButtonProps) {
         isOpen={isOpen}
         onClose={onClose}
         handleConfirm={handleDeleteGame}
+        performingConfirmActionText="Deleting..."
       >
         This action cannot be undone.
       </ConfirmAlert>
