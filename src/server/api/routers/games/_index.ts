@@ -1,5 +1,6 @@
 import { createTRPCRouter } from "../../trpc";
 import { create } from "./create";
+import { deleteGames } from "./delete";
 import { deleteById } from "./deleteById";
 import { getAll } from "./getAll";
 import { getById } from "./getById";
@@ -12,6 +13,7 @@ export const gamesRouter = createTRPCRouter({
   getAll,
   getCount,
   getById,
+  delete: deleteGames,
   deleteById,
   updateById,
   getPlayerScores,
