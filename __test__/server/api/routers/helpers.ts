@@ -31,7 +31,7 @@ export const createInnerTRPCContextWithPlayerTokenAuthForTest = (
 };
 
 export async function clearDbsTest(prisma: PrismaClient) {
-  const toClear = [
+  await prisma.$transaction([
     prisma.account.deleteMany(),
     prisma.example.deleteMany(),
     prisma.game.deleteMany(),
@@ -45,9 +45,7 @@ export async function clearDbsTest(prisma: PrismaClient) {
     prisma.user.deleteMany(),
     prisma.verificationToken.deleteMany(),
     prisma.weight.deleteMany(),
-  ];
-
-  await Promise.all(toClear);
+  ]);
 }
 
 export async function createTestSecret() {
