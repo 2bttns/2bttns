@@ -61,6 +61,7 @@
     "superjson": "1.9.1",
     "swagger-ui-react": "^4.15.5",
     "trpc-openapi": "^1.1.2",
+    "use-debounce": "^9.0.4",
     "use-fit-text": "^2.4.0",
     "whatwg-fetch": "^3.6.2",
     "winston": "^3.8.2",
