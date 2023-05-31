@@ -219,7 +219,7 @@ export default function GameObjectsTable(props: GameObjectsTableProps) {
   const { selectedRows, handleSelectedRowsChange, toggleCleared } =
     useSelectRows<GameObjectData>({
       clearRowsUponChangeDependencies: [
-        globalFilter,
+        globalFilter.debouncedInput,
         tag,
         perPage,
         currentPage,
