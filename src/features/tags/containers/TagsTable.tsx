@@ -8,7 +8,9 @@ import CustomEditable from "../../shared/components/CustomEditable";
 import PaginatedTable, {
   PaginatedTableProps,
 } from "../../shared/components/Table/containers/PaginatedTable";
-import SearchAndCreateBar from "../../shared/components/Table/containers/SearchAndCreateBar";
+import SearchAndCreateBar, {
+  SearchAndCreateBarProps,
+} from "../../shared/components/Table/containers/SearchAndCreateBar";
 import useDebouncedValue from "../../shared/components/Table/hooks/useDebouncedValue";
 import usePagination from "../../shared/components/Table/hooks/usePagination";
 import useSelectRows from "../../shared/components/Table/hooks/useSelectRows";
@@ -97,10 +99,12 @@ export default function TagsTable(props: TagsTableProps) {
   };
 
   const createTagMutation = api.tags.create.useMutation();
-  const handleCreateTag = async () => {
+  const handleCreateTag: SearchAndCreateBarProps["onCreate"] = async (
+    value
+  ) => {
     try {
       const result = await createTagMutation.mutateAsync({
-        name: globalFilter.debouncedInput,
+        name: value,
       });
       if (onTagCreated) await onTagCreated(result.createdTag);
       await utils.tags.invalidate();
