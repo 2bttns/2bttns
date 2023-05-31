@@ -1,4 +1,4 @@
-import { Box, ButtonGroup } from "@chakra-ui/react";
+import { Box, ButtonGroup, Divider } from "@chakra-ui/react";
 import type { GetServerSideProps } from "next";
 import { Session } from "next-auth";
 import Head from "next/head";
@@ -12,10 +12,12 @@ import { AdditionalColumns } from "../../features/shared/components/Table/contai
 import TableActionsMenu, {
   TableActionsMenuItemBulkTag,
   TableActionsMenuItemDelete,
+  TableActionsMenuItemExportJSON,
 } from "../../features/shared/components/Table/containers/TableActionsMenu";
 import { EditTagsForGameObjectsButtonDrawer } from "../../features/tags/containers/EditTagsForGameObjectsButtonDrawer";
 import { SelectTagFiltersDrawerButton } from "../../features/tags/containers/SelectTagFiltersDrawerButton";
 import useAllTagFilters from "../../features/tags/hooks/useAllTagFilters";
+import { apiClient } from "../../utils/api";
 import getSessionWithSignInRedirect from "../../utils/getSessionWithSignInRedirect";
 import { NextPageWithLayout } from "../_app";
 
@@ -81,12 +83,47 @@ function AdditionalTopBarContent(props: AdditionalTopBarContentProps) {
   return (
     <>
       <ButtonGroup>
-        {/* <CsvImport />- @TODO: Move to Menu */}
         <TableActionsMenu
           selectedRows={selectedRows}
           actionItems={(context) => (
             <>
               <TableActionsMenuItemBulkTag context={context} />
+              <Divider />
+              {/* MAJOR TODO: determine import/export format for all 2bttns data structures
+                e.g. Export tags; but with a unified format so tags aren't duplicated for each exported item
+                e.g. {gameobjects: [...], tags:[...]}
+
+                Consider import order too. e.g. import tags first, then gameobjects, then relationships
+              */}
+              <TableActionsMenuItemExportJSON
+                context={context}
+                fetchJSON={async (ctx) => {
+                  return ctx.selectedRows.map((row) => {
+                    return row;
+                  });
+                }}
+                menuItemText={(ctx) =>
+                  `Export Selected to JSON (${ctx.selectedRows.length})`
+                }
+                isDisabled={(ctx) => ctx.selectedRows.length === 0}
+              />
+              <TableActionsMenuItemExportJSON
+                context={context}
+                // TODO: Export all (total # across db) in menu text
+                // May need to separate this into its own component
+                menuItemText={(_) => `Export All to JSON`}
+                fetchJSON={async (ctx) => {
+                  const { count } =
+                    await apiClient.gameObjects.getCount.query();
+                  const allItems = await apiClient.gameObjects.getAll.query({
+                    take: count,
+                    includeOutgoingRelationships: true,
+                  });
+
+                  return allItems.gameObjects;
+                }}
+              />
+              <Divider />
               <TableActionsMenuItemDelete
                 context={context}
                 handleDelete={async () => {
