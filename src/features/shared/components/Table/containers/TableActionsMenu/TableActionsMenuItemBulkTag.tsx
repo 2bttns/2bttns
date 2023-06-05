@@ -7,7 +7,7 @@ import { TableActionMenuContext } from "./index";
 //
 //
 
-export type TableActionsMenuItemBulkTagProps<T extends Object> = {
+export type TableActionsMenuItemBulkTagProps<T extends object> = {
   context: TableActionMenuContext<T>;
 };
 /**

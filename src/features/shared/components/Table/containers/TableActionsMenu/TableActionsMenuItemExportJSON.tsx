@@ -6,13 +6,13 @@ import { TableActionMenuContext } from "./index";
  * TODO: CSV Export
  */
 
-export type TableActionsMenuItemExportJSONProps<T extends Object> = {
+export type TableActionsMenuItemExportJSONProps<T extends object> = {
   context: TableActionMenuContext<T>;
   fetchJSON: (context: TableActionMenuContext<T>) => Promise<T[]>;
   menuItemText?: (context: TableActionMenuContext<T>) => string;
   isDisabled?: (context: TableActionMenuContext<T>) => boolean;
 };
-export default function TableActionsMenuItemExportJSON<T extends Object>(
+export default function TableActionsMenuItemExportJSON<T extends object>(
   props: TableActionsMenuItemExportJSONProps<T>
 ) {
   const { context, fetchJSON, menuItemText, isDisabled } = props;

@@ -3,7 +3,7 @@ import React from "react";
 import { ConfirmAlert } from "../../../ConfirmAlert";
 import { TableActionMenuContext, TableActionMenuProps } from "./index";
 
-export type TableActionsMenuItemDeleteProps<T extends Object> = {
+export type TableActionsMenuItemDeleteProps<T extends object> = {
   context: TableActionMenuContext<T>;
   handleDelete: (
     selectedRows: TableActionMenuProps<T>["selectedRows"]
@@ -13,7 +13,7 @@ export type TableActionsMenuItemDeleteProps<T extends Object> = {
  * Add this to the `actionItems` prop of a `TableActionMenu` to add a delete button for bulk-deleting selected items
  */
 
-export default function TableActionsMenuItemDelete<T extends Object>(
+export default function TableActionsMenuItemDelete<T extends object>(
   props: TableActionsMenuItemDeleteProps<T>
 ) {
   const { context, handleDelete } = props;

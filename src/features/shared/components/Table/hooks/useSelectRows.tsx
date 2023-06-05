@@ -5,7 +5,7 @@ export type UseSelectRowsProps<T> = {
   clearRowsUponChangeDependencies?: any[];
 };
 
-export default function useSelectRows<T extends Object>(
+export default function useSelectRows<T extends object>(
   props: UseSelectRowsProps<T> = {}
 ) {
   const { clearRowsUponChangeDependencies = [] } = props;
