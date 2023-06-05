@@ -17,7 +17,7 @@ const input = z
     nameFilter: commaSeparatedStringToArray
       .optional()
       .describe("Comma-separated Game Object names to filter by"),
-    requiredTags: commaSeparatedStringToArray
+    includeTags: commaSeparatedStringToArray
       .optional()
       .describe(
         "Comma-separated list of tag IDs the resulting game objects must have"
@@ -118,43 +118,35 @@ export const getAll = adminOrApiKeyProtectedProcedure
               notIn: input?.excludeGameObjects,
             },
           },
-          {
-            OR: [
-              // If includeUntagged is false, we need to filter out game objects that don't have any tags
-              // {
-              //   tags: input?.includeUntagged ? { none: {} } : undefined,
-              // },
 
-              {
-                AND: [
-                  // If requiredTags is set, we need to filter out game objects that don't have all of the required tags
-                  {
-                    tags: input?.requiredTags
-                      ? {
-                          some: {
-                            id: {
-                              in: input?.requiredTags,
-                            },
-                          },
-                        }
-                      : undefined,
+          // If includeTags is specified, only return game objects that have at least one of those tags
+          ...(input?.includeTags && input.includeTags.length > 0
+            ? [
+                {
+                  tags: {
+                    some: {
+                      id: {
+                        in: input.includeTags,
+                      },
+                    },
                   },
-                  // If excludeTags is set, we need to filter out game objects that have any of the excluded tags, even if they have any of the required tags
-                  {
-                    tags: input?.excludeTags
-                      ? {
-                          none: {
-                            id: {
-                              in: input?.excludeTags,
-                            },
-                          },
-                        }
-                      : undefined,
+                },
+              ]
+            : []),
+          // If excludeTags is specified, exclude game objects that have any of those tags
+          ...(input?.excludeTags && input.excludeTags.length > 0
+            ? [
+                {
+                  tags: {
+                    every: {
+                      id: {
+                        notIn: input.excludeTags,
+                      },
+                    },
                   },
-                ],
-              },
-            ],
-          },
+                },
+              ]
+            : []),
         ],
       },
       include: {

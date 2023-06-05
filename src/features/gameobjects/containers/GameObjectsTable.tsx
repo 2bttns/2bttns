@@ -59,17 +59,18 @@ export default function GameObjectsTable(props: GameObjectsTableProps) {
       take: perPage,
       idFilter: globalFilter.debouncedInput,
       nameFilter: globalFilter.debouncedInput,
-      requiredTags: tag?.include.join(",") || undefined,
+      includeTags: tag?.include.join(",") || undefined,
       excludeTags: tag?.exclude.join(",") || undefined,
       includeUntagged: tag?.includeUntagged ?? false,
       sortField: sorting?.sortField,
       sortOrder: sorting?.order,
-      excludeGameObjects: gameObjectsToExclude,
+      excludeGameObjects: gameObjectsToExclude?.join(",") || undefined,
     },
     {
       enabled: currentPage !== null,
       keepPreviousData: true,
       refetchOnWindowFocus: false,
+      retry: false,
     }
   );
   const data: GameObjectData[] = gameObjectsQuery.data?.gameObjects ?? [];
@@ -83,11 +84,12 @@ export default function GameObjectsTable(props: GameObjectsTableProps) {
       requiredTags: tag?.include.join(",") || undefined,
       excludeTags: tag?.exclude.join(",") || undefined,
       includeUntagged: tag?.includeUntagged ?? false,
-      excludeGameObjects: gameObjectsToExclude,
+      excludeGameObjects: gameObjectsToExclude?.join(",") || undefined,
     },
     {
       keepPreviousData: true,
       refetchOnWindowFocus: false,
+      retry: false,
     }
   );
 

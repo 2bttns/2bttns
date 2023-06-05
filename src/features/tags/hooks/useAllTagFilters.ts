@@ -69,6 +69,7 @@ export default function useAllTagFilters(props: UseAllTagFiltersProps = {}) {
   }, [tagFilter]);
 
   const excludeTags = useMemo(() => {
+    // All tags that are off are excluded
     const allOff = Object.keys(tagFilter).every((tagId) => {
       return !tagFilter[tagId]!.on;
     });
