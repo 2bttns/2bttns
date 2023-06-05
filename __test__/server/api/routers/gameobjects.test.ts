@@ -35,6 +35,79 @@ describe("gameobjects router", () => {
     expect(result.createdGameObject.updatedAt).toBeInstanceOf(Date);
   });
 
+  describe("gameobjects.count", () => {
+    test("count total game objects", async () => {
+      const ctx = createInnerTRPCContextWithSessionForTest();
+      const caller = appRouter.createCaller(ctx);
+
+      const numberOfGames = 101;
+      await createTestGameObjects({ count: numberOfGames });
+
+      type Input = inferProcedureInput<AppRouter["gameObjects"]["getAll"]>;
+      const input: Input = {};
+
+      const result = await caller.gameObjects.getCount(input);
+      expect(result.count).equals(numberOfGames);
+    });
+
+    test("count filtered by name and id", async () => {
+      const ctx = createInnerTRPCContextWithSessionForTest();
+      const caller = appRouter.createCaller(ctx);
+
+      await prisma.gameObject.createMany({
+        data: [
+          { id: "1", name: "lorem" },
+          { id: "2", name: "ipsum" },
+          { id: "3", name: "ipsum" },
+          { id: "4", name: "dolor" },
+        ],
+      });
+
+      type Input = inferProcedureInput<AppRouter["gameObjects"]["getAll"]>;
+      const input: Input = { idFilter: "1" };
+
+      // Filter by id only
+      const result = await caller.gameObjects.getCount(input);
+      expect(result.count).equals(1);
+
+      // Filter by name only
+      const input2: Input = { nameFilter: "ipsum" };
+      const result2 = await caller.gameObjects.getCount(input2);
+      expect(result2.count).equals(2);
+
+      // Filter by id and name requires either filters to match
+      const input4: Input = { idFilter: "1", nameFilter: "dolor" };
+      const result4 = await caller.gameObjects.getCount(input4);
+      expect(result4.count).equals(2);
+
+      // Supports filtering by multiple ids and names
+      const input5: Input = { idFilter: "1,2", nameFilter: "ipsum" };
+      const result5 = await caller.gameObjects.getCount(input5);
+      expect(result5.count).equals(3);
+    });
+
+    test("count filtered by excluded game objects", async () => {
+      const ctx = createInnerTRPCContextWithSessionForTest();
+      const caller = appRouter.createCaller(ctx);
+
+      await prisma.gameObject.createMany({
+        data: [
+          { id: "1", name: "lorem" },
+          { id: "2", name: "ipsum" },
+          { id: "3", name: "ipsum" },
+          { id: "4", name: "dolor" },
+        ],
+      });
+
+      type Input = inferProcedureInput<AppRouter["gameObjects"]["getAll"]>;
+      const input: Input = { excludeGameObjects: "1,2" };
+
+      // Filter by id only
+      const result = await caller.gameObjects.getCount(input);
+      expect(result.count).equals(2);
+    });
+  });
+
   describe("gameobjects.getAll", () => {
     test("default limit 10", async () => {
       const ctx = createInnerTRPCContextWithSessionForTest();
@@ -46,8 +119,36 @@ describe("gameobjects router", () => {
       type Input = inferProcedureInput<AppRouter["gameObjects"]["getAll"]>;
       const input: Input = {};
 
+      // default limit is 10
       const result = await caller.gameObjects.getAll(input);
       expect(result.gameObjects).length(10);
+
+      // can override limit with take
+      const result2 = await caller.gameObjects.getAll({ take: numberOfGames });
+      expect(result2.gameObjects).length(numberOfGames);
+    });
+
+    test("can skip items", async () => {
+      const ctx = createInnerTRPCContextWithSessionForTest();
+      const caller = appRouter.createCaller(ctx);
+
+      const numberOfGames = 20;
+      const skipCount = 10;
+      await createTestGameObjects({ count: numberOfGames });
+
+      // default limit is 10
+      const result1 = await caller.gameObjects.getAll({ take: numberOfGames });
+      expect(result1.gameObjects).length(numberOfGames);
+
+      // can override limit with take
+      const result2 = await caller.gameObjects.getAll({
+        take: skipCount,
+        skip: skipCount,
+      });
+      expect(result2.gameObjects).length(skipCount);
+      result1.gameObjects.slice(skipCount).forEach((g, i) => {
+        expect(g.id).toBe(result2.gameObjects[i]!.id);
+      });
     });
 
     test("sort by name", async () => {
@@ -65,21 +166,88 @@ describe("gameobjects router", () => {
         .slice(0, 10);
 
       type Input = inferProcedureInput<AppRouter["gameObjects"]["getAll"]>;
-      const input: Input = { sort: { name: "asc" } };
+      const input: Input = { sortField: "name", sortOrder: "asc" };
 
       const result = await caller.gameObjects.getAll(input);
       expect(result.gameObjects).length(10);
-      expect(result.gameObjects).toEqual(first10Asc);
+      expect(result.gameObjects.map((g) => g.id)).toEqual(
+        first10Asc.map((g) => g.id)
+      );
 
-      const input2: Input = { sort: { name: "desc" } };
+      const input2: Input = { sortField: "name", sortOrder: "desc" };
       const result2 = await caller.gameObjects.getAll(input2);
       expect(result2.gameObjects).length(10);
-      expect(result2.gameObjects).toEqual(first10Desc);
+      expect(result2.gameObjects.map((g) => g.id)).toEqual(
+        first10Desc.map((g) => g.id)
+      );
     });
 
-    // TODO: test pagination
-    // TODO: test filters
-    // TODO: test other sorting params
+    test("filter by name and id", async () => {
+      const ctx = createInnerTRPCContextWithSessionForTest();
+      const caller = appRouter.createCaller(ctx);
+
+      await prisma.gameObject.createMany({
+        data: [
+          { id: "1", name: "lorem" },
+          { id: "2", name: "ipsum" },
+          { id: "3", name: "ipsum" },
+          { id: "4", name: "dolor" },
+        ],
+      });
+
+      type Input = inferProcedureInput<AppRouter["gameObjects"]["getAll"]>;
+      const input: Input = { idFilter: "1" };
+
+      // Filter by id only
+      const result = await caller.gameObjects.getAll(input);
+      expect(result.gameObjects).length(1);
+      expect(result.gameObjects[0]!.id).toBe("1");
+
+      // Filter by name only
+      const input2: Input = { nameFilter: "ipsum" };
+      const result2 = await caller.gameObjects.getAll(input2);
+      expect(result2.gameObjects).length(2);
+      expect(result2.gameObjects[0]!.id).toBe("2");
+      expect(result2.gameObjects[1]!.id).toBe("3");
+
+      // Filter by id and name requires either filters to match
+      const input4: Input = { idFilter: "1", nameFilter: "dolor" };
+      const result4 = await caller.gameObjects.getAll(input4);
+      expect(result4.gameObjects).length(2);
+      expect(result4.gameObjects[0]!.id).toBe("1");
+      expect(result4.gameObjects[1]!.id).toBe("4");
+
+      // Supports filtering by multiple ids and names
+      const input5: Input = { idFilter: "1,2", nameFilter: "ipsum" };
+      const result5 = await caller.gameObjects.getAll(input5);
+      expect(result5.gameObjects).length(3);
+      expect(result5.gameObjects[0]!.id).toBe("1");
+      expect(result5.gameObjects[1]!.id).toBe("2");
+      expect(result5.gameObjects[2]!.id).toBe("3");
+    });
+
+    test("exclude game objects by id", async () => {
+      const ctx = createInnerTRPCContextWithSessionForTest();
+      const caller = appRouter.createCaller(ctx);
+
+      await prisma.gameObject.createMany({
+        data: [
+          { id: "1", name: "lorem" },
+          { id: "2", name: "ipsum" },
+          { id: "3", name: "ipsum" },
+          { id: "4", name: "dolor" },
+        ],
+      });
+
+      type Input = inferProcedureInput<AppRouter["gameObjects"]["getAll"]>;
+      const input: Input = { excludeGameObjects: "1,2" };
+
+      // Filter by id only
+      const result = await caller.gameObjects.getAll(input);
+      expect(result.gameObjects).length(2);
+      expect(result.gameObjects[0]!.id).toBe("3");
+      expect(result.gameObjects[1]!.id).toBe("4");
+    });
   });
 
   describe("gameobjects.getRanked", async () => {

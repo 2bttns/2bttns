@@ -1,124 +1,195 @@
 import { z } from "zod";
 import {
+  commaSeparatedStringToArray,
   paginationSkip,
   paginationTake,
-  sort,
-  tagFilter,
-  textFilter,
 } from "../../../shared/z";
+import { OPENAPI_TAGS } from "../../openapi/openApiTags";
 import { adminOrApiKeyProtectedProcedure } from "../../trpc";
 
-export const getAll = adminOrApiKeyProtectedProcedure
-  .input(
-    z
-      .object({
-        take: paginationTake,
-        skip: paginationSkip,
-        filter: z
-          .object({
-            mode: z.enum(["AND", "OR"]).optional(),
-            id: textFilter.optional(),
-            name: textFilter.optional(),
-            tag: tagFilter.optional(),
-          })
-          .optional(),
-        includeTags: z.boolean().optional().default(false),
-        sort: z
-          .object({
-            id: sort.optional(),
-            name: sort.optional(),
-            description: sort.optional(),
-            tags: sort.optional(),
-            updatedAt: sort.optional(),
-          })
-          .optional(),
-        excludeGameObjects: z.array(z.string()).optional().default([]),
-        includeOutgoingRelationships: z.boolean().optional().default(false),
-      })
+const input = z
+  .object({
+    take: paginationTake,
+    skip: paginationSkip,
+    idFilter: commaSeparatedStringToArray
       .optional()
-  )
+      .describe("Comma-separated Game Object IDs to filter by"),
+    nameFilter: commaSeparatedStringToArray
+      .optional()
+      .describe("Comma-separated Game Object names to filter by"),
+    requiredTags: commaSeparatedStringToArray
+      .optional()
+      .describe(
+        "Comma-separated list of tag IDs the resulting game objects must have"
+      ),
+    excludeTags: commaSeparatedStringToArray
+      .optional()
+      .describe(
+        "Comma-separated list of tag IDs to exclude from the response. Use this to exclude game objects that have a specific tag, even if they match the `requiredTags` filter."
+      ),
+    includeUntagged: z
+      .boolean()
+      .default(true)
+      .describe(
+        "Set to `false` to exclude untagged Game Objects from the response"
+      ),
+    sortField: z
+      .enum([
+        "id",
+        "name",
+        "description",
+        "updatedAt",
+        "createdAt",
+        "tags",
+        "related",
+      ])
+      .describe("Field to sort by")
+      .optional(),
+    sortOrder: z
+      .enum(["asc", "desc"])
+      .describe("Sort order for the selected field")
+      .optional(),
+    // includeTags: booleanEnum.describe(
+    //   "Set to `true` to include tags in the response"
+    // ),
+    // includeOutgoingRelationships: booleanEnum.describe(
+    //   "Set to `true` to include outgoing relationships in the response"
+    // ),
+    excludeGameObjects: commaSeparatedStringToArray
+      .optional()
+      .describe(
+        "Comma-separated list of Game Object IDs to exclude from the response"
+      ),
+  })
+  .optional();
+
+const output = z.object({
+  gameObjects: z.array(
+    z.object({
+      id: z.string(),
+      name: z.string(),
+      description: z.string().nullable(),
+      createdAt: z.string().describe("ISO date string"),
+      updatedAt: z.string().describe("ISO date string"),
+      tags: z.array(z.string()).describe("Tag IDs"),
+      related: z.array(z.string().describe("Related Game Object IDs")),
+    })
+  ),
+});
+
+export const getAll = adminOrApiKeyProtectedProcedure
+  .meta({
+    openapi: {
+      summary: "Get All Game Objects",
+      description:
+        "Get all Game Objects. Paginated by default. Supports filtering and sorting.",
+      tags: [OPENAPI_TAGS.GAME_OBJECTS],
+      method: "GET",
+      path: "/game-objects",
+      protect: true,
+    },
+  })
+  .input(input)
+  .output(output)
   .query(async ({ ctx, input }) => {
+    console.log("input");
+    console.log(input);
+
     const gameObjects = await ctx.prisma.gameObject.findMany({
       take: input?.take,
       skip: input?.skip,
       where: {
         AND: [
           {
-            [input?.filter?.mode ?? "AND"]: input?.filter?.mode
-              ? [
-                  {
-                    id: {
-                      in: input?.filter?.id?.in,
-                      contains: input?.filter?.id?.contains,
-                    },
-                  },
-                  {
-                    name: {
-                      in: input?.filter?.name?.in,
-                      contains: input?.filter?.name?.contains,
-                    },
-                  },
-                ]
-              : undefined,
+            OR:
+              input?.idFilter || input?.nameFilter
+                ? [
+                    ...(input?.idFilter?.map((id) => ({
+                      id: { contains: id },
+                    })) || []),
+                    ...(input?.nameFilter?.map((name) => ({
+                      name: { contains: name },
+                    })) || []),
+                  ]
+                : undefined,
           },
-          input?.filter?.tag
-            ? {
-                OR: [
-                  {
-                    AND: [
-                      {
-                        tags: {
-                          some: {
-                            id: {
-                              in: input?.filter?.tag?.include,
-                            },
-                          },
-                        },
-                      },
-                      {
-                        tags: {
-                          none: {
-                            id: {
-                              in: input?.filter?.tag?.exclude,
-                            },
-                          },
-                        },
-                      },
-                    ],
-                  },
-                  {
-                    tags: {
-                      none: input?.filter?.tag?.includeUntagged
-                        ? {}
-                        : undefined,
-                    },
-                  },
-                ],
-              }
-            : {},
           {
             id: {
               notIn: input?.excludeGameObjects,
             },
           },
+          {
+            OR: [
+              // If includeUntagged is false, we need to filter out game objects that don't have any tags
+              // {
+              //   tags: input?.includeUntagged ? { none: {} } : undefined,
+              // },
+
+              {
+                AND: [
+                  // If requiredTags is set, we need to filter out game objects that don't have all of the required tags
+                  {
+                    tags: input?.requiredTags
+                      ? {
+                          some: {
+                            id: {
+                              in: input?.requiredTags,
+                            },
+                          },
+                        }
+                      : undefined,
+                  },
+                  // If excludeTags is set, we need to filter out game objects that have any of the excluded tags, even if they have any of the required tags
+                  {
+                    tags: input?.excludeTags
+                      ? {
+                          none: {
+                            id: {
+                              in: input?.excludeTags,
+                            },
+                          },
+                        }
+                      : undefined,
+                  },
+                ],
+              },
+            ],
+          },
         ],
       },
       include: {
-        tags: input?.includeTags,
-        // TODO: Include related game objects
-        FromGameObjectRelationship: input?.includeOutgoingRelationships,
+        tags: { select: { id: true } },
+        FromGameObjectRelationship: { select: { toGameObjectId: true } },
       },
       orderBy: {
-        id: input?.sort?.id,
-        name: input?.sort?.name,
-        description: input?.sort?.description,
-        tags: input?.sort?.tags
-          ? {
-              _count: input.sort.tags,
-            }
-          : undefined,
-        updatedAt: input?.sort?.updatedAt,
+        id: input?.sortField === "id" ? input.sortOrder : undefined,
+        name: input?.sortField === "name" ? input.sortOrder : undefined,
+        description:
+          input?.sortField === "description" ? input.sortOrder : undefined,
+        tags:
+          input?.sortField === "tags" ? { _count: input.sortOrder } : undefined,
+        updatedAt:
+          input?.sortField === "updatedAt" ? input.sortOrder : undefined,
+        createdAt:
+          input?.sortField === "createdAt" ? input.sortOrder : undefined,
+        FromGameObjectRelationship:
+          input?.sortField === "related"
+            ? { _count: input.sortOrder }
+            : undefined,
       },
     });
-    return { gameObjects };
+
+    const processedOutput: typeof output._type = {
+      gameObjects: gameObjects.map((gameObject) => ({
+        ...gameObject,
+        createdAt: gameObject.createdAt.toISOString(),
+        updatedAt: gameObject.updatedAt.toISOString(),
+        tags: gameObject.tags.map((tag) => tag.id) ?? [],
+        related:
+          gameObject.FromGameObjectRelationship.map(
+            (relationship) => relationship.toGameObjectId
+          ) ?? [],
+      })),
+    };
+    return processedOutput;
   });

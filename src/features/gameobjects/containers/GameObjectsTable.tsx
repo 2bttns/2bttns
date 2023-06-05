@@ -46,33 +46,24 @@ export default function GameObjectsTable(props: GameObjectsTableProps) {
 
   const { perPage, currentPage, handlePageChange, handlePerRowsChange } =
     usePagination();
-  const { getSortOrder: getSort, handleSort } = useSort<GameObjectData>();
+  const { sorting, handleSort } = useSort<GameObjectData>();
 
   const utils = api.useContext();
   const globalFilter = useDebouncedValue();
 
+  console.log(tag);
+
   const gameObjectsQuery = api.gameObjects.getAll.useQuery(
     {
-      includeTags: true,
       skip: (currentPage! - 1) * perPage,
       take: perPage,
-      filter: globalFilter.debouncedInput
-        ? {
-            mode: "OR",
-            id: { contains: globalFilter.debouncedInput },
-            name: { contains: globalFilter.debouncedInput },
-            tag,
-          }
-        : {
-            tag,
-          },
-      sort: {
-        id: getSort("id"),
-        name: getSort("name"),
-        description: getSort("description"),
-        tags: getSort("tags"),
-        updatedAt: getSort("updatedAt"),
-      },
+      idFilter: globalFilter.debouncedInput,
+      nameFilter: globalFilter.debouncedInput,
+      requiredTags: tag?.include.join(",") || undefined,
+      excludeTags: tag?.exclude.join(",") || undefined,
+      includeUntagged: tag?.includeUntagged ?? false,
+      sortField: sorting?.sortField,
+      sortOrder: sorting?.order,
       excludeGameObjects: gameObjectsToExclude,
     },
     {
@@ -83,18 +74,15 @@ export default function GameObjectsTable(props: GameObjectsTableProps) {
   );
   const data: GameObjectData[] = gameObjectsQuery.data?.gameObjects ?? [];
 
+  const { associatedTagDataByTagId } = useAssociatedTagDataMap(data);
+
   const gameObjectsCountQuery = api.gameObjects.getCount.useQuery(
     {
-      filter: globalFilter.debouncedInput
-        ? {
-            mode: "OR",
-            id: { contains: globalFilter.debouncedInput },
-            name: { contains: globalFilter.debouncedInput },
-            tag,
-          }
-        : {
-            tag,
-          },
+      idFilter: globalFilter.debouncedInput,
+      nameFilter: globalFilter.debouncedInput,
+      requiredTags: tag?.include.join(",") || undefined,
+      excludeTags: tag?.exclude.join(",") || undefined,
+      includeUntagged: tag?.includeUntagged ?? false,
       excludeGameObjects: gameObjectsToExclude,
     },
     {
@@ -196,8 +184,10 @@ export default function GameObjectsTable(props: GameObjectsTableProps) {
         cell: (row) => {
           return (
             <TagBadges
-              selectedTags={row.tags.map((t) => {
-                return { id: t.id, name: t.name };
+              selectedTags={row.tags.map((tagId) => {
+                const name =
+                  associatedTagDataByTagId.get(tagId)?.name ?? "Untitled Tag";
+                return { id: tagId, name };
               })}
             />
           );
@@ -214,7 +204,7 @@ export default function GameObjectsTable(props: GameObjectsTableProps) {
         minWidth: "256px",
       },
     ];
-  }, [editable]);
+  }, [editable, associatedTagDataByTagId]);
 
   const { selectedRows, handleSelectedRowsChange, toggleCleared } =
     useSelectRows<GameObjectData>({
@@ -259,4 +249,33 @@ export default function GameObjectsTable(props: GameObjectsTableProps) {
       </ConstrainToRemainingSpace>
     </Box>
   );
+}
+
+// Hook that creates a map of tag data by tag id for quick lookups
+function useAssociatedTagDataMap(gameObjects: GameObjectData[]) {
+  const associatedTagIds = gameObjects.reduce((acc, gameObject) => {
+    gameObject.tags.forEach((tag) => acc.add(tag));
+    return acc;
+  }, new Set<string>());
+
+  const associatedTagsQuery = api.tags.getAll.useQuery({
+    take: associatedTagIds.size,
+    idFilter: Array.from(associatedTagIds).join(","),
+  });
+
+  const associatedTags = useMemo(
+    () => associatedTagsQuery.data?.tags ?? [],
+    [associatedTagsQuery.data?.tags]
+  );
+
+  const associatedTagDataByTagId = useMemo(() => {
+    const map = new Map<
+      (typeof associatedTags)[0]["id"],
+      (typeof associatedTags)[0]
+    >();
+    associatedTags.forEach((tag) => map.set(tag.id, tag));
+    return map;
+  }, [associatedTags]);
+
+  return { associatedTagDataByTagId };
 }

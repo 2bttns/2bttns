@@ -15,12 +15,11 @@ export function useToggleTagForGameObjects(
 
   const utils = api.useContext();
   const getGameObjectsCountQuery = api.gameObjects.getCount.useQuery({
-    filter: { id: { in: gameObjectIds } },
+    idFilter: gameObjectIds.join(","),
   });
   const getGameObjectsQuery = api.gameObjects.getAll.useQuery(
     {
-      filter: { id: { in: gameObjectIds } },
-      includeTags: true,
+      idFilter: gameObjectIds.join(","),
       take: getGameObjectsCountQuery.data?.count ?? 0,
     },
     {
@@ -36,8 +35,8 @@ export function useToggleTagForGameObjects(
 
     getGameObjectsQuery.data.gameObjects.forEach(({ id, tags }) => {
       tagsByGameObject[id] = {};
-      tags.forEach((t) => {
-        tagsByGameObject[id]![t.id] = true;
+      tags.forEach((tagId) => {
+        tagsByGameObject[id]![tagId] = true;
       });
     });
 

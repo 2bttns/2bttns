@@ -28,7 +28,6 @@ export default function ExportAllGameObjectsJSON(
 
         const allItems = await apiClient.gameObjects.getAll.query({
           take: count,
-          includeOutgoingRelationships: true,
         });
 
         return allItems.gameObjects;

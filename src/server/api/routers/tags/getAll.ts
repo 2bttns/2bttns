@@ -1,7 +1,32 @@
 import { z } from "zod";
-import { paginationSkip, paginationTake } from "../../../shared/z";
+import {
+  commaSeparatedStringToArray,
+  paginationSkip,
+  paginationTake,
+} from "../../../shared/z";
 import { OPENAPI_TAGS } from "../../openapi/openApiTags";
 import { adminOrApiKeyProtectedProcedure } from "../../trpc";
+
+const input = z
+  .object({
+    idFilter: commaSeparatedStringToArray
+      .describe("Comma-separated tag IDs to filter by")
+      .optional(),
+    nameFilter: commaSeparatedStringToArray
+      .describe("Comma-separated tag names to filter by")
+      .optional(),
+    take: paginationTake,
+    skip: paginationSkip,
+    sortField: z
+      .enum(["id", "name", "description", "updatedAt", "createdAt"])
+      .describe("Field to sort by")
+      .optional(),
+    sortOrder: z
+      .enum(["asc", "desc"])
+      .describe("Sort order for the selected field")
+      .optional(),
+  })
+  .optional();
 
 const output = z.object({
   tags: z.array(
@@ -26,31 +51,7 @@ export const getAll = adminOrApiKeyProtectedProcedure
       protect: true,
     },
   })
-
-  .input(
-    z
-      .object({
-        idFilter: z
-          .string()
-          .describe("Tag ID to filter by. Can be used with other filters.")
-          .optional(),
-        nameFilter: z
-          .string()
-          .describe("Tag name to filter by. Can be used with other filters.")
-          .optional(),
-        take: paginationTake,
-        skip: paginationSkip,
-        sortField: z
-          .enum(["id", "name", "description", "updatedAt", "createdAt"])
-          .describe("Field to sort by")
-          .optional(),
-        sortOrder: z
-          .enum(["asc", "desc"])
-          .describe("Sort order for the selected field")
-          .optional(),
-      })
-      .optional()
-  )
+  .input(input)
   .output(output)
   .query(async ({ ctx, input }) => {
     const tags = await ctx.prisma.tag.findMany({
@@ -58,8 +59,11 @@ export const getAll = adminOrApiKeyProtectedProcedure
         OR:
           input?.idFilter || input?.nameFilter
             ? [
-                { id: { contains: input?.idFilter } },
-                { name: { contains: input?.nameFilter } },
+                ...(input?.idFilter?.map((id) => ({ id: { contains: id } })) ||
+                  []),
+                ...(input?.nameFilter?.map((name) => ({
+                  name: { contains: name },
+                })) || []),
               ]
             : undefined,
       },
