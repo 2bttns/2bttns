@@ -10,9 +10,8 @@ import ManageGameButton from "../../features/games/containers/ManageGameButton";
 import PlayGameButton from "../../features/games/containers/PlayGameButton";
 import useDeleteGames from "../../features/games/hooks/useDeleteGames";
 import { AdditionalColumns } from "../../features/shared/components/Table/containers/PaginatedTable";
-import TableActionMenu, {
-  TableActionsMenuItemDelete,
-} from "../../features/shared/components/Table/containers/TableActionsMenu";
+import TableActionMenu from "../../features/shared/components/Table/containers/TableActionsMenu";
+import TableActionsMenuItemDelete from "../../features/shared/components/Table/containers/TableActionsMenu/TableActionsMenuItemDelete";
 import getSessionWithSignInRedirect from "../../utils/getSessionWithSignInRedirect";
 
 export type GamesPageProps = {

@@ -3,9 +3,8 @@ import { Tag } from "@prisma/client";
 import { GetServerSideProps, NextPage } from "next";
 import { Session } from "next-auth";
 import Head from "next/head";
-import TableActionMenu, {
-  TableActionsMenuItemDelete,
-} from "../../features/shared/components/Table/containers/TableActionsMenu";
+import TableActionMenu from "../../features/shared/components/Table/containers/TableActionsMenu";
+import TableActionsMenuItemDelete from "../../features/shared/components/Table/containers/TableActionsMenu/TableActionsMenuItemDelete";
 import DeleteTagButton from "../../features/tags/containers/DeleteTagButton";
 import ManageTagButton from "../../features/tags/containers/ManageTagButton";
 import TagsTable, { TagData } from "../../features/tags/containers/TagsTable";

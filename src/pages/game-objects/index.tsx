@@ -9,11 +9,10 @@ import GameObjectsTable, {
 import ManageGameObjectButton from "../../features/gameobjects/containers/ManageGameObjectButton";
 import useDeleteGameObjects from "../../features/gameobjects/hooks/useDeleteGameObjects";
 import { AdditionalColumns } from "../../features/shared/components/Table/containers/PaginatedTable";
-import TableActionsMenu, {
-  TableActionsMenuItemBulkTag,
-  TableActionsMenuItemDelete,
-  TableActionsMenuItemExportJSON,
-} from "../../features/shared/components/Table/containers/TableActionsMenu";
+import TableActionsMenu from "../../features/shared/components/Table/containers/TableActionsMenu";
+import TableActionsMenuItemBulkTag from "../../features/shared/components/Table/containers/TableActionsMenu/TableActionsMenuItemBulkTag";
+import TableActionsMenuItemDelete from "../../features/shared/components/Table/containers/TableActionsMenu/TableActionsMenuItemDelete";
+import TableActionsMenuItemExportJSON from "../../features/shared/components/Table/containers/TableActionsMenu/TableActionsMenuItemExportJSON";
 import { EditTagsForGameObjectsButtonDrawer } from "../../features/tags/containers/EditTagsForGameObjectsButtonDrawer";
 import { SelectTagFiltersDrawerButton } from "../../features/tags/containers/SelectTagFiltersDrawerButton";
 import useAllTagFilters from "../../features/tags/hooks/useAllTagFilters";

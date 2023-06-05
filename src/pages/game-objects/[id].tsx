@@ -24,9 +24,8 @@ import RelateGameObjects from "../../features/gameobjects/containers/RelateGameO
 import useDeleteGameObjects from "../../features/gameobjects/hooks/useDeleteGameObjects";
 import CustomEditable from "../../features/shared/components/CustomEditable";
 import { AdditionalColumns } from "../../features/shared/components/Table/containers/PaginatedTable";
-import TableActionMenu, {
-  TableActionsMenuItemDelete,
-} from "../../features/shared/components/Table/containers/TableActionsMenu";
+import TableActionMenu from "../../features/shared/components/Table/containers/TableActionsMenu";
+import TableActionsMenuItemDelete from "../../features/shared/components/Table/containers/TableActionsMenu/TableActionsMenuItemDelete";
 import { EditTagsForGameObjectsButtonDrawer } from "../../features/tags/containers/EditTagsForGameObjectsButtonDrawer";
 import { SelectTagFiltersDrawerButton } from "../../features/tags/containers/SelectTagFiltersDrawerButton";
 import TagBadges from "../../features/tags/containers/TagBadges";
