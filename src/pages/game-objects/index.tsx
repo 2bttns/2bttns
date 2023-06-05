@@ -7,13 +7,12 @@ import GameObjectsTable, {
   GameObjectData,
 } from "../../features/gameobjects/containers/GameObjectsTable";
 import ManageGameObjectButton from "../../features/gameobjects/containers/ManageGameObjectButton";
+import DeleteSelectedGameObjects from "../../features/gameobjects/containers/TableActionsMenu/DeleteSelectedGameObjects";
 import ExportAllGameObjectsJSON from "../../features/gameobjects/containers/TableActionsMenu/ExportAllGameObjectsJSON";
-import useDeleteGameObjects from "../../features/gameobjects/hooks/useDeleteGameObjects";
+import ExportSelectedGameObjectsJSON from "../../features/gameobjects/containers/TableActionsMenu/ExportSelectedGameObjectsJSON";
 import { AdditionalColumns } from "../../features/shared/components/Table/containers/PaginatedTable";
 import TableActionsMenu from "../../features/shared/components/Table/containers/TableActionsMenu";
 import TableActionsMenuItemBulkTag from "../../features/shared/components/Table/containers/TableActionsMenu/TableActionsMenuItemBulkTag";
-import TableActionsMenuItemDelete from "../../features/shared/components/Table/containers/TableActionsMenu/TableActionsMenuItemDelete";
-import TableActionsMenuItemExportJSON from "../../features/shared/components/Table/containers/TableActionsMenu/TableActionsMenuItemExportJSON";
 import { EditTagsForGameObjectsButtonDrawer } from "../../features/tags/containers/EditTagsForGameObjectsButtonDrawer";
 import { SelectTagFiltersDrawerButton } from "../../features/tags/containers/SelectTagFiltersDrawerButton";
 import useAllTagFilters from "../../features/tags/hooks/useAllTagFilters";
@@ -77,7 +76,6 @@ type AdditionalTopBarContentProps = {
 
 function AdditionalTopBarContent(props: AdditionalTopBarContentProps) {
   const { selectedRows, tagFilter } = props;
-  const { handleDeleteGameObjects } = useDeleteGameObjects();
 
   return (
     <>
@@ -94,28 +92,10 @@ function AdditionalTopBarContent(props: AdditionalTopBarContentProps) {
 
                 Consider import order too. e.g. import tags first, then gameobjects, then relationships
               */}
-              <TableActionsMenuItemExportJSON
-                context={context}
-                fetchJSON={async (ctx) => {
-                  return ctx.selectedRows.map((row) => {
-                    return row;
-                  });
-                }}
-                menuItemText={(ctx) =>
-                  `Export Selected to JSON (${ctx.selectedRows.length})`
-                }
-                isDisabled={(ctx) => ctx.selectedRows.length === 0}
-              />
+              <ExportSelectedGameObjectsJSON context={context} />
               <ExportAllGameObjectsJSON context={context} />
               <Divider />
-              <TableActionsMenuItemDelete
-                context={context}
-                handleDelete={async () => {
-                  await handleDeleteGameObjects(
-                    context.selectedRows.map((row) => row.id)
-                  );
-                }}
-              />
+              <DeleteSelectedGameObjects context={context} />
             </>
           )}
         />
