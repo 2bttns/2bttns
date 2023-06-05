@@ -20,7 +20,15 @@ export const booleanEnum = z
   // For some reason, z.boolean() doesn't work when setting it via the swagger docs UI; everything is registered as true
   // Hence, we use z.string() and then preprocess it to a boolean
   .preprocess((value) => {
-    return value === "true";
+    if (typeof value === "string") {
+      return value === "true";
+    }
+
+    if (typeof value === "boolean") {
+      return value;
+    }
+
+    return false;
   }, z.boolean())
   .default(false);
 

@@ -1,5 +1,6 @@
 import { Box, HStack, StackProps } from "@chakra-ui/react";
 import { useMemo } from "react";
+import { OutputTag } from "../../../server/api/routers/gameobjects/getAll";
 import { tagFilter } from "../../../server/shared/z";
 import { api, RouterInputs, RouterOutputs } from "../../../utils/api";
 import ConstrainToRemainingSpace, {
@@ -51,20 +52,19 @@ export default function GameObjectsTable(props: GameObjectsTableProps) {
   const utils = api.useContext();
   const globalFilter = useDebouncedValue();
 
-  console.log(tag);
-
   const gameObjectsQuery = api.gameObjects.getAll.useQuery(
     {
       skip: (currentPage! - 1) * perPage,
       take: perPage,
       idFilter: globalFilter.debouncedInput,
       nameFilter: globalFilter.debouncedInput,
-      includeTags: tag?.include.join(",") || undefined,
-      excludeTags: tag?.exclude.join(",") || undefined,
-      includeUntagged: tag?.includeUntagged ?? false,
+      includeTagsFilter: tag?.include.join(",") || undefined,
+      excludeTagsFilter: tag?.exclude.join(",") || undefined,
+      includeUntaggedResults: tag?.includeUntagged ?? false,
       sortField: sorting?.sortField,
       sortOrder: sorting?.order,
       excludeGameObjects: gameObjectsToExclude?.join(",") || undefined,
+      includeTagData: true,
     },
     {
       enabled: currentPage !== null,
@@ -73,9 +73,18 @@ export default function GameObjectsTable(props: GameObjectsTableProps) {
       retry: false,
     }
   );
-  const data: GameObjectData[] = gameObjectsQuery.data?.gameObjects ?? [];
+  const gameObjects: GameObjectData[] =
+    gameObjectsQuery.data?.gameObjects ?? [];
 
-  const { associatedTagDataByTagId } = useAssociatedTagDataMap(data);
+  const tagDataById = useMemo(() => {
+    if (gameObjectsQuery.isLoading || !gameObjectsQuery.data?.tags) return null;
+
+    const map = new Map<string, OutputTag>();
+    gameObjectsQuery.data?.tags?.forEach((tag) => {
+      map.set(tag.id, tag);
+    });
+    return map;
+  }, [gameObjectsQuery]);
 
   const gameObjectsCountQuery = api.gameObjects.getCount.useQuery(
     {
@@ -186,11 +195,16 @@ export default function GameObjectsTable(props: GameObjectsTableProps) {
         cell: (row) => {
           return (
             <TagBadges
-              selectedTags={row.tags.map((tagId) => {
-                const name =
-                  associatedTagDataByTagId.get(tagId)?.name ?? "Untitled Tag";
-                return { id: tagId, name };
-              })}
+              selectedTags={row.tags
+                .filter((tagId) => {
+                  return tagDataById?.get(tagId)?.name !== undefined;
+                })
+                .map((tagId) => {
+                  return {
+                    id: tagId,
+                    name: tagDataById!.get(tagId)!.name,
+                  };
+                })}
             />
           );
         },
@@ -206,7 +220,7 @@ export default function GameObjectsTable(props: GameObjectsTableProps) {
         minWidth: "256px",
       },
     ];
-  }, [editable, associatedTagDataByTagId]);
+  }, [editable, tagDataById]);
 
   const { selectedRows, handleSelectedRowsChange, toggleCleared } =
     useSelectRows<GameObjectData>({
@@ -234,7 +248,7 @@ export default function GameObjectsTable(props: GameObjectsTableProps) {
             <PaginatedTable<GameObjectData>
               additionalColumns={additionalColumns}
               columns={columns}
-              data={data}
+              data={gameObjects}
               fixedHeight={remainingHeight}
               itemIdField="id"
               loading={gameObjectsQuery.isLoading}
@@ -251,33 +265,4 @@ export default function GameObjectsTable(props: GameObjectsTableProps) {
       </ConstrainToRemainingSpace>
     </Box>
   );
-}
-
-// Hook that creates a map of tag data by tag id for quick lookups
-function useAssociatedTagDataMap(gameObjects: GameObjectData[]) {
-  const associatedTagIds = gameObjects.reduce((acc, gameObject) => {
-    gameObject.tags.forEach((tag) => acc.add(tag));
-    return acc;
-  }, new Set<string>());
-
-  const associatedTagsQuery = api.tags.getAll.useQuery({
-    take: associatedTagIds.size,
-    idFilter: Array.from(associatedTagIds).join(","),
-  });
-
-  const associatedTags = useMemo(
-    () => associatedTagsQuery.data?.tags ?? [],
-    [associatedTagsQuery.data?.tags]
-  );
-
-  const associatedTagDataByTagId = useMemo(() => {
-    const map = new Map<
-      (typeof associatedTags)[0]["id"],
-      (typeof associatedTags)[0]
-    >();
-    associatedTags.forEach((tag) => map.set(tag.id, tag));
-    return map;
-  }, [associatedTags]);
-
-  return { associatedTagDataByTagId };
 }

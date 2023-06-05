@@ -6,6 +6,7 @@ import {
 } from "../../../shared/z";
 import { OPENAPI_TAGS } from "../../openapi/openApiTags";
 import { adminOrApiKeyProtectedProcedure } from "../../trpc";
+import { booleanEnum } from "./../../../shared/z";
 
 const input = z
   .object({
@@ -17,18 +18,17 @@ const input = z
     nameFilter: commaSeparatedStringToArray
       .optional()
       .describe("Comma-separated Game Object names to filter by"),
-    includeTags: commaSeparatedStringToArray
+    includeTagsFilter: commaSeparatedStringToArray
       .optional()
       .describe(
         "Comma-separated list of tag IDs the resulting game objects must have"
       ),
-    excludeTags: commaSeparatedStringToArray
+    excludeTagsFilter: commaSeparatedStringToArray
       .optional()
       .describe(
         "Comma-separated list of tag IDs to exclude from the response. Use this to exclude game objects that have a specific tag, even if they match the `requiredTags` filter."
       ),
-    includeUntagged: z
-      .boolean()
+    includeUntaggedResults: booleanEnum
       .default(true)
       .describe(
         "Set to `false` to exclude untagged Game Objects from the response"
@@ -49,9 +49,9 @@ const input = z
       .enum(["asc", "desc"])
       .describe("Sort order for the selected field")
       .optional(),
-    // includeTags: booleanEnum.describe(
-    //   "Set to `true` to include tags in the response"
-    // ),
+    includeTagData: booleanEnum.describe(
+      "Set to `true` to include additional tags info in the response"
+    ),
     // includeOutgoingRelationships: booleanEnum.describe(
     //   "Set to `true` to include outgoing relationships in the response"
     // ),
@@ -63,18 +63,31 @@ const input = z
   })
   .optional();
 
+const outputTag = z.object({
+  id: z.string(),
+  name: z.string(),
+  description: z.string().nullable(),
+  createdAt: z.string().describe("ISO date string"),
+  updatedAt: z.string().describe("ISO date string"),
+});
+
+export type OutputTag = z.infer<typeof outputTag>;
+
+const outputGameObject = z.object({
+  id: z.string(),
+  name: z.string(),
+  description: z.string().nullable(),
+  createdAt: z.string().describe("ISO date string"),
+  updatedAt: z.string().describe("ISO date string"),
+  tags: z.array(z.string()).describe("Tag IDs"),
+  related: z.array(z.string().describe("Related Game Object IDs")),
+});
+
+export type OutputGameObject = z.infer<typeof outputGameObject>;
+
 const output = z.object({
-  gameObjects: z.array(
-    z.object({
-      id: z.string(),
-      name: z.string(),
-      description: z.string().nullable(),
-      createdAt: z.string().describe("ISO date string"),
-      updatedAt: z.string().describe("ISO date string"),
-      tags: z.array(z.string()).describe("Tag IDs"),
-      related: z.array(z.string().describe("Related Game Object IDs")),
-    })
-  ),
+  gameObjects: z.array(outputGameObject),
+  tags: z.array(outputTag).optional(),
 });
 
 export const getAll = adminOrApiKeyProtectedProcedure
@@ -119,14 +132,17 @@ export const getAll = adminOrApiKeyProtectedProcedure
             },
           },
 
+          // If includeUntagged is true, include game objects that have no tags i nthe results
+          ...(input?.includeUntaggedResults ? [{ tags: { some: {} } }] : []),
+
           // If includeTags is specified, only return game objects that have at least one of those tags
-          ...(input?.includeTags && input.includeTags.length > 0
+          ...(input?.includeTagsFilter && input.includeTagsFilter.length > 0
             ? [
                 {
                   tags: {
                     some: {
                       id: {
-                        in: input.includeTags,
+                        in: input.includeTagsFilter,
                       },
                     },
                   },
@@ -134,13 +150,13 @@ export const getAll = adminOrApiKeyProtectedProcedure
               ]
             : []),
           // If excludeTags is specified, exclude game objects that have any of those tags
-          ...(input?.excludeTags && input.excludeTags.length > 0
+          ...(input?.excludeTagsFilter && input.excludeTagsFilter.length > 0
             ? [
                 {
                   tags: {
                     every: {
                       id: {
-                        notIn: input.excludeTags,
+                        notIn: input.excludeTagsFilter,
                       },
                     },
                   },
@@ -171,6 +187,21 @@ export const getAll = adminOrApiKeyProtectedProcedure
       },
     });
 
+    const relatedTagIds = gameObjects.reduce((acc, gameObject) => {
+      gameObject.tags.forEach((tag) => acc.add(tag.id));
+      return acc;
+    }, new Set<string>());
+
+    const additionalTagData = input?.includeTagData
+      ? await ctx.prisma.tag.findMany({
+          where: {
+            id: {
+              in: [...relatedTagIds],
+            },
+          },
+        })
+      : undefined;
+
     const processedOutput: typeof output._type = {
       gameObjects: gameObjects.map((gameObject) => ({
         ...gameObject,
@@ -181,6 +212,11 @@ export const getAll = adminOrApiKeyProtectedProcedure
           gameObject.FromGameObjectRelationship.map(
             (relationship) => relationship.toGameObjectId
           ) ?? [],
+      })),
+      tags: additionalTagData?.map((tag) => ({
+        ...tag,
+        createdAt: tag.createdAt.toISOString(),
+        updatedAt: tag.updatedAt.toISOString(),
       })),
     };
     return processedOutput;
