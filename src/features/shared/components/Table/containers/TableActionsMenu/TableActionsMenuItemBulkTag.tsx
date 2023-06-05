@@ -3,10 +3,6 @@ import { GameObjectData } from "../../../../../gameobjects/containers/GameObject
 import { EditTagsForGameObjectsDrawer } from "../../../../../tags/containers/EditTagsForGameObjectsButtonDrawer";
 import { TableActionMenuContext } from "./index";
 
-//
-//
-//
-
 export type TableActionsMenuItemBulkTagProps<T extends object> = {
   context: TableActionMenuContext<T>;
 };
@@ -14,8 +10,6 @@ export type TableActionsMenuItemBulkTagProps<T extends object> = {
  * Add this to the `actionItems` prop of a `TableActionMenu` to add bulk-tagging UI that can manage tags for multiple selected items
  *
  * Supported for Game Objects only
- *
- * TODO: Add support for Games
  */
 
 export default function TableActionsMenuItemBulkTag(

@@ -7,6 +7,7 @@ import GameObjectsTable, {
   GameObjectData,
 } from "../../features/gameobjects/containers/GameObjectsTable";
 import ManageGameObjectButton from "../../features/gameobjects/containers/ManageGameObjectButton";
+import ExportAllGameObjectsJSON from "../../features/gameobjects/containers/TableActionsMenu/ExportAllGameObjectsJSON";
 import useDeleteGameObjects from "../../features/gameobjects/hooks/useDeleteGameObjects";
 import { AdditionalColumns } from "../../features/shared/components/Table/containers/PaginatedTable";
 import TableActionsMenu from "../../features/shared/components/Table/containers/TableActionsMenu";
@@ -16,7 +17,6 @@ import TableActionsMenuItemExportJSON from "../../features/shared/components/Tab
 import { EditTagsForGameObjectsButtonDrawer } from "../../features/tags/containers/EditTagsForGameObjectsButtonDrawer";
 import { SelectTagFiltersDrawerButton } from "../../features/tags/containers/SelectTagFiltersDrawerButton";
 import useAllTagFilters from "../../features/tags/hooks/useAllTagFilters";
-import { apiClient } from "../../utils/api";
 import getSessionWithSignInRedirect from "../../utils/getSessionWithSignInRedirect";
 import { NextPageWithLayout } from "../_app";
 
@@ -106,22 +106,7 @@ function AdditionalTopBarContent(props: AdditionalTopBarContentProps) {
                 }
                 isDisabled={(ctx) => ctx.selectedRows.length === 0}
               />
-              <TableActionsMenuItemExportJSON
-                context={context}
-                // TODO: Export all (total # across db) in menu text
-                // May need to separate this into its own component
-                menuItemText={(_) => `Export All to JSON`}
-                fetchJSON={async (ctx) => {
-                  const { count } =
-                    await apiClient.gameObjects.getCount.query();
-                  const allItems = await apiClient.gameObjects.getAll.query({
-                    take: count,
-                    includeOutgoingRelationships: true,
-                  });
-
-                  return allItems.gameObjects;
-                }}
-              />
+              <ExportAllGameObjectsJSON context={context} />
               <Divider />
               <TableActionsMenuItemDelete
                 context={context}
