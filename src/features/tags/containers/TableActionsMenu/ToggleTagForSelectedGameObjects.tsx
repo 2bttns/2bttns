@@ -23,8 +23,8 @@ export default function ToggleTagForSelectedGameObjects(
   });
 
   const actionText = toggleQuery.isTagAppliedToAll
-    ? "Remove tag from"
-    : "Apply tag to";
+    ? "Remove Tag from"
+    : "Apply Tag to";
 
   if (context.selectedRows.length === 0) {
     return null;
