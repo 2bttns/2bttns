@@ -3,6 +3,7 @@ import { inferProcedureInput } from "@trpc/server";
 import { afterEach, beforeEach, describe, expect, test } from "vitest";
 import { AppRouter, appRouter } from "../../../../src/server/api/root";
 import { prisma } from "../../../../src/server/db";
+import { RouterInputs, RouterOutputs } from "../../../../src/utils/api";
 import {
   clearDbsTest,
   createInnerTRPCContextWithSessionForTest,
@@ -247,6 +248,141 @@ describe("gameobjects router", () => {
       expect(result.gameObjects).length(2);
       expect(result.gameObjects[0]!.id).toBe("3");
       expect(result.gameObjects[1]!.id).toBe("4");
+    });
+
+    test("filter gameobjects by tag", async () => {
+      const ctx = createInnerTRPCContextWithSessionForTest();
+      const caller = appRouter.createCaller(ctx);
+
+      await prisma.gameObject.createMany({
+        data: [
+          { id: "1", name: "lorem" },
+          { id: "2", name: "ipsum" },
+          { id: "3", name: "dolor" },
+          { id: "4", name: "sit" },
+        ],
+      });
+
+      await prisma.tag.create({
+        data: {
+          id: "A",
+          name: "Tag A",
+          gameObjects: {
+            connect: [{ id: "1" }, { id: "2" }, { id: "3" }],
+          },
+        },
+      });
+      await prisma.tag.create({
+        data: {
+          id: "B",
+          name: "Tag B",
+          gameObjects: {
+            connect: [{ id: "2" }, { id: "3" }],
+          },
+        },
+      });
+      await prisma.tag.create({
+        data: {
+          id: "C",
+          name: "Tag C",
+          gameObjects: {
+            connect: [{ id: "3" }],
+          },
+        },
+      });
+
+      type Input = RouterInputs["gameObjects"]["getAll"];
+      let input: Input = {};
+
+      // Get all, including untagged by default
+      type Output = RouterOutputs["gameObjects"]["getAll"];
+      let result: Output = await caller.gameObjects.getAll(input);
+      expect(result.gameObjects).length(4);
+
+      // Get all, excluding untagged objects
+      input = { untaggedFilter: "exclude" };
+      result = await caller.gameObjects.getAll(input);
+      expect(result.gameObjects).length(3);
+      expect(result.gameObjects.find((g) => g.id === "4")).toBeUndefined();
+
+      // Get untagged items only
+      input = { untaggedFilter: "untagged-only" };
+      result = await caller.gameObjects.getAll(input);
+      expect(result.gameObjects).length(1);
+      expect(result.gameObjects.find((g) => g.id === "4")).toBeDefined();
+
+      // Get untagged items only
+      // Should override any tag filters, since only untagged items are requested
+      input = { untaggedFilter: "untagged-only", tagFilter: "A" };
+      result = await caller.gameObjects.getAll(input);
+      expect(result.gameObjects).length(1);
+      expect(result.gameObjects.find((g) => g.id === "4")).toBeDefined();
+
+      // Get all items with tag A
+      // Untagged items are included by default
+      input = { tagFilter: "A" };
+      result = await caller.gameObjects.getAll(input);
+      expect(result.gameObjects).length(4);
+
+      // Get all items with tag B and C
+      // Untagged items are included by default
+      input = { tagFilter: "B,C" };
+      result = await caller.gameObjects.getAll(input);
+      expect(result.gameObjects).length(3);
+      expect(result.gameObjects.find((g) => g.id === "4")).toBeDefined();
+
+      // Get items with tag A but not C
+      // Untagged items are included by default
+      input = { tagFilter: "A", tagExcludeFilter: "C" };
+      result = await caller.gameObjects.getAll(input);
+      console.log(result);
+      expect(result.gameObjects).length(3);
+      expect(result.gameObjects.find((g) => g.id === "4")).toBeDefined();
+
+      // Get items with tag A but not C
+      // Exclude untagged items
+      input = {
+        tagFilter: "A",
+        tagExcludeFilter: "C",
+        untaggedFilter: "exclude",
+      };
+      result = await caller.gameObjects.getAll(input);
+      expect(result.gameObjects).length(2);
+      expect(result.gameObjects.find((g) => g.id === "4")).toBeUndefined();
+
+      // All tag filters & include untagged
+      input = {
+        tagFilter: "A,B,C",
+      };
+      result = await caller.gameObjects.getAll(input);
+      expect(result.gameObjects).length(4);
+
+      // Include all tag filters but then exclude them too
+      // Also include untagged
+      // This should return only the untagged items, since all the tags are excluded
+      input = {
+        tagFilter: "A,B,C",
+        tagExcludeFilter: "A,B,C",
+      };
+      result = await caller.gameObjects.getAll(input);
+      expect(result.gameObjects).length(1);
+
+      // All tag filters & exclude untagged
+      input = {
+        tagFilter: "A,B,C",
+        untaggedFilter: "exclude",
+      };
+      result = await caller.gameObjects.getAll(input);
+      expect(result.gameObjects).length(3);
+
+      // All tag filters & untagged only
+      // Untagged should override all other filters, only returning untagged items
+      input = {
+        tagFilter: "A,B,C",
+        untaggedFilter: "untagged-only",
+      };
+      result = await caller.gameObjects.getAll(input);
+      expect(result.gameObjects).length(1);
     });
   });
 

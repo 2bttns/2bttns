@@ -8,30 +8,34 @@ import { OPENAPI_TAGS } from "../../openapi/openApiTags";
 import { adminOrApiKeyProtectedProcedure } from "../../trpc";
 import { booleanEnum } from "./../../../shared/z";
 
+const untaggedFilterEnum = z.enum(["include", "exclude", "untagged-only"]);
+
+export type UntaggedFilterEnum = z.infer<typeof untaggedFilterEnum>;
+
 const input = z
   .object({
     take: paginationTake,
     skip: paginationSkip,
     idFilter: commaSeparatedStringToArray
-      .optional()
-      .describe("Comma-separated Game Object IDs to filter by"),
+      .describe("Comma-separated Game Object IDs to filter by")
+      .optional(),
     nameFilter: commaSeparatedStringToArray
-      .optional()
-      .describe("Comma-separated Game Object names to filter by"),
-    includeTagsFilter: commaSeparatedStringToArray
-      .optional()
+      .describe("Comma-separated Game Object names to filter by")
+      .optional(),
+    tagFilter: commaSeparatedStringToArray
       .describe(
         "Comma-separated list of tag IDs the resulting game objects must have"
-      ),
-    excludeTagsFilter: commaSeparatedStringToArray
-      .optional()
+      )
+      .optional(),
+    tagExcludeFilter: commaSeparatedStringToArray
       .describe(
         "Comma-separated list of tag IDs to exclude from the response. Use this to exclude game objects that have a specific tag, even if they match the `requiredTags` filter."
-      ),
-    includeUntaggedResults: booleanEnum
-      .default(true)
+      )
+      .optional(),
+    untaggedFilter: untaggedFilterEnum
+      .default("include")
       .describe(
-        "Set to `false` to exclude untagged Game Objects from the response"
+        "`include`: Include all game objects, regardless of whether they have tags or not. \n\n`exclude`: Exclude game objects that have no tags. \n\n`untagged-only`: Only return game objects that have no tags. Setting this option will ignore `requiredTags` and `excludeTags`, since tagged items shouldn't appear in the results."
       ),
     sortField: z
       .enum([
@@ -56,10 +60,10 @@ const input = z
     //   "Set to `true` to include outgoing relationships in the response"
     // ),
     excludeGameObjects: commaSeparatedStringToArray
-      .optional()
       .describe(
         "Comma-separated list of Game Object IDs to exclude from the response"
-      ),
+      )
+      .optional(),
   })
   .optional();
 
@@ -105,7 +109,7 @@ export const getAll = adminOrApiKeyProtectedProcedure
   .input(input)
   .output(output)
   .query(async ({ ctx, input }) => {
-    console.log("input");
+    console.log("FOO");
     console.log(input);
 
     const gameObjects = await ctx.prisma.gameObject.findMany({
@@ -114,57 +118,101 @@ export const getAll = adminOrApiKeyProtectedProcedure
       where: {
         AND: [
           {
-            OR:
-              input?.idFilter || input?.nameFilter
-                ? [
-                    ...(input?.idFilter?.map((id) => ({
-                      id: { contains: id },
-                    })) || []),
-                    ...(input?.nameFilter?.map((name) => ({
-                      name: { contains: name },
-                    })) || []),
-                  ]
-                : undefined,
+            OR: [
+              ...(input?.idFilter ? [{ id: { in: input.idFilter } }] : []),
+              ...(input?.nameFilter
+                ? [{ name: { in: input.nameFilter } }]
+                : []),
+            ],
           },
+          input?.untaggedFilter === "include"
+            ? {
+                OR: [
+                  {
+                    // Include items that have no tags
+                    tags: {
+                      none: {},
+                    },
+                  },
+                  {
+                    // Also include items that have tags, but only if they match the `tagFilter` and `tagExcludeFilter` filters
+                    AND: [
+                      {
+                        tags: {
+                          some: {},
+                        },
+                      },
+                      input?.tagFilter
+                        ? {
+                            tags: {
+                              some: {
+                                id: {
+                                  in: input?.tagFilter,
+                                },
+                              },
+                            },
+                          }
+                        : {},
+                      input?.tagExcludeFilter
+                        ? {
+                            tags: {
+                              none: {
+                                id: {
+                                  in: input?.tagExcludeFilter,
+                                },
+                              },
+                            },
+                          }
+                        : {},
+                    ],
+                  },
+                ],
+              }
+            : {},
+          input?.untaggedFilter === "exclude"
+            ? {
+                AND: [
+                  // Include only items that have tags
+                  {
+                    tags: {
+                      some: {},
+                    },
+                  },
+
+                  // If the `tagFilter` and `tagExcludeFilter` filters are set, we need to add a filter to the query to only return items that match those filters
+                  // Otherwise, items that have tags but don't match the filters will be included in the response, which is not what we want
+                  input?.tagExcludeFilter
+                    ? {
+                        tags: {
+                          none: {
+                            id: {
+                              in: input?.tagExcludeFilter,
+                            },
+                          },
+                        },
+                      }
+                    : {},
+                ],
+              }
+            : {},
+          // If the untagged-only filter is set, we need to add a filter to the query to only return untagged items
+          // This ignores the `tagFilter` and `tagExcludeFilter` filters, since tagged items shouldn't appear in the when this option is set
+          input?.untaggedFilter === "untagged-only"
+            ? {
+                tags: {
+                  none: {},
+                },
+              }
+            : {},
           {
+            // Exclude explicitly excluded items that were specified in the `excludeGameObjects` filter
             id: {
               notIn: input?.excludeGameObjects,
             },
           },
-
-          // If includeUntagged is true, include game objects that have no tags i nthe results
-          ...(input?.includeUntaggedResults ? [{ tags: { some: {} } }] : []),
-
-          // If includeTags is specified, only return game objects that have at least one of those tags
-          ...(input?.includeTagsFilter && input.includeTagsFilter.length > 0
-            ? [
-                {
-                  tags: {
-                    some: {
-                      id: {
-                        in: input.includeTagsFilter,
-                      },
-                    },
-                  },
-                },
-              ]
-            : []),
-          // If excludeTags is specified, exclude game objects that have any of those tags
-          ...(input?.excludeTagsFilter && input.excludeTagsFilter.length > 0
-            ? [
-                {
-                  tags: {
-                    every: {
-                      id: {
-                        notIn: input.excludeTagsFilter,
-                      },
-                    },
-                  },
-                },
-              ]
-            : []),
         ],
       },
+
       include: {
         tags: { select: { id: true } },
         FromGameObjectRelationship: { select: { toGameObjectId: true } },
@@ -187,6 +235,7 @@ export const getAll = adminOrApiKeyProtectedProcedure
       },
     });
 
+    // Include tags used by the game objects in the response if requested via the includeTagData flag
     const relatedTagIds = gameObjects.reduce((acc, gameObject) => {
       gameObject.tags.forEach((tag) => acc.add(tag.id));
       return acc;
@@ -219,5 +268,6 @@ export const getAll = adminOrApiKeyProtectedProcedure
         updatedAt: tag.updatedAt.toISOString(),
       })),
     };
+
     return processedOutput;
   });
