@@ -22,16 +22,15 @@ import GameObjectsTable, {
   GameObjectsTableProps,
 } from "../../features/gameobjects/containers/GameObjectsTable";
 import ManageGameObjectButton from "../../features/gameobjects/containers/ManageGameObjectButton";
-import useDeleteGameObjects from "../../features/gameobjects/hooks/useDeleteGameObjects";
 import CustomEditable from "../../features/shared/components/CustomEditable";
 import { AdditionalColumns } from "../../features/shared/components/Table/containers/PaginatedTable";
 import TableActionMenu from "../../features/shared/components/Table/containers/TableActionsMenu";
-import TableActionsMenuItemDelete from "../../features/shared/components/Table/containers/TableActionsMenu/TableActionsMenuItemDelete";
 import DeleteTagButton from "../../features/tags/containers/DeleteTagButton";
 import {
   SelectTagFiltersDrawerButton,
   SelectTagFiltersDrawerButtonProps,
 } from "../../features/tags/containers/SelectTagFiltersDrawerButton";
+import ToggleTagForSelectedGameObjects from "../../features/tags/containers/TableActionsMenu/ToggleTagForSelectedGameObjects";
 import { TagFilter } from "../../features/tags/containers/TagFilterToggles";
 import ToggleTagButton from "../../features/tags/containers/ToggleTagButton";
 import { untaggedFilterEnum } from "../../server/shared/z";
@@ -279,7 +278,6 @@ type AdditionalTopBarContentProps = {
 };
 function AdditionalTopBarContent(props: AdditionalTopBarContentProps) {
   const { selectedGameObjectRows, tagId, tagFilter, setTagFilter } = props;
-  const { handleDeleteGameObjects } = useDeleteGameObjects();
 
   return (
     <>
@@ -288,13 +286,9 @@ function AdditionalTopBarContent(props: AdditionalTopBarContentProps) {
           selectedRows={selectedGameObjectRows}
           actionItems={(context) => (
             <>
-              <TableActionsMenuItemDelete
+              <ToggleTagForSelectedGameObjects
                 context={context}
-                handleDelete={async (selectedRows) => {
-                  await handleDeleteGameObjects(
-                    selectedRows.map((row) => row.id)
-                  );
-                }}
+                tagId={tagId}
               />
             </>
           )}
