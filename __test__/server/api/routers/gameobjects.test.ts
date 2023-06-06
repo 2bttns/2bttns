@@ -335,7 +335,6 @@ describe("gameobjects router", () => {
       // Untagged items are included by default
       input = { tagFilter: "A", tagExcludeFilter: "C" };
       result = await caller.gameObjects.getAll(input);
-      console.log(result);
       expect(result.gameObjects).length(3);
       expect(result.gameObjects.find((g) => g.id === "4")).toBeDefined();
 
@@ -357,7 +356,6 @@ describe("gameobjects router", () => {
         untaggedFilter: "exclude",
       };
       result = await caller.gameObjects.getAll(input);
-      console.log(result);
       expect(result.gameObjects).length(1);
       expect(result.gameObjects.find((g) => g.id === "4")).toBeUndefined();
     });
