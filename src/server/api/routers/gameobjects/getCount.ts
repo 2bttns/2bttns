@@ -144,6 +144,18 @@ export const getCount = adminOrApiKeyProtectedProcedure
                         },
                       }
                     : {},
+
+                  input?.tagFilter
+                    ? {
+                        tags: {
+                          some: {
+                            id: {
+                              in: input?.tagFilter,
+                            },
+                          },
+                        },
+                      }
+                    : {},
                 ],
               }
             : {},

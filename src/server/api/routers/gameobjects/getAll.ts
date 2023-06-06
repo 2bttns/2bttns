@@ -197,6 +197,18 @@ export const getAll = adminOrApiKeyProtectedProcedure
                         },
                       }
                     : {},
+
+                  input?.tagFilter
+                    ? {
+                        tags: {
+                          some: {
+                            id: {
+                              in: input?.tagFilter,
+                            },
+                          },
+                        },
+                      }
+                    : {},
                 ],
               }
             : {},

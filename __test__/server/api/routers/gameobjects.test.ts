@@ -349,6 +349,17 @@ describe("gameobjects router", () => {
       result = await caller.gameObjects.getAll(input);
       expect(result.gameObjects).length(2);
       expect(result.gameObjects.find((g) => g.id === "4")).toBeUndefined();
+
+      // Get specific items with tag C
+      // Exclude untagged items
+      input = {
+        tagFilter: "C",
+        untaggedFilter: "exclude",
+      };
+      result = await caller.gameObjects.getAll(input);
+      console.log(result);
+      expect(result.gameObjects).length(1);
+      expect(result.gameObjects.find((g) => g.id === "4")).toBeUndefined();
     });
   });
 

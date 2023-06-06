@@ -102,6 +102,7 @@ const TagByIdPage: NextPage<TagByIdPageProps> = (props) => {
     };
 
   const appliedTagFilters = useAppliedTagFilters({ tagId });
+  console.log(appliedTagFilters);
 
   if (getTagByIdQuery.isFetching) {
     return (
