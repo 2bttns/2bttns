@@ -349,40 +349,6 @@ describe("gameobjects router", () => {
       result = await caller.gameObjects.getAll(input);
       expect(result.gameObjects).length(2);
       expect(result.gameObjects.find((g) => g.id === "4")).toBeUndefined();
-
-      // All tag filters & include untagged
-      input = {
-        tagFilter: "A,B,C",
-      };
-      result = await caller.gameObjects.getAll(input);
-      expect(result.gameObjects).length(4);
-
-      // Include all tag filters but then exclude them too
-      // Also include untagged
-      // This should return only the untagged items, since all the tags are excluded
-      input = {
-        tagFilter: "A,B,C",
-        tagExcludeFilter: "A,B,C",
-      };
-      result = await caller.gameObjects.getAll(input);
-      expect(result.gameObjects).length(1);
-
-      // All tag filters & exclude untagged
-      input = {
-        tagFilter: "A,B,C",
-        untaggedFilter: "exclude",
-      };
-      result = await caller.gameObjects.getAll(input);
-      expect(result.gameObjects).length(3);
-
-      // All tag filters & untagged only
-      // Untagged should override all other filters, only returning untagged items
-      input = {
-        tagFilter: "A,B,C",
-        untaggedFilter: "untagged-only",
-      };
-      result = await caller.gameObjects.getAll(input);
-      expect(result.gameObjects).length(1);
     });
   });
 

@@ -54,7 +54,7 @@ const GameObjects: NextPageWithLayout<GameObjectsPageProps> = (props) => {
           tag={{
             include: tagFilter.results.includeTags,
             exclude: tagFilter.results.excludeTags,
-            includeUntagged: tagFilter.results.includeUntagged,
+            untaggedFilter: tagFilter.results.untaggedFilter,
           }}
           additionalTopBarContent={(selectedRows) => (
             <AdditionalTopBarContent

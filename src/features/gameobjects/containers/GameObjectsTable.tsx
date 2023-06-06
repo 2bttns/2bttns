@@ -1,7 +1,9 @@
 import { Box, HStack, StackProps } from "@chakra-ui/react";
+import { Tag } from "@prisma/client";
 import { useMemo } from "react";
+import { z } from "zod";
 import { OutputTag } from "../../../server/api/routers/gameobjects/getAll";
-import { tagFilter } from "../../../server/shared/z";
+import { untaggedFilterEnum } from "../../../server/shared/z";
 import { api, RouterInputs, RouterOutputs } from "../../../utils/api";
 import ConstrainToRemainingSpace, {
   ConstrainToRemainingSpaceProps,
@@ -21,7 +23,11 @@ export type GameObjectData =
   RouterOutputs["gameObjects"]["getAll"]["gameObjects"][0];
 
 export type GameObjectsTableProps = {
-  tag?: typeof tagFilter._type;
+  tag?: {
+    include: Tag["id"][];
+    exclude: Tag["id"][];
+    untaggedFilter: z.infer<typeof untaggedFilterEnum>;
+  };
   onGameObjectCreated?: (gameObjectId: string) => Promise<void>;
   additionalColumns?: PaginatedTableProps<GameObjectData>["additionalColumns"];
   gameObjectsToExclude?: GameObjectData["id"][];
@@ -58,12 +64,12 @@ export default function GameObjectsTable(props: GameObjectsTableProps) {
       take: perPage,
       idFilter: globalFilter.debouncedInput,
       nameFilter: globalFilter.debouncedInput,
-      includeTagsFilter: tag?.include.join(",") || undefined,
-      excludeTagsFilter: tag?.exclude.join(",") || undefined,
-      includeUntaggedResults: tag?.includeUntagged ?? false,
+      tagFilter: tag?.include.join(","),
+      tagExcludeFilter: tag?.exclude.join(","),
+      untaggedFilter: tag?.untaggedFilter,
       sortField: sorting?.sortField,
       sortOrder: sorting?.order,
-      excludeGameObjects: gameObjectsToExclude?.join(",") || undefined,
+      excludeGameObjects: gameObjectsToExclude?.join(","),
       includeTagData: true,
     },
     {
@@ -90,9 +96,9 @@ export default function GameObjectsTable(props: GameObjectsTableProps) {
     {
       idFilter: globalFilter.debouncedInput,
       nameFilter: globalFilter.debouncedInput,
-      requiredTags: tag?.include.join(",") || undefined,
-      excludeTags: tag?.exclude.join(",") || undefined,
-      includeUntagged: tag?.includeUntagged ?? false,
+      tagFilter: tag?.include.join(","),
+      tagExcludeFilter: tag?.exclude.join(","),
+      untaggedFilter: tag?.untaggedFilter,
       excludeGameObjects: gameObjectsToExclude?.join(",") || undefined,
     },
     {

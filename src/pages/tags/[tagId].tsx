@@ -16,6 +16,7 @@ import { Session } from "next-auth";
 import Head from "next/head";
 import { useRouter } from "next/router";
 import { useMemo, useState } from "react";
+import { z } from "zod";
 import GameObjectsTable, {
   GameObjectData,
   GameObjectsTableProps,
@@ -33,6 +34,7 @@ import {
 } from "../../features/tags/containers/SelectTagFiltersDrawerButton";
 import { TagFilter } from "../../features/tags/containers/TagFilterToggles";
 import ToggleTagButton from "../../features/tags/containers/ToggleTagButton";
+import { untaggedFilterEnum } from "../../server/shared/z";
 import { api, RouterInputs } from "../../utils/api";
 import getSessionWithSignInRedirect from "../../utils/getSessionWithSignInRedirect";
 
@@ -174,7 +176,7 @@ const TagByIdPage: NextPage<TagByIdPageProps> = (props) => {
           tag={{
             include: appliedTagFilters.outputs.includeTags,
             exclude: appliedTagFilters.outputs.excludeTags,
-            includeUntagged: appliedTagFilters.outputs.includeUntagged,
+            untaggedFilter: appliedTagFilters.outputs.untaggedFilter,
           }}
           onGameObjectCreated={handleGameObjectCreated}
           additionalTopBarContent={(selectedRows) => (
@@ -233,8 +235,6 @@ function useAppliedTagFilters(props: UseAppliedTagFiltersProps) {
     });
   }, [tagsQuery.data, tagFilter, tagId]);
 
-  const includeUntagged = tagFilter["Untagged"]!.on;
-
   const includeTags = useMemo(() => {
     return tagsToFilterGameObjectsBy?.map((tag) => tag.id) || [];
   }, [tagsToFilterGameObjectsBy]);
@@ -246,6 +246,18 @@ function useAppliedTagFilters(props: UseAppliedTagFiltersProps) {
     return [];
   }, [tagFilter]);
 
+  const untaggedFilter = useMemo<z.infer<typeof untaggedFilterEnum>>(() => {
+    if (!tagFilter["Untagged"]?.on) {
+      return "exclude";
+    }
+
+    if (includeTags.length === 0 && excludeTags.length === 0) {
+      return "untagged-only";
+    }
+
+    return "include";
+  }, [tagFilter, includeTags, excludeTags]);
+
   return {
     state: {
       tagFilter,
@@ -254,7 +266,7 @@ function useAppliedTagFilters(props: UseAppliedTagFiltersProps) {
     outputs: {
       includeTags,
       excludeTags,
-      includeUntagged,
+      untaggedFilter,
     },
   };
 }

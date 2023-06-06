@@ -87,7 +87,7 @@ const GameObjectById: NextPage<GameObjectByIdPageProps> = (props) => {
           tag={{
             include: tagFilter.results.includeTags,
             exclude: tagFilter.results.excludeTags,
-            includeUntagged: tagFilter.results.includeUntagged,
+            untaggedFilter: tagFilter.results.untaggedFilter,
           }}
           additionalColumns={getAdditionalColumns(gameObjectId)}
           // TODO: Fix table fitting -- maybe delay rendering until after the game object details have rendered?

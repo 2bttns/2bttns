@@ -40,3 +40,9 @@ export const commaSeparatedStringToArray = z
     return [];
   }, z.array(z.string()))
   .optional();
+
+export const untaggedFilterEnum = z.enum([
+  "include",
+  "exclude",
+  "untagged-only",
+]);

@@ -3,14 +3,11 @@ import {
   commaSeparatedStringToArray,
   paginationSkip,
   paginationTake,
+  untaggedFilterEnum,
 } from "../../../shared/z";
 import { OPENAPI_TAGS } from "../../openapi/openApiTags";
 import { adminOrApiKeyProtectedProcedure } from "../../trpc";
 import { booleanEnum } from "./../../../shared/z";
-
-const untaggedFilterEnum = z.enum(["include", "exclude", "untagged-only"]);
-
-export type UntaggedFilterEnum = z.infer<typeof untaggedFilterEnum>;
 
 const input = z
   .object({
@@ -109,9 +106,6 @@ export const getAll = adminOrApiKeyProtectedProcedure
   .input(input)
   .output(output)
   .query(async ({ ctx, input }) => {
-    console.log("FOO");
-    console.log(input);
-
     const gameObjects = await ctx.prisma.gameObject.findMany({
       take: input?.take,
       skip: input?.skip,
@@ -119,9 +113,20 @@ export const getAll = adminOrApiKeyProtectedProcedure
         AND: [
           {
             OR: [
-              ...(input?.idFilter ? [{ id: { in: input.idFilter } }] : []),
+              ...(input?.idFilter
+                ? input.idFilter.map((id) => ({
+                    id: {
+                      contains: id,
+                    },
+                  }))
+                : []),
+
               ...(input?.nameFilter
-                ? [{ name: { in: input.nameFilter } }]
+                ? input.nameFilter.map((name) => ({
+                    name: {
+                      contains: name,
+                    },
+                  }))
                 : []),
             ],
           },

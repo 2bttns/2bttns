@@ -1,4 +1,6 @@
 import { useMemo, useState } from "react";
+import { z } from "zod";
+import { untaggedFilterEnum } from "../../../server/shared/z";
 import { api } from "../../../utils/api";
 import { TagFilter } from "../containers/TagFilterToggles";
 
@@ -88,13 +90,17 @@ export default function useAllTagFilters(props: UseAllTagFiltersProps = {}) {
     return [];
   }, [tagFilter]);
 
-  const includeUntagged = useMemo(() => {
-    if (tagFilter[UNTAGGED_ID] === undefined) {
-      return false;
+  const untaggedFilter = useMemo<z.infer<typeof untaggedFilterEnum>>(() => {
+    if (!tagFilter[UNTAGGED_ID]?.on) {
+      return "exclude";
     }
 
-    return tagFilter[UNTAGGED_ID]!.on;
-  }, [tagFilter]);
+    if (includeTags.length === 0 && excludeTags.length === 0) {
+      return "untagged-only";
+    }
+
+    return "include";
+  }, [tagFilter, includeTags, excludeTags]);
 
   return {
     state: {
@@ -104,7 +110,7 @@ export default function useAllTagFilters(props: UseAllTagFiltersProps = {}) {
     results: {
       includeTags,
       excludeTags,
-      includeUntagged,
+      untaggedFilter,
     },
     tagsQuery,
   };
