@@ -4,4 +4,5 @@ export const OPENAPI_TAGS = {
   GAME_OBJECTS: "Game Objects",
   TAGS: "Tags",
   PLAYERS: "Players",
+  EXPORT_DATA: "Export Data",
 };
