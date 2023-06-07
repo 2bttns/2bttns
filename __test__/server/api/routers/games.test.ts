@@ -8,7 +8,9 @@ import {
   clearDbsTest,
   createInnerTRPCContextWithPlayerTokenAuthForTest,
   createInnerTRPCContextWithSessionForTest,
+  createTestGames,
   createTestSecret,
+  getAllGames,
 } from "./helpers";
 
 describe("games router", () => {
@@ -282,16 +284,3 @@ describe("games router", () => {
     });
   });
 });
-
-async function createTestGames(count: number) {
-  return await prisma.game.createMany({
-    data: Array.from({ length: count }, (_, i) => ({
-      id: `test-game-id-${i}`,
-      name: `test-game-${i}`,
-    })),
-  });
-}
-
-async function getAllGames() {
-  return await prisma.game.findMany();
-}

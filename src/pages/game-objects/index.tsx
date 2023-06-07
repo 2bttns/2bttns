@@ -93,7 +93,10 @@ function AdditionalTopBarContent(props: AdditionalTopBarContentProps) {
                 Consider import order too. e.g. import tags first, then gameobjects, then relationships
               */}
               <ExportSelectedGameObjectsJSON context={context} />
-              <ExportAllGameObjectsJSON context={context} />
+              <ExportAllGameObjectsJSON
+                context={context}
+                filteredTags={tagFilter.results.includeTags}
+              />
               <Divider />
               <DeleteSelectedGameObjects context={context} />
             </>

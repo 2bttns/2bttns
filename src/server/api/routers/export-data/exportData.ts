@@ -31,6 +31,9 @@ const input = z.object({
       "Comma-separated ID list of GameObjects to export.\n\nLeave this field empty if you want the results to include all GameObjects."
     )
     .optional(),
+  filterAllowUntaggedGameObjects: booleanEnum
+    .describe("Set to `false` to exclude GameObjects that have no tags.")
+    .default(true),
   filterTagIds: commaSeparatedStringToArray
     .describe(
       "Comma-separated ID list of Tags to export.\n\nLeave this field empty if you want the results to include all Tags."
@@ -105,8 +108,12 @@ export const exportData = adminOrApiKeyProtectedProcedure
       includeCount,
       filterGameIds,
       filterGameObjectIds,
+      filterAllowUntaggedGameObjects,
       filterTagIds,
     } = input;
+
+    console.log("FOO");
+    console.log(input);
 
     const games = includeGames
       ? await ctx.prisma.game.findMany({
@@ -148,6 +155,21 @@ export const exportData = adminOrApiKeyProtectedProcedure
             id: {
               in: filterGameObjectIds,
             },
+            OR: [
+              // If there are filterTagIds, only include game objects that have at least one of the filterTagIds
+              {
+                tags: {
+                  some: {
+                    id: {
+                      in: filterTagIds,
+                    },
+                  },
+                },
+              },
+
+              // If filterAllowUntaggedGameObjects is true, also include game objects that have no tags
+              filterAllowUntaggedGameObjects ? { tags: { none: {} } } : {},
+            ],
           },
         })
       : undefined;

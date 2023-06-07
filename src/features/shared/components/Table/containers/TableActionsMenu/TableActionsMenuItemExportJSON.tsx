@@ -1,20 +1,28 @@
 import { MenuItem } from "@chakra-ui/react";
 import { TableActionMenuContext } from "./index";
 
+export type JSONOutput = object | object[];
+
 /**
  * Add this to the `actionItems` prop of a `TableActionMenu` to add JSON Export functionality
  * TODO: CSV Export
  */
 
-export type TableActionsMenuItemExportJSONProps<T extends object> = {
+export type TableActionsMenuItemExportJSONProps<
+  T extends object,
+  J extends JSONOutput = T[]
+> = {
   context: TableActionMenuContext<T>;
-  fetchJSON: (context: TableActionMenuContext<T>) => Promise<T[]>;
+  // JSON Output is an array of objects matching the context type (e.g. GameObjectData[]))
+  // If a JSONOutput generic is provided, it will be used as the type for the JSON output instead
+  fetchJSON: (context: TableActionMenuContext<T>) => Promise<J>;
   menuItemText?: (context: TableActionMenuContext<T>) => string;
   isDisabled?: (context: TableActionMenuContext<T>) => boolean;
 };
-export default function TableActionsMenuItemExportJSON<T extends object>(
-  props: TableActionsMenuItemExportJSONProps<T>
-) {
+export default function TableActionsMenuItemExportJSON<
+  T extends object,
+  J extends JSONOutput = T[]
+>(props: TableActionsMenuItemExportJSONProps<T, J>) {
   const { context, fetchJSON, menuItemText, isDisabled } = props;
 
   const handleClick = async () => {

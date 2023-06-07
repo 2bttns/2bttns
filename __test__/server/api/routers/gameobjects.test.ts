@@ -1,4 +1,3 @@
-import { Tag } from "@prisma/client";
 import { inferProcedureInput } from "@trpc/server";
 import { afterEach, beforeEach, describe, expect, test } from "vitest";
 import { AppRouter, appRouter } from "../../../../src/server/api/root";
@@ -7,6 +6,8 @@ import { RouterInputs, RouterOutputs } from "../../../../src/utils/api";
 import {
   clearDbsTest,
   createInnerTRPCContextWithSessionForTest,
+  createTestGameObjects,
+  getAllGameObjects,
 } from "./helpers";
 
 describe("gameobjects router", () => {
@@ -434,35 +435,3 @@ describe("gameobjects router", () => {
     });
   });
 });
-
-async function createTestGameObjects(options: {
-  count: number;
-  tags?: Tag["id"][];
-}) {
-  const { count, tags = [] } = options;
-  await prisma.gameObject.createMany({
-    data: Array.from({ length: count }, (_, i) => ({
-      id: `test-gameobject-id-${i}`,
-      name: `test-gameobject-${i}`,
-    })),
-  });
-
-  for await (const gameObject of await getAllGameObjects()) {
-    await prisma.gameObject.update({
-      data: { tags: { connect: tags.map((tagId) => ({ id: tagId })) } },
-      where: { id: gameObject.id },
-    });
-  }
-}
-
-async function getAllGameObjects() {
-  return await prisma.gameObject.findMany();
-}
-
-async function clearPlayers() {
-  return await prisma.player.deleteMany();
-}
-
-async function clearTags() {
-  return await prisma.tag.deleteMany();
-}

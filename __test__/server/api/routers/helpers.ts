@@ -1,4 +1,4 @@
-import { PrismaClient, Secret } from "@prisma/client";
+import { PrismaClient, Secret, Tag } from "@prisma/client";
 import jwt from "jsonwebtoken";
 import { createInnerTRPCContext } from "../../../../src/server/api/trpc";
 import { prisma } from "../../../../src/server/db";
@@ -52,4 +52,63 @@ export async function createTestSecret() {
   return await prisma.secret.create({
     data: { id: "test-app-id", secret: "test-secret" },
   });
+}
+
+export async function createTestGames(count: number) {
+  return await prisma.game.createMany({
+    data: Array.from({ length: count }, (_, i) => ({
+      id: `test-game-id-${i}`,
+      name: `test-game-${i}`,
+    })),
+  });
+}
+
+export async function getAllGames() {
+  return await prisma.game.findMany();
+}
+
+export async function getAllGameObjects() {
+  return await prisma.gameObject.findMany();
+}
+
+export async function createTestGameObjects(options: {
+  count: number;
+  tags?: Tag["id"][];
+  startIndex?: number;
+}) {
+  const { count, tags = [], startIndex = 0 } = options;
+  await prisma.gameObject.createMany({
+    data: Array.from({ length: count }, (_, i) => ({
+      id: `test-gameobject-id-${startIndex + i}`,
+      name: `test-gameobject-${startIndex + i}`,
+    })),
+  });
+
+  for await (const gameObject of await getAllGameObjects()) {
+    await prisma.gameObject.update({
+      data: { tags: { connect: tags.map((tagId) => ({ id: tagId })) } },
+      where: { id: gameObject.id },
+    });
+  }
+}
+
+export async function clearPlayers() {
+  return await prisma.player.deleteMany();
+}
+
+export async function clearTags() {
+  return await prisma.tag.deleteMany();
+}
+
+export async function createTestTags(count: number) {
+  return await prisma.tag.createMany({
+    data: Array.from({ length: count }).map((_, i) => ({
+      id: `test-tag-id-${i}`,
+      name: `test-tag-${i}`,
+    })),
+  });
+}
+
+export async function getAllTags() {
+  return await prisma.tag.findMany();
 }
