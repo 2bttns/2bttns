@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { booleanEnum } from "../../../shared/z";
+import { booleanEnum, commaSeparatedStringToArray } from "../../../shared/z";
 import { OPENAPI_TAGS } from "../../openapi/openApiTags";
 import { adminOrApiKeyProtectedProcedure } from "../../trpc";
 
@@ -21,6 +21,21 @@ const input = z.object({
     .default(true)
     .describe("Set to true to include a count of each type of data exported."),
 
+  filterGameIds: commaSeparatedStringToArray
+    .describe(
+      "Comma-separated ID list of Games to export.\n\nLeave this field empty if you want the results to include all Games."
+    )
+    .optional(),
+  filterGameObjectIds: commaSeparatedStringToArray
+    .describe(
+      "Comma-separated ID list of GameObjects to export.\n\nLeave this field empty if you want the results to include all GameObjects."
+    )
+    .optional(),
+  filterTagIds: commaSeparatedStringToArray
+    .describe(
+      "Comma-separated ID list of Tags to export.\n\nLeave this field empty if you want the results to include all Tags."
+    )
+    .optional(),
   // TODO: Export associated game object ids with game objects
   // TODO: Export Weights
   // TODO: Export Modes & necessary config used by exported Games -
@@ -83,8 +98,15 @@ export const exportData = adminOrApiKeyProtectedProcedure
   .input(input)
   .output(output)
   .query(async ({ input, ctx }) => {
-    const { includeGames, includeTags, includeGameObjects, includeCount } =
-      input;
+    const {
+      includeGames,
+      includeTags,
+      includeGameObjects,
+      includeCount,
+      filterGameIds,
+      filterGameObjectIds,
+      filterTagIds,
+    } = input;
 
     const games = includeGames
       ? await ctx.prisma.game.findMany({
@@ -99,6 +121,11 @@ export const exportData = adminOrApiKeyProtectedProcedure
                   },
                 }
               : undefined,
+          },
+          where: {
+            id: {
+              in: filterGameIds,
+            },
           },
         })
       : undefined;
@@ -117,6 +144,11 @@ export const exportData = adminOrApiKeyProtectedProcedure
                 }
               : undefined,
           },
+          where: {
+            id: {
+              in: filterGameObjectIds,
+            },
+          },
         })
       : undefined;
 
@@ -127,8 +159,20 @@ export const exportData = adminOrApiKeyProtectedProcedure
             name: true,
             description: true,
           },
+          where: {
+            id: {
+              in: filterTagIds,
+            },
+          },
         })
       : undefined;
+
+    // Map of allowed tag IDs for fast lookups when filtering the tag results of games & game objects
+    // This way, game and game object tags that aren't in the allowed tags list are filtered out
+    const allowedTagsMap = tags?.reduce((map, tag) => {
+      map.set(tag.id, true);
+      return map;
+    }, new Map<string, boolean>());
 
     const processedOutput: z.infer<typeof output> = {
       count: includeCount
@@ -143,14 +187,20 @@ export const exportData = adminOrApiKeyProtectedProcedure
         name: game.name,
         description: game.description ?? "",
         inputTagIds: includeTags
-          ? game.inputTags.map((tag) => tag.id)
+          ? game.inputTags
+              .map((tag) => tag.id)
+              .filter((id) => allowedTagsMap?.has(id))
           : undefined,
       })),
       gameObjects: gameObjects?.map((gameObject) => ({
         id: gameObject.id,
         name: gameObject.name,
         description: gameObject.description ?? "",
-        tagIds: includeTags ? gameObject.tags.map((tag) => tag.id) : undefined,
+        tagIds: includeTags
+          ? gameObject.tags
+              .map((tag) => tag.id)
+              .filter((id) => allowedTagsMap?.has(id))
+          : undefined,
       })),
       tags: tags?.map((tag) => ({
         id: tag.id,
