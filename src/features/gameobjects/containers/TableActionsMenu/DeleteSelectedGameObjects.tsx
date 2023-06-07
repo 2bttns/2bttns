@@ -5,12 +5,13 @@ import { GameObjectData } from "../GameObjectsTable";
 
 export type DeleteSelectedGameObjectsProps = {
   context: TableActionMenuContext<GameObjectData>;
+  onDeleted?: () => Promise<void>;
 };
 
 export default function DeleteSelectedGameObjects(
   props: DeleteSelectedGameObjectsProps
 ) {
-  const { context } = props;
+  const { context, onDeleted } = props;
   const { handleDeleteGameObjects } = useDeleteGameObjects();
 
   return (
@@ -20,6 +21,9 @@ export default function DeleteSelectedGameObjects(
         await handleDeleteGameObjects(
           context.selectedRows.map((row) => row.id)
         );
+        if (onDeleted) {
+          await onDeleted();
+        }
       }}
     />
   );

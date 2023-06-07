@@ -156,7 +156,6 @@ export const exportData = adminOrApiKeyProtectedProcedure
               in: filterGameObjectIds,
             },
             OR: [
-              // If there are filterTagIds, only include game objects that have at least one of the filterTagIds
               {
                 tags: {
                   some: {
@@ -166,9 +165,13 @@ export const exportData = adminOrApiKeyProtectedProcedure
                   },
                 },
               },
-
-              // If filterAllowUntaggedGameObjects is true, also include game objects that have no tags
-              filterAllowUntaggedGameObjects ? { tags: { none: {} } } : {},
+              filterAllowUntaggedGameObjects
+                ? {
+                    tags: {
+                      none: {},
+                    },
+                  }
+                : {},
             ],
           },
         })

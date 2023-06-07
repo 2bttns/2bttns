@@ -7,19 +7,25 @@ import { GameObjectData } from "../GameObjectsTable";
 export type ExportAllGameObjectsJSONProps = {
   context: TableActionMenuContext<GameObjectData>;
   filteredTags?: Tag["id"][];
+  filterAllowUntaggedGameObjects?: boolean;
 };
 
 export default function ExportAllGameObjectsJSON(
   props: ExportAllGameObjectsJSONProps
 ) {
-  const { context, filteredTags } = props;
-  const filterTagIds = filteredTags?.join(",") || undefined;
+  const {
+    context,
+    filteredTags,
+    filterAllowUntaggedGameObjects = true,
+  } = props;
+  const filterTagIds = filteredTags?.join(",");
   const gameObjectCountQuery = api.exportData.exportData.useQuery({
     includeCount: true,
     includeGames: false,
     includeGameObjects: true,
     includeTags: false,
     filterTagIds,
+    filterAllowUntaggedGameObjects,
   });
   const count = gameObjectCountQuery.data?.count?.gameObjects ?? 0;
 
@@ -41,6 +47,7 @@ export default function ExportAllGameObjectsJSON(
           includeGameObjects: true,
           includeTags: Boolean(filteredTags?.length),
           filterTagIds,
+          filterAllowUntaggedGameObjects,
         });
 
         return data;
