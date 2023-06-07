@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { prisma } from "../../../db";
 import { booleanEnum, commaSeparatedStringToArray } from "../../../shared/z";
 import { OPENAPI_TAGS } from "../../openapi/openApiTags";
 import { adminOrApiKeyProtectedProcedure } from "../../trpc";
@@ -112,92 +113,24 @@ export const exportData = adminOrApiKeyProtectedProcedure
       filterTagIds,
     } = input;
 
-    console.log("FOO");
-    console.log(input);
-
     const games = includeGames
-      ? await ctx.prisma.game.findMany({
-          select: {
-            id: true,
-            name: true,
-            description: true,
-            inputTags: includeTags
-              ? {
-                  select: {
-                    id: true,
-                  },
-                }
-              : undefined,
-          },
-          where: {
-            id: {
-              in: filterGameIds,
-            },
-          },
-        })
+      ? await getGames(includeTags, filterGameIds)
       : undefined;
 
     const gameObjects = includeGameObjects
-      ? await ctx.prisma.gameObject.findMany({
-          select: {
-            id: true,
-            name: true,
-            description: true,
-            tags: includeTags
-              ? {
-                  select: {
-                    id: true,
-                  },
-                }
-              : undefined,
-          },
-          where: {
-            id: {
-              in: filterGameObjectIds,
-            },
-            OR: [
-              {
-                tags: {
-                  some: {
-                    id: {
-                      in: filterTagIds,
-                    },
-                  },
-                },
-              },
-              filterAllowUntaggedGameObjects
-                ? {
-                    tags: {
-                      none: {},
-                    },
-                  }
-                : {},
-            ],
-          },
-        })
+      ? await getGameObjects(
+          includeTags,
+          filterGameObjectIds,
+          filterTagIds,
+          filterAllowUntaggedGameObjects
+        )
       : undefined;
 
-    const tags = includeTags
-      ? await ctx.prisma.tag.findMany({
-          select: {
-            id: true,
-            name: true,
-            description: true,
-          },
-          where: {
-            id: {
-              in: filterTagIds,
-            },
-          },
-        })
-      : undefined;
+    const tags = includeTags ? await getTags(filterTagIds) : undefined;
 
     // Map of allowed tag IDs for fast lookups when filtering the tag results of games & game objects
     // This way, game and game object tags that aren't in the allowed tags list are filtered out
-    const allowedTagsMap = tags?.reduce((map, tag) => {
-      map.set(tag.id, true);
-      return map;
-    }, new Map<string, boolean>());
+    const allowedTagsMap = generateTagsMap(tags?.map((t) => t.id) ?? []);
 
     const processedOutput: z.infer<typeof output> = {
       count: includeCount
@@ -236,3 +169,94 @@ export const exportData = adminOrApiKeyProtectedProcedure
 
     return processedOutput;
   });
+async function getTags(filterTagIds: string[] | undefined) {
+  return await prisma.tag.findMany({
+    select: {
+      id: true,
+      name: true,
+      description: true,
+    },
+    where: {
+      id: {
+        in: filterTagIds,
+      },
+    },
+  });
+}
+
+async function getGameObjects(
+  includeTags: boolean,
+  filterGameObjectIds: string[] | undefined,
+  filterTagIds: string[] | undefined,
+  filterAllowUntaggedGameObjects: boolean
+) {
+  return await prisma.gameObject.findMany({
+    select: {
+      id: true,
+      name: true,
+      description: true,
+      tags: includeTags
+        ? {
+            select: {
+              id: true,
+            },
+          }
+        : undefined,
+    },
+    where: {
+      id: {
+        in: filterGameObjectIds,
+      },
+      OR: [
+        {
+          tags: {
+            some: {
+              id: {
+                in: filterTagIds,
+              },
+            },
+          },
+        },
+        filterAllowUntaggedGameObjects
+          ? {
+              tags: {
+                none: {},
+              },
+            }
+          : {},
+      ],
+    },
+  });
+}
+
+async function getGames(
+  includeTags: boolean,
+  filterGameIds: string[] | undefined
+) {
+  return await prisma.game.findMany({
+    select: {
+      id: true,
+      name: true,
+      description: true,
+      inputTags: includeTags
+        ? {
+            select: {
+              id: true,
+            },
+          }
+        : undefined,
+    },
+    where: {
+      id: {
+        in: filterGameIds,
+      },
+    },
+  });
+}
+
+function generateTagsMap(tagIds: string[]) {
+  return tagIds.reduce((map, id) => {
+    map.set(id, true);
+    return map;
+  }, new Map<string, boolean>());
+}
