@@ -1,5 +1,5 @@
 import { TableActionMenuContext } from "../../../shared/components/Table/containers/TableActionsMenu";
-import TableActionsMenuItemExportJSON from "../../../shared/components/Table/containers/TableActionsMenu/TableActionsMenuItemExportJSON";
+import TableActionsMenuItemExportJSON from "../../../shared/components/Table/views/TableActionsMenuItemExportJSON";
 import { GameObjectData } from "../GameObjectsTable";
 
 export type ExportSelectedGameObjectsJSONProps = {

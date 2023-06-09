@@ -1,5 +1,5 @@
 import { MenuItem } from "@chakra-ui/react";
-import { TableActionMenuContext } from "./index";
+import { TableActionMenuContext } from "../containers/TableActionsMenu/index";
 
 export type JSONOutput = object | object[];
 
