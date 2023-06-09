@@ -1,4 +1,4 @@
-import { Box, ButtonGroup } from "@chakra-ui/react";
+import { Box, ButtonGroup, Divider } from "@chakra-ui/react";
 import { Tag } from "@prisma/client";
 import { GetServerSideProps, NextPage } from "next";
 import { Session } from "next-auth";
@@ -7,6 +7,8 @@ import TableActionMenu from "../../features/shared/components/Table/containers/T
 import TableActionsMenuItemDelete from "../../features/shared/components/Table/containers/TableActionsMenu/TableActionsMenuItemDelete";
 import DeleteTagButton from "../../features/tags/containers/DeleteTagButton";
 import ManageTagButton from "../../features/tags/containers/ManageTagButton";
+import ExportAllTagsJSON from "../../features/tags/containers/TableActionsMenu/ExportAllTagsJSON";
+import ExportSelectedTagsJSON from "../../features/tags/containers/TableActionsMenu/ExportSelectedTagsJSON";
 import TagsTable, { TagData } from "../../features/tags/containers/TagsTable";
 import useDeleteTags from "../../features/tags/hooks/useDeleteTags";
 import { api } from "../../utils/api";
@@ -70,6 +72,9 @@ function AdditionalTopBarContent(props: AdditionalTopBarContentProps) {
         selectedRows={selectedRows}
         actionItems={(context) => (
           <>
+            <ExportSelectedTagsJSON context={context} />
+            <ExportAllTagsJSON context={context} />
+            <Divider />
             <TableActionsMenuItemDelete
               context={context}
               handleDelete={async (selectedRows) => {
