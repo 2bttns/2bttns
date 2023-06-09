@@ -1,4 +1,5 @@
 import { Tag } from "@prisma/client";
+import { useEffect } from "react";
 import { api, apiClient } from "../../../../utils/api";
 import { TableActionMenuContext } from "../../../shared/components/Table/containers/TableActionsMenu";
 import TableActionsMenuItemExportJSON from "../../../shared/components/Table/containers/TableActionsMenu/TableActionsMenuItemExportJSON";
@@ -29,6 +30,14 @@ export default function ExportAllGameObjectsJSON(
   });
   const count = gameObjectCountQuery.data?.count?.gameObjects ?? 0;
 
+  useEffect(() => {
+    if (context.isOpen) {
+      // refetch the count when the menu is opened
+      // otherwise, the count will be stale if items are created/updated/deleted in a way that affects the current count
+      gameObjectCountQuery.refetch().catch(console.error);
+    }
+  }, [context.isOpen]);
+
   return (
     <TableActionsMenuItemExportJSON
       context={context}
@@ -38,8 +47,6 @@ export default function ExportAllGameObjectsJSON(
         if (count === 0) {
           return {};
         }
-        console.log("FOO");
-        console.log(filterTagIds);
 
         const data = await apiClient.exportData.exportData.query({
           includeCount: true,

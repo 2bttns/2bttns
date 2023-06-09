@@ -16,7 +16,6 @@ import TableActionsMenuItemBulkTag from "../../features/shared/components/Table/
 import { EditTagsForGameObjectsButtonDrawer } from "../../features/tags/containers/EditTagsForGameObjectsButtonDrawer";
 import { SelectTagFiltersDrawerButton } from "../../features/tags/containers/SelectTagFiltersDrawerButton";
 import useAllTagFilters from "../../features/tags/hooks/useAllTagFilters";
-import { api } from "../../utils/api";
 import getSessionWithSignInRedirect from "../../utils/getSessionWithSignInRedirect";
 import { NextPageWithLayout } from "../_app";
 
@@ -78,12 +77,6 @@ type AdditionalTopBarContentProps = {
 function AdditionalTopBarContent(props: AdditionalTopBarContentProps) {
   const { selectedRows, tagFilter } = props;
 
-  const utils = api.useContext();
-  const onDeleted = async () => {
-    // When a game object is deleted, we need to invalidate the cache for the exportData query, or else data like the "Export All" count will be stale
-    await utils.exportData.invalidate();
-  };
-
   return (
     <>
       <ButtonGroup>
@@ -109,10 +102,7 @@ function AdditionalTopBarContent(props: AdditionalTopBarContentProps) {
                 }
               />
               <Divider />
-              <DeleteSelectedGameObjects
-                context={context}
-                onDeleted={onDeleted}
-              />
+              <DeleteSelectedGameObjects context={context} />
             </>
           )}
         />
@@ -146,21 +136,12 @@ type ActionsProps = {
 function Actions(props: ActionsProps) {
   const { gameObjectId } = props;
 
-  const utils = api.useContext();
-  const onDeleted = async () => {
-    // When a game object is deleted, we need to invalidate the cache for the exportData query, or else data like the "Export All" count will be stale
-    await utils.exportData.invalidate();
-  };
-
   return (
     <>
       <ButtonGroup width="100%" justifyContent="center">
         <EditTagsForGameObjectsButtonDrawer gameObjectIds={[gameObjectId]} />
         <ManageGameObjectButton gameObjectId={gameObjectId} />
-        <DeleteGameObjectButton
-          gameObjectId={gameObjectId}
-          onDeleted={onDeleted}
-        />
+        <DeleteGameObjectButton gameObjectId={gameObjectId} />
       </ButtonGroup>
     </>
   );

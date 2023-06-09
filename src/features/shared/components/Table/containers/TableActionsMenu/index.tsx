@@ -9,6 +9,8 @@ export type TableActionMenuProps<T extends object> = {
 
 export type TableActionMenuContext<T extends object> = {
   selectedRows: TableActionMenuProps<T>["selectedRows"];
+  isOpen: boolean;
+  onClose: () => void;
 };
 
 export default function TableActionMenu<T extends object>(
@@ -17,10 +19,16 @@ export default function TableActionMenu<T extends object>(
   const { selectedRows, actionItems } = props;
   return (
     <Menu>
-      <MenuButton as={Button} rightIcon={<ChevronDownIcon />}>
-        Actions
-      </MenuButton>
-      <MenuList zIndex={99}>{actionItems({ selectedRows })}</MenuList>
+      {({ isOpen, onClose }) => (
+        <>
+          <MenuButton as={Button} rightIcon={<ChevronDownIcon />}>
+            Actions
+          </MenuButton>
+          <MenuList zIndex={99}>
+            {actionItems({ selectedRows, isOpen, onClose })}
+          </MenuList>
+        </>
+      )}
     </Menu>
   );
 }
