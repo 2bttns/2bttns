@@ -1,4 +1,4 @@
-import { Box, ButtonGroup } from "@chakra-ui/react";
+import { Box, ButtonGroup, Divider } from "@chakra-ui/react";
 import { GetServerSideProps, NextPage } from "next";
 import { Session } from "next-auth";
 import Head from "next/head";
@@ -71,15 +71,15 @@ function AdditionalTopBarContent(props: AdditionalTopBarContentProps) {
         selectedRows={selectedRows}
         actionItems={(context) => (
           <>
+            <ExportSelectedGamesJSON context={context} />
+            <ExportAllGamesJSON context={context} />
+            <Divider />
             <TableActionsMenuItemDelete
               context={context}
               handleDelete={async () => {
                 await handleDeleteGame(context.selectedRows.map((r) => r.id));
               }}
             />
-
-            <ExportSelectedGamesJSON context={context} />
-            <ExportAllGamesJSON context={context} />
           </>
         )}
       />
