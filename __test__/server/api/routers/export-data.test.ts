@@ -189,4 +189,60 @@ describe("exportData router", () => {
     });
     expect(results.count?.gameObjects).toBe(totalUntaggedGameObjects);
   });
+
+  test("can get games with only tags they use", async () => {
+    const ctx = createInnerTRPCContextWithSessionForTest();
+    const caller = appRouter.createCaller(ctx);
+
+    // Update the first `beforeAll` created game to use the first existing tag
+    const game = await prisma.game.findFirst({});
+    const tag = await prisma.tag.findFirst({});
+    await prisma.game.update({
+      where: {
+        id: game!.id,
+      },
+      data: {
+        inputTags: {
+          connect: {
+            id: tag!.id,
+          },
+        },
+      },
+    });
+
+    // Ensure there are multiple games and tags from the `beforeAll`
+    const allGames = await prisma.game.findMany({});
+    const allTags = await prisma.tag.findMany({});
+    expect(allGames.length).toBeGreaterThan(1);
+    expect(allTags.length).toBeGreaterThan(1);
+
+    // Should only get the first game and first tag, because filterGameIds is set to only the first game's ID
+    // Since filterTagsMustBeInGames is true, only the associated tag should be returned in the results
+    let results = await caller.exportData.exportData({
+      filterTagsMustBeInGames: true,
+      filterGameIds: game!.id,
+    });
+    expect(results.count!.games).toBe(1);
+    expect(results.count!.tags).toBe(1);
+
+    // Ensure the game objects are filtered by the tag when filterTagsMustBeInGames is true
+    const gameObjectsWithFirstTag = await prisma.gameObject.findMany({
+      where: {
+        tags: {
+          some: {
+            id: tag!.id,
+          },
+        },
+      },
+    });
+    expect(results.count!.gameObjects).toBe(gameObjectsWithFirstTag.length);
+
+    // If filterTagsMustBeInGames is false, then all tags should be returned regardless of whether they are associated with the filtered game
+    results = await caller.exportData.exportData({
+      filterTagsMustBeInGames: false,
+      filterGameIds: game!.id,
+    });
+    expect(results.count!.games).toBe(1);
+    expect(results.count!.tags).toBe(allTags.length);
+  });
 });

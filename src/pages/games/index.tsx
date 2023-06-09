@@ -8,6 +8,8 @@ import GamesTable, {
 } from "../../features/games/containers/GamesTable";
 import ManageGameButton from "../../features/games/containers/ManageGameButton";
 import PlayGameButton from "../../features/games/containers/PlayGameButton";
+import ExportAllGamesJSON from "../../features/games/containers/TableActionsMenu/ExportAllGamesJSON";
+import ExportSelectedGamesJSON from "../../features/games/containers/TableActionsMenu/ExportSelectedGamesJSON";
 import useDeleteGames from "../../features/games/hooks/useDeleteGames";
 import { AdditionalColumns } from "../../features/shared/components/Table/containers/PaginatedTable";
 import TableActionMenu from "../../features/shared/components/Table/containers/TableActionsMenu";
@@ -75,6 +77,9 @@ function AdditionalTopBarContent(props: AdditionalTopBarContentProps) {
                 await handleDeleteGame(context.selectedRows.map((r) => r.id));
               }}
             />
+
+            <ExportSelectedGamesJSON context={context} />
+            <ExportAllGamesJSON context={context} />
           </>
         )}
       />
