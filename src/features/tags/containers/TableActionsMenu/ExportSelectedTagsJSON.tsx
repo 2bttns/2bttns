@@ -18,7 +18,7 @@ export default function ExportSelectedTagsJSON(
       }}
       exportText={(countValue) => `Export Selected to JSON (${countValue})`}
       exportDataQueryOptions={{
-        includeCount: true,
+        count: "include",
         includeGames: false,
         includeGameObjects: true,
         includeTags: true,

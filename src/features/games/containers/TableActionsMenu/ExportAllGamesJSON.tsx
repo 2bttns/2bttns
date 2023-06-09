@@ -17,11 +17,12 @@ export default function ExportAllGamesJSON(props: ExportAllGamesProps) {
         return countData?.games ?? 0;
       }}
       exportDataQueryOptions={{
-        includeCount: true,
+        count: "include",
         includeGames: true,
         includeGameObjects: true,
         includeTags: true,
         filterTagsMustBeInGames: true,
+        filterAllowUntaggedGameObjects: false,
       }}
     />
   );

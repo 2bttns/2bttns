@@ -27,12 +27,13 @@ export default function ExportAllGameObjectsJSON(
         return countData?.gameObjects ?? 0;
       }}
       exportDataQueryOptions={{
-        includeCount: true,
+        count: "include",
         includeGames: false,
         includeGameObjects: true,
         includeTags: Boolean(filteredTags?.length),
         filterTagIds,
         filterAllowUntaggedGameObjects,
+        filterTagsMustBeInGameObjects: true,
       }}
     />
   );

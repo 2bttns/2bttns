@@ -19,9 +19,12 @@ const input = z.object({
   includeTags: booleanEnum
     .default(true)
     .describe("Set to true to export Tags."),
-  includeCount: booleanEnum
-    .default(true)
-    .describe("Set to true to include a count of each type of data exported."),
+  count: z
+    .enum(["include", "count-only", "no-count"])
+    .default("include")
+    .describe(
+      "`include`: include the count of each type of data exported with the results\n\n`count-only`: only return the count of each type of data that would be exported. Useful if you only want the count and not the actual data.\n\n`no-count`: do not include the count"
+    ),
 
   filterGameIds: commaSeparatedStringToArray
     .describe(
@@ -44,6 +47,11 @@ const input = z.object({
   filterTagsMustBeInGames: booleanEnum
     .describe(
       "Set to `true` to only include Tags that are associated with the games that are being exported."
+    )
+    .default(false),
+  filterTagsMustBeInGameObjects: booleanEnum
+    .describe(
+      "Set to `true` to only include Tags that are associated with the game objects that are being exported."
     )
     .default(false),
   // TODO: Export associated game object ids with game objects
@@ -112,84 +120,126 @@ export const exportData = adminOrApiKeyProtectedProcedure
       includeGames,
       includeTags,
       includeGameObjects,
-      includeCount,
+      count,
       filterGameIds,
       filterGameObjectIds,
       filterAllowUntaggedGameObjects,
       filterTagIds,
       filterTagsMustBeInGames,
+      filterTagsMustBeInGameObjects,
     } = input;
 
     const games = includeGames
       ? await getGames(includeTags || filterTagsMustBeInGames, filterGameIds)
       : undefined;
 
-    const tags = includeTags ? await getTags(filterTagIds) : undefined;
-
-    const allowedTagsMap = generateTagsMap({
-      tagIds: tags?.map((t) => t.id) ?? [],
-      filterTagsMustBeInGames,
-      games: filterTagsMustBeInGames
-        ? games?.map((g) => ({
-            id: g.id,
-            inputTags: g.inputTags.map((t) => t.id) ?? [],
-          }))
-        : undefined,
-    });
-    const filteredTags = tags?.filter((tag) => allowedTagsMap.has(tag.id));
-
     const gameObjects = includeGameObjects
       ? await getGameObjects({
-          includeTags: includeTags,
+          includeTags: includeTags || filterTagsMustBeInGameObjects,
           filterGameObjectIds: filterGameObjectIds,
-          filterTagIds: filterTagsMustBeInGames
-            ? filteredTags?.map((t) => t.id)
-            : filterTagIds,
+          filterTagIds: filterTagIds,
           filterAllowUntaggedGameObjects:
             filterAllowUntaggedGameObjects && !filterTagsMustBeInGames,
         })
       : undefined;
 
-    const processedOutput: z.infer<typeof output> = {
-      count: includeCount
-        ? {
-            games: games?.length,
-            gameObjects: gameObjects?.length,
-            tags: filteredTags?.length,
-          }
+    const tags = includeTags
+      ? await getTags({
+          filterTagIds,
+          mustBeInGameObjects: filterTagsMustBeInGameObjects
+            ? gameObjects?.map((go) => ({
+                id: go.id,
+                tags: go.tags.map((t) => t.id),
+              }))
+            : undefined,
+        })
+      : undefined;
+
+    const allowedTagsMap = generateTagsMap({
+      tagIds: tags?.map((t) => t.id) ?? [],
+      filterTagIds,
+      mustBeUsedByGames: filterTagsMustBeInGames
+        ? games?.map((g) => ({
+            id: g.id,
+            tags: g.inputTags.map((t) => t.id) ?? [],
+          }))
         : undefined,
-      games: games?.map((game) => ({
-        id: game.id,
-        name: game.name,
-        description: game.description ?? "",
-        inputTagIds: includeTags
-          ? // Input tags for a game should only have tags that are allowed in the current export operation
-            game.inputTags
-              .map((tag) => tag.id)
-              .filter((id) => allowedTagsMap?.has(id))
-          : undefined,
-      })),
-      gameObjects: gameObjects?.map((gameObject) => ({
-        id: gameObject.id,
-        name: gameObject.name,
-        description: gameObject.description ?? "",
-        // Tags for a game object should only have tags that are allowed in the current export operation
-        tagIds: includeTags
-          ? gameObject.tags
-              .map((tag) => tag.id)
-              .filter((id) => allowedTagsMap?.has(id))
-          : undefined,
-      })),
-      tags: filteredTags?.map((tag) => ({
-        id: tag.id,
-        name: tag.name,
-        description: tag.description ?? "",
-      })),
+    });
+    const filteredTags = tags?.filter((tag) => allowedTagsMap.has(tag.id));
+    const filteredGameObjects = gameObjects?.filter((gameObject) => {
+      if (!includeTags) return true;
+      if (filterAllowUntaggedGameObjects) return true;
+      return gameObject.tags?.some((t) => allowedTagsMap.has(t.id));
+    });
+
+    const processedOutput: z.infer<typeof output> = {
+      count:
+        count === "no-count"
+          ? undefined
+          : {
+              games: games?.length,
+              gameObjects: filteredGameObjects?.length,
+              tags: filteredTags?.length,
+            },
+      games:
+        count === "count-only"
+          ? undefined
+          : games?.map((game) => ({
+              id: game.id,
+              name: game.name,
+              description: game.description ?? "",
+              inputTagIds: includeTags
+                ? // Input tags for a game should only have tags that are allowed in the current export operation
+                  game.inputTags
+                    .map((tag) => tag.id)
+                    .filter((id) => allowedTagsMap?.has(id))
+                : undefined,
+            })),
+      gameObjects:
+        count === "count-only"
+          ? undefined
+          : filteredGameObjects?.map((gameObject) => ({
+              id: gameObject.id,
+              name: gameObject.name,
+              description: gameObject.description ?? "",
+              // Tags for a game object should only have tags that are allowed in the current export operation
+              tagIds: includeTags
+                ? gameObject.tags
+                    .map((tag) => tag.id)
+                    .filter((id) => allowedTagsMap?.has(id))
+                : undefined,
+            })),
+      tags:
+        count === "count-only"
+          ? undefined
+          : filteredTags?.map((tag) => ({
+              id: tag.id,
+              name: tag.name,
+              description: tag.description ?? "",
+            })),
     };
 
     return processedOutput;
   });
-async function getTags(filterTagIds: string[] | undefined) {
+async function getTags(params: {
+  filterTagIds?: string[];
+  mustBeInGameObjects?: { id: string; tags: string[] }[];
+}) {
+  const { filterTagIds, mustBeInGameObjects } = params;
+
+  // If the user wants to filter by tags that must be in game objects, we need to get all the tags that are in those game objects
+  const tagIdsToFilterBy = mustBeInGameObjects
+    ? Array.from(
+        mustBeInGameObjects.reduce((prev, next) => {
+          next.tags.forEach((tagId) => {
+            prev.add(tagId);
+          });
+          return prev;
+        }, new Set<string>())
+      )
+    : // Otherwise, just use the explicitly provided tag IDs from filterTagIds
+      filterTagIds;
+
   return await prisma.tag.findMany({
     select: {
       id: true,
@@ -198,7 +248,7 @@ async function getTags(filterTagIds: string[] | undefined) {
     },
     where: {
       id: {
-        in: filterTagIds,
+        in: tagIdsToFilterBy,
       },
     },
   });
@@ -284,13 +334,17 @@ async function getGames(
 // This way, game and game object tags that aren't in the allowed tags list are filtered out
 function generateTagsMap(params: {
   tagIds: Tag["id"][];
-  filterTagsMustBeInGames?: boolean;
-  games?: { id: Game["id"]; inputTags: Tag["id"][] }[];
+  filterTagIds?: Tag["id"][];
+  mustBeUsedByGames?: { id: Game["id"]; tags: Tag["id"][] }[];
 }) {
-  const { tagIds, filterTagsMustBeInGames = false, games = [] } = params;
+  const { tagIds, filterTagIds, mustBeUsedByGames } = params;
   return tagIds.reduce((map, id) => {
-    if (filterTagsMustBeInGames) {
-      const isTagValid = games.some((game) => game.inputTags.includes(id));
+    if (filterTagIds && !filterTagIds.includes(id)) return map;
+
+    if (mustBeUsedByGames) {
+      const isTagValid = mustBeUsedByGames.some((game) =>
+        game.tags.includes(id)
+      );
       if (!isTagValid) return map;
     }
     map.set(id, true);

@@ -35,7 +35,7 @@ export default function TableActionsMenuItemExportJSONContainer<
   } = props;
   const countQuery = api.exportData.exportData.useQuery({
     ...exportDataQueryOptions,
-    includeCount: true,
+    count: "count-only",
   });
   const countValue = useMemo(() => {
     return count(context, countQuery.data?.count);

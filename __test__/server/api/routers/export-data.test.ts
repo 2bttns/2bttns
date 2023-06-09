@@ -226,6 +226,7 @@ describe("exportData router", () => {
     expect(results.count!.tags).toBe(1);
 
     // Ensure the game objects are filtered by the tag when filterTagsMustBeInGames is true
+    // These game objects are the ones that the game ends up using based on the input tag
     const gameObjectsWithFirstTag = await prisma.gameObject.findMany({
       where: {
         tags: {
@@ -243,6 +244,48 @@ describe("exportData router", () => {
       filterGameIds: game!.id,
     });
     expect(results.count!.games).toBe(1);
+    expect(results.count!.tags).toBe(allTags.length);
+  });
+
+  test("can get game-objects with only tags they use", async () => {
+    const ctx = createInnerTRPCContextWithSessionForTest();
+    const caller = appRouter.createCaller(ctx);
+
+    const firstTag = await prisma.tag.findFirst({});
+    const gameObjectWithOneTag = await prisma.gameObject.create({
+      data: {
+        name: "test-game-object",
+        tags: {
+          connect: {
+            id: firstTag!.id,
+          },
+        },
+      },
+    });
+
+    // Ensure there are multiple game-objects and tags from the `beforeAll`
+    const allGameObjects = await prisma.gameObject.findMany({});
+    const allTags = await prisma.tag.findMany({});
+    expect(allGameObjects.length).toBeGreaterThan(1);
+    expect(allTags.length).toBeGreaterThan(1);
+
+    // Should only get the first game-object and first tag, because filterGameObjectIds is set to only the first game-object's ID
+    // Since filterTagsMustBeInGameObjects is true, only the associated tag should be returned in the results
+    let results = await caller.exportData.exportData({
+      filterTagsMustBeInGameObjects: true,
+      filterGameObjectIds: gameObjectWithOneTag!.id,
+      includeGames: false,
+    });
+    expect(results.count!.gameObjects).toBe(1);
+    expect(results.count!.tags).toBe(1);
+    expect(results.tags![0]!.id).toBe(firstTag!.id);
+
+    // If filterTagsMustBeInGameObjects is false, then all tags should be returned regardless of whether they are associated with the filtered game-object
+    results = await caller.exportData.exportData({
+      filterTagsMustBeInGameObjects: false,
+      includeGames: false,
+    });
+    expect(results.count!.gameObjects).toBe(allGameObjects.length);
     expect(results.count!.tags).toBe(allTags.length);
   });
 });

@@ -18,12 +18,13 @@ export default function ExportSelectedGamesJSON(
       }}
       exportText={(countValue) => `Export Selected to JSON (${countValue})`}
       exportDataQueryOptions={{
-        includeCount: true,
+        count: "include",
         includeGames: true,
         includeGameObjects: true,
         includeTags: true,
         filterTagsMustBeInGames: true,
         filterGameIds: context.selectedRows.map((g) => g.id).join(","),
+        filterAllowUntaggedGameObjects: false,
       }}
     />
   );

@@ -17,7 +17,7 @@ export default function ExportAllTagsJSON(props: ExportAllTagsProps) {
         return countData?.tags ?? 0;
       }}
       exportDataQueryOptions={{
-        includeCount: true,
+        count: "include",
         includeGames: false,
         includeGameObjects: true,
         includeTags: true,
