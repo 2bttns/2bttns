@@ -62,7 +62,7 @@ const input = z.object({
   //          play the game if it isn't already installed
 });
 
-const output = z.object({
+export const output = z.object({
   count: z
     .object({
       games: z.number().optional(),

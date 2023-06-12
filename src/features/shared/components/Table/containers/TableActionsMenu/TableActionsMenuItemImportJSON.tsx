@@ -1,7 +1,7 @@
 import { Box, MenuItem, useDisclosure } from "@chakra-ui/react";
 import { useCallback, useEffect, useState } from "react";
 import Dropzone from "react-dropzone";
-import { apiClient } from "../../../../../../utils/api";
+import { api, apiClient } from "../../../../../../utils/api";
 import ConfirmAlert from "../../../ConfirmAlert";
 import { TableActionMenuContext } from "./index";
 
@@ -28,6 +28,8 @@ export default function TableActionsMenuItemImportJSON<T extends object>(
     setFile(acceptedFiles[0]);
   }, []);
 
+  const utils = api.useContext();
+
   const handleConfirm = async () => {
     try {
       if (!file) return;
@@ -38,7 +40,11 @@ export default function TableActionsMenuItemImportJSON<T extends object>(
       const response = await apiClient.importData.importData.mutate({
         jsonBase64: base64,
       });
-      throw "foo";
+      await Promise.all([
+        utils.tags.invalidate(),
+        utils.gameObjects.invalidate(),
+        utils.games.invalidate(),
+      ]);
       // onClose();
     } catch (error) {
       console.error(error);
