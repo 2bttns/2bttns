@@ -1,6 +1,7 @@
 import { PrismaPromise } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
+import { defaultMode } from "../../../../modes/availableModes";
 import { OPENAPI_TAGS } from "../../openapi/openApiTags";
 import { adminOrApiKeyProtectedProcedure } from "../../trpc";
 import { output as exportDataOutput } from "../export-data/exportData";
@@ -86,6 +87,7 @@ export const importData = adminOrApiKeyProtectedProcedure
               id: game.id,
               name: game.name,
               description: game.description,
+              mode: defaultMode,
             })),
           })
         );
