@@ -14,6 +14,7 @@ import useDeleteGames from "../../features/games/hooks/useDeleteGames";
 import { AdditionalColumns } from "../../features/shared/components/Table/containers/PaginatedTable";
 import TableActionMenu from "../../features/shared/components/Table/containers/TableActionsMenu";
 import TableActionsMenuItemDelete from "../../features/shared/components/Table/containers/TableActionsMenu/TableActionsMenuItemDelete";
+import TableActionsMenuItemImportJSON from "../../features/shared/components/Table/containers/TableActionsMenu/TableActionsMenuItemImportJSON";
 import getSessionWithSignInRedirect from "../../utils/getSessionWithSignInRedirect";
 
 export type GamesPageProps = {
@@ -73,6 +74,7 @@ function AdditionalTopBarContent(props: AdditionalTopBarContentProps) {
           <>
             <ExportSelectedGamesJSON context={context} />
             <ExportAllGamesJSON context={context} />
+            <TableActionsMenuItemImportJSON context={context} />
             <Divider />
             <TableActionsMenuItemDelete
               context={context}
