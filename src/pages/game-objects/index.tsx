@@ -13,6 +13,7 @@ import ExportSelectedGameObjectsJSON from "../../features/gameobjects/containers
 import { AdditionalColumns } from "../../features/shared/components/Table/containers/PaginatedTable";
 import TableActionsMenu from "../../features/shared/components/Table/containers/TableActionsMenu";
 import TableActionsMenuItemBulkTag from "../../features/shared/components/Table/containers/TableActionsMenu/TableActionsMenuItemBulkTag";
+import TableActionsMenuItemImportJSON from "../../features/shared/components/Table/containers/TableActionsMenu/TableActionsMenuItemImportJSON";
 import { EditTagsForGameObjectsButtonDrawer } from "../../features/tags/containers/EditTagsForGameObjectsButtonDrawer";
 import { SelectTagFiltersDrawerButton } from "../../features/tags/containers/SelectTagFiltersDrawerButton";
 import useAllTagFilters from "../../features/tags/hooks/useAllTagFilters";
@@ -101,6 +102,7 @@ function AdditionalTopBarContent(props: AdditionalTopBarContentProps) {
                   tagFilter.results.untaggedFilter === "untagged-only"
                 }
               />
+              <TableActionsMenuItemImportJSON context={context} />
               <Divider />
               <DeleteSelectedGameObjects context={context} />
             </>

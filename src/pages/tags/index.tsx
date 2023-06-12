@@ -5,6 +5,7 @@ import { Session } from "next-auth";
 import Head from "next/head";
 import TableActionMenu from "../../features/shared/components/Table/containers/TableActionsMenu";
 import TableActionsMenuItemDelete from "../../features/shared/components/Table/containers/TableActionsMenu/TableActionsMenuItemDelete";
+import TableActionsMenuItemImportJSON from "../../features/shared/components/Table/containers/TableActionsMenu/TableActionsMenuItemImportJSON";
 import DeleteTagButton from "../../features/tags/containers/DeleteTagButton";
 import ManageTagButton from "../../features/tags/containers/ManageTagButton";
 import ExportAllTagsJSON from "../../features/tags/containers/TableActionsMenu/ExportAllTagsJSON";
@@ -74,6 +75,7 @@ function AdditionalTopBarContent(props: AdditionalTopBarContentProps) {
           <>
             <ExportSelectedTagsJSON context={context} />
             <ExportAllTagsJSON context={context} />
+            <TableActionsMenuItemImportJSON context={context} />
             <Divider />
             <TableActionsMenuItemDelete
               context={context}
