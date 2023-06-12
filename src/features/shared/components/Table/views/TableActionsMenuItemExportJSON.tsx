@@ -1,4 +1,5 @@
-import { MenuItem } from "@chakra-ui/react";
+import { MenuItem, useDisclosure } from "@chakra-ui/react";
+import { ConfirmAlert } from "../../ConfirmAlert";
 import { TableActionMenuContext } from "../containers/TableActionsMenu/index";
 
 export type JSONOutput = object | object[];
@@ -18,12 +19,19 @@ export type TableActionsMenuItemExportJSONProps<
   fetchJSON: (context: TableActionMenuContext<T>) => Promise<J>;
   menuItemText?: (context: TableActionMenuContext<T>) => string;
   isDisabled?: (context: TableActionMenuContext<T>) => boolean;
+  requireConfirmationAlert?: boolean;
 };
 export default function TableActionsMenuItemExportJSON<
   T extends object,
   J extends JSONOutput = T[]
 >(props: TableActionsMenuItemExportJSONProps<T, J>) {
-  const { context, fetchJSON, menuItemText, isDisabled } = props;
+  const {
+    context,
+    fetchJSON,
+    menuItemText,
+    isDisabled,
+    requireConfirmationAlert = true,
+  } = props;
 
   const handleClick = async () => {
     try {
@@ -46,10 +54,21 @@ export default function TableActionsMenuItemExportJSON<
     ? menuItemText(context)
     : `Export to JSON (${context.selectedRows.length})`;
 
+  const { isOpen, onClose, onOpen } = useDisclosure();
+
   return (
     <>
+      <ConfirmAlert
+        alertTitle="Confirm Export"
+        handleConfirm={handleClick}
+        isOpen={isOpen}
+        onClose={onClose}
+        confirmButtonProps={{
+          colorScheme: "blue",
+        }}
+      />
       <MenuItem
-        onClick={handleClick}
+        onClick={requireConfirmationAlert ? onOpen : handleClick}
         isDisabled={isDisabled ? isDisabled(context) : false}
       >
         {text}
