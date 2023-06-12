@@ -66,7 +66,7 @@ export default function TableActionsMenuItemImportJSON<T extends object>(
         handleConfirm={handleConfirm}
         isOpen={isOpen}
         onClose={onClose}
-        performingConfirmActionText="Deleting..."
+        performingConfirmActionText="Importing..."
         confirmButtonProps={{
           colorScheme: "blue",
           isDisabled: !file,

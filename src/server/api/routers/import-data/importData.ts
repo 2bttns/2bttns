@@ -38,6 +38,7 @@ export const importData = adminOrApiKeyProtectedProcedure
       const queries: PrismaPromise<any>[] = [];
 
       if (validated.tags && validated.tags.length > 0) {
+        // Create tags
         queries.push(
           ctx.prisma.tag.createMany({
             data: validated.tags?.map((tag) => ({
@@ -49,6 +50,7 @@ export const importData = adminOrApiKeyProtectedProcedure
       }
 
       if (validated.gameObjects && validated.gameObjects.length > 0) {
+        // Create game objects
         queries.push(
           ctx.prisma.gameObject.createMany({
             data: validated.gameObjects?.map((gameObject) => ({
@@ -58,9 +60,26 @@ export const importData = adminOrApiKeyProtectedProcedure
             })),
           })
         );
+
+        // Apply imported tags to corresponding game objects
+        if (validated.tags && validated.tags.length > 0) {
+          queries.push(
+            ...validated.gameObjects.map((gameObject) => {
+              return ctx.prisma.gameObject.update({
+                where: { id: gameObject.id },
+                data: {
+                  tags: {
+                    connect: gameObject.tagIds?.map((id) => ({ id })),
+                  },
+                },
+              });
+            })
+          );
+        }
       }
 
       if (validated.games && validated.games.length > 0) {
+        // Create games
         queries.push(
           ctx.prisma.game.createMany({
             data: validated.games?.map((game) => ({
@@ -70,8 +89,26 @@ export const importData = adminOrApiKeyProtectedProcedure
             })),
           })
         );
+
+        // Apply imported input tags to corresponding games
+        if (validated.tags && validated.tags.length > 0) {
+          queries.push(
+            ...validated.games?.map((game) => {
+              return ctx.prisma.game.update({
+                where: { id: game.id },
+                data: {
+                  inputTags: {
+                    connect: game.inputTagIds?.map((id) => ({ id })),
+                  },
+                },
+              });
+            })
+          );
+        }
       }
 
+      // All or nothing transaction
+      // TODO: Allow import of partial data
       await ctx.prisma.$transaction(queries);
 
       return {
