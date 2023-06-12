@@ -1,4 +1,4 @@
-import { Box, MenuItem, useDisclosure } from "@chakra-ui/react";
+import { Box, MenuItem, Text, useDisclosure } from "@chakra-ui/react";
 import { useCallback, useEffect, useState } from "react";
 import Dropzone from "react-dropzone";
 import { api, apiClient } from "../../../../../../utils/api";
@@ -80,6 +80,7 @@ export default function TableActionsMenuItemImportJSON<T extends object>(
         >
           {({ getRootProps, getInputProps }) => (
             <Box
+              {...getRootProps()}
               borderColor="gray.300"
               borderWidth="2px"
               borderStyle="dashed"
@@ -87,17 +88,18 @@ export default function TableActionsMenuItemImportJSON<T extends object>(
               textAlign="center"
               backgroundColor="gray.200"
               color="gray.500"
+              cursor="pointer"
             >
-              <div {...getRootProps()}>
-                <input {...getInputProps()} />
-                <Box maxWidth="256px" marginX="auto">
+              <input {...getInputProps()} />
+              <Box maxWidth="256px" marginX="auto">
+                <Text userSelect="none">
                   {file ? (
                     <>{file.name}</>
                   ) : (
-                    <p>Drag & Drop JSON file here, or click to select file</p>
+                    <>Drag & Drop JSON file here, or click to select file</>
                   )}
-                </Box>
-              </div>
+                </Text>
+              </Box>
             </Box>
           )}
         </Dropzone>
