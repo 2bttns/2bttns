@@ -50,7 +50,7 @@ export default function TableActionsMenuItemExportJSONContainer<
   });
   const countValue = useMemo(() => {
     return count(context, countQuery.data?.count);
-  }, [count]);
+  }, [count, context, countQuery.data?.count]);
 
   const menuItemText = useCallback(() => {
     return exportText(countValue);
@@ -71,12 +71,15 @@ export default function TableActionsMenuItemExportJSONContainer<
       isDisabled={() => countValue === 0}
       fetchJSON={async () => {
         if (countValue === 0) {
+          console.log("No items to export");
           return {};
         }
 
         const data = await apiClient.exportData.exportData.query(
           exportDataQueryOptions
         );
+        console.log("DATA");
+        console.log(data);
 
         return data;
       }}

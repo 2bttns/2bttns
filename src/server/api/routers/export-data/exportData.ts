@@ -143,17 +143,18 @@ export const exportData = adminOrApiKeyProtectedProcedure
         })
       : undefined;
 
-    const tags = includeTags
-      ? await getTags({
-          filterTagIds,
-          mustBeInGameObjects: filterTagsMustBeInGameObjects
-            ? gameObjects?.map((go) => ({
-                id: go.id,
-                tags: go.tags.map((t) => t.id),
-              }))
-            : undefined,
-        })
-      : undefined;
+    const tags =
+      includeTags || filterTagsMustBeInGameObjects
+        ? await getTags({
+            filterTagIds,
+            mustBeInGameObjects: filterTagsMustBeInGameObjects
+              ? gameObjects?.map((go) => ({
+                  id: go.id,
+                  tags: go.tags.map((t) => t.id),
+                }))
+              : undefined,
+          })
+        : undefined;
 
     const allowedTagsMap = generateTagsMap({
       tagIds: tags?.map((t) => t.id) ?? [],
@@ -177,12 +178,14 @@ export const exportData = adminOrApiKeyProtectedProcedure
         count === "no-count"
           ? undefined
           : {
-              games: games?.length,
-              gameObjects: filteredGameObjects?.length,
-              tags: filteredTags?.length,
+              games: includeGames ? games?.length : undefined,
+              gameObjects: includeGameObjects
+                ? filteredGameObjects?.length
+                : undefined,
+              tags: includeTags ? filteredTags?.length : undefined,
             },
       games:
-        count === "count-only"
+        !includeGames || count === "count-only"
           ? undefined
           : games?.map((game) => ({
               id: game.id,
@@ -196,7 +199,7 @@ export const exportData = adminOrApiKeyProtectedProcedure
                 : undefined,
             })),
       gameObjects:
-        count === "count-only"
+        !includeGameObjects || count === "count-only"
           ? undefined
           : filteredGameObjects?.map((gameObject) => ({
               id: gameObject.id,
@@ -210,7 +213,7 @@ export const exportData = adminOrApiKeyProtectedProcedure
                 : undefined,
             })),
       tags:
-        count === "count-only"
+        !includeTags || count === "count-only"
           ? undefined
           : filteredTags?.map((tag) => ({
               id: tag.id,
