@@ -24,7 +24,7 @@ export default function ExportSelectedGameObjectsJSON(
   const [includeTags, setIncludeTags] = useState(true);
 
   useEffect(() => {
-    // Reset the includeGameObjects and includeTags state when the menu is opened
+    // Reset the includeTags state when the menu is opened
     if (context.isOpen) {
       setIncludeTags(true);
     }
