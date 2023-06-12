@@ -1,5 +1,5 @@
 import { MenuItem, useDisclosure } from "@chakra-ui/react";
-import { ConfirmAlert } from "../../ConfirmAlert";
+import ConfirmAlert, { ConfirmAlertProps } from "../../ConfirmAlert";
 import { TableActionMenuContext } from "../containers/TableActionsMenu/index";
 
 export type JSONOutput = object | object[];
@@ -19,19 +19,21 @@ export type TableActionsMenuItemExportJSONProps<
   fetchJSON: (context: TableActionMenuContext<T>) => Promise<J>;
   menuItemText?: (context: TableActionMenuContext<T>) => string;
   isDisabled?: (context: TableActionMenuContext<T>) => boolean;
-  requireConfirmationAlert?: boolean;
+  confirmationAlert?: {
+    title?: ConfirmAlertProps["alertTitle"];
+    body?: ConfirmAlertProps["children"];
+    confirmButtonText?: ConfirmAlertProps["confirmText"];
+    confirmButtonProps?: ConfirmAlertProps["confirmButtonProps"];
+    cancelButtonText?: ConfirmAlertProps["cancelText"];
+    cancelButtonProps?: ConfirmAlertProps["cancelButtonProps"];
+  };
 };
 export default function TableActionsMenuItemExportJSON<
   T extends object,
   J extends JSONOutput = T[]
 >(props: TableActionsMenuItemExportJSONProps<T, J>) {
-  const {
-    context,
-    fetchJSON,
-    menuItemText,
-    isDisabled,
-    requireConfirmationAlert = true,
-  } = props;
+  const { context, fetchJSON, menuItemText, isDisabled, confirmationAlert } =
+    props;
 
   const handleClick = async () => {
     try {
@@ -58,17 +60,28 @@ export default function TableActionsMenuItemExportJSON<
 
   return (
     <>
-      <ConfirmAlert
-        alertTitle="Confirm Export"
-        handleConfirm={handleClick}
-        isOpen={isOpen}
-        onClose={onClose}
-        confirmButtonProps={{
-          colorScheme: "blue",
-        }}
-      />
+      {confirmationAlert && (
+        <ConfirmAlert
+          alertTitle={confirmationAlert.title ?? "Confirm Export"}
+          handleConfirm={handleClick}
+          isOpen={isOpen}
+          onClose={onClose}
+          confirmButtonProps={{
+            colorScheme: "blue",
+            ...confirmationAlert.confirmButtonProps,
+          }}
+          cancelButtonProps={{
+            ...confirmationAlert.cancelButtonProps,
+          }}
+          confirmText={confirmationAlert.confirmButtonText ?? "Confirm"}
+          cancelText={confirmationAlert.cancelButtonText ?? "Cancel"}
+          performingConfirmActionText="Exporting..."
+        >
+          {confirmationAlert.body}
+        </ConfirmAlert>
+      )}
       <MenuItem
-        onClick={requireConfirmationAlert ? onOpen : handleClick}
+        onClick={confirmationAlert ? onOpen : handleClick}
         isDisabled={isDisabled ? isDisabled(context) : false}
       >
         {text}

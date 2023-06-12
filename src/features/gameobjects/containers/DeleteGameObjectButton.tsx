@@ -1,7 +1,7 @@
 import { DeleteIcon } from "@chakra-ui/icons";
 import { IconButton, Tooltip, useDisclosure } from "@chakra-ui/react";
 import { api } from "../../../utils/api";
-import { ConfirmAlert } from "../../shared/components/ConfirmAlert";
+import ConfirmAlert from "../../shared/components/ConfirmAlert";
 import { GameObjectData } from "./GameObjectsTable";
 
 export type DeleteGameObjectButtonProps = {

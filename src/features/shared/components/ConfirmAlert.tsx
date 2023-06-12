@@ -11,7 +11,7 @@ import {
 import { useRef, useState } from "react";
 
 export type ConfirmAlertProps = {
-  alertTitle: string;
+  alertTitle: React.ReactNode;
   handleConfirm: () => Promise<void>;
   confirmText?: string;
   cancelText?: string;
@@ -23,7 +23,7 @@ export type ConfirmAlertProps = {
   performingConfirmActionText?: string;
 };
 
-export function ConfirmAlert(props: ConfirmAlertProps) {
+export default function ConfirmAlert(props: ConfirmAlertProps) {
   const {
     alertTitle,
     handleConfirm,

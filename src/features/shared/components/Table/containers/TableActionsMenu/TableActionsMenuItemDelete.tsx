@@ -1,6 +1,6 @@
 import { MenuItem, useDisclosure } from "@chakra-ui/react";
 import React from "react";
-import { ConfirmAlert } from "../../../ConfirmAlert";
+import ConfirmAlert from "../../../ConfirmAlert";
 import { TableActionMenuContext, TableActionMenuProps } from "./index";
 
 export type TableActionsMenuItemDeleteProps<T extends object> = {

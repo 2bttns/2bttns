@@ -16,7 +16,7 @@ import { GetServerSideProps, NextPage } from "next";
 import { Session } from "next-auth";
 import Head from "next/head";
 import SecretsTable from "../../features/settings/containers/SecretsTable";
-import { ConfirmAlert } from "../../features/shared/components/ConfirmAlert";
+import ConfirmAlert from "../../features/shared/components/ConfirmAlert";
 import { api } from "../../utils/api";
 import getSessionWithSignInRedirect from "../../utils/getSessionWithSignInRedirect";
 

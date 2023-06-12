@@ -6,7 +6,9 @@ import {
   RouterInputs,
   RouterOutputs,
 } from "../../../../../../utils/api";
-import TableActionsMenuItemExportJSON from "../../views/TableActionsMenuItemExportJSON";
+import TableActionsMenuItemExportJSON, {
+  TableActionsMenuItemExportJSONProps,
+} from "../../views/TableActionsMenuItemExportJSON";
 
 export type TableActionsMenuItemExportJSONContainerProps<T extends object> = {
   context: TableActionMenuContext<T>;
@@ -22,6 +24,13 @@ export type TableActionsMenuItemExportJSONContainerProps<T extends object> = {
   // Text to display in the menu item
   // e.g. "Export Selected to JSON"
   exportText?: (countValue: number) => string;
+
+  // Use this to define a custom confirmation alert
+  // For example, if you want to display a warning about the number/breakdown of items being exported
+  renderConfirmationAlert?: (
+    context: TableActionMenuContext<T>,
+    countData: RouterOutputs["exportData"]["exportData"]["count"]
+  ) => TableActionsMenuItemExportJSONProps<T>["confirmationAlert"];
 };
 
 export default function TableActionsMenuItemExportJSONContainer<
@@ -32,6 +41,7 @@ export default function TableActionsMenuItemExportJSONContainer<
     exportDataQueryOptions = {},
     count,
     exportText = (countValue) => `Export (${countValue})`,
+    renderConfirmationAlert,
   } = props;
   const countQuery = api.exportData.exportData.useQuery({
     ...exportDataQueryOptions,
@@ -69,6 +79,10 @@ export default function TableActionsMenuItemExportJSONContainer<
 
         return data;
       }}
+      confirmationAlert={renderConfirmationAlert?.(
+        context,
+        countQuery.data?.count
+      )}
     />
   );
 }
