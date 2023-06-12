@@ -29,7 +29,8 @@ export type TableActionsMenuItemExportJSONContainerProps<T extends object> = {
   // For example, if you want to display a warning about the number/breakdown of items being exported
   renderConfirmationAlert?: (
     context: TableActionMenuContext<T>,
-    countData: RouterOutputs["exportData"]["exportData"]["count"]
+    countData: RouterOutputs["exportData"]["exportData"]["count"],
+    countLoading: boolean
   ) => TableActionsMenuItemExportJSONProps<T>["confirmationAlert"];
 };
 
@@ -81,7 +82,8 @@ export default function TableActionsMenuItemExportJSONContainer<
       }}
       confirmationAlert={renderConfirmationAlert?.(
         context,
-        countQuery.data?.count
+        countQuery.data?.count,
+        countQuery.isLoading
       )}
     />
   );

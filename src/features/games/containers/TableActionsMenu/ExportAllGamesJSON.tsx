@@ -45,7 +45,7 @@ export default function ExportAllGamesJSON(props: ExportAllGamesProps) {
         filterTagsMustBeInGames: true,
         filterAllowUntaggedGameObjects: false,
       }}
-      renderConfirmationAlert={(ctx, countData) => ({
+      renderConfirmationAlert={(ctx, countData, countLoading) => ({
         title: "Export All Games to JSON",
         body: (
           <Box>
@@ -70,23 +70,26 @@ export default function ExportAllGamesJSON(props: ExportAllGamesProps) {
                 Click &apos;Confirm&apos; to export the following to a JSON
                 file:
               </Text>
-              <UnorderedList mt="1rem">
-                <ListItem>
-                  <strong>{countData?.games ?? 0} games</strong>{" "}
-                </ListItem>
-                {includeTags && (
+              {countLoading && <Text>Loading...</Text>}
+              {!countLoading && (
+                <UnorderedList mt="1rem">
                   <ListItem>
-                    <strong>{countData?.tags ?? 0} associated tags</strong>
+                    <strong>{countData?.games ?? 0} game(s)</strong>{" "}
                   </ListItem>
-                )}
-                {includeTags && includeGameObjects && (
-                  <ListItem>
-                    <strong>
-                      {countData?.gameObjects ?? 0} associated game objects
-                    </strong>
-                  </ListItem>
-                )}
-              </UnorderedList>
+                  {includeTags && (
+                    <ListItem>
+                      <strong>{countData?.tags ?? 0} associated tag(s)</strong>
+                    </ListItem>
+                  )}
+                  {includeTags && includeGameObjects && (
+                    <ListItem>
+                      <strong>
+                        {countData?.gameObjects ?? 0} associated game object(s)
+                      </strong>
+                    </ListItem>
+                  )}
+                </UnorderedList>
+              )}
             </Box>
           </Box>
         ),
