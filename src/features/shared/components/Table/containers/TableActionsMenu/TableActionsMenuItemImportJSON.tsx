@@ -20,6 +20,7 @@ export default function TableActionsMenuItemImportJSON<T extends object>(
   const { isOpen, onOpen, onClose } = useDisclosure();
 
   const [file, setFile] = useState<File | null>(null);
+  const [isImporting, setImporting] = useState<boolean>(false);
 
   const onDrop = useCallback((acceptedFiles: File[]) => {
     if (acceptedFiles.length === 0 || !acceptedFiles[0]) {
@@ -33,10 +34,13 @@ export default function TableActionsMenuItemImportJSON<T extends object>(
   const handleConfirm = async () => {
     try {
       if (!file) return;
+      if (isImporting) return;
       if (typeof window === "undefined") return;
 
       const fileText = await file.text();
       const base64 = window.btoa(fileText);
+
+      setImporting(true);
       const response = await apiClient.importData.importData.mutate({
         jsonBase64: base64,
       });
@@ -45,6 +49,7 @@ export default function TableActionsMenuItemImportJSON<T extends object>(
         utils.gameObjects.invalidate(),
         utils.games.invalidate(),
       ]);
+      setImporting(false);
       // onClose();
     } catch (error) {
       console.error(error);
@@ -69,7 +74,7 @@ export default function TableActionsMenuItemImportJSON<T extends object>(
         performingConfirmActionText="Importing..."
         confirmButtonProps={{
           colorScheme: "blue",
-          isDisabled: !file,
+          isDisabled: !file || isImporting,
         }}
       >
         <Dropzone
