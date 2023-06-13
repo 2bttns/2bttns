@@ -61,7 +61,7 @@ CREATE TABLE "Game" (
     "name" TEXT NOT NULL,
     "description" TEXT,
     "defaultNumItemsPerRound" INTEGER,
-    "mode" TEXT,
+    "mode" TEXT NOT NULL,
     "modeConfigJson" TEXT,
 
     CONSTRAINT "Game_pkey" PRIMARY KEY ("id")

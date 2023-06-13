@@ -126,6 +126,7 @@ describe("games router", () => {
           name: "test-game",
           id: testGameId,
           inputTags: { connect: { id: testTagId } },
+          mode: defaultMode,
         },
       });
 

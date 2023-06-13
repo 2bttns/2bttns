@@ -1,5 +1,6 @@
 import { PrismaClient, Secret, Tag } from "@prisma/client";
 import jwt from "jsonwebtoken";
+import { defaultMode } from "../../../../src/modes/availableModes";
 import { createInnerTRPCContext } from "../../../../src/server/api/trpc";
 import { prisma } from "../../../../src/server/db";
 import { playerTokenSchema } from "../../../../src/server/helpers/checkUserAuth";
@@ -59,6 +60,7 @@ export async function createTestGames(count: number) {
     data: Array.from({ length: count }, (_, i) => ({
       id: `test-game-id-${i}`,
       name: `test-game-${i}`,
+      mode: defaultMode,
     })),
   });
 }
