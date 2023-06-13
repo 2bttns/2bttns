@@ -54,6 +54,13 @@ CREATE TABLE "VerificationToken" (
 );
 
 -- CreateTable
+CREATE TABLE "AllowedAdmin" (
+    "email" TEXT NOT NULL,
+
+    CONSTRAINT "AllowedAdmin_pkey" PRIMARY KEY ("email")
+);
+
+-- CreateTable
 CREATE TABLE "Game" (
     "id" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,

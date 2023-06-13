@@ -20,7 +20,8 @@ model Example {
     updatedAt DateTime @updatedAt
 }
 
-// Necessary for Next auth
+// Necessary for Next Auth's Prisma adapter
+// Note that the "Users" table refers to admin users, not end users. End users are instead stored in the "Player" table.
 model Account {
     id                String  @id @default(cuid())
     userId            String
@@ -63,6 +64,11 @@ model VerificationToken {
     expires    DateTime
 
     @@unique([identifier, token])
+}
+
+// 2bttns specific models
+model AllowedAdmin {
+    email String @id
 }
 
 model Game {

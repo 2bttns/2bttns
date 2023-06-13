@@ -1,5 +1,4 @@
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
-import fs from "fs";
 import type { GetServerSidePropsContext } from "next";
 import {
   getServerSession,
@@ -7,10 +6,10 @@ import {
   type NextAuthOptions,
 } from "next-auth";
 import GitHubProvider from "next-auth/providers/github";
-import path from "path";
 import { env } from "../env/server.mjs";
 import { prisma } from "./db";
 import { logger } from "./helpers/logger";
+import isAdmin from "./shared/isAdmin";
 
 /**
  * Module augmentation for `next-auth` types
@@ -47,15 +46,15 @@ export const authOptions: NextAuthOptions = {
             `No email found on user object: ${user}. Rejecting login.`
           );
         }
-        const adminAllowList = fs.readFileSync(
-          path.resolve("adminAllowList.json"),
-          "utf8"
-        );
-        const adminAllowListArray = JSON.parse(adminAllowList) as string[];
-        const canSignIn = adminAllowListArray.includes(user.email);
+
+        const canSignIn = await isAdmin({
+          email: user.email,
+          userId: user.id,
+          clearSessionsIfNotFound: false,
+        });
         if (canSignIn) {
           logger.info(
-            `Found ${user.email} in adminAllowList.json. Allowing login.`
+            `Found ${user.email} in allowed admin list. Allowing login.`
           );
         }
         return canSignIn;

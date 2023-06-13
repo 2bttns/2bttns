@@ -2,6 +2,7 @@ import { TRPCError } from "@trpc/server";
 import jwt from "jsonwebtoken";
 import { z } from "zod";
 import { CreateContextOptions } from "../api/trpc";
+import isAdmin from "../shared/isAdmin";
 import { logger } from "./logger";
 
 const jwtBaseSchema = z.object({
@@ -95,8 +96,26 @@ export async function checkUserAuth(
 
   // In the 2bttns admin panel, "user" refers to the admin user, not the end user
   //  (end users don't log in to the admin panel; when they play a game they are referred to as "players")
-  const isAdmin = ctx.session && ctx.session.user;
-  if (isAdmin) {
+  const isAdminType = ctx.session && ctx.session.user;
+  if (isAdminType) {
+    // Ensure the user is an admin
+    // Even if they have a session, ensure their access is still valid via the admin allow list database table
+    // For example, the admin user may have been deleted from the allow list while they were still logged in
+    if (
+      !ctx.session?.user?.email ||
+      !(await isAdmin({
+        email: ctx.session.user.email,
+        userId: ctx.session.user.id,
+        clearSessionsIfNotFound: true,
+      }))
+    ) {
+      logger.silly("checkUserAuth - end (UNAUTHORIZED)");
+      throw new TRPCError({
+        code: "UNAUTHORIZED",
+        message: "You are not authorized to access this resource",
+      });
+    }
+
     logger.silly("checkUserAuth - end (admin session found)");
     return { type: "admin_session" };
   }
