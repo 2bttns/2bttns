@@ -1,15 +1,16 @@
 import { z } from "zod";
 import { defaultMode } from "../../../../modes/availableModes";
+import { idSchema } from "../../../shared/z";
 import { adminOrApiKeyProtectedProcedure } from "../../trpc";
 
+const input = z.object({
+  id: idSchema.optional(),
+  name: z.string(),
+  description: z.string().optional(),
+});
+
 export const create = adminOrApiKeyProtectedProcedure
-  .input(
-    z.object({
-      id: z.string().optional(),
-      name: z.string(),
-      description: z.string().optional(),
-    })
-  )
+  .input(input)
   .mutation(async ({ input, ctx }) => {
     const createdGame = await ctx.prisma.game.create({
       data: {

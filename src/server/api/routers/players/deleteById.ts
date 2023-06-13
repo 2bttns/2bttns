@@ -1,7 +1,12 @@
 import { TRPCError } from "@trpc/server";
 import { output, z } from "zod";
+import { idSchema } from "../../../shared/z";
 import { OPENAPI_TAGS } from "../../openapi/openApiTags";
 import { adminOrApiKeyProtectedProcedure } from "../../trpc";
+
+const input = z.object({
+  id: idSchema,
+});
 
 const output = z.object({
   deletedPlayer: z.object({
@@ -23,11 +28,7 @@ export const deleteById = adminOrApiKeyProtectedProcedure
       protect: true,
     },
   })
-  .input(
-    z.object({
-      id: z.string(),
-    })
-  )
+  .input(input)
   .output(output)
   .mutation(async ({ input, ctx }) => {
     try {
@@ -36,7 +37,7 @@ export const deleteById = adminOrApiKeyProtectedProcedure
           id: input.id,
         },
       });
-      const processedDeletedPlayer: typeof output._type["deletedPlayer"] = {
+      const processedDeletedPlayer: (typeof output._type)["deletedPlayer"] = {
         ...deletedPlayer,
         createdAt: deletedPlayer.createdAt.toISOString(),
         updatedAt: deletedPlayer.updatedAt.toISOString(),

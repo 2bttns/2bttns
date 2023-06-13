@@ -1,13 +1,14 @@
 import { z } from "zod";
+import { idSchema } from "../../../shared/z";
 import { adminOrApiKeyProtectedProcedure } from "../../trpc";
 
+const input = z.object({
+  fromGameObjectId: idSchema,
+  toGameObjectId: idSchema,
+});
+
 export const getRelationship = adminOrApiKeyProtectedProcedure
-  .input(
-    z.object({
-      fromGameObjectId: z.string(),
-      toGameObjectId: z.string(),
-    })
-  )
+  .input(input)
   .query(async ({ ctx, input }) => {
     const fromGameObject = await ctx.prisma.gameObject.findFirst({
       where: {

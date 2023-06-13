@@ -1,13 +1,14 @@
 import { z } from "zod";
+import { idSchema } from "../../../shared/z";
 import { adminOrApiKeyProtectedProcedure } from "../../trpc";
 
+const input = z.object({
+  gameObjectId1: idSchema,
+  gameObjectId2: idSchema,
+});
+
 export const deleteRelationship = adminOrApiKeyProtectedProcedure
-  .input(
-    z.object({
-      gameObjectId1: z.string(),
-      gameObjectId2: z.string(),
-    })
-  )
+  .input(input)
   .mutation(async ({ ctx, input }) => {
     const results = await ctx.prisma.$transaction([
       ctx.prisma.gameObjectRelationship.delete({

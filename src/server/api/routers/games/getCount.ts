@@ -2,21 +2,21 @@ import { z } from "zod";
 import { tagFilter, textFilter } from "../../../shared/z";
 import { adminOrApiKeyProtectedProcedure } from "../../trpc";
 
-export const getCount = adminOrApiKeyProtectedProcedure
-  .input(
-    z
+const input = z
+  .object({
+    filter: z
       .object({
-        filter: z
-          .object({
-            mode: z.enum(["AND", "OR"]).optional(),
-            id: textFilter.optional(),
-            name: textFilter.optional(),
-            tag: tagFilter.optional(),
-          })
-          .optional(),
+        mode: z.enum(["AND", "OR"]).optional(),
+        id: textFilter.optional(),
+        name: textFilter.optional(),
+        tag: tagFilter.optional(),
       })
-      .optional()
-  )
+      .optional(),
+  })
+  .optional();
+
+export const getCount = adminOrApiKeyProtectedProcedure
+  .input(input)
   .query(async ({ ctx, input }) => {
     const count = await ctx.prisma.game.count({
       where: {

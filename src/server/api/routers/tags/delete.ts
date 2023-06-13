@@ -1,8 +1,17 @@
 import { TRPCError } from "@trpc/server";
 import { difference } from "lodash";
 import { z } from "zod";
+import { commaSeparatedStringToArray } from "../../../shared/z";
 import { OPENAPI_TAGS } from "../../openapi/openApiTags";
 import { adminOrApiKeyProtectedProcedure } from "../../trpc";
+
+const input = z.object({
+  id: commaSeparatedStringToArray.describe("Comma separated list of tag IDs"),
+});
+
+const output = z.object({
+  deletedCount: z.number(),
+});
 
 export const deleteTags = adminOrApiKeyProtectedProcedure
   .meta({
@@ -15,23 +24,13 @@ export const deleteTags = adminOrApiKeyProtectedProcedure
       protect: true,
     },
   })
-  .input(
-    z.object({
-      id: z.string().describe("Comma separated list of tag IDs"),
-    })
-  )
-  .output(
-    z.object({
-      deletedCount: z.number(),
-    })
-  )
+  .input(input)
+  .output(output)
   .mutation(async ({ ctx, input }) => {
-    const ids = input.id.split(",");
-
     const foundTags = await ctx.prisma.tag.findMany({
       where: {
         id: {
-          in: ids,
+          in: input.id,
         },
       },
       select: {
@@ -39,9 +38,9 @@ export const deleteTags = adminOrApiKeyProtectedProcedure
       },
     });
 
-    if (foundTags.length !== ids.length) {
+    if (foundTags.length !== input.id?.length) {
       const missingIds = difference(
-        ids,
+        input.id,
         foundTags.map((tag) => tag.id)
       ).join(",");
 
@@ -54,7 +53,7 @@ export const deleteTags = adminOrApiKeyProtectedProcedure
     const { count } = await ctx.prisma.tag.deleteMany({
       where: {
         id: {
-          in: ids,
+          in: input.id,
         },
       },
     });

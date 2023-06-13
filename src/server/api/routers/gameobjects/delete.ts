@@ -1,8 +1,19 @@
 import { TRPCError } from "@trpc/server";
 import { difference } from "lodash";
 import { z } from "zod";
+import { commaSeparatedStringToArray } from "../../../shared/z";
 import { OPENAPI_TAGS } from "../../openapi/openApiTags";
 import { adminOrApiKeyProtectedProcedure } from "../../trpc";
+
+const input = z.object({
+  id: commaSeparatedStringToArray.describe(
+    "Comma separated list of game object IDs"
+  ),
+});
+
+const output = z.object({
+  deletedCount: z.number(),
+});
 
 export const deleteGameObjects = adminOrApiKeyProtectedProcedure
   .meta({
@@ -15,23 +26,13 @@ export const deleteGameObjects = adminOrApiKeyProtectedProcedure
       protect: true,
     },
   })
-  .input(
-    z.object({
-      id: z.string().describe("Comma separated list of game object IDs"),
-    })
-  )
-  .output(
-    z.object({
-      deletedCount: z.number(),
-    })
-  )
+  .input(input)
+  .output(output)
   .mutation(async ({ ctx, input }) => {
-    const ids = input.id.split(",");
-
     const foundGameObjects = await ctx.prisma.gameObject.findMany({
       where: {
         id: {
-          in: ids,
+          in: input.id,
         },
       },
       select: {
@@ -39,9 +40,9 @@ export const deleteGameObjects = adminOrApiKeyProtectedProcedure
       },
     });
 
-    if (foundGameObjects.length !== ids.length) {
+    if (foundGameObjects.length !== input.id?.length) {
       const missingIds = difference(
-        ids,
+        input.id,
         foundGameObjects.map((gameObject) => gameObject.id)
       ).join(",");
 
@@ -54,7 +55,7 @@ export const deleteGameObjects = adminOrApiKeyProtectedProcedure
     const { count } = await ctx.prisma.gameObject.deleteMany({
       where: {
         id: {
-          in: ids,
+          in: input.id,
         },
       },
     });

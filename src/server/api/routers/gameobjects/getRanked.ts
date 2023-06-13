@@ -3,18 +3,17 @@ import { Decimal } from "@prisma/client/runtime";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { prisma } from "../../../db";
+import { idSchema } from "../../../shared/z";
 import { OPENAPI_TAGS } from "../../openapi/openApiTags";
 import { adminOrApiKeyProtectedProcedure } from "../../trpc";
 
 const input = z.object({
-  playerId: z.string(),
-
+  playerId: idSchema,
   inputTags: z
     .string()
     .describe(
       "Specify comma-separated input tags that will be used to score the game objects associated with the output tag.\n\nIf the output tag is included in the input tags, the player's score for those game object will be used as base scores"
     ),
-
   outputTag: z
     .string()
     .describe(
@@ -77,7 +76,7 @@ export const getRanked = adminOrApiKeyProtectedProcedure
 
     const doScoreSelf = input.inputTags.includes(input.outputTag);
 
-    const playerScoreMap = new Map<string, typeof playerScores[0]>();
+    const playerScoreMap = new Map<string, (typeof playerScores)[0]>();
     for (const { gameObject, score } of playerScores) {
       const baseScore = doScoreSelf ? score : new Decimal(0);
       playerScoreMap.set(gameObject.id, {

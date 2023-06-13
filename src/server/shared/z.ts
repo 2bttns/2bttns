@@ -46,3 +46,10 @@ export const untaggedFilterEnum = z.enum([
   "exclude",
   "untagged-only",
 ]);
+
+// Regex to prevent usage of special characters in IDs -- only alphanumeric, underscore, and hyphen are allowed
+// Characters like ? and & are not allowed, because they may cause issues when the ID is used with URL query parameters
+export const idSchema = z
+  .string()
+  .regex(/^[a-zA-Z0-9_-]+$/)
+  .describe("ID value. Only alphanumeric, underscore, and hyphen are allowed.");
