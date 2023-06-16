@@ -145,11 +145,11 @@ function GameObjectDetails(props: GameObjectDetailsProps) {
   const { gameObjectIds } = props;
 
   const gameObjectsCountQuery = api.gameObjects.getCount.useQuery({
-    filter: { id: { in: gameObjectIds }, mode: "OR" },
+    idFilter: gameObjectIds.join(","),
   });
   const gameObjectsQuery = api.gameObjects.getAll.useQuery(
     {
-      filter: { id: { in: gameObjectIds }, mode: "OR" },
+      idFilter: gameObjectIds.join(","),
       take: gameObjectsCountQuery.data?.count ?? 0,
     },
     { enabled: gameObjectsCountQuery.isSuccess }

@@ -1,15 +1,16 @@
 import { z } from "zod";
 import generateSecret from "../../../../utils/generateSecret";
+import { idSchema } from "../../../shared/z";
 import { adminOrApiKeyProtectedProcedure } from "../../trpc";
 
+const input = z.object({
+  id: idSchema.optional(),
+  name: z.string().optional(),
+  description: z.string().optional(),
+});
+
 export const create = adminOrApiKeyProtectedProcedure
-  .input(
-    z.object({
-      id: z.string().optional(),
-      name: z.string().optional(),
-      description: z.string().optional(),
-    })
-  )
+  .input(input)
   .mutation(async ({ input, ctx }) => {
     const createdSecret = await ctx.prisma.secret.create({
       data: {

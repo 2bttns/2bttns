@@ -1,12 +1,13 @@
 import { z } from "zod";
+import { idSchema } from "../../../shared/z";
 import { adminOrApiKeyProtectedProcedure } from "../../trpc";
 
+const input = z.object({
+  id: idSchema,
+});
+
 export const deleteById = adminOrApiKeyProtectedProcedure
-  .input(
-    z.object({
-      id: z.string(),
-    })
-  )
+  .input(input)
   .mutation(async ({ ctx, input }) => {
     const deletedGame = await ctx.prisma.game.delete({
       where: {

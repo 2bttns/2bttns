@@ -1,5 +1,5 @@
 import { Box, HStack, StackProps } from "@chakra-ui/react";
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { tagFilter } from "../../../server/shared/z";
 import { api, RouterInputs, RouterOutputs } from "../../../utils/api";
 import ConstrainToRemainingSpace, {
@@ -10,6 +10,7 @@ import PaginatedTable, {
   PaginatedTableProps,
 } from "../../shared/components/Table/containers/PaginatedTable";
 import SearchAndCreateBar from "../../shared/components/Table/containers/SearchAndCreateBar";
+import useDebouncedValue from "../../shared/components/Table/hooks/useDebouncedValue";
 import usePagination from "../../shared/components/Table/hooks/usePagination";
 import useSelectRows from "../../shared/components/Table/hooks/useSelectRows";
 import useSort from "../../shared/components/Table/hooks/useSort";
@@ -47,18 +48,18 @@ export default function GamesTable(props: GamesTableProps) {
   const { getSortOrder: getSort, handleSort } = useSort<GameData>();
 
   const utils = api.useContext();
-  const [globalFilter, setGlobalFilter] = useState("");
+  const globalFilter = useDebouncedValue();
 
   const gamesQuery = api.games.getAll.useQuery(
     {
       includeTags: true,
       skip: (currentPage! - 1) * perPage,
       take: perPage,
-      filter: globalFilter
+      filter: globalFilter.debouncedInput
         ? {
             mode: "OR",
-            id: { contains: globalFilter },
-            name: { contains: globalFilter },
+            id: { contains: globalFilter.debouncedInput },
+            name: { contains: globalFilter.debouncedInput },
             tag,
           }
         : {
@@ -82,11 +83,11 @@ export default function GamesTable(props: GamesTableProps) {
 
   const gamesCountQuery = api.games.getCount.useQuery(
     {
-      filter: globalFilter
+      filter: globalFilter.debouncedInput
         ? {
             mode: "OR",
-            id: { contains: globalFilter },
-            name: { contains: globalFilter },
+            id: { contains: globalFilter.debouncedInput },
+            name: { contains: globalFilter.debouncedInput },
             tag,
           }
         : {
@@ -218,7 +219,7 @@ export default function GamesTable(props: GamesTableProps) {
   const { selectedRows, handleSelectedRowsChange, toggleCleared } =
     useSelectRows<GameData>({
       clearRowsUponChangeDependencies: [
-        globalFilter,
+        globalFilter.debouncedInput,
         tag,
         perPage,
         currentPage,
@@ -229,8 +230,8 @@ export default function GamesTable(props: GamesTableProps) {
     <Box>
       <HStack spacing="4px" marginBottom="4px" width="100%" {...topBarProps}>
         <SearchAndCreateBar
-          value={globalFilter}
-          onChange={setGlobalFilter}
+          value={globalFilter.input}
+          onChange={globalFilter.setInput}
           onCreate={allowCreate ? handleCreateGame : undefined}
         />
         {additionalTopBarContent && additionalTopBarContent(selectedRows)}

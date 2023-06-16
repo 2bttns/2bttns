@@ -1,7 +1,52 @@
 import { PrismaClient } from "@prisma/client";
+import fs from "fs";
+import path from "path";
+import { z } from "zod";
 import { defaultMode } from "../src/modes/availableModes";
+import { logger } from "../src/server/helpers/logger";
 const prisma = new PrismaClient();
 async function main() {
+  // Seed initial admin allow list using adminAllowList.json
+  // const adminAllowList = fs.readFileSync(path.resolve(process.cwd(), '')
+  const pathToAdminAllowList = path.resolve(
+    process.cwd(),
+    "adminAllowList.json"
+  );
+  if (fs.existsSync(pathToAdminAllowList)) {
+    const file = fs.readFileSync(pathToAdminAllowList, "utf8");
+    const data = JSON.parse(file) as unknown;
+    const allowedAdmins = z.array(z.string()).parse(data);
+    logger.info(
+      `[Admin Allow List] Found ${allowedAdmins.length} admin emails in adminAllowList.json`
+    );
+
+    const createAdmins = allowedAdmins.map((email) => {
+      return new Promise<void>((resolve) => {
+        prisma.allowedAdmin
+          .create({
+            data: {
+              email,
+            },
+          })
+          .then((result) => {
+            logger.info(
+              `[Admin Allow List] Admin email added: ${result.email}`
+            );
+          })
+          .catch(() => {
+            logger.warn(
+              `[Admin Allow List] Admin email already exists: ${email}; skipping.`
+            );
+          })
+          .finally(() => {
+            resolve();
+          });
+      });
+    });
+    await Promise.all(createAdmins);
+  }
+
+  // Demo seed data -- example secret, weights, game objects, tags, and games
   try {
     const secret = await prisma.secret.create({
       data: {

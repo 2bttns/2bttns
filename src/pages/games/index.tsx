@@ -1,4 +1,4 @@
-import { Box, ButtonGroup } from "@chakra-ui/react";
+import { Box, ButtonGroup, Divider } from "@chakra-ui/react";
 import { GetServerSideProps, NextPage } from "next";
 import { Session } from "next-auth";
 import Head from "next/head";
@@ -8,11 +8,13 @@ import GamesTable, {
 } from "../../features/games/containers/GamesTable";
 import ManageGameButton from "../../features/games/containers/ManageGameButton";
 import PlayGameButton from "../../features/games/containers/PlayGameButton";
+import ExportAllGamesJSON from "../../features/games/containers/TableActionsMenu/ExportAllGamesJSON";
+import ExportSelectedGamesJSON from "../../features/games/containers/TableActionsMenu/ExportSelectedGamesJSON";
 import useDeleteGames from "../../features/games/hooks/useDeleteGames";
 import { AdditionalColumns } from "../../features/shared/components/Table/containers/PaginatedTable";
-import TableActionMenu, {
-  TableActionsMenuItemDelete,
-} from "../../features/shared/components/Table/containers/TableActionsMenu";
+import TableActionMenu from "../../features/shared/components/Table/containers/TableActionsMenu";
+import TableActionsMenuItemDelete from "../../features/shared/components/Table/containers/TableActionsMenu/TableActionsMenuItemDelete";
+import TableActionsMenuItemImportJSON from "../../features/shared/components/Table/containers/TableActionsMenu/TableActionsMenuItemImportJSON";
 import getSessionWithSignInRedirect from "../../utils/getSessionWithSignInRedirect";
 
 export type GamesPageProps = {
@@ -70,6 +72,10 @@ function AdditionalTopBarContent(props: AdditionalTopBarContentProps) {
         selectedRows={selectedRows}
         actionItems={(context) => (
           <>
+            <ExportSelectedGamesJSON context={context} />
+            <ExportAllGamesJSON context={context} />
+            <TableActionsMenuItemImportJSON context={context} />
+            <Divider />
             <TableActionsMenuItemDelete
               context={context}
               handleDelete={async () => {

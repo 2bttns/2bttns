@@ -9,7 +9,7 @@ import { PaginatedTableProps } from "../containers/PaginatedTable";
  * Re-usable sort hook for use by the custom PaginatedTable component
  * Only supports sorting by a single column at a time; does not support multi-column sorting (for now)
  */
-export default function useSort<T extends Object = any>() {
+export default function useSort<T extends object = any>() {
   const [sorting, setSorting] = useState<{
     sortField: keyof T;
     order: "asc" | "desc";

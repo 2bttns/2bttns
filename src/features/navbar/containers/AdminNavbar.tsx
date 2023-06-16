@@ -47,7 +47,7 @@ function AdminLoginLogout() {
               {session.data.user?.email ?? "MISSING_EMAIL"}
             </Text>
           </Text>
-          <ChakraLink onClick={() => signOut({ callbackUrl: "/" })}>
+          <ChakraLink onClick={() => signOut({ callbackUrl: "/auth/signIn" })}>
             <Text>Log out</Text>
           </ChakraLink>
         </VStack>

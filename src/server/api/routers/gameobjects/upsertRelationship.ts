@@ -1,15 +1,16 @@
 import { z } from "zod";
+import { idSchema } from "../../../shared/z";
 import { adminOrApiKeyProtectedProcedure } from "../../trpc";
+
+const input = z.object({
+  gameObjectId1: idSchema,
+  gameObjectId2: idSchema,
+  weightId: idSchema,
+});
 
 // Creates/updates a relationship in both directions, meaning two records are created/updated.
 export const upsertRelationship = adminOrApiKeyProtectedProcedure
-  .input(
-    z.object({
-      gameObjectId1: z.string(),
-      gameObjectId2: z.string(),
-      weightId: z.string(),
-    })
-  )
+  .input(input)
   .mutation(async ({ ctx, input }) => {
     await ctx.prisma.weight.findFirstOrThrow({
       where: {

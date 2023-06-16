@@ -1,5 +1,5 @@
 import { Box, HStack, StackProps } from "@chakra-ui/react";
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { api, RouterInputs, RouterOutputs } from "../../../utils/api";
 import ConstrainToRemainingSpace, {
   ConstrainToRemainingSpaceProps,
@@ -9,6 +9,7 @@ import PaginatedTable, {
   PaginatedTableProps,
 } from "../../shared/components/Table/containers/PaginatedTable";
 import SearchAndCreateBar from "../../shared/components/Table/containers/SearchAndCreateBar";
+import useDebouncedValue from "../../shared/components/Table/hooks/useDebouncedValue";
 import usePagination from "../../shared/components/Table/hooks/usePagination";
 import useSelectRows from "../../shared/components/Table/hooks/useSelectRows";
 import useSort from "../../shared/components/Table/hooks/useSort";
@@ -41,17 +42,17 @@ export default function SecretsTable(props: SecretsTableProps) {
   const { getSortOrder: getSort, handleSort } = useSort<SecretData>();
 
   const utils = api.useContext();
-  const [globalFilter, setGlobalFilter] = useState("");
+  const globalFilter = useDebouncedValue();
 
   const secretsQuery = api.secrets.getAll.useQuery(
     {
       skip: (currentPage! - 1) * perPage,
       take: perPage,
-      filter: globalFilter
+      filter: globalFilter.debouncedInput
         ? {
             mode: "OR",
-            id: { contains: globalFilter },
-            name: { contains: globalFilter },
+            id: { contains: globalFilter.debouncedInput },
+            name: { contains: globalFilter.debouncedInput },
           }
         : undefined,
       sort: {
@@ -71,11 +72,11 @@ export default function SecretsTable(props: SecretsTableProps) {
 
   const secretsCountQuery = api.secrets.getCount.useQuery(
     {
-      filter: globalFilter
+      filter: globalFilter.debouncedInput
         ? {
             mode: "OR",
-            id: { contains: globalFilter },
-            name: { contains: globalFilter },
+            id: { contains: globalFilter.debouncedInput },
+            name: { contains: globalFilter.debouncedInput },
           }
         : undefined,
     },
@@ -188,15 +189,19 @@ export default function SecretsTable(props: SecretsTableProps) {
 
   const { selectedRows, handleSelectedRowsChange, toggleCleared } =
     useSelectRows<SecretData>({
-      clearRowsUponChangeDependencies: [globalFilter, perPage, currentPage],
+      clearRowsUponChangeDependencies: [
+        globalFilter.debouncedInput,
+        perPage,
+        currentPage,
+      ],
     });
 
   return (
     <Box>
       <HStack spacing="4px" marginBottom="4px" width="100%" {...topBarProps}>
         <SearchAndCreateBar
-          value={globalFilter}
-          onChange={setGlobalFilter}
+          value={globalFilter.input}
+          onChange={globalFilter.setInput}
           onCreate={(name) => handleCreateSecret(name)}
         />
         {additionalTopBarContent && additionalTopBarContent(selectedRows)}

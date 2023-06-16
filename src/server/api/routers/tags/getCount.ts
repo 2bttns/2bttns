@@ -1,16 +1,15 @@
 import { z } from "zod";
+import { commaSeparatedStringToArray } from "../../../shared/z";
 import { OPENAPI_TAGS } from "../../openapi/openApiTags";
 import { adminOrApiKeyProtectedProcedure } from "../../trpc";
 
 const input = z
   .object({
-    idFilter: z
-      .string()
-      .describe("Tag ID to filter by. Can be used with other filters.")
+    idFilter: commaSeparatedStringToArray
+      .describe("Comma-separated tag IDs to filter by")
       .optional(),
-    nameFilter: z
-      .string()
-      .describe("Tag name to filter by. Can be used with other filters.")
+    nameFilter: commaSeparatedStringToArray
+      .describe("Comma-separated tag names to filter by")
       .optional(),
   })
   .optional();
@@ -39,8 +38,11 @@ export const getCount = adminOrApiKeyProtectedProcedure
         OR:
           input?.idFilter || input?.nameFilter
             ? [
-                { id: { contains: input?.idFilter } },
-                { name: { contains: input?.nameFilter } },
+                ...(input?.idFilter?.map((id) => ({ id: { contains: id } })) ||
+                  []),
+                ...(input?.nameFilter?.map((name) => ({
+                  name: { contains: name },
+                })) || []),
               ]
             : undefined,
       },

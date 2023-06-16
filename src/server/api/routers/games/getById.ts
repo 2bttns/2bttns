@@ -1,13 +1,14 @@
 import { z } from "zod";
+import { idSchema } from "../../../shared/z";
 import { adminOrApiKeyProtectedProcedure } from "../../trpc";
 
+const input = z.object({
+  id: idSchema,
+  includeGameObjects: z.boolean().optional(),
+});
+
 export const getById = adminOrApiKeyProtectedProcedure
-  .input(
-    z.object({
-      id: z.string(),
-      includeGameObjects: z.boolean().optional(),
-    })
-  )
+  .input(input)
   .query(async ({ ctx, input }) => {
     const game = await ctx.prisma.game.findFirst({
       where: {

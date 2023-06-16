@@ -1,19 +1,20 @@
 import { z } from "zod";
+import { idSchema } from "../../../shared/z";
 import { adminOrApiKeyProtectedProcedure } from "../../trpc";
 
+const input = z.object({
+  id: idSchema,
+  data: z.object({
+    id: idSchema.optional(),
+    name: z.string().optional(),
+    description: z.string().optional(),
+    addGameObjects: z.array(z.string()).optional(),
+    removeGameObjects: z.array(z.string()).optional(),
+  }),
+});
+
 export const updateById = adminOrApiKeyProtectedProcedure
-  .input(
-    z.object({
-      id: z.string(),
-      data: z.object({
-        id: z.string().optional(),
-        name: z.string().optional(),
-        description: z.string().optional(),
-        addGameObjects: z.array(z.string()).optional(),
-        removeGameObjects: z.array(z.string()).optional(),
-      }),
-    })
-  )
+  .input(input)
   .mutation(async ({ ctx, input }) => {
     const updatedTag = await ctx.prisma.tag.update({
       where: {

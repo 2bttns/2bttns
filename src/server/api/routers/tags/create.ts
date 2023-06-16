@@ -1,9 +1,10 @@
 import { z } from "zod";
+import { idSchema } from "../../../shared/z";
 import { OPENAPI_TAGS } from "../../openapi/openApiTags";
 import { adminOrApiKeyProtectedProcedure } from "../../trpc";
 
 const input = z.object({
-  id: z.string().optional(),
+  id: idSchema.optional(),
   name: z.string(),
   description: z.string().optional(),
 });

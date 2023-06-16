@@ -2,7 +2,7 @@ import { DeleteIcon } from "@chakra-ui/icons";
 import { IconButton, Tooltip, useDisclosure } from "@chakra-ui/react";
 import { Game } from "@prisma/client";
 import { api } from "../../../utils/api";
-import { ConfirmAlert } from "../../shared/components/ConfirmAlert";
+import ConfirmAlert from "../../shared/components/ConfirmAlert";
 
 export type DeleteGameButtonProps = {
   gameId: Game["id"];

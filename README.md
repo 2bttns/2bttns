@@ -93,13 +93,33 @@ For local development, when configuring the OAuth app, set the homepage URL to `
 
 ### Admin Allow List
 
-Users who are not in the admin allow list and attempt to log in will see an "Access Denied" error.
+Users who are not in the 2bttns-managed `AllowedAdmin` database table and attempt to log in to the admin panel will be denied access.
 
-To configure the admin allow list...
+### Initial Admin Users
+
+The 2bttns app uses an `adminAllowList.json` file to populate the `AllowedAdmin` table with a list of emails associated with GitHub accounts allowed to log in to the admin app.
+
+To configure the initial admin allow list...
 
 1. Copy the `adminAllowList.json.example` file to a new `adminAllowList.json` file, if it doesn't already exist.
 
 2. Add the emails associated with the GitHub accounts you want to grant access to.
+
+Now, whenever you seed the database (e.g. `npm run db-seed:dev`), the `AllowedAdmin` table will be updated with the emails in the `adminAllowList.json` file.
+
+### Adding Admin Users
+
+Once you have the initial admin users set up, you can add more admin users in the following ways:
+
+#### via Prisma Studio or a Database Client
+
+You can manually add allowed admin emails to the `AllowedAdmin` table via the Prisma Studio UI (`npx prisma studio`) or manually through another database client of your choice.
+
+### via the 2bttns Admin Panel
+
+@TODO
+
+When logged in as an admin user, you can add more admin users via the 2bttns Admin Panel at the `Settings > Admin Users` page.
 
 ### Next Auth Secret
 

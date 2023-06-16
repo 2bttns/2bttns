@@ -1,7 +1,12 @@
 import { TRPCError } from "@trpc/server";
 import { output, z } from "zod";
+import { idSchema } from "../../../shared/z";
 import { OPENAPI_TAGS } from "../../openapi/openApiTags";
 import { adminOrApiKeyProtectedProcedure } from "../../trpc";
+
+const input = z.object({
+  id: idSchema,
+});
 
 const output = z.object({
   player: z.object({
@@ -23,11 +28,7 @@ export const getById = adminOrApiKeyProtectedProcedure
       protect: true,
     },
   })
-  .input(
-    z.object({
-      id: z.string(),
-    })
-  )
+  .input(input)
   .output(output)
   .query(async ({ input, ctx }) => {
     try {
@@ -36,7 +37,7 @@ export const getById = adminOrApiKeyProtectedProcedure
           id: input.id,
         },
       });
-      const processedPlayer: typeof output._type["player"] = {
+      const processedPlayer: (typeof output._type)["player"] = {
         ...player,
         createdAt: player.createdAt.toISOString(),
         updatedAt: player.updatedAt.toISOString(),

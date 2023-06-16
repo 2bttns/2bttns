@@ -1,6 +1,9 @@
 import { Box, HStack, StackProps } from "@chakra-ui/react";
-import { useMemo, useState } from "react";
-import { tagFilter } from "../../../server/shared/z";
+import { Tag } from "@prisma/client";
+import { useMemo } from "react";
+import { z } from "zod";
+import { OutputTag } from "../../../server/api/routers/gameobjects/getAll";
+import { untaggedFilterEnum } from "../../../server/shared/z";
 import { api, RouterInputs, RouterOutputs } from "../../../utils/api";
 import ConstrainToRemainingSpace, {
   ConstrainToRemainingSpaceProps,
@@ -10,6 +13,7 @@ import PaginatedTable, {
   PaginatedTableProps,
 } from "../../shared/components/Table/containers/PaginatedTable";
 import SearchAndCreateBar from "../../shared/components/Table/containers/SearchAndCreateBar";
+import useDebouncedValue from "../../shared/components/Table/hooks/useDebouncedValue";
 import usePagination from "../../shared/components/Table/hooks/usePagination";
 import useSelectRows from "../../shared/components/Table/hooks/useSelectRows";
 import useSort from "../../shared/components/Table/hooks/useSort";
@@ -19,7 +23,11 @@ export type GameObjectData =
   RouterOutputs["gameObjects"]["getAll"]["gameObjects"][0];
 
 export type GameObjectsTableProps = {
-  tag?: typeof tagFilter._type;
+  tag?: {
+    include: Tag["id"][];
+    exclude: Tag["id"][];
+    untaggedFilter: z.infer<typeof untaggedFilterEnum>;
+  };
   onGameObjectCreated?: (gameObjectId: string) => Promise<void>;
   additionalColumns?: PaginatedTableProps<GameObjectData>["additionalColumns"];
   gameObjectsToExclude?: GameObjectData["id"][];
@@ -45,60 +53,58 @@ export default function GameObjectsTable(props: GameObjectsTableProps) {
 
   const { perPage, currentPage, handlePageChange, handlePerRowsChange } =
     usePagination();
-  const { getSortOrder: getSort, handleSort } = useSort<GameObjectData>();
+  const { sorting, handleSort } = useSort<GameObjectData>();
 
   const utils = api.useContext();
-  const [globalFilter, setGlobalFilter] = useState("");
+  const globalFilter = useDebouncedValue();
 
   const gameObjectsQuery = api.gameObjects.getAll.useQuery(
     {
-      includeTags: true,
       skip: (currentPage! - 1) * perPage,
       take: perPage,
-      filter: globalFilter
-        ? {
-            mode: "OR",
-            id: { contains: globalFilter },
-            name: { contains: globalFilter },
-            tag,
-          }
-        : {
-            tag,
-          },
-      sort: {
-        id: getSort("id"),
-        name: getSort("name"),
-        description: getSort("description"),
-        tags: getSort("tags"),
-        updatedAt: getSort("updatedAt"),
-      },
-      excludeGameObjects: gameObjectsToExclude,
+      idFilter: globalFilter.debouncedInput,
+      nameFilter: globalFilter.debouncedInput,
+      tagFilter: tag?.include.join(","),
+      tagExcludeFilter: tag?.exclude.join(","),
+      untaggedFilter: tag?.untaggedFilter,
+      sortField: sorting?.sortField,
+      sortOrder: sorting?.order,
+      excludeGameObjects: gameObjectsToExclude?.join(","),
+      includeTagData: true,
     },
     {
       enabled: currentPage !== null,
       keepPreviousData: true,
       refetchOnWindowFocus: false,
+      retry: false,
     }
   );
-  const data: GameObjectData[] = gameObjectsQuery.data?.gameObjects ?? [];
+  const gameObjects: GameObjectData[] =
+    gameObjectsQuery.data?.gameObjects ?? [];
+
+  const tagDataById = useMemo(() => {
+    if (gameObjectsQuery.isLoading || !gameObjectsQuery.data?.tags) return null;
+
+    const map = new Map<string, OutputTag>();
+    gameObjectsQuery.data?.tags?.forEach((tag) => {
+      map.set(tag.id, tag);
+    });
+    return map;
+  }, [gameObjectsQuery]);
 
   const gameObjectsCountQuery = api.gameObjects.getCount.useQuery(
     {
-      filter: globalFilter
-        ? {
-            mode: "OR",
-            id: { contains: globalFilter },
-            name: { contains: globalFilter },
-            tag,
-          }
-        : {
-            tag,
-          },
-      excludeGameObjects: gameObjectsToExclude,
+      idFilter: globalFilter.debouncedInput,
+      nameFilter: globalFilter.debouncedInput,
+      tagFilter: tag?.include.join(","),
+      tagExcludeFilter: tag?.exclude.join(","),
+      untaggedFilter: tag?.untaggedFilter,
+      excludeGameObjects: gameObjectsToExclude?.join(",") || undefined,
     },
     {
       keepPreviousData: true,
       refetchOnWindowFocus: false,
+      retry: false,
     }
   );
 
@@ -195,9 +201,16 @@ export default function GameObjectsTable(props: GameObjectsTableProps) {
         cell: (row) => {
           return (
             <TagBadges
-              selectedTags={row.tags.map((t) => {
-                return { id: t.id, name: t.name };
-              })}
+              selectedTags={row.tags
+                .filter((tagId) => {
+                  return tagDataById?.get(tagId)?.name !== undefined;
+                })
+                .map((tagId) => {
+                  return {
+                    id: tagId,
+                    name: tagDataById!.get(tagId)!.name,
+                  };
+                })}
             />
           );
         },
@@ -213,12 +226,12 @@ export default function GameObjectsTable(props: GameObjectsTableProps) {
         minWidth: "256px",
       },
     ];
-  }, [editable]);
+  }, [editable, tagDataById]);
 
   const { selectedRows, handleSelectedRowsChange, toggleCleared } =
     useSelectRows<GameObjectData>({
       clearRowsUponChangeDependencies: [
-        globalFilter,
+        globalFilter.debouncedInput,
         tag,
         perPage,
         currentPage,
@@ -229,8 +242,8 @@ export default function GameObjectsTable(props: GameObjectsTableProps) {
     <Box>
       <HStack spacing="4px" marginBottom="4px" width="100%" {...topBarProps}>
         <SearchAndCreateBar
-          value={globalFilter}
-          onChange={setGlobalFilter}
+          value={globalFilter.input}
+          onChange={globalFilter.setInput}
           onCreate={allowCreate ? handleCreateGameObject : undefined}
         />
         {additionalTopBarContent && additionalTopBarContent(selectedRows)}
@@ -241,7 +254,7 @@ export default function GameObjectsTable(props: GameObjectsTableProps) {
             <PaginatedTable<GameObjectData>
               additionalColumns={additionalColumns}
               columns={columns}
-              data={data}
+              data={gameObjects}
               fixedHeight={remainingHeight}
               itemIdField="id"
               loading={gameObjectsQuery.isLoading}

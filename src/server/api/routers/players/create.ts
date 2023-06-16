@@ -1,10 +1,16 @@
 import { z } from "zod";
+import { idSchema } from "../../../shared/z";
 import { OPENAPI_TAGS } from "../../openapi/openApiTags";
 import { adminOrApiKeyProtectedProcedure } from "../../trpc";
 
+const input = z.object({
+  id: idSchema,
+  name: z.string().optional(),
+});
+
 const output = z.object({
   createdPlayer: z.object({
-    id: z.string(),
+    id: idSchema,
     name: z.string().nullable().optional(),
     createdAt: z.string().describe("ISO date string"),
     updatedAt: z.string().describe("ISO date string"),
@@ -23,12 +29,7 @@ export const create = adminOrApiKeyProtectedProcedure
       protect: true,
     },
   })
-  .input(
-    z.object({
-      id: z.string(),
-      name: z.string().optional(),
-    })
-  )
+  .input(input)
   .output(output)
   .mutation(async ({ input, ctx }) => {
     const createdPlayer = await ctx.prisma.player.create({
@@ -38,7 +39,7 @@ export const create = adminOrApiKeyProtectedProcedure
       },
     });
 
-    const processedCreatedPlayer: typeof output._type["createdPlayer"] = {
+    const processedCreatedPlayer: (typeof output._type)["createdPlayer"] = {
       ...createdPlayer,
       createdAt: createdPlayer.createdAt.toISOString(),
       updatedAt: createdPlayer.updatedAt.toISOString(),

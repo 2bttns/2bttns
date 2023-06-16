@@ -2,6 +2,10 @@ import { z } from "zod";
 import { OPENAPI_TAGS } from "../../openapi/openApiTags";
 import { adminOrApiKeyProtectedProcedure } from "../../trpc";
 
+const output = z.object({
+  count: z.number(),
+});
+
 export const getCount = adminOrApiKeyProtectedProcedure
   .meta({
     openapi: {
@@ -14,11 +18,7 @@ export const getCount = adminOrApiKeyProtectedProcedure
     },
   })
   .input(z.void())
-  .output(
-    z.object({
-      count: z.number(),
-    })
-  )
+  .output(output)
   .query(async ({ input, ctx }) => {
     const count = await ctx.prisma.player.count();
 

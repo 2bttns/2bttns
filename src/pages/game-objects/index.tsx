@@ -1,4 +1,4 @@
-import { Box, ButtonGroup } from "@chakra-ui/react";
+import { Box, ButtonGroup, Divider } from "@chakra-ui/react";
 import type { GetServerSideProps } from "next";
 import { Session } from "next-auth";
 import Head from "next/head";
@@ -7,12 +7,13 @@ import GameObjectsTable, {
   GameObjectData,
 } from "../../features/gameobjects/containers/GameObjectsTable";
 import ManageGameObjectButton from "../../features/gameobjects/containers/ManageGameObjectButton";
-import useDeleteGameObjects from "../../features/gameobjects/hooks/useDeleteGameObjects";
+import DeleteSelectedGameObjects from "../../features/gameobjects/containers/TableActionsMenu/DeleteSelectedGameObjects";
+import ExportAllGameObjectsJSON from "../../features/gameobjects/containers/TableActionsMenu/ExportAllGameObjectsJSON";
+import ExportSelectedGameObjectsJSON from "../../features/gameobjects/containers/TableActionsMenu/ExportSelectedGameObjectsJSON";
 import { AdditionalColumns } from "../../features/shared/components/Table/containers/PaginatedTable";
-import TableActionsMenu, {
-  TableActionsMenuItemBulkTag,
-  TableActionsMenuItemDelete,
-} from "../../features/shared/components/Table/containers/TableActionsMenu";
+import TableActionsMenu from "../../features/shared/components/Table/containers/TableActionsMenu";
+import TableActionsMenuItemBulkTag from "../../features/shared/components/Table/containers/TableActionsMenu/TableActionsMenuItemBulkTag";
+import TableActionsMenuItemImportJSON from "../../features/shared/components/Table/containers/TableActionsMenu/TableActionsMenuItemImportJSON";
 import { EditTagsForGameObjectsButtonDrawer } from "../../features/tags/containers/EditTagsForGameObjectsButtonDrawer";
 import { SelectTagFiltersDrawerButton } from "../../features/tags/containers/SelectTagFiltersDrawerButton";
 import useAllTagFilters from "../../features/tags/hooks/useAllTagFilters";
@@ -54,7 +55,7 @@ const GameObjects: NextPageWithLayout<GameObjectsPageProps> = (props) => {
           tag={{
             include: tagFilter.results.includeTags,
             exclude: tagFilter.results.excludeTags,
-            includeUntagged: tagFilter.results.includeUntagged,
+            untaggedFilter: tagFilter.results.untaggedFilter,
           }}
           additionalTopBarContent={(selectedRows) => (
             <AdditionalTopBarContent
@@ -76,25 +77,34 @@ type AdditionalTopBarContentProps = {
 
 function AdditionalTopBarContent(props: AdditionalTopBarContentProps) {
   const { selectedRows, tagFilter } = props;
-  const { handleDeleteGameObjects } = useDeleteGameObjects();
 
   return (
     <>
       <ButtonGroup>
-        {/* <CsvImport />- @TODO: Move to Menu */}
         <TableActionsMenu
           selectedRows={selectedRows}
           actionItems={(context) => (
             <>
               <TableActionsMenuItemBulkTag context={context} />
-              <TableActionsMenuItemDelete
+              <Divider />
+              {/* MAJOR TODO: determine import/export format for all 2bttns data structures
+                e.g. Export tags; but with a unified format so tags aren't duplicated for each exported item
+                e.g. {gameobjects: [...], tags:[...]}
+
+                Consider import order too. e.g. import tags first, then gameobjects, then relationships
+              */}
+              <ExportSelectedGameObjectsJSON context={context} />
+              <ExportAllGameObjectsJSON
                 context={context}
-                handleDelete={async () => {
-                  await handleDeleteGameObjects(
-                    context.selectedRows.map((row) => row.id)
-                  );
-                }}
+                filteredTags={tagFilter.results.includeTags}
+                filterAllowUntaggedGameObjects={
+                  tagFilter.results.untaggedFilter === "include" ||
+                  tagFilter.results.untaggedFilter === "untagged-only"
+                }
               />
+              <TableActionsMenuItemImportJSON context={context} />
+              <Divider />
+              <DeleteSelectedGameObjects context={context} />
             </>
           )}
         />

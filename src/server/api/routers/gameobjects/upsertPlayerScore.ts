@@ -1,16 +1,17 @@
 import { GameObjectRelationship, PlayerScore, Weight } from "@prisma/client";
 import { z } from "zod";
 import normalizeScores from "../../../shared/normalizeScores";
+import { idSchema } from "../../../shared/z";
 import { adminOrApiKeyProtectedProcedure } from "../../trpc";
 
+const input = z.object({
+  playerId: idSchema,
+  gameObjectId: idSchema,
+  score: z.number(),
+});
+
 export const upsertPlayerScore = adminOrApiKeyProtectedProcedure
-  .input(
-    z.object({
-      playerId: z.string(),
-      gameObjectId: z.string(),
-      score: z.number(),
-    })
-  )
+  .input(input)
   .mutation(async ({ ctx, input }) => {
     const player = await ctx.prisma.player.findUnique({
       where: {

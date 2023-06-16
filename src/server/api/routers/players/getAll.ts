@@ -2,6 +2,17 @@ import { z } from "zod";
 import { OPENAPI_TAGS } from "../../openapi/openApiTags";
 import { adminOrApiKeyProtectedProcedure } from "../../trpc";
 
+const output = z.object({
+  players: z.array(
+    z.object({
+      id: z.string(),
+      name: z.string().nullable().optional(),
+      createdAt: z.string().describe("ISO date string"),
+      updatedAt: z.string().describe("ISO date string"),
+    })
+  ),
+});
+
 export const getAll = adminOrApiKeyProtectedProcedure
   .meta({
     openapi: {
@@ -14,18 +25,7 @@ export const getAll = adminOrApiKeyProtectedProcedure
     },
   })
   .input(z.void())
-  .output(
-    z.object({
-      players: z.array(
-        z.object({
-          id: z.string(),
-          name: z.string().nullable().optional(),
-          createdAt: z.string().describe("ISO date string"),
-          updatedAt: z.string().describe("ISO date string"),
-        })
-      ),
-    })
-  )
+  .output(output)
   .query(async ({ input, ctx }) => {
     const players = await ctx.prisma.player.findMany();
 

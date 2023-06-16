@@ -4,6 +4,8 @@ import { prisma } from "../../../../src/server/db";
 import {
   clearDbsTest,
   createInnerTRPCContextWithSessionForTest,
+  createTestTags,
+  getAllTags,
 } from "./helpers";
 
 describe("tags router", () => {
@@ -54,7 +56,7 @@ describe("tags router", () => {
       const caller = appRouter.createCaller(ctx);
 
       const totalNumberOfTags = 101;
-      await createTags(totalNumberOfTags);
+      await createTestTags(totalNumberOfTags);
 
       const result = await caller.tags.getCount({});
       expect(result.count).toEqual(totalNumberOfTags);
@@ -65,7 +67,7 @@ describe("tags router", () => {
       const caller = appRouter.createCaller(ctx);
 
       const totalNumberOfTags = 101;
-      await createTags(totalNumberOfTags);
+      await createTestTags(totalNumberOfTags);
 
       const result = await caller.tags.getCount({ idFilter: "test-tag-id-0" });
       expect(result.count).toEqual(1);
@@ -78,7 +80,7 @@ describe("tags router", () => {
       const caller = appRouter.createCaller(ctx);
 
       const totalNumberOfTags = 101;
-      await createTags(totalNumberOfTags);
+      await createTestTags(totalNumberOfTags);
 
       const result = await caller.tags.getAll({});
       expect(result.tags).length(10);
@@ -89,7 +91,7 @@ describe("tags router", () => {
       const caller = appRouter.createCaller(ctx);
 
       const numberOfTags = 101;
-      await createTags(numberOfTags);
+      await createTestTags(numberOfTags);
 
       const result = await caller.tags.getAll({ take: numberOfTags });
       expect(result.tags).length(101);
@@ -105,7 +107,7 @@ describe("tags router", () => {
       const caller = appRouter.createCaller(ctx);
 
       const totalNumberOfTags = 101;
-      await createTags(totalNumberOfTags);
+      await createTestTags(totalNumberOfTags);
 
       const result = await caller.tags.getAll({
         idFilter: "test-tag-id-0",
@@ -123,7 +125,7 @@ describe("tags router", () => {
       const caller = appRouter.createCaller(ctx);
 
       const totalNumberOfTags = 101;
-      await createTags(totalNumberOfTags);
+      await createTestTags(totalNumberOfTags);
 
       const result = await caller.tags.getAll({
         sortField: "id",
@@ -146,7 +148,7 @@ describe("tags router", () => {
       const caller = appRouter.createCaller(ctx);
 
       const count = 10;
-      await createTags(count);
+      await createTestTags(count);
 
       const testTags = await getAllTags();
       const numToDelete = 5;
@@ -162,16 +164,3 @@ describe("tags router", () => {
     });
   });
 });
-
-async function createTags(count: number) {
-  return await prisma.tag.createMany({
-    data: Array.from({ length: count }).map((_, i) => ({
-      id: `test-tag-id-${i}`,
-      name: `test-tag-${i}`,
-    })),
-  });
-}
-
-async function getAllTags() {
-  return await prisma.tag.findMany();
-}

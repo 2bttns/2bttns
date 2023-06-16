@@ -16,24 +16,24 @@ import { Session } from "next-auth";
 import Head from "next/head";
 import { useRouter } from "next/router";
 import { useMemo, useState } from "react";
+import { z } from "zod";
 import GameObjectsTable, {
   GameObjectData,
   GameObjectsTableProps,
 } from "../../features/gameobjects/containers/GameObjectsTable";
 import ManageGameObjectButton from "../../features/gameobjects/containers/ManageGameObjectButton";
-import useDeleteGameObjects from "../../features/gameobjects/hooks/useDeleteGameObjects";
 import CustomEditable from "../../features/shared/components/CustomEditable";
 import { AdditionalColumns } from "../../features/shared/components/Table/containers/PaginatedTable";
-import TableActionMenu, {
-  TableActionsMenuItemDelete,
-} from "../../features/shared/components/Table/containers/TableActionsMenu";
+import TableActionMenu from "../../features/shared/components/Table/containers/TableActionsMenu";
 import DeleteTagButton from "../../features/tags/containers/DeleteTagButton";
 import {
   SelectTagFiltersDrawerButton,
   SelectTagFiltersDrawerButtonProps,
 } from "../../features/tags/containers/SelectTagFiltersDrawerButton";
+import ToggleTagForSelectedGameObjects from "../../features/tags/containers/TableActionsMenu/ToggleTagForSelectedGameObjects";
 import { TagFilter } from "../../features/tags/containers/TagFilterToggles";
 import ToggleTagButton from "../../features/tags/containers/ToggleTagButton";
+import { untaggedFilterEnum } from "../../server/shared/z";
 import { api, RouterInputs } from "../../utils/api";
 import getSessionWithSignInRedirect from "../../utils/getSessionWithSignInRedirect";
 
@@ -175,7 +175,7 @@ const TagByIdPage: NextPage<TagByIdPageProps> = (props) => {
           tag={{
             include: appliedTagFilters.outputs.includeTags,
             exclude: appliedTagFilters.outputs.excludeTags,
-            includeUntagged: appliedTagFilters.outputs.includeUntagged,
+            untaggedFilter: appliedTagFilters.outputs.untaggedFilter,
           }}
           onGameObjectCreated={handleGameObjectCreated}
           additionalTopBarContent={(selectedRows) => (
@@ -234,8 +234,6 @@ function useAppliedTagFilters(props: UseAppliedTagFiltersProps) {
     });
   }, [tagsQuery.data, tagFilter, tagId]);
 
-  const includeUntagged = tagFilter["Untagged"]!.on;
-
   const includeTags = useMemo(() => {
     return tagsToFilterGameObjectsBy?.map((tag) => tag.id) || [];
   }, [tagsToFilterGameObjectsBy]);
@@ -247,6 +245,18 @@ function useAppliedTagFilters(props: UseAppliedTagFiltersProps) {
     return [];
   }, [tagFilter]);
 
+  const untaggedFilter = useMemo<z.infer<typeof untaggedFilterEnum>>(() => {
+    if (!tagFilter["Untagged"]?.on) {
+      return "exclude";
+    }
+
+    if (includeTags.length === 0 && excludeTags.length === 0) {
+      return "untagged-only";
+    }
+
+    return "include";
+  }, [tagFilter, includeTags, excludeTags]);
+
   return {
     state: {
       tagFilter,
@@ -255,7 +265,7 @@ function useAppliedTagFilters(props: UseAppliedTagFiltersProps) {
     outputs: {
       includeTags,
       excludeTags,
-      includeUntagged,
+      untaggedFilter,
     },
   };
 }
@@ -268,7 +278,6 @@ type AdditionalTopBarContentProps = {
 };
 function AdditionalTopBarContent(props: AdditionalTopBarContentProps) {
   const { selectedGameObjectRows, tagId, tagFilter, setTagFilter } = props;
-  const { handleDeleteGameObjects } = useDeleteGameObjects();
 
   return (
     <>
@@ -277,13 +286,9 @@ function AdditionalTopBarContent(props: AdditionalTopBarContentProps) {
           selectedRows={selectedGameObjectRows}
           actionItems={(context) => (
             <>
-              <TableActionsMenuItemDelete
+              <ToggleTagForSelectedGameObjects
                 context={context}
-                handleDelete={async (selectedRows) => {
-                  await handleDeleteGameObjects(
-                    selectedRows.map((row) => row.id)
-                  );
-                }}
+                tagId={tagId}
               />
             </>
           )}

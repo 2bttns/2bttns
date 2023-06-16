@@ -7,31 +7,31 @@ import {
 } from "../../../shared/z";
 import { adminOrApiKeyProtectedProcedure } from "../../trpc";
 
-export const getAll = adminOrApiKeyProtectedProcedure
-  .input(
-    z
+const input = z
+  .object({
+    take: paginationTake,
+    skip: paginationSkip,
+    filter: z
       .object({
-        take: paginationTake,
-        skip: paginationSkip,
-        filter: z
-          .object({
-            mode: z.enum(["AND", "OR"]).optional(),
-            id: textFilter.optional(),
-            name: textFilter.optional(),
-          })
-          .optional(),
-        sort: z
-          .object({
-            id: sort.optional(),
-            name: sort.optional(),
-            description: sort.optional(),
-            secret: sort.optional(),
-            updatedAt: sort.optional(),
-          })
-          .optional(),
+        mode: z.enum(["AND", "OR"]).optional(),
+        id: textFilter.optional(),
+        name: textFilter.optional(),
       })
-      .optional()
-  )
+      .optional(),
+    sort: z
+      .object({
+        id: sort.optional(),
+        name: sort.optional(),
+        description: sort.optional(),
+        secret: sort.optional(),
+        updatedAt: sort.optional(),
+      })
+      .optional(),
+  })
+  .optional();
+
+export const getAll = adminOrApiKeyProtectedProcedure
+  .input(input)
   .query(async ({ ctx, input }) => {
     const secrets = await ctx.prisma.secret.findMany({
       take: input?.take,

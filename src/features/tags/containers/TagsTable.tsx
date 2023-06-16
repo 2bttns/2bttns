@@ -1,5 +1,5 @@
 import { Box, HStack, StackProps } from "@chakra-ui/react";
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { api, RouterInputs, RouterOutputs } from "../../../utils/api";
 import ConstrainToRemainingSpace, {
   ConstrainToRemainingSpaceProps,
@@ -8,7 +8,10 @@ import CustomEditable from "../../shared/components/CustomEditable";
 import PaginatedTable, {
   PaginatedTableProps,
 } from "../../shared/components/Table/containers/PaginatedTable";
-import SearchAndCreateBar from "../../shared/components/Table/containers/SearchAndCreateBar";
+import SearchAndCreateBar, {
+  SearchAndCreateBarProps,
+} from "../../shared/components/Table/containers/SearchAndCreateBar";
+import useDebouncedValue from "../../shared/components/Table/hooks/useDebouncedValue";
 import usePagination from "../../shared/components/Table/hooks/usePagination";
 import useSelectRows from "../../shared/components/Table/hooks/useSelectRows";
 import useSort from "../../shared/components/Table/hooks/useSort";
@@ -51,14 +54,14 @@ export default function TagsTable(props: TagsTableProps) {
   const { sorting, handleSort } = useSort<TagData>();
 
   const utils = api.useContext();
-  const [globalFilter, setGlobalFilter] = useState("");
+  const globalFilter = useDebouncedValue();
 
   const tagsQuery = api.tags.getAll.useQuery(
     {
       skip: (currentPage! - 1) * perPage,
       take: perPage,
-      idFilter: globalFilter,
-      nameFilter: globalFilter,
+      idFilter: globalFilter.debouncedInput,
+      nameFilter: globalFilter.debouncedInput,
       sortField: sorting?.sortField,
       sortOrder: sorting?.order,
     },
@@ -71,8 +74,8 @@ export default function TagsTable(props: TagsTableProps) {
 
   const tagsCountQuery = api.tags.getCount.useQuery(
     {
-      idFilter: globalFilter,
-      nameFilter: globalFilter,
+      idFilter: globalFilter.debouncedInput,
+      nameFilter: globalFilter.debouncedInput,
     },
     {
       keepPreviousData: true,
@@ -96,10 +99,12 @@ export default function TagsTable(props: TagsTableProps) {
   };
 
   const createTagMutation = api.tags.create.useMutation();
-  const handleCreateTag = async () => {
+  const handleCreateTag: SearchAndCreateBarProps["onCreate"] = async (
+    value
+  ) => {
     try {
       const result = await createTagMutation.mutateAsync({
-        name: globalFilter,
+        name: value,
       });
       if (onTagCreated) await onTagCreated(result.createdTag);
       await utils.tags.invalidate();
@@ -186,15 +191,19 @@ export default function TagsTable(props: TagsTableProps) {
 
   const { selectedRows, handleSelectedRowsChange, toggleCleared } =
     useSelectRows<TagData>({
-      clearRowsUponChangeDependencies: [globalFilter, perPage, currentPage],
+      clearRowsUponChangeDependencies: [
+        globalFilter.debouncedInput,
+        perPage,
+        currentPage,
+      ],
     });
 
   return (
     <Box>
       <HStack spacing="4px" marginBottom="4px" width="100%" {...topBarProps}>
         <SearchAndCreateBar
-          value={globalFilter}
-          onChange={setGlobalFilter}
+          value={globalFilter.input}
+          onChange={globalFilter.setInput}
           onCreate={allowCreate ? handleCreateTag : undefined}
         />
         {additionalTopBarContent && additionalTopBarContent(selectedRows)}

@@ -1,8 +1,18 @@
 import { GameObject, PlayerScore } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
+import { booleanEnum } from "../../../shared/z";
 import { OPENAPI_TAGS } from "../../openapi/openApiTags";
 import { anyAuthProtectedProcedure } from "../../trpc";
+import { idSchema } from "./../../../shared/z";
+
+const input = z.object({
+  game_id: idSchema.describe("The game id to get scores for"),
+  player_id: idSchema.describe("The player id to get scores for"),
+  include_game_objects: booleanEnum.describe(
+    "Whether to include game objects in the response"
+  ),
+});
 
 const output = z.object({
   playerScores: z.array(
@@ -36,20 +46,7 @@ export const getPlayerScores = anyAuthProtectedProcedure
       protect: true,
     },
   })
-  .input(
-    z.object({
-      game_id: z.string().describe("The game id to get scores for"),
-      player_id: z.string().describe("The player id to get scores for"),
-      include_game_objects: z
-        // For some reason, z.boolean() doesn't work here when setting this via the swagger docs UI; everything registered as true
-        // Hence, we use z.string() and then preprocess it to a boolean
-        .preprocess((value) => {
-          return value === "true";
-        }, z.boolean())
-        .default(false)
-        .describe("Whether to include game objects in the response"),
-    })
-  )
+  .input(input)
   .output(output)
   .query(async ({ ctx, input }) => {
     if (ctx.authData.type === "player_token") {
@@ -100,7 +97,7 @@ export const getPlayerScores = anyAuthProtectedProcedure
       },
     });
 
-    const outputData: typeof output._type["playerScores"] = playerScores.map(
+    const outputData: (typeof output._type)["playerScores"] = playerScores.map(
       (playerScore) => {
         return {
           ...playerScore,
