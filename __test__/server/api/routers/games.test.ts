@@ -25,7 +25,7 @@ describe("games router", () => {
   });
 
   test("games.create", async () => {
-    const ctx = createInnerTRPCContextWithSessionForTest();
+    const ctx = await createInnerTRPCContextWithSessionForTest();
     const caller = appRouter.createCaller(ctx);
 
     type Input = inferProcedureInput<AppRouter["games"]["create"]>;
@@ -45,7 +45,7 @@ describe("games router", () => {
 
   describe("games.getAll", () => {
     test("default limit 10", async () => {
-      const ctx = createInnerTRPCContextWithSessionForTest();
+      const ctx = await createInnerTRPCContextWithSessionForTest();
       const caller = appRouter.createCaller(ctx);
 
       const numberOfGames = 101;
@@ -59,7 +59,7 @@ describe("games router", () => {
     });
 
     test("sort by name", async () => {
-      const ctx = createInnerTRPCContextWithSessionForTest();
+      const ctx = await createInnerTRPCContextWithSessionForTest();
       const caller = appRouter.createCaller(ctx);
 
       const numberOfGames = 101;
@@ -149,7 +149,7 @@ describe("games router", () => {
     };
 
     test("getPlayerScores with gameobjects (admin session)", async () => {
-      const ctx = createInnerTRPCContextWithSessionForTest();
+      const ctx = await createInnerTRPCContextWithSessionForTest();
       const caller = appRouter.createCaller(ctx);
 
       type Input = inferProcedureInput<AppRouter["games"]["getPlayerScores"]>;
@@ -187,7 +187,7 @@ describe("games router", () => {
     });
 
     test("getPlayerScores without gameobjects (admin session)", async () => {
-      const ctx = createInnerTRPCContextWithSessionForTest();
+      const ctx = await createInnerTRPCContextWithSessionForTest();
       const caller = appRouter.createCaller(ctx);
 
       type Input = inferProcedureInput<AppRouter["games"]["getPlayerScores"]>;
@@ -265,7 +265,7 @@ describe("games router", () => {
 
   describe("games.delete", () => {
     test("delete many", async () => {
-      const ctx = createInnerTRPCContextWithSessionForTest();
+      const ctx = await createInnerTRPCContextWithSessionForTest();
       const caller = appRouter.createCaller(ctx);
 
       const count = 10;

@@ -19,7 +19,7 @@ describe("tags router", () => {
 
   describe("tags.create", () => {
     test("create tag using name only", async () => {
-      const ctx = createInnerTRPCContextWithSessionForTest();
+      const ctx = await createInnerTRPCContextWithSessionForTest();
       const caller = appRouter.createCaller(ctx);
 
       const tagName = "test-tag-name";
@@ -38,7 +38,7 @@ describe("tags router", () => {
     });
 
     test("throw error upon duplicate tag id", async () => {
-      const ctx = createInnerTRPCContextWithSessionForTest();
+      const ctx = await createInnerTRPCContextWithSessionForTest();
       const caller = appRouter.createCaller(ctx);
 
       const input = {
@@ -52,7 +52,7 @@ describe("tags router", () => {
 
   describe("tags.getCount", () => {
     test("get count", async () => {
-      const ctx = createInnerTRPCContextWithSessionForTest();
+      const ctx = await createInnerTRPCContextWithSessionForTest();
       const caller = appRouter.createCaller(ctx);
 
       const totalNumberOfTags = 101;
@@ -63,7 +63,7 @@ describe("tags router", () => {
     });
 
     test("get filtered count", async () => {
-      const ctx = createInnerTRPCContextWithSessionForTest();
+      const ctx = await createInnerTRPCContextWithSessionForTest();
       const caller = appRouter.createCaller(ctx);
 
       const totalNumberOfTags = 101;
@@ -76,7 +76,7 @@ describe("tags router", () => {
 
   describe("tags.getAll", () => {
     test("take 10 by default", async () => {
-      const ctx = createInnerTRPCContextWithSessionForTest();
+      const ctx = await createInnerTRPCContextWithSessionForTest();
       const caller = appRouter.createCaller(ctx);
 
       const totalNumberOfTags = 101;
@@ -87,7 +87,7 @@ describe("tags router", () => {
     });
 
     test("get all", async () => {
-      const ctx = createInnerTRPCContextWithSessionForTest();
+      const ctx = await createInnerTRPCContextWithSessionForTest();
       const caller = appRouter.createCaller(ctx);
 
       const numberOfTags = 101;
@@ -103,7 +103,7 @@ describe("tags router", () => {
     });
 
     test("filter by tags by ID", async () => {
-      const ctx = createInnerTRPCContextWithSessionForTest();
+      const ctx = await createInnerTRPCContextWithSessionForTest();
       const caller = appRouter.createCaller(ctx);
 
       const totalNumberOfTags = 101;
@@ -121,7 +121,7 @@ describe("tags router", () => {
     });
 
     test("able to sort by ID", async () => {
-      const ctx = createInnerTRPCContextWithSessionForTest();
+      const ctx = await createInnerTRPCContextWithSessionForTest();
       const caller = appRouter.createCaller(ctx);
 
       const totalNumberOfTags = 101;
@@ -144,7 +144,7 @@ describe("tags router", () => {
 
   describe("tags.delete", () => {
     test("delete many", async () => {
-      const ctx = createInnerTRPCContextWithSessionForTest();
+      const ctx = await createInnerTRPCContextWithSessionForTest();
       const caller = appRouter.createCaller(ctx);
 
       const count = 10;

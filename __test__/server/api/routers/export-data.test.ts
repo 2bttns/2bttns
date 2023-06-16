@@ -48,7 +48,7 @@ afterAll(async () => {
 
 describe("exportData router", () => {
   test("export all", async () => {
-    const ctx = createInnerTRPCContextWithSessionForTest();
+    const ctx = await createInnerTRPCContextWithSessionForTest();
     const caller = appRouter.createCaller(ctx);
 
     const { count, gameObjects, games, tags } =
@@ -60,7 +60,7 @@ describe("exportData router", () => {
   });
 
   test("get only games", async () => {
-    const ctx = createInnerTRPCContextWithSessionForTest();
+    const ctx = await createInnerTRPCContextWithSessionForTest();
     const caller = appRouter.createCaller(ctx);
 
     const results = await caller.exportData.exportData({
@@ -74,7 +74,7 @@ describe("exportData router", () => {
     expect(results.tags).toBeUndefined();
   });
   test("get only game-objects", async () => {
-    const ctx = createInnerTRPCContextWithSessionForTest();
+    const ctx = await createInnerTRPCContextWithSessionForTest();
     const caller = appRouter.createCaller(ctx);
 
     const results = await caller.exportData.exportData({
@@ -89,7 +89,7 @@ describe("exportData router", () => {
   });
 
   test("get only tags", async () => {
-    const ctx = createInnerTRPCContextWithSessionForTest();
+    const ctx = await createInnerTRPCContextWithSessionForTest();
     const caller = appRouter.createCaller(ctx);
 
     const results = await caller.exportData.exportData({
@@ -104,7 +104,7 @@ describe("exportData router", () => {
   });
 
   test("no tag field for games and game-objects if includeTags=false", async () => {
-    const ctx = createInnerTRPCContextWithSessionForTest();
+    const ctx = await createInnerTRPCContextWithSessionForTest();
     const caller = appRouter.createCaller(ctx);
 
     const results = await caller.exportData.exportData({
@@ -125,7 +125,7 @@ describe("exportData router", () => {
   });
 
   test("tags associated with games and game-objects must be in tag filter list", async () => {
-    const ctx = createInnerTRPCContextWithSessionForTest();
+    const ctx = await createInnerTRPCContextWithSessionForTest();
     const caller = appRouter.createCaller(ctx);
 
     const results = await caller.exportData.exportData({
@@ -147,7 +147,7 @@ describe("exportData router", () => {
   });
 
   test("can get all game-objects", async () => {
-    const ctx = createInnerTRPCContextWithSessionForTest();
+    const ctx = await createInnerTRPCContextWithSessionForTest();
     const caller = appRouter.createCaller(ctx);
 
     const totalGameObjects = await prisma.gameObject.count();
@@ -156,7 +156,7 @@ describe("exportData router", () => {
   });
 
   test("can exclude untagged game-objects", async () => {
-    const ctx = createInnerTRPCContextWithSessionForTest();
+    const ctx = await createInnerTRPCContextWithSessionForTest();
     const caller = appRouter.createCaller(ctx);
 
     const totalTaggedGameObjects = await prisma.gameObject.count({
@@ -173,7 +173,7 @@ describe("exportData router", () => {
   });
 
   test("can get untagged game-objects only", async () => {
-    const ctx = createInnerTRPCContextWithSessionForTest();
+    const ctx = await createInnerTRPCContextWithSessionForTest();
     const caller = appRouter.createCaller(ctx);
 
     const totalUntaggedGameObjects = await prisma.gameObject.count({
@@ -191,7 +191,7 @@ describe("exportData router", () => {
   });
 
   test("can get games with only tags they use", async () => {
-    const ctx = createInnerTRPCContextWithSessionForTest();
+    const ctx = await createInnerTRPCContextWithSessionForTest();
     const caller = appRouter.createCaller(ctx);
 
     // Update the first `beforeAll` created game to use the first existing tag
@@ -248,7 +248,7 @@ describe("exportData router", () => {
   });
 
   test("can get game-objects with only tags they use", async () => {
-    const ctx = createInnerTRPCContextWithSessionForTest();
+    const ctx = await createInnerTRPCContextWithSessionForTest();
     const caller = appRouter.createCaller(ctx);
 
     const firstTag = await prisma.tag.findFirst({});

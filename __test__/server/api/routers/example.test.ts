@@ -33,7 +33,7 @@ describe("example router", () => {
   });
 
   test("getSecretMessage with admin session", async () => {
-    const ctx = createInnerTRPCContextWithSessionForTest();
+    const ctx = await createInnerTRPCContextWithSessionForTest();
     const caller = appRouter.createCaller(ctx);
     const result = await caller.example.getSecretMessage();
     expect(result).toBeDefined();

@@ -6,10 +6,18 @@ import { prisma } from "../../../../src/server/db";
 import { playerTokenSchema } from "../../../../src/server/helpers/checkUserAuth";
 import { setPlayerToken } from "../../../../src/utils/api";
 
-export const createInnerTRPCContextWithSessionForTest = () => {
+export const testUserSessionEmail = "test-user-session-email@example.com";
+export const createInnerTRPCContextWithSessionForTest = async () => {
+  const existingAllowedTestAdmin = await prisma.allowedAdmin.findFirst({
+    where: { email: testUserSessionEmail },
+  });
+  if (!existingAllowedTestAdmin) {
+    await prisma.allowedAdmin.create({ data: { email: testUserSessionEmail } });
+  }
+
   return createInnerTRPCContext({
     session: {
-      user: { id: "123", name: "Test" },
+      user: { id: "123", name: "Test", email: testUserSessionEmail },
       expires: "1",
     },
   });
@@ -113,4 +121,8 @@ export async function createTestTags(count: number) {
 
 export async function getAllTags() {
   return await prisma.tag.findMany();
+}
+
+export async function clearAllowedAdmins() {
+  return await prisma.allowedAdmin.deleteMany();
 }

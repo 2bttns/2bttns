@@ -20,7 +20,7 @@ describe("gameobjects router", () => {
   });
 
   test("games.create", async () => {
-    const ctx = createInnerTRPCContextWithSessionForTest();
+    const ctx = await createInnerTRPCContextWithSessionForTest();
     const caller = appRouter.createCaller(ctx);
 
     type Input = inferProcedureInput<AppRouter["gameObjects"]["create"]>;
@@ -39,7 +39,7 @@ describe("gameobjects router", () => {
 
   describe("gameobjects.count", () => {
     test("count total game objects", async () => {
-      const ctx = createInnerTRPCContextWithSessionForTest();
+      const ctx = await createInnerTRPCContextWithSessionForTest();
       const caller = appRouter.createCaller(ctx);
 
       const numberOfGames = 101;
@@ -53,7 +53,7 @@ describe("gameobjects router", () => {
     });
 
     test("count filtered by name and id", async () => {
-      const ctx = createInnerTRPCContextWithSessionForTest();
+      const ctx = await createInnerTRPCContextWithSessionForTest();
       const caller = appRouter.createCaller(ctx);
 
       await prisma.gameObject.createMany({
@@ -89,7 +89,7 @@ describe("gameobjects router", () => {
     });
 
     test("count filtered by excluded game objects", async () => {
-      const ctx = createInnerTRPCContextWithSessionForTest();
+      const ctx = await createInnerTRPCContextWithSessionForTest();
       const caller = appRouter.createCaller(ctx);
 
       await prisma.gameObject.createMany({
@@ -112,7 +112,7 @@ describe("gameobjects router", () => {
 
   describe("gameobjects.getAll", () => {
     test("default limit 10", async () => {
-      const ctx = createInnerTRPCContextWithSessionForTest();
+      const ctx = await createInnerTRPCContextWithSessionForTest();
       const caller = appRouter.createCaller(ctx);
 
       const numberOfGames = 101;
@@ -131,7 +131,7 @@ describe("gameobjects router", () => {
     });
 
     test("can skip items", async () => {
-      const ctx = createInnerTRPCContextWithSessionForTest();
+      const ctx = await createInnerTRPCContextWithSessionForTest();
       const caller = appRouter.createCaller(ctx);
 
       const numberOfGames = 20;
@@ -154,7 +154,7 @@ describe("gameobjects router", () => {
     });
 
     test("sort by name", async () => {
-      const ctx = createInnerTRPCContextWithSessionForTest();
+      const ctx = await createInnerTRPCContextWithSessionForTest();
       const caller = appRouter.createCaller(ctx);
 
       const numberOfGameObjects = 101;
@@ -185,7 +185,7 @@ describe("gameobjects router", () => {
     });
 
     test("filter by name and id", async () => {
-      const ctx = createInnerTRPCContextWithSessionForTest();
+      const ctx = await createInnerTRPCContextWithSessionForTest();
       const caller = appRouter.createCaller(ctx);
 
       await prisma.gameObject.createMany({
@@ -229,7 +229,7 @@ describe("gameobjects router", () => {
     });
 
     test("exclude game objects by id", async () => {
-      const ctx = createInnerTRPCContextWithSessionForTest();
+      const ctx = await createInnerTRPCContextWithSessionForTest();
       const caller = appRouter.createCaller(ctx);
 
       await prisma.gameObject.createMany({
@@ -252,7 +252,7 @@ describe("gameobjects router", () => {
     });
 
     test("filter gameobjects by tag", async () => {
-      const ctx = createInnerTRPCContextWithSessionForTest();
+      const ctx = await createInnerTRPCContextWithSessionForTest();
       const caller = appRouter.createCaller(ctx);
 
       await prisma.gameObject.createMany({
@@ -364,7 +364,7 @@ describe("gameobjects router", () => {
 
   describe("gameobjects.getRanked", async () => {
     test("getRanked", async () => {
-      const ctx = createInnerTRPCContextWithSessionForTest();
+      const ctx = await createInnerTRPCContextWithSessionForTest();
       const caller = appRouter.createCaller(ctx);
 
       await prisma.player.create({
@@ -411,7 +411,7 @@ describe("gameobjects router", () => {
 
   describe("gameobjects.delete", () => {
     test("delete many", async () => {
-      const ctx = createInnerTRPCContextWithSessionForTest();
+      const ctx = await createInnerTRPCContextWithSessionForTest();
       const caller = appRouter.createCaller(ctx);
 
       const count = 10;
