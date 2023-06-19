@@ -1,4 +1,4 @@
-import { Box, HStack, StackProps } from "@chakra-ui/react";
+import { Box, HStack, StackProps, useToast } from "@chakra-ui/react";
 import { useMemo } from "react";
 import { tagFilter } from "../../../server/shared/z";
 import { api, RouterInputs, RouterOutputs } from "../../../utils/api";
@@ -42,6 +42,8 @@ export default function GamesTable(props: GamesTableProps) {
     allowCreate = true,
     areRowsSelectable = true,
   } = props;
+
+  const toast = useToast();
 
   const { perPage, currentPage, handlePageChange, handlePerRowsChange } =
     usePagination();
@@ -105,10 +107,27 @@ export default function GamesTable(props: GamesTableProps) {
     id: string,
     data: RouterInputs["games"]["updateById"]["data"]
   ) => {
+    const updateDescription = `Game ID: ${id}`;
+    const updateToast = toast({
+      title: "Updating Game",
+      status: "loading",
+      description: updateDescription,
+    });
     try {
       await updateGameMutation.mutateAsync({ id, data });
       await utils.games.invalidate();
+      toast.update(updateToast, {
+        title: "Game Updated",
+        status: "success",
+        description: updateDescription,
+      });
     } catch (error) {
+      toast.update(updateToast, {
+        title: "Error",
+        status: "error",
+        description: `Failed to update (Game ID=${id}). See console for details`,
+      });
+
       // This will be caught by CustomEditable component using this function
       // it will revert the value to the previous value when it receives an error
       throw error;
@@ -117,15 +136,30 @@ export default function GamesTable(props: GamesTableProps) {
 
   const createGameMutation = api.games.create.useMutation();
   const handleCreateGame = async (name: string) => {
+    const createToast = toast({
+      title: "Creating Game",
+      status: "loading",
+      description: `Name: ${name}`,
+    });
+
     try {
       const result = await createGameMutation.mutateAsync({ name });
       if (onGameCreated) {
         await onGameCreated(result.createdGame.id);
       }
       await utils.games.invalidate();
+      toast.update(createToast, {
+        title: "Game Created",
+        status: "success",
+        description: `Name: ${name}, ID: ${result.createdGame.id}`,
+      });
     } catch (error) {
-      window.alert("Error creating Game\n See console for details");
       console.error(error);
+      toast.update(createToast, {
+        title: "Error",
+        status: "error",
+        description: `Failed to create Game (Name=${name}). See console for details`,
+      });
     }
   };
 
