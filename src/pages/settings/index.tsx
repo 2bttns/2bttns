@@ -8,6 +8,7 @@ import {
   TabPanel,
   TabPanels,
   Tabs,
+  Text,
   Tooltip,
   useDisclosure,
   useToast,
@@ -180,14 +181,18 @@ function CellActions(props: CellActionsProps) {
           handleConfirm={() => handleDeleteSecret(secretId)}
           performingConfirmActionText="Deleting..."
         >
-          This action cannot be undone.
+          <Text>Click &apos;Confirm&apos; to delete the following Secret:</Text>
+          <Text textDecoration="underline">(App ID={secretId})</Text>
+          <Text mt="1rem" color="red.500" fontStyle="italic">
+            Warning: This action cannot be undone.
+          </Text>
         </ConfirmAlert>
         <Tooltip label={`Delete`} placement="top">
           <IconButton
             colorScheme="red"
             onClick={deleteSecretDisclosure.onOpen}
             icon={<DeleteIcon />}
-            aria-label={`Delete secret with ID: ${secretId}`}
+            aria-label={`Delete secret with ID=${secretId}`}
             size="sm"
             variant="outline"
           />
