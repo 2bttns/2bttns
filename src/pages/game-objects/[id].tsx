@@ -127,6 +127,7 @@ function AdditionalTopBarContent(props: AdditionalTopBarContentProps) {
                   selectedRows.map((row) => row.id)
                 );
               }}
+              closeMenuMode="on-confirm"
             />
           </>
         )}
