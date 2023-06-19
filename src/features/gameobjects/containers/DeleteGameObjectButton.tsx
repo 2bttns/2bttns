@@ -1,5 +1,11 @@
 import { DeleteIcon } from "@chakra-ui/icons";
-import { IconButton, Tooltip, useDisclosure, useToast } from "@chakra-ui/react";
+import {
+  IconButton,
+  Text,
+  Tooltip,
+  useDisclosure,
+  useToast,
+} from "@chakra-ui/react";
 import { api } from "../../../utils/api";
 import ConfirmAlert from "../../shared/components/ConfirmAlert";
 import { GameObjectData } from "./GameObjectsTable";
@@ -18,10 +24,16 @@ export default function DeleteGameObjectButton(
   const { isOpen, onOpen, onClose } = useDisclosure();
 
   const utils = api.useContext();
+  const gameObjectQuery = api.gameObjects.getById.useQuery({
+    id: gameObjectId,
+  });
+  const gameObjectName =
+    gameObjectQuery.data?.gameObject?.name ?? "Untitled GameObject";
+
   const deleteGameObjectMutation = api.gameObjects.deleteById.useMutation();
   const handleDeleteGameObject = async () => {
     onClose(); // Close the confirm alert; loading toast will notifiy the user of success/error
-    const deleteDescription = `GameObject (ID: ${gameObjectId})`;
+    const deleteDescription = `${gameObjectName} (ID: ${gameObjectId})`;
     const deleteToast = toast({
       title: `Deleting GameObject...`,
       description: deleteDescription,
@@ -53,13 +65,21 @@ export default function DeleteGameObjectButton(
   return (
     <>
       <ConfirmAlert
-        alertTitle={`Delete Game Object: ${gameObjectId}?`}
+        alertTitle={`Delete GameObject?`}
         isOpen={isOpen}
         onClose={onClose}
         handleConfirm={handleDeleteGameObject}
         performingConfirmActionText="Deleting..."
       >
-        This action cannot be undone.
+        <Text>
+          Click &apos;Confirm&apos; to delete the following GameObject:
+        </Text>
+        <Text textDecoration="underline">
+          {gameObjectName} (ID: {gameObjectId})
+        </Text>
+        <Text mt="1rem" color="red.500" fontStyle="italic">
+          Warning: This action cannot be undone.
+        </Text>
       </ConfirmAlert>
       <Tooltip label={`Delete`} placement="top">
         <IconButton
