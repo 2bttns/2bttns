@@ -35,6 +35,7 @@ export default function DeleteGameButton(props: DeleteGameButtonProps) {
     });
 
     try {
+      onClose(); // Close the confirm alert; loading toast will notifiy the user of success/error
       const { deletedGame } = await deleteGameMutation.mutateAsync({
         id: gameId,
       });
@@ -44,13 +45,17 @@ export default function DeleteGameButton(props: DeleteGameButtonProps) {
       await utils.games.invalidate();
 
       toast.update(deleteToast, {
-        title: `Game Deleted Successfully`,
+        title: `Success: Deleted Game`,
         description: deleteDescription,
         status: "success",
       });
     } catch (error) {
-      window.alert("Error deleting game\n See console for details");
       console.error(error);
+      toast.update(deleteToast, {
+        title: `Error`,
+        description: `Received an unexpected error when deleting a game. See console for details.`,
+        status: "error",
+      });
     }
   };
 

@@ -81,6 +81,7 @@ function AdditionalTopBarContent(props: AdditionalTopBarContentProps) {
               handleDelete={async () => {
                 await handleDeleteGame(context.selectedRows.map((r) => r.id));
               }}
+              closeMenuMode="on-confirm"
             />
           </>
         )}
