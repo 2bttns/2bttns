@@ -1,4 +1,4 @@
-import { Box, HStack, StackProps } from "@chakra-ui/react";
+import { Box, HStack, StackProps, useToast } from "@chakra-ui/react";
 import { useMemo } from "react";
 import { api, RouterInputs, RouterOutputs } from "../../../utils/api";
 import ConstrainToRemainingSpace, {
@@ -48,6 +48,7 @@ export default function TagsTable(props: TagsTableProps) {
     onTagCreated,
     topBarProps,
   } = props;
+  const toast = useToast();
 
   const { perPage, currentPage, handlePageChange, handlePerRowsChange } =
     usePagination();
@@ -88,10 +89,26 @@ export default function TagsTable(props: TagsTableProps) {
     id: string,
     data: RouterInputs["tags"]["updateById"]["data"]
   ) => {
+    const updateDescription = `ID=${id}`;
+    const updateToast = toast({
+      title: "Updating Tag",
+      description: updateDescription,
+      status: "loading",
+    });
     try {
       await updateTagMutation.mutateAsync({ id, data });
       await utils.tags.invalidate();
+      toast.update(updateToast, {
+        title: "Success: Tag Updated",
+        description: updateDescription,
+        status: "success",
+      });
     } catch (error) {
+      toast.update(updateToast, {
+        title: "Error",
+        description: `Failed to update Tag (ID=${id}). See console for details`,
+        status: "error",
+      });
       // This will be caught by CustomEditable component using this function
       // it will revert the value to the previous value when it receives an error
       throw error;
@@ -102,15 +119,30 @@ export default function TagsTable(props: TagsTableProps) {
   const handleCreateTag: SearchAndCreateBarProps["onCreate"] = async (
     value
   ) => {
+    const createDescription = `Name=${value}`;
+    const createToast = toast({
+      title: "Creating Tag",
+      description: createDescription,
+      status: "loading",
+    });
     try {
       const result = await createTagMutation.mutateAsync({
         name: value,
       });
       if (onTagCreated) await onTagCreated(result.createdTag);
       await utils.tags.invalidate();
+      toast.update(createToast, {
+        title: "Success: Tag Created",
+        description: createDescription,
+        status: "success",
+      });
     } catch (error) {
-      window.alert("Error creating Tag\n See console for details");
       console.error(error);
+      toast.update(createToast, {
+        title: "Error",
+        description: `Failed to create Tag (Name=${name}). See console for details`,
+        status: "error",
+      });
     }
   };
 
