@@ -1,4 +1,4 @@
-import { Box, HStack, StackProps } from "@chakra-ui/react";
+import { Box, HStack, StackProps, useToast } from "@chakra-ui/react";
 import { Tag } from "@prisma/client";
 import { useMemo } from "react";
 import { z } from "zod";
@@ -50,6 +50,7 @@ export default function GameObjectsTable(props: GameObjectsTableProps) {
     topBarProps,
     allowCreate = true,
   } = props;
+  const toast = useToast();
 
   const { perPage, currentPage, handlePageChange, handlePerRowsChange } =
     usePagination();
@@ -113,10 +114,27 @@ export default function GameObjectsTable(props: GameObjectsTableProps) {
     id: string,
     data: RouterInputs["gameObjects"]["updateById"]["data"]
   ) => {
+    const updateDescription = `ID=${id}`;
+    const updateToast = toast({
+      title: "Updating GameObject",
+      description: updateDescription,
+      status: "loading",
+    });
     try {
       await updateGameObjectMutation.mutateAsync({ id, data });
       await utils.gameObjects.invalidate();
+      toast.update(updateToast, {
+        title: "Success: GameObject Updated",
+        description: updateDescription,
+        status: "success",
+      });
     } catch (error) {
+      toast.update(updateToast, {
+        title: "Error",
+        description: `Failed to update GameObject (ID=${id}). See console for details`,
+        status: "error",
+      });
+
       // This will be caught by CustomEditable component using this function
       // it will revert the value to the previous value when it receives an error
       throw error;
@@ -125,15 +143,31 @@ export default function GameObjectsTable(props: GameObjectsTableProps) {
 
   const createGameObjectMutation = api.gameObjects.create.useMutation();
   const handleCreateGameObject = async (name: string) => {
+    const createDescription = `Name=${name}`;
+    const createToast = toast({
+      title: "Creating GameObject",
+      description: createDescription,
+      status: "loading",
+    });
+
     try {
       const result = await createGameObjectMutation.mutateAsync({ name });
       if (onGameObjectCreated) {
         await onGameObjectCreated(result.createdGameObject.id);
       }
       await utils.gameObjects.invalidate();
+      toast.update(createToast, {
+        title: "Success: GameObject Created",
+        description: createDescription,
+        status: "success",
+      });
     } catch (error) {
-      window.alert("Error creating Game Object\n See console for details");
       console.error(error);
+      toast.update(createToast, {
+        title: "Error",
+        description: `Failed to create GameObject (Name=${name}). See console for details`,
+        status: "error",
+      });
     }
   };
 

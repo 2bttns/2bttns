@@ -117,7 +117,7 @@ export default function GamesTable(props: GamesTableProps) {
       await updateGameMutation.mutateAsync({ id, data });
       await utils.games.invalidate();
       toast.update(updateToast, {
-        title: "Game Updated",
+        title: "Success: Game Updated",
         status: "success",
         description: updateDescription,
       });
