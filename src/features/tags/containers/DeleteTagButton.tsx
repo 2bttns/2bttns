@@ -25,7 +25,7 @@ export default function DeleteTagButton(props: DeleteTagButtonProps) {
 
   const tagName = tagQuery.data?.tag.name ?? "Untitled Tag";
   const handleDeleteTag = async () => {
-    const deleteDescription = `${tagName} (ID: ${tagId})`;
+    const deleteDescription = `${tagName} (ID=${tagId})`;
     const deleteToast = toast({
       title: `Deleting Tag...`,
       description: deleteDescription,
@@ -62,7 +62,7 @@ export default function DeleteTagButton(props: DeleteTagButtonProps) {
       >
         <Text>Click &apos;Confirm&apos; to delete the following tag:</Text>
         <Text textDecoration="underline">
-          {tagName} (ID: {tagId})
+          {tagName} (ID={tagId})
         </Text>
         <Text mt="1rem" color="red.500" fontStyle="italic">
           Warning: This action cannot be undone.
@@ -73,7 +73,7 @@ export default function DeleteTagButton(props: DeleteTagButtonProps) {
           colorScheme="red"
           onClick={onOpen}
           icon={<DeleteIcon />}
-          aria-label={`Delete tag with ID: ${tagId}`}
+          aria-label={`Delete tag with ID=${tagId}`}
           size="sm"
           variant="outline"
         />

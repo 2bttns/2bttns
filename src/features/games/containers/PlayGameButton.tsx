@@ -21,7 +21,7 @@ export default function PlayGameButton(props: PlayGameButtonProps) {
         colorScheme="blue"
         onClick={handlePlayGame}
         icon={<ArrowForwardIcon />}
-        aria-label={`Play game with ID: ${gameId}`}
+        aria-label={`Play game with ID=${gameId}`}
         size="sm"
         variant="solid"
       />

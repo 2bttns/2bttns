@@ -15,7 +15,7 @@ export default function ManageTagButton(props: ManageTagButtonProps) {
         <IconButton
           colorScheme="blue"
           icon={<SettingsIcon />}
-          aria-label={`Manage tag with ID: ${tagId}`}
+          aria-label={`Manage tag with ID=${tagId}`}
           size="sm"
           variant="solid"
         />

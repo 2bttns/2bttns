@@ -46,8 +46,8 @@ export default function ToggleTagButton(props: ToggleTagButtonProps) {
 
   const ariaLabel = useMemo(() => {
     if (isLoading) return `Loading`;
-    if (isTagAppliedToAll) return `Remove tag with ID: ${tagId}`;
-    return `Apply tag with ID: ${tagId}`;
+    if (isTagAppliedToAll) return `Remove tag with ID=${tagId}`;
+    return `Apply tag with ID=${tagId}`;
   }, [isTagAppliedToAll, isLoading, tagId]);
 
   const colorScheme = useMemo<ButtonProps["colorScheme"]>(() => {

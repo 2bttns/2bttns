@@ -33,7 +33,7 @@ export default function DeleteGameObjectButton(
   const deleteGameObjectMutation = api.gameObjects.deleteById.useMutation();
   const handleDeleteGameObject = async () => {
     onClose(); // Close the confirm alert; loading toast will notifiy the user of success/error
-    const deleteDescription = `${gameObjectName} (ID: ${gameObjectId})`;
+    const deleteDescription = `${gameObjectName} (ID=${gameObjectId})`;
     const deleteToast = toast({
       title: `Deleting GameObject...`,
       description: deleteDescription,
@@ -75,7 +75,7 @@ export default function DeleteGameObjectButton(
           Click &apos;Confirm&apos; to delete the following GameObject:
         </Text>
         <Text textDecoration="underline">
-          {gameObjectName} (ID: {gameObjectId})
+          {gameObjectName} (ID={gameObjectId})
         </Text>
         <Text mt="1rem" color="red.500" fontStyle="italic">
           Warning: This action cannot be undone.
@@ -86,7 +86,7 @@ export default function DeleteGameObjectButton(
           colorScheme="red"
           onClick={onOpen}
           icon={<DeleteIcon />}
-          aria-label={`Delete gameobject with ID: ${gameObjectId}`}
+          aria-label={`Delete gameobject with ID=${gameObjectId}`}
           size="sm"
           variant="outline"
         />

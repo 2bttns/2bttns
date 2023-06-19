@@ -27,7 +27,7 @@ export default function DeleteGameButton(props: DeleteGameButtonProps) {
   const gameToDelete = api.games.getById.useQuery({ id: gameId });
   const deleteGameMutation = api.games.deleteById.useMutation();
   const handleDeleteGame = async () => {
-    const deleteDescription = `${gameName} (ID: ${gameId})`;
+    const deleteDescription = `${gameName} (ID=${gameId})`;
     const deleteToast = toast({
       title: `Deleting Game...`,
       description: deleteDescription,
@@ -72,7 +72,7 @@ export default function DeleteGameButton(props: DeleteGameButtonProps) {
       >
         <Text>Click &apos;Confirm&apos; to delete the following game:</Text>
         <Text textDecoration="underline">
-          {gameName} (ID: {gameId})
+          {gameName} (ID={gameId})
         </Text>
         <Text mt="1rem" color="red.500" fontStyle="italic">
           Warning: This action cannot be undone.
@@ -83,7 +83,7 @@ export default function DeleteGameButton(props: DeleteGameButtonProps) {
           colorScheme="red"
           onClick={onOpen}
           icon={<DeleteIcon />}
-          aria-label={`Delete game with ID: ${gameId}`}
+          aria-label={`Delete game with ID=${gameId}`}
           size="sm"
           variant="outline"
         />

@@ -20,7 +20,7 @@ export default function ManageGameObjectButton(
         <IconButton
           colorScheme="blue"
           icon={<SettingsIcon />}
-          aria-label={`Manage gameobject with ID: ${gameObjectId}`}
+          aria-label={`Manage gameobject with ID=${gameObjectId}`}
           size="sm"
           variant="solid"
         />
