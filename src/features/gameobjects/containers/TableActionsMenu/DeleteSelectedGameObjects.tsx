@@ -25,6 +25,7 @@ export default function DeleteSelectedGameObjects(
           await onDeleted();
         }
       }}
+      closeMenuMode="on-confirm"
     />
   );
 }

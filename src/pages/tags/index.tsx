@@ -82,6 +82,7 @@ function AdditionalTopBarContent(props: AdditionalTopBarContentProps) {
               handleDelete={async (selectedRows) => {
                 await handleDeleteTag(selectedRows.map((row) => row.id));
               }}
+              closeMenuMode="on-confirm"
             />
           </>
         )}
