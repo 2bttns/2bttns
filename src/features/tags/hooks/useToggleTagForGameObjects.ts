@@ -1,3 +1,4 @@
+import { useToast } from "@chakra-ui/react";
 import { GameObject, Tag } from "@prisma/client";
 import { useMemo, useState } from "react";
 import { api } from "../../../utils/api";
@@ -10,10 +11,15 @@ export function useToggleTagForGameObjects(
   params: UseToggleTagForGameObjectsParams
 ) {
   const { tagId, gameObjectIds } = params;
+  const toast = useToast();
 
   const [isApplyingChanges, setApplyingChanges] = useState(false);
 
   const utils = api.useContext();
+
+  const tagQuery = api.tags.getById.useQuery({ id: tagId });
+  const tagName = tagQuery.data?.tag.name ?? "Untitled Tag";
+
   const getGameObjectsCountQuery = api.gameObjects.getCount.useQuery({
     idFilter: gameObjectIds.join(","),
   });
@@ -51,6 +57,12 @@ export function useToggleTagForGameObjects(
   const handleApplyTag = async () => {
     if (isApplyingChanges) return;
 
+    const applyTagToast = toast({
+      title: `Performing Bulk Tag operation...`,
+      status: "loading",
+      duration: null,
+    });
+
     setApplyingChanges(true);
     try {
       await updateTagMutation.mutateAsync({
@@ -61,11 +73,20 @@ export function useToggleTagForGameObjects(
         },
       });
       await utils.gameObjects.invalidate();
+      toast.update(applyTagToast, {
+        title: `Success: Bulk Tag operation`,
+        description: `Tag "${tagName}" ${
+          isTagAppliedToAll ? "removed from" : "applied to"
+        } ${gameObjectIds.length} GameObjects`,
+        status: "success",
+      });
     } catch (error) {
-      window.alert(
-        "Error applying tag to game objects\n See console for details"
-      );
       console.error(error);
+      toast.update(applyTagToast, {
+        title: `Error: Bulk Tag operation failed`,
+        description: "See console for more details.",
+        status: "error",
+      });
     }
     setApplyingChanges(false);
   };
