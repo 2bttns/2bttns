@@ -10,6 +10,7 @@ import {
   Tabs,
   Tooltip,
   useDisclosure,
+  useToast,
 } from "@chakra-ui/react";
 import { Secret } from "@prisma/client";
 import { GetServerSideProps, NextPage } from "next";
@@ -83,31 +84,66 @@ export type CellActionsProps = {
 function CellActions(props: CellActionsProps) {
   const { secretId } = props;
   const utils = api.useContext();
+  const toast = useToast();
 
   const regenerateSecretDisclosure = useDisclosure();
   const updateSecretMutation = api.secrets.updateById.useMutation();
   const regenerateSecret = async (id: Secret["id"]) => {
+    const regenDescription = `App ID: ${id}`;
+    const regenToast = toast({
+      title: "Regenerating secret...",
+      status: "loading",
+      description: regenDescription,
+    });
+    regenerateSecretDisclosure.onClose(); // Close the disclosure; toasts will notifiy the user of success/failure
+
     try {
       await updateSecretMutation.mutateAsync({
         id,
         generateNewSecret: true,
       });
       await utils.secrets.getAll.invalidate();
+      toast.update(regenToast, {
+        title: "Success: Secret regenerated",
+        status: "success",
+        description: regenDescription,
+      });
     } catch (error) {
       console.error(error);
-      window.alert("Error regenerating secret\n See console for details");
+      toast.update(regenToast, {
+        title: `Error (App ID=${id})`,
+        status: "error",
+        description: `Failed to regenerate secret. See console for details`,
+      });
     }
   };
 
   const deleteSecretDisclosure = useDisclosure();
   const deleteSecretMutation = api.secrets.deleteById.useMutation();
   const handleDeleteSecret = async (id: Secret["id"]) => {
+    const toastDescription = `App ID: ${id}`;
+    deleteSecretDisclosure.onClose(); // Close the disclosure; toasts will notifiy the user of success/failure
+    const deleteToast = toast({
+      title: "Deleting secret...",
+      status: "loading",
+      description: toastDescription,
+    });
+
     try {
       await deleteSecretMutation.mutateAsync({ id });
       await utils.secrets.invalidate();
+      toast.update(deleteToast, {
+        title: "Success: Secret deleted",
+        status: "success",
+        description: toastDescription,
+      });
     } catch (error) {
       console.error(error);
-      window.alert("Error deleting secret\n See console for details");
+      toast.update(deleteToast, {
+        title: `Error (App ID=${id})`,
+        status: "error",
+        description: `Failed to delete secret. See console for details`,
+      });
     }
   };
 
