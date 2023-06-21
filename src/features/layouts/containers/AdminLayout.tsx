@@ -43,7 +43,7 @@ export default function AdminLayout(props: AdminLayoutProps) {
       </Box>
       <Stack width="100%" height="100%" direction="row" spacing={0}>
         <VStack
-          backgroundColor="blue.700"
+          backgroundColor="twobttns.blue"
           height="100%"
           minWidth="200px"
           width="200px"

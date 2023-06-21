@@ -19,7 +19,7 @@ export default function Navbar(props: NavbarProps) {
       width="100%"
       height={NAVBAR_HEIGHT_PX}
       paddingX="1rem"
-      backgroundColor="blue.900"
+      backgroundColor="twobttns.darkblue"
       color="gray.200"
       justifyContent="space-between"
     >

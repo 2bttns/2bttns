@@ -5,7 +5,7 @@
   "scripts": {
     "build": "next build",
     "dev": "next dev -p 3001",
-    "postinstall": "prisma generate",
+    "postinstall": "prisma generate; npm run gen:theme-typings",
     "lint": "next lint --quiet",
     "start": "next start -p 3262",
     "test": "dotenv -e .env.test -- npm run init-db:test && vitest && npm run docker:rm:test-db",
@@ -23,7 +23,8 @@
     "docker:up:test-db": "docker-compose up test-db -d",
     "docker:stop": "docker-compose stop",
     "docker:rm:test-db": "docker-compose rm -svf test-db",
-    "docker:rm:dev-db": "docker-compose rm -svf dev-db"
+    "docker:rm:dev-db": "docker-compose rm -svf dev-db",
+    "gen:theme-typings": "chakra-cli tokens src/style/theme/index.ts"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
@@ -70,6 +71,7 @@
     "zod": "^3.20.2"
   },
   "devDependencies": {
+    "@chakra-ui/cli": "^2.4.1",
     "@types/color-hash": "^1.0.2",
     "@types/jsonwebtoken": "^9.0.1",
     "@types/node": "^18.11.18",
