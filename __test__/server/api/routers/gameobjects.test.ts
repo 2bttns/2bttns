@@ -1,4 +1,5 @@
 import { inferProcedureInput } from "@trpc/server";
+import _ from "lodash";
 import { afterEach, beforeEach, describe, expect, test } from "vitest";
 import { AppRouter, appRouter } from "../../../../src/server/api/root";
 import { prisma } from "../../../../src/server/db";
@@ -360,6 +361,89 @@ describe("gameobjects router", () => {
       expect(result.gameObjects).length(1);
       expect(result.gameObjects.find((g) => g.id === "4")).toBeUndefined();
     });
+  });
+
+  test("getAll with fuzzy search", async () => {
+    const ctx = await createInnerTRPCContextWithSessionForTest();
+    const caller = appRouter.createCaller(ctx);
+
+    // Create test game objects
+    // Should create 11 game objects with ids of test-gameobject-id-1 to test-gameobject-id-11
+    // Their names are "test-gameobject-1" to "test-gameobject-11"
+    const count = 11;
+    await createTestGameObjects({ count });
+
+    // Test fuzzy search with id
+    // Should return 2 results: 1 and 10
+    let input: RouterInputs["gameObjects"]["getAll"] = {
+      idFilter: "1",
+      allowFuzzyIdFilter: true,
+    };
+    let result = await caller.gameObjects.getAll(input);
+    expect(result.gameObjects).toHaveLength(2);
+    let idsToCheck = ["test-gameobject-id-1", "test-gameobject-id-10"];
+    for (const id of idsToCheck) {
+      expect(_.some(result.gameObjects, { id })).toBe(true);
+    }
+
+    // Fuzzy id filtering with multiple ids
+    // Should return 3 results: 1, 2, 10
+    input.idFilter = "1,2";
+    result = await caller.gameObjects.getAll(input);
+    expect(result.gameObjects).toHaveLength(3);
+    idsToCheck = [
+      "test-gameobject-id-1",
+      "test-gameobject-id-2",
+      "test-gameobject-id-10",
+    ];
+    for (const id of idsToCheck) {
+      expect(_.some(result.gameObjects, { id })).toBe(true);
+    }
+
+    // Disable fuzzy search
+    // Should return nothing, if the id is not an exact match
+    input.allowFuzzyIdFilter = false;
+    result = await caller.gameObjects.getAll(input);
+    expect(result.gameObjects).toHaveLength(0);
+
+    input.idFilter = "test-gameobject-id-1";
+    result = await caller.gameObjects.getAll(input);
+    expect(result.gameObjects).toHaveLength(1);
+    expect(result.gameObjects[0]!.id).toBe("test-gameobject-id-1");
+
+    // The same starting from the first test case, but for name filtering
+    input = { nameFilter: "1", allowFuzzyNameFilter: true };
+    result = await caller.gameObjects.getAll(input);
+    expect(result.gameObjects).toHaveLength(2);
+    let namesToCheck = ["test-gameobject-1", "test-gameobject-10"];
+    for (const name of namesToCheck) {
+      expect(_.some(result.gameObjects, { name })).toBe(true);
+    }
+
+    // Fuzzy name filtering with multiple names
+    // Should return 3 results: 1, 2, 10
+    input.nameFilter = "1,2";
+    result = await caller.gameObjects.getAll(input);
+    expect(result.gameObjects).toHaveLength(3);
+    namesToCheck = [
+      "test-gameobject-1",
+      "test-gameobject-2",
+      "test-gameobject-10",
+    ];
+    for (const name of namesToCheck) {
+      expect(_.some(result.gameObjects, { name })).toBe(true);
+    }
+
+    // Disable fuzzy search
+    // Should return nothing, if the name is not an exact match
+    input.allowFuzzyNameFilter = false;
+    result = await caller.gameObjects.getAll(input);
+    expect(result.gameObjects).toHaveLength(0);
+
+    input.nameFilter = "test-gameobject-1";
+    result = await caller.gameObjects.getAll(input);
+    expect(result.gameObjects).toHaveLength(1);
+    expect(result.gameObjects[0]!.name).toBe("test-gameobject-1");
   });
 
   describe("gameobjects.getRanked", async () => {

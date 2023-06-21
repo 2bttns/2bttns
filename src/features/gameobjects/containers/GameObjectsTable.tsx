@@ -64,7 +64,9 @@ export default function GameObjectsTable(props: GameObjectsTableProps) {
       skip: (currentPage! - 1) * perPage,
       take: perPage,
       idFilter: globalFilter.debouncedInput,
+      allowFuzzyIdFilter: true,
       nameFilter: globalFilter.debouncedInput,
+      allowFuzzyNameFilter: true,
       tagFilter: tag?.include.join(","),
       tagExcludeFilter: tag?.exclude.join(","),
       untaggedFilter: tag?.untaggedFilter,
@@ -96,7 +98,9 @@ export default function GameObjectsTable(props: GameObjectsTableProps) {
   const gameObjectsCountQuery = api.gameObjects.getCount.useQuery(
     {
       idFilter: globalFilter.debouncedInput,
+      allowFuzzyIdFilter: true,
       nameFilter: globalFilter.debouncedInput,
+      allowFuzzyNameFilter: true,
       tagFilter: tag?.include.join(","),
       tagExcludeFilter: tag?.exclude.join(","),
       untaggedFilter: tag?.untaggedFilter,
