@@ -18,7 +18,7 @@ const links: NavMenuLink[] = [
   "divider",
   { href: "/settings", label: "Settings" },
   { href: "/docs", label: "Docs" },
-  { href: "/testRankedOutputs", label: "Outputs" },
+  // { href: "/testRankedOutputs", label: "Outputs" },
 ];
 
 export default function AdminLayout(props: AdminLayoutProps) {
