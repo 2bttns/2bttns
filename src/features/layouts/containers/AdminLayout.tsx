@@ -8,7 +8,9 @@ export type AdminLayoutProps = {
   children: React.ReactNode;
 };
 
-export type NavMenuLink = { href: string; label: string } | "divider";
+export type NavMenuLink =
+  | { href: string; label: string; newTab?: boolean }
+  | "divider";
 const links: NavMenuLink[] = [
   { href: "/", label: "Home" },
   "divider",
@@ -17,7 +19,8 @@ const links: NavMenuLink[] = [
   { href: "/game-objects", label: "Game Objects" },
   "divider",
   { href: "/settings", label: "Settings" },
-  { href: "/docs", label: "Docs" },
+  { href: "/api-documentation", label: "API" },
+  { href: "https://docs.2bttns.com", label: "Documentation", newTab: true },
   // { href: "/testRankedOutputs", label: "Outputs" },
 ];
 
@@ -57,9 +60,14 @@ export default function AdminLayout(props: AdminLayoutProps) {
             }
 
             const isCurrentRootPage = currentRootPage === link.href;
-
+            const target = link.newTab ? "_blank" : "_self";
             return (
-              <Link href={link.href} key={link.href} style={{ width: "100%" }}>
+              <Link
+                href={link.href}
+                key={link.href}
+                style={{ width: "100%" }}
+                target={target}
+              >
                 <Box
                   width="100%"
                   textAlign="left"
