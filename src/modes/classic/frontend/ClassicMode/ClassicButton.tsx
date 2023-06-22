@@ -1,6 +1,5 @@
 import { Box, Button, ButtonProps, Code } from "@chakra-ui/react";
 import ColorHash from "color-hash";
-import useFitText from "use-fit-text";
 
 const colorHash = new ColorHash();
 
@@ -11,11 +10,6 @@ export type ClassicButtonProps = ButtonProps & {
 
 export default function ClassicButton(props: ClassicButtonProps) {
   const { children, hotkey, ...rest } = props;
-
-  const { fontSize, ref } = useFitText({
-    maxFontSize: 150,
-    logLevel: "none",
-  });
 
   return (
     <Button
@@ -56,13 +50,12 @@ export default function ClassicButton(props: ClassicButtonProps) {
       >
         <Box
           style={{
-            fontSize,
+            fontSize: "100%",
             fontWeight: "bold",
             maxWidth: "80%",
             overflow: "hidden",
             textOverflow: "ellipsis",
           }}
-          ref={ref}
         >
           {children}
         </Box>
