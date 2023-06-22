@@ -4,6 +4,7 @@ import { extendTheme } from "@chakra-ui/react";
 import styles from "./styles";
 
 // Foundation overrides
+import { fonts } from "./fonts";
 import radii from "./foundations/radius";
 
 // Component style overrides
@@ -24,6 +25,7 @@ const overrides = {
       lighttext: "#ffffff",
     },
   },
+  fonts,
 };
 
 export default extendTheme(overrides);
