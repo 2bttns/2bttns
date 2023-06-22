@@ -24,7 +24,7 @@
     "docker:stop": "docker-compose stop",
     "docker:rm:test-db": "docker-compose rm -svf test-db",
     "docker:rm:dev-db": "docker-compose rm -svf dev-db",
-    "gen:theme-typings": "chakra-cli tokens src/style/theme/index.ts"
+    "gen:theme-typings": "chakra-cli tokens src/style/theme/typings-only.ts"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
