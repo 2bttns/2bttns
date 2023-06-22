@@ -104,7 +104,7 @@ export default function CustomEditable(props: CustomEditableProps) {
               sx={{
                 whiteSpace: "pre-wrap",
                 maxHeight: "64px",
-                overflowY: "scroll",
+                overflowY: "auto",
                 flex: 1,
               }}
             />
@@ -113,7 +113,7 @@ export default function CustomEditable(props: CustomEditableProps) {
                 height="64px"
                 sx={{
                   maxHeight: "64px",
-                  overflowY: "scroll",
+                  overflowY: "auto",
                   flex: 1,
                 }}
               />
