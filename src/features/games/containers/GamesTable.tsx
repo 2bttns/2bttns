@@ -182,6 +182,7 @@ export default function GamesTable(props: GamesTableProps) {
         sortable: true,
         sortField: "id",
         minWidth: "256px",
+        reorder: true,
       },
       {
         name: "Name",
@@ -200,6 +201,7 @@ export default function GamesTable(props: GamesTableProps) {
         sortable: true,
         sortField: "name",
         minWidth: "256px",
+        reorder: true,
       },
       {
         name: "Description",
@@ -219,6 +221,7 @@ export default function GamesTable(props: GamesTableProps) {
         sortable: true,
         sortField: "description",
         minWidth: "512px",
+        reorder: true,
       },
       {
         name: "Input Tags",
@@ -234,11 +237,13 @@ export default function GamesTable(props: GamesTableProps) {
         sortable: true,
         sortField: "tags",
         minWidth: "256px",
+        reorder: true,
       },
       {
         name: "Mode",
         cell: (row) => row.mode ?? "",
         minWidth: "128px",
+        reorder: true,
       },
       {
         name: "Last Updated",
@@ -246,6 +251,7 @@ export default function GamesTable(props: GamesTableProps) {
         sortable: true,
         sortField: "updatedAt",
         minWidth: "256px",
+        reorder: true,
       },
     ];
   }, [editable]);
