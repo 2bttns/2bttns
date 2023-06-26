@@ -1,4 +1,15 @@
-import { HStack, Select, Stack, Text } from "@chakra-ui/react";
+import {
+  Box,
+  Heading,
+  Select,
+  Table,
+  TableContainer,
+  Tbody,
+  Td,
+  Th,
+  Thead,
+  Tr,
+} from "@chakra-ui/react";
 import { useState } from "react";
 import { ConfigComponentProps } from "../../types";
 import { ItemPolicyType, ReplacePolicy } from "./ClassicMode/types";
@@ -50,40 +61,54 @@ export default function ClassicModeConfig(
   };
 
   return (
-    <Stack direction="column" spacing="1rem" width="100%">
-      <HStack maxWidth="512px">
-        <Text fontWeight="bold" minWidth="128px">
-          Item Policy:
-        </Text>
-        <Select
-          onChange={handleItemPolicyChange}
-          value={config.itemPolicy ?? defaultItemPolicy}
-          sx={{ backgroundColor: "white" }}
-        >
-          {itemPolicies.map((option, i) => (
-            <option value={option} key={i}>
-              {option}
-            </option>
-          ))}
-        </Select>
-      </HStack>
-
-      <HStack maxWidth="512px">
-        <Text fontWeight="bold" minWidth="128px">
-          Replace Policy:
-        </Text>
-        <Select
-          onChange={handleReplacePolicyChange}
-          value={config.replacePolicy ?? defaultReplacePolicy}
-          sx={{ backgroundColor: "white" }}
-        >
-          {replacePolicies.map((option, i) => (
-            <option value={option} key={i}>
-              {option}
-            </option>
-          ))}
-        </Select>
-      </HStack>
-    </Stack>
+    <>
+      <TableContainer>
+        <Table variant="striped">
+          <Thead>
+            <Tr>
+              <Th>
+                <Heading size="md">Mode Configuration: Classic</Heading>
+              </Th>
+            </Tr>
+          </Thead>
+          <Tbody>
+            <Tr>
+              <Td>Item Policy</Td>
+              <Td>
+                <Box>
+                  <Select
+                    onChange={handleItemPolicyChange}
+                    value={config.itemPolicy ?? defaultItemPolicy}
+                    bgColor="white"
+                  >
+                    {itemPolicies.map((option, i) => (
+                      <option value={option} key={i}>
+                        {option}
+                      </option>
+                    ))}
+                  </Select>
+                </Box>
+              </Td>
+            </Tr>
+            <Tr>
+              <Td>Replace Policy</Td>
+              <Td>
+                <Select
+                  onChange={handleReplacePolicyChange}
+                  value={config.replacePolicy ?? defaultReplacePolicy}
+                  bgColor="white"
+                >
+                  {replacePolicies.map((option, i) => (
+                    <option value={option} key={i}>
+                      {option}
+                    </option>
+                  ))}
+                </Select>
+              </Td>
+            </Tr>
+          </Tbody>
+        </Table>
+      </TableContainer>
+    </>
   );
 }
