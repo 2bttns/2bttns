@@ -1,4 +1,4 @@
-import { Box, Divider, Stack, Text, VStack } from "@chakra-ui/react";
+import { Box, BoxProps, Divider, Stack, Text, VStack } from "@chakra-ui/react";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useMemo } from "react";
@@ -6,6 +6,7 @@ import AdminNavbar from "../../navbar/containers/AdminNavbar";
 
 export type AdminLayoutProps = {
   children: React.ReactNode;
+  rootBoxProps?: BoxProps;
 };
 
 export type NavMenuLink =
@@ -25,7 +26,7 @@ const links: NavMenuLink[] = [
 ];
 
 export default function AdminLayout(props: AdminLayoutProps) {
-  const { children } = props;
+  const { children, rootBoxProps } = props;
 
   const router = useRouter();
 
@@ -40,6 +41,7 @@ export default function AdminLayout(props: AdminLayoutProps) {
       backgroundColor="gray.300"
       position="relative"
       overflow="hidden"
+      {...rootBoxProps}
     >
       <Box position="sticky" top="0" zIndex="99">
         <AdminNavbar />

@@ -7,6 +7,7 @@ import {
   ButtonGroup,
   Heading,
   HStack,
+  Skeleton,
   Table,
   TableContainer,
   Tbody,
@@ -18,14 +19,18 @@ import {
   useToast,
   VStack,
 } from "@chakra-ui/react";
-import { Game } from "@prisma/client";
+import { Game, Tag } from "@prisma/client";
 import type { GetServerSideProps, NextPage } from "next";
 import { Session } from "next-auth";
 import { useRouter } from "next/router";
+import { useEffect, useState } from "react";
 import DeleteGameButton from "../../features/games/containers/DeleteGameButton";
 import EditGameMode from "../../features/games/containers/EditGameMode";
 import PlayGameButton from "../../features/games/containers/PlayGameButton";
 import CustomEditable from "../../features/shared/components/CustomEditable";
+import TagMultiSelect, {
+  TagMultiSelectProps,
+} from "../../features/tags/containers/TagMultiSelect";
 import { prisma } from "../../server/db";
 import { api, RouterInputs } from "../../utils/api";
 import getSessionWithSignInRedirect from "../../utils/getSessionWithSignInRedirect";
@@ -73,14 +78,6 @@ const GameById: NextPage<GameByIdPageProps> = (props) => {
       <Box width="100%" height="100%" padding="1rem">
         <VStack spacing="1rem" width="100%" alignItems="start">
           <GameDetails gameId={gameId} />
-          {/* <HStack alignItems="start" width="100%">
-            <Text fontWeight="bold" minWidth="128px">
-              Input Tags:
-            </Text>
-            <Box flex={1} backgroundColor="white" padding="1rem">
-              <GameInputTagsFilterToggles gameId={gameId} />
-            </Box>
-          </HStack> */}
         </VStack>
       </Box>
     </>
@@ -151,6 +148,19 @@ function GameDetails(props: GameDetailsProps) {
     router.push("/games");
   };
 
+  const [inputTags, setInputTags] = useState<
+    TagMultiSelectProps["value"] | null
+  >(null);
+
+  useEffect(() => {
+    if (!gameQuery.data) return;
+    const data = gameQuery.data.game.inputTags.map((t) => ({
+      value: t.id,
+      label: t.name,
+    }));
+    setInputTags(data);
+  }, [gameQuery.data]);
+
   if (gameQuery.isLoading || !gameQuery.data) {
     return null;
   }
@@ -188,68 +198,92 @@ function GameDetails(props: GameDetailsProps) {
         </ButtonGroup>
       </HStack>
 
-      <Box maxW="2xl">
-        <TableContainer>
-          <Table variant="striped">
-            <Thead>
-              <Tr>
-                <Th>
-                  <Heading size="md">Game Setup</Heading>
-                </Th>
-              </Tr>
-            </Thead>
-            <Tbody>
-              <Tr>
-                <Td>ID</Td>
-                <Td>
-                  <CustomEditable
-                    value={gameQuery.data.game.id ?? ""}
-                    placeholder="<Missing ID>"
-                    handleSave={async (value) => {
-                      await handleUpdateGame({
-                        id: gameId,
-                        data: { id: value },
-                      });
-                    }}
-                  />
-                </Td>
-              </Tr>
-              <Tr>
-                <Td>Name</Td>
-                <Td>
-                  <CustomEditable
-                    value={gameQuery.data.game.name ?? ""}
-                    placeholder="<Untitled Game>"
-                    handleSave={async (value) => {
-                      await handleUpdateGame({
-                        id: gameId,
-                        data: { name: value },
-                      });
-                    }}
-                  />
-                </Td>
-              </Tr>
-              <Tr>
-                <Td verticalAlign="top">Description</Td>
-                <Td verticalAlign="top">
-                  <CustomEditable
-                    isTextarea
-                    value={gameQuery.data.game.description ?? ""}
-                    placeholder="<No Description>"
-                    handleSave={async (value) => {
-                      await handleUpdateGame({
-                        id: gameId,
-                        data: { description: value },
-                      });
-                    }}
-                  />
-                </Td>
-              </Tr>
-            </Tbody>
-          </Table>
-        </TableContainer>
-        <Box sx={{ marginY: "1rem" }}>
-          <EditGameMode gameId={gameId} />
+      <Box width="100%" height="100%" overflow="auto">
+        <Box minW="2xl" maxW="2xl">
+          <TableContainer overflowX="visible" overflowY="visible">
+            <Table variant="striped">
+              <Thead>
+                <Tr>
+                  <Th>
+                    <Heading size="md">Game Setup</Heading>
+                  </Th>
+                </Tr>
+              </Thead>
+              <Tbody>
+                <Tr>
+                  <Td>ID</Td>
+                  <Td>
+                    <CustomEditable
+                      value={gameQuery.data.game.id ?? ""}
+                      placeholder="<Missing ID>"
+                      handleSave={async (value) => {
+                        await handleUpdateGame({
+                          id: gameId,
+                          data: { id: value },
+                        });
+                      }}
+                    />
+                  </Td>
+                </Tr>
+                <Tr>
+                  <Td>Name</Td>
+                  <Td>
+                    <CustomEditable
+                      value={gameQuery.data.game.name ?? ""}
+                      placeholder="<Untitled Game>"
+                      handleSave={async (value) => {
+                        await handleUpdateGame({
+                          id: gameId,
+                          data: { name: value },
+                        });
+                      }}
+                    />
+                  </Td>
+                </Tr>
+                <Tr>
+                  <Td verticalAlign="top">Description</Td>
+                  <Td verticalAlign="top">
+                    <CustomEditable
+                      isTextarea
+                      value={gameQuery.data.game.description ?? ""}
+                      placeholder="<No Description>"
+                      handleSave={async (value) => {
+                        await handleUpdateGame({
+                          id: gameId,
+                          data: { description: value },
+                        });
+                      }}
+                    />
+                  </Td>
+                </Tr>
+                <Tr>
+                  <Td>Input Tags</Td>
+                  <Td>
+                    {!inputTags && <Skeleton height="24px" width="100%" />}
+                    {inputTags && (
+                      <TagMultiSelect
+                        value={inputTags}
+                        onChange={async (nextValue) => {
+                          setInputTags(nextValue);
+                          await handleUpdateGame({
+                            id: gameId,
+                            data: {
+                              inputTags: nextValue.map(
+                                (t) => t.value as Tag["id"]
+                              ),
+                            },
+                          });
+                        }}
+                      />
+                    )}
+                  </Td>
+                </Tr>
+              </Tbody>
+            </Table>
+          </TableContainer>
+          <Box sx={{ marginY: "1rem" }}>
+            <EditGameMode gameId={gameId} />
+          </Box>
         </Box>
       </Box>
     </Box>
