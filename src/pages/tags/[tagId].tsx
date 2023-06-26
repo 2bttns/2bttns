@@ -103,18 +103,6 @@ const TagByIdPage: NextPage<TagByIdPageProps> = (props) => {
 
   const appliedTagFilters = useAppliedTagFilters({ tagId });
 
-  if (getTagByIdQuery.isFetching) {
-    return (
-      <>
-        <Head>
-          <title>Tags - Loading... | 2bttns</title>
-          <meta name="description" content="2bttns Tag Management" />
-          <link rel="icon" href="/favicon.ico" />
-        </Head>
-      </>
-    );
-  }
-
   const tag = getTagByIdQuery.data?.tag;
   if (!tag) return <></>;
 
@@ -157,7 +145,7 @@ const TagByIdPage: NextPage<TagByIdPageProps> = (props) => {
             value={tag?.name || ""}
             placeholder="Untitled Tag"
             handleSave={async (value) => {
-              handleUpdateTag({ id: tag.id, data: { name: value } });
+              await handleUpdateTag({ id: tag.id, data: { name: value } });
             }}
           />
         </Heading>
@@ -166,7 +154,7 @@ const TagByIdPage: NextPage<TagByIdPageProps> = (props) => {
           value={tag?.description || ""}
           placeholder="No description"
           handleSave={async (value) => {
-            handleUpdateTag({ id: tag.id, data: { description: value } });
+            await handleUpdateTag({ id: tag.id, data: { description: value } });
           }}
         />
         <Divider />
