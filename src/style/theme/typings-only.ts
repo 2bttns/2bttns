@@ -1,5 +1,6 @@
 import { extendTheme, Theme } from "@chakra-ui/react";
 import colors from "./overrides/colors";
+import components from "./overrides/components";
 import radii from "./overrides/foundations/radius";
 import styles from "./overrides/styles";
 
@@ -11,7 +12,7 @@ const overrides: ThemeOverrides = {
   styles,
   radii,
   colors,
-  components: {},
+  components,
 
   // Do not import ./fonts.ts here; its usage of next/fonts will cause the chakra-ui CLI to not generate types properly
 };

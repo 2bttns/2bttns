@@ -10,6 +10,7 @@ const colors: ExtendedThemeColors = {
     darkblue: "#415db7",
     darktext: "#514e4e",
     lighttext: "#ffffff",
+    green: "#68D391",
   },
 };
 
