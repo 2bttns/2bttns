@@ -119,7 +119,7 @@ function GameDetails(props: GameDetailsProps) {
           description: updateDescription,
         });
         await wait(1);
-        await router.push(`/games/${id}`);
+        await router.replace(`/games/${id}`);
         await utils.games.getById.invalidate({ id: input.id });
       }
 
