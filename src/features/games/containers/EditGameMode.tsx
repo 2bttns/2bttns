@@ -13,10 +13,12 @@ import {
   TableContainer,
   Tbody,
   Td,
+  Text,
   Th,
   Thead,
   Tr,
   useToast,
+  VStack,
 } from "@chakra-ui/react";
 import { Game } from "@prisma/client";
 import { useMemo, useState } from "react";
@@ -25,6 +27,7 @@ import { getModeUI } from "../../../modes/modesUIRegistry";
 import { ConfigComponentProps } from "../../../modes/types";
 import { api, RouterInputs } from "../../../utils/api";
 import CustomEditable from "../../shared/components/CustomEditable";
+import UnderlinedTextTooltip from "../../shared/components/UnderlinedTextTooltip";
 
 type EditGameModeProps = {
   gameId: Game["id"];
@@ -114,7 +117,32 @@ export default function EditGameMode(props: EditGameModeProps) {
           </Thead>
           <Tbody>
             <Tr>
-              <Td fontWeight="bold">Game Mode</Td>
+              <Td>
+                <UnderlinedTextTooltip
+                  tooltipProps={{
+                    label: (
+                      <VStack
+                        spacing={1}
+                        alignItems="start"
+                        fontSize="12px"
+                        padding="1rem"
+                      >
+                        <Text fontWeight="bold">GAME MODE</Text>
+                        <Text>
+                          The user interface and underlying data processing
+                          functionality that define how a Game is played.
+                        </Text>
+                        <Text>
+                          Additional Modes can be installed or custom-built to
+                          support new types of Games.
+                        </Text>
+                      </VStack>
+                    ),
+                  }}
+                >
+                  Game Mode
+                </UnderlinedTextTooltip>
+              </Td>
               <Td>
                 <Box width="256px">
                   {!didMount ? (
@@ -141,7 +169,32 @@ export default function EditGameMode(props: EditGameModeProps) {
               </Td>
             </Tr>
             <Tr>
-              <Td>Round Length</Td>
+              <Td>
+                <UnderlinedTextTooltip
+                  tooltipProps={{
+                    label: (
+                      <VStack
+                        spacing={1}
+                        alignItems="start"
+                        fontSize="12px"
+                        padding="1rem"
+                      >
+                        <Text fontWeight="bold">ROUND LENGTH</Text>
+                        <Text>
+                          The total number of Game Objects that should appear
+                          when a user plays a round.
+                        </Text>
+                        <Text>
+                          Set to <strong>ALL</strong> if all Game Objects should
+                          appear in a single round.
+                        </Text>
+                      </VStack>
+                    ),
+                  }}
+                >
+                  Round Length
+                </UnderlinedTextTooltip>
+              </Td>
               <Td verticalAlign="top">
                 <CustomEditable
                   value={

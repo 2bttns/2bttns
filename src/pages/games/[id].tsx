@@ -28,6 +28,7 @@ import DeleteGameButton from "../../features/games/containers/DeleteGameButton";
 import EditGameMode from "../../features/games/containers/EditGameMode";
 import PlayGameButton from "../../features/games/containers/PlayGameButton";
 import CustomEditable from "../../features/shared/components/CustomEditable";
+import UnderlinedTextTooltip from "../../features/shared/components/UnderlinedTextTooltip";
 import TagMultiSelect, {
   TagMultiSelectProps,
 } from "../../features/tags/containers/TagMultiSelect";
@@ -211,7 +212,41 @@ function GameDetails(props: GameDetailsProps) {
               </Thead>
               <Tbody>
                 <Tr>
-                  <Td>ID</Td>
+                  <Td>
+                    <UnderlinedTextTooltip
+                      tooltipProps={{
+                        label: (
+                          <VStack
+                            spacing={1}
+                            alignItems="start"
+                            fontSize="12px"
+                            padding="1rem"
+                          >
+                            <Text fontWeight="bold">ID</Text>
+                            <Text>
+                              A default ID is generated for you when a Game is
+                              created.
+                            </Text>
+                            <Text>
+                              An ID may only contain alphanumeric, underscore
+                              (_), and hyphen (-) characters.
+                            </Text>
+                            <Text
+                              color="yellow.500"
+                              fontStyle="bold"
+                              textDecoration="underline"
+                            >
+                              ⚠️ Warning: Changing the ID will change the URL of
+                              the Game. This may break external connections to
+                              your Game.
+                            </Text>
+                          </VStack>
+                        ),
+                      }}
+                    >
+                      ID
+                    </UnderlinedTextTooltip>
+                  </Td>
                   <Td>
                     <CustomEditable
                       value={gameQuery.data.game.id ?? ""}
@@ -226,7 +261,25 @@ function GameDetails(props: GameDetailsProps) {
                   </Td>
                 </Tr>
                 <Tr>
-                  <Td>Name</Td>
+                  <Td>
+                    <UnderlinedTextTooltip
+                      tooltipProps={{
+                        label: (
+                          <VStack
+                            spacing={1}
+                            alignItems="start"
+                            fontSize="12px"
+                            padding="1rem"
+                          >
+                            <Text fontWeight="bold">NAME</Text>
+                            <Text>Optional display name of the Game.</Text>
+                          </VStack>
+                        ),
+                      }}
+                    >
+                      Name
+                    </UnderlinedTextTooltip>
+                  </Td>
                   <Td>
                     <CustomEditable
                       value={gameQuery.data.game.name ?? ""}
@@ -241,7 +294,25 @@ function GameDetails(props: GameDetailsProps) {
                   </Td>
                 </Tr>
                 <Tr>
-                  <Td verticalAlign="top">Description</Td>
+                  <Td verticalAlign="top">
+                    <UnderlinedTextTooltip
+                      tooltipProps={{
+                        label: (
+                          <VStack
+                            spacing={1}
+                            alignItems="start"
+                            fontSize="12px"
+                            padding="1rem"
+                          >
+                            <Text fontWeight="bold">DESCRIPTION</Text>
+                            <Text>Optional text description of the Game.</Text>
+                          </VStack>
+                        ),
+                      }}
+                    >
+                      Description
+                    </UnderlinedTextTooltip>
+                  </Td>
                   <Td verticalAlign="top">
                     <CustomEditable
                       isTextarea
@@ -257,7 +328,29 @@ function GameDetails(props: GameDetailsProps) {
                   </Td>
                 </Tr>
                 <Tr>
-                  <Td>Input Tags</Td>
+                  <Td>
+                    <UnderlinedTextTooltip
+                      tooltipProps={{
+                        label: (
+                          <VStack
+                            spacing={1}
+                            alignItems="start"
+                            fontSize="12px"
+                            padding="1rem"
+                          >
+                            <Text fontWeight="bold">INPUT TAGS</Text>
+                            <Text>
+                              Choose the tag(s) corresponding to the collection
+                              of Game Objects that players should see when they
+                              play the Game.
+                            </Text>
+                          </VStack>
+                        ),
+                      }}
+                    >
+                      Input Tags
+                    </UnderlinedTextTooltip>
+                  </Td>
                   <Td>
                     {!inputTags && <Skeleton height="24px" width="100%" />}
                     {inputTags && (
