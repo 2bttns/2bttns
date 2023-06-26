@@ -7,7 +7,14 @@ import {
   ButtonGroup,
   Heading,
   HStack,
+  Table,
+  TableContainer,
+  Tbody,
+  Td,
   Text,
+  Th,
+  Thead,
+  Tr,
   VStack,
 } from "@chakra-ui/react";
 import { Game } from "@prisma/client";
@@ -91,8 +98,12 @@ function GameDetails(props: GameDetailsProps) {
   const handleUpdateGame = async (
     input: RouterInputs["games"]["updateById"]
   ) => {
-    await updateGameMutation.mutateAsync(input);
-    await utils.games.getById.invalidate({ id: input.id });
+    try {
+      await updateGameMutation.mutateAsync(input);
+      await utils.games.getById.invalidate({ id: input.id });
+    } catch (error) {
+      throw error;
+    }
   };
 
   const router = useRouter();
@@ -136,29 +147,66 @@ function GameDetails(props: GameDetailsProps) {
           <DeleteGameButton gameId={gameId} onDeleted={onDeleted} />
         </ButtonGroup>
       </HStack>
-      <Heading size="xl">
-        <CustomEditable
-          value={gameQuery.data.game.name ?? ""}
-          placeholder="Untitled Game"
-          handleSave={async (value) => {
-            handleUpdateGame({
-              id: gameId,
-              data: { name: value },
-            });
-          }}
-        />
-      </Heading>
-      <CustomEditable
-        isTextarea
-        value={gameQuery.data.game.description ?? ""}
-        placeholder="No description"
-        handleSave={async (value) => {
-          handleUpdateGame({
-            id: gameId,
-            data: { description: value },
-          });
-        }}
-      />
+
+      <TableContainer w="xl">
+        <Table variant="striped">
+          <Thead>
+            <Tr>
+              <Heading size="lg">Game Setup</Heading>
+              <Th></Th>
+            </Tr>
+          </Thead>
+          <Tbody>
+            <Tr>
+              <Td>ID</Td>
+              <Td>
+                <CustomEditable
+                  value={gameQuery.data.game.id ?? ""}
+                  placeholder="<Missing ID>"
+                  handleSave={async (value) => {
+                    await handleUpdateGame({
+                      id: gameId,
+                      data: { id: value },
+                    });
+                  }}
+                />
+              </Td>
+            </Tr>
+            <Tr>
+              <Td>Name</Td>
+              <Td>
+                <CustomEditable
+                  value={gameQuery.data.game.name ?? ""}
+                  placeholder="<Untitled Game>"
+                  handleSave={async (value) => {
+                    await handleUpdateGame({
+                      id: gameId,
+                      data: { name: value },
+                    });
+                  }}
+                />
+              </Td>
+            </Tr>
+            <Tr>
+              <Td verticalAlign="top">Description</Td>
+              <Td verticalAlign="top">
+                <CustomEditable
+                  isTextarea
+                  value={gameQuery.data.game.description ?? ""}
+                  placeholder="<No Description>"
+                  handleSave={async (value) => {
+                    await handleUpdateGame({
+                      id: gameId,
+                      data: { description: value },
+                    });
+                  }}
+                />
+              </Td>
+            </Tr>
+          </Tbody>
+        </Table>
+      </TableContainer>
+
       <Text>Configure</Text>
 
       <HStack>

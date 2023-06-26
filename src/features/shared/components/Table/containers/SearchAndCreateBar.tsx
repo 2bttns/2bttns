@@ -69,6 +69,7 @@ export default function SearchAndCreateBar(props: SearchAndCreateBarProps) {
           bgColor="gray.200"
           isDisabled={isCreating}
           ref={inputRef}
+          focusBorderColor="twobttns.green"
         />
         {onCreate && (
           <InputRightElement>
@@ -97,7 +98,7 @@ export default function SearchAndCreateBar(props: SearchAndCreateBarProps) {
               hasArrow
             >
               <IconButton
-                colorScheme="blue"
+                colorScheme="green"
                 icon={isCreating ? <Spinner size="sm" /> : <AddIcon />}
                 aria-label="Create new item"
                 size="sm"

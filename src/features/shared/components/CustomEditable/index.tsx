@@ -96,7 +96,7 @@ export default function CustomEditable(props: CustomEditableProps) {
           <Stack
             direction="row"
             justifyContent="space-between"
-            alignItems="center"
+            alignItems={isTextarea ? "flex-start" : "center"}
             width="100%"
           >
             <EditablePreview
