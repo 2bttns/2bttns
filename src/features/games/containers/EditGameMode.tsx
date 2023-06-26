@@ -16,6 +16,7 @@ import {
   Th,
   Thead,
   Tr,
+  useToast,
 } from "@chakra-ui/react";
 import { Game } from "@prisma/client";
 import { useMemo, useState } from "react";
@@ -31,6 +32,8 @@ type EditGameModeProps = {
 
 export default function EditGameMode(props: EditGameModeProps) {
   const { gameId } = props;
+
+  const toast = useToast();
 
   const [selectedMode, setSelectedMode] = useState<AvailableModes | null>(null);
   const [modeConfig, setModeConfig] =
@@ -62,12 +65,30 @@ export default function EditGameMode(props: EditGameModeProps) {
   const handleUpdateGame = async (
     input: RouterInputs["games"]["updateById"]
   ) => {
+    let updateDescription = `Saving changes...`;
+    const updateToast = toast({
+      title: "Updating Game",
+      status: "loading",
+      description: updateDescription,
+    });
     try {
       await updateGameMutation.mutateAsync(input);
       await utils.games.getById.invalidate({ id: input.id });
+
+      updateDescription = ``;
+      toast.update(updateToast, {
+        title: "Saved",
+        status: "success",
+        description: updateDescription,
+      });
     } catch (error) {
+      updateDescription = `Failed to update (Game ID=${gameId}). See console for details`;
+      toast.update(updateToast, {
+        title: "Error",
+        status: "error",
+        description: updateDescription,
+      });
       console.error(error);
-      window.alert("Error updating game. See console for details.");
     }
   };
 

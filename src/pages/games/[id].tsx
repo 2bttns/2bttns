@@ -15,6 +15,7 @@ import {
   Th,
   Thead,
   Tr,
+  useToast,
   VStack,
 } from "@chakra-ui/react";
 import { Game } from "@prisma/client";
@@ -25,10 +26,10 @@ import DeleteGameButton from "../../features/games/containers/DeleteGameButton";
 import EditGameMode from "../../features/games/containers/EditGameMode";
 import PlayGameButton from "../../features/games/containers/PlayGameButton";
 import CustomEditable from "../../features/shared/components/CustomEditable";
-import GameInputTagsFilterToggles from "../../features/tags/containers/GameInputTagsFilterToggles";
 import { prisma } from "../../server/db";
 import { api, RouterInputs } from "../../utils/api";
 import getSessionWithSignInRedirect from "../../utils/getSessionWithSignInRedirect";
+import wait from "../../utils/wait";
 
 export type GameByIdPageProps = {
   gameId: Game["id"];
@@ -92,21 +93,60 @@ type GameDetailsProps = {
 function GameDetails(props: GameDetailsProps) {
   const { gameId } = props;
 
+  const toast = useToast();
+  const router = useRouter();
+
   const utils = api.useContext();
   const gameQuery = api.games.getById.useQuery({ id: gameId });
   const updateGameMutation = api.games.updateById.useMutation();
   const handleUpdateGame = async (
     input: RouterInputs["games"]["updateById"]
   ) => {
+    let updateDescription = `Saving changes...`;
+    let updateToast = toast({
+      title: "Updating Game",
+      status: "loading",
+      description: updateDescription,
+    });
     try {
       await updateGameMutation.mutateAsync(input);
-      await utils.games.getById.invalidate({ id: input.id });
+
+      // Redirect to the new game ID page if the ID changed
+      const id = input.data.id;
+      if (id && id !== gameId) {
+        toast.close(updateToast);
+        updateDescription = `Redirecting to new game ID page (${id})...`;
+        updateToast = toast({
+          title: "ID Changed",
+          status: "loading",
+          description: updateDescription,
+        });
+        await wait(1);
+        await router.push(`/games/${id}`);
+        await utils.games.getById.invalidate({ id: input.id });
+      }
+
+      updateDescription = ``;
+      toast.update(updateToast, {
+        title: "Saved",
+        status: "success",
+        description: updateDescription,
+      });
     } catch (error) {
+      updateDescription = `Failed to update (Game ID=${gameId}). See console for details`;
+      toast.update(updateToast, {
+        title: "Error",
+        status: "error",
+        description: updateDescription,
+      });
+
+      // This will be caught by CustomEditable component using this function
+      // it will revert the value to the previous value when it receives an error
+      console.error(error);
       throw error;
     }
   };
 
-  const router = useRouter();
   const onDeleted = () => {
     router.push("/games");
   };
