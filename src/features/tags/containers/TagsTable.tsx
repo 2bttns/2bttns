@@ -28,6 +28,7 @@ export type TagsTableProps = {
   hideColumns?: HideTagsTableColumn;
   onTagCreated?: (tag: TagData) => Promise<void>;
   topBarProps?: Partial<StackProps>;
+  onRowDoubleClicked?: PaginatedTableProps<TagData>["onRowDoubleClicked"];
 };
 
 export type TagsTableColumns = "id" | "name" | "description" | "updatedAt";
@@ -47,6 +48,7 @@ export default function TagsTable(props: TagsTableProps) {
     hideColumns,
     onTagCreated,
     topBarProps,
+    onRowDoubleClicked,
   } = props;
   const toast = useToast();
 
@@ -258,6 +260,7 @@ export default function TagsTable(props: TagsTableProps) {
               selectedRows={selectedRows}
               totalRows={tagsCountQuery.data?.count ?? 0}
               toggleCleared={toggleCleared}
+              onRowDoubleClicked={onRowDoubleClicked}
             />
           );
         }}
