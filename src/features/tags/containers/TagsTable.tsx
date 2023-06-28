@@ -18,6 +18,13 @@ import useSort from "../../shared/components/Table/hooks/useSort";
 
 export type TagData = RouterOutputs["tags"]["getAll"]["tags"][0];
 
+export const columnIds = {
+  ID: "id",
+  NAME: "name",
+  DESCRIPTION: "description",
+  UPDATED_AT: "updatedAt",
+};
+
 export type TagsTableProps = {
   additionalColumns?: PaginatedTableProps<TagData>["additionalColumns"];
   additionalTopBarContent?: (selectedRows: TagData[]) => React.ReactNode;
@@ -25,16 +32,10 @@ export type TagsTableProps = {
   areRowsSelectable?: boolean;
   constrainToRemainingSpaceProps?: Partial<ConstrainToRemainingSpaceProps>;
   editable?: boolean;
-  hideColumns?: HideTagsTableColumn;
   onTagCreated?: (tag: TagData) => Promise<void>;
   topBarProps?: Partial<StackProps>;
   onRowDoubleClicked?: PaginatedTableProps<TagData>["onRowDoubleClicked"];
-};
-
-export type TagsTableColumns = "id" | "name" | "description" | "updatedAt";
-
-export type HideTagsTableColumn = {
-  [key in TagsTableColumns]?: boolean;
+  omitColumns?: (keyof typeof columnIds)[];
 };
 
 export default function TagsTable(props: TagsTableProps) {
@@ -45,10 +46,10 @@ export default function TagsTable(props: TagsTableProps) {
     areRowsSelectable,
     constrainToRemainingSpaceProps,
     editable = true,
-    hideColumns,
     onTagCreated,
     topBarProps,
     onRowDoubleClicked,
+    omitColumns,
   } = props;
   const toast = useToast();
 
@@ -148,10 +149,6 @@ export default function TagsTable(props: TagsTableProps) {
     }
   };
 
-  const numColumnsToHide = useMemo<number>(() => {
-    return Object.values(hideColumns ?? {}).filter((v) => v === true).length;
-  }, [hideColumns]);
-
   const columns = useMemo<PaginatedTableProps<TagData>["columns"]>(() => {
     return [
       {
@@ -169,9 +166,10 @@ export default function TagsTable(props: TagsTableProps) {
           />
         ),
         sortable: true,
-        sortField: "id",
+        id: columnIds["ID"],
+        sortField: columnIds["ID"],
         minWidth: "256px",
-        omit: hideColumns?.id,
+        omit: omitColumns?.includes("ID"),
         reorder: true,
       },
       {
@@ -189,9 +187,10 @@ export default function TagsTable(props: TagsTableProps) {
           />
         ),
         sortable: true,
-        sortField: "name",
+        id: columnIds.NAME,
+        sortField: columnIds.NAME,
         minWidth: "256px",
-        omit: hideColumns?.name,
+        omit: omitColumns?.includes("NAME"),
         reorder: true,
       },
       {
@@ -210,22 +209,24 @@ export default function TagsTable(props: TagsTableProps) {
           />
         ),
         sortable: true,
-        sortField: "description",
+        id: columnIds.DESCRIPTION,
+        sortField: columnIds.DESCRIPTION,
         minWidth: "512px",
-        omit: hideColumns?.description,
+        omit: omitColumns?.includes("DESCRIPTION"),
         reorder: true,
       },
       {
         name: "Last Updated",
         cell: (row) => new Date(row.updatedAt).toLocaleString(),
         sortable: true,
-        sortField: "updatedAt",
+        id: columnIds.UPDATED_AT,
+        sortField: columnIds.UPDATED_AT,
         minWidth: "256px",
-        omit: hideColumns?.updatedAt,
+        omit: omitColumns?.includes("UPDATED_AT"),
         reorder: true,
       },
     ];
-  }, [editable, numColumnsToHide]);
+  }, [editable, omitColumns]);
 
   const { selectedRows, handleSelectedRowsChange, toggleCleared } =
     useSelectRows<TagData>({

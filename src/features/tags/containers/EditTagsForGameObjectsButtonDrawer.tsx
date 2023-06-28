@@ -100,10 +100,7 @@ export function EditTagsForGameObjectsDrawer(
 
             <TagsTable
               allowCreate={false}
-              hideColumns={{
-                updatedAt: true,
-                description: true,
-              }}
+              omitColumns={["DESCRIPTION", "UPDATED_AT"]}
               editable={false}
               areRowsSelectable={false}
               additionalColumns={{
