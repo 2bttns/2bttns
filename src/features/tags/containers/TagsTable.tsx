@@ -172,6 +172,7 @@ export default function TagsTable(props: TagsTableProps) {
         sortField: "id",
         minWidth: "256px",
         omit: hideColumns?.id,
+        reorder: true,
       },
       {
         name: "Name",
@@ -191,6 +192,7 @@ export default function TagsTable(props: TagsTableProps) {
         sortField: "name",
         minWidth: "256px",
         omit: hideColumns?.name,
+        reorder: true,
       },
       {
         name: "Description",
@@ -211,6 +213,7 @@ export default function TagsTable(props: TagsTableProps) {
         sortField: "description",
         minWidth: "512px",
         omit: hideColumns?.description,
+        reorder: true,
       },
       {
         name: "Last Updated",
@@ -219,6 +222,7 @@ export default function TagsTable(props: TagsTableProps) {
         sortField: "updatedAt",
         minWidth: "256px",
         omit: hideColumns?.updatedAt,
+        reorder: true,
       },
     ];
   }, [editable, numColumnsToHide]);

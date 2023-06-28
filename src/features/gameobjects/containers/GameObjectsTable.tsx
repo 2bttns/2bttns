@@ -210,6 +210,7 @@ export default function GameObjectsTable(props: GameObjectsTableProps) {
         sortField: columnIds.ID,
         minWidth: "256px",
         omit: omitColumns?.includes("ID"),
+        reorder: true,
       },
       {
         name: "Name",
@@ -230,6 +231,7 @@ export default function GameObjectsTable(props: GameObjectsTableProps) {
         sortField: columnIds.NAME,
         minWidth: "256px",
         omit: omitColumns?.includes("NAME"),
+        reorder: true,
       },
       {
         name: "Tags",
@@ -254,6 +256,7 @@ export default function GameObjectsTable(props: GameObjectsTableProps) {
         sortField: columnIds.TAGS,
         minWidth: "256px",
         omit: omitColumns?.includes("TAGS"),
+        reorder: true,
       },
       {
         name: "Last Updated",
@@ -263,6 +266,7 @@ export default function GameObjectsTable(props: GameObjectsTableProps) {
         sortField: columnIds.UPDATED_AT,
         minWidth: "256px",
         omit: omitColumns?.includes("UPDATED_AT"),
+        reorder: true,
       },
     ];
   }, [editable, tagDataById, omitColumns]);
