@@ -218,25 +218,6 @@ export default function GameObjectsTable(props: GameObjectsTableProps) {
         minWidth: "256px",
       },
       {
-        name: "Description",
-        cell: (row) => (
-          <CustomEditable
-            value={row.description ?? undefined}
-            placeholder="No description"
-            handleSave={async (nextValue) =>
-              handleUpdateGameObject(row.id, {
-                description: nextValue,
-              })
-            }
-            isEditable={editable}
-            isTextarea
-          />
-        ),
-        sortable: true,
-        sortField: "description",
-        minWidth: "512px",
-      },
-      {
         name: "Tags",
         cell: (row) => {
           return (
