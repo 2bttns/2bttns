@@ -227,23 +227,9 @@ export default function GamesTable(props: GamesTableProps) {
         reorder: true,
       },
       {
-        name: "Description",
-        cell: (row) => (
-          <CustomEditable
-            value={row.description ?? undefined}
-            placeholder="No description"
-            handleSave={async (nextValue) =>
-              handleUpdateGame(row.id, {
-                description: nextValue,
-              })
-            }
-            isEditable={editable}
-            isTextarea
-          />
-        ),
-        sortable: true,
-        sortField: "description",
-        minWidth: "512px",
+        name: "Mode",
+        cell: (row) => row.mode ?? "",
+        minWidth: "128px",
         reorder: true,
       },
       {
@@ -260,12 +246,6 @@ export default function GamesTable(props: GamesTableProps) {
         sortable: true,
         sortField: "tags",
         minWidth: "256px",
-        reorder: true,
-      },
-      {
-        name: "Mode",
-        cell: (row) => row.mode ?? "",
-        minWidth: "128px",
         reorder: true,
       },
       {
