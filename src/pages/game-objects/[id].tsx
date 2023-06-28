@@ -488,7 +488,7 @@ function GameObjectBreadcrumb(props: GameObjectBreadcrumbProps) {
 
   const router = useRouter();
   const onDeleted = async () => {
-    await router.push("/game-objects");
+    await router.replace("/game-objects");
   };
 
   const gameObjectQuery = api.gameObjects.getById.useQuery({

@@ -181,6 +181,9 @@ const TagByIdPage: NextPage<TagByIdPageProps> = (props) => {
               editable={false}
               allowCreate={false}
               omitColumns={["TAGS", "UPDATED_AT"]}
+              onRowDoubleClicked={async (row) => {
+                await router.push(`/game-objects/${row.id}`);
+              }}
             />
           </Box>
           <Box width="50%">
@@ -202,6 +205,9 @@ const TagByIdPage: NextPage<TagByIdPageProps> = (props) => {
               editable={false}
               allowCreate={false}
               omitColumns={["TAGS", "UPDATED_AT"]}
+              onRowDoubleClicked={async (row) => {
+                await router.push(`/game-objects/${row.id}`);
+              }}
             />
           </Box>
         </HStack>
