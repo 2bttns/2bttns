@@ -1,5 +1,6 @@
 import { ChevronRightIcon } from "@chakra-ui/icons";
 import {
+  Box,
   Breadcrumb,
   BreadcrumbItem,
   BreadcrumbLink,
@@ -9,6 +10,7 @@ import {
   HStack,
   Stack,
   Text,
+  Tooltip,
 } from "@chakra-ui/react";
 import { Tag } from "@prisma/client";
 import { GetServerSideProps, NextPage } from "next";
@@ -26,10 +28,6 @@ import CustomEditable from "../../features/shared/components/CustomEditable";
 import { AdditionalColumns } from "../../features/shared/components/Table/containers/PaginatedTable";
 import TableActionMenu from "../../features/shared/components/Table/containers/TableActionsMenu";
 import DeleteTagButton from "../../features/tags/containers/DeleteTagButton";
-import {
-  SelectTagFiltersDrawerButton,
-  SelectTagFiltersDrawerButtonProps,
-} from "../../features/tags/containers/SelectTagFiltersDrawerButton";
 import ToggleTagForSelectedGameObjects from "../../features/tags/containers/TableActionsMenu/ToggleTagForSelectedGameObjects";
 import { TagFilter } from "../../features/tags/containers/TagFilterToggles";
 import ToggleTagButton from "../../features/tags/containers/ToggleTagButton";
@@ -101,7 +99,15 @@ const TagByIdPage: NextPage<TagByIdPageProps> = (props) => {
       }
     };
 
-  const appliedTagFilters = useAppliedTagFilters({ tagId });
+  const tagsCountQuery = api.tags.getCount.useQuery();
+  const tagsQuery = api.tags.getAll.useQuery(
+    { take: tagsCountQuery.data?.count ?? 0 },
+    { enabled: tagsCountQuery.data?.count !== undefined }
+  );
+  const allTags = useMemo(() => {
+    if (!tagsQuery.data?.tags) return [];
+    return tagsQuery.data.tags.map((t) => t.id);
+  }, [tagsQuery.data?.tags, tagId]);
 
   const tag = getTagByIdQuery.data?.tag;
   if (!tag) return <></>;
@@ -158,26 +164,49 @@ const TagByIdPage: NextPage<TagByIdPageProps> = (props) => {
           }}
         />
         <Divider />
-        <Heading size="md">Tagged Game Objects</Heading>
-        <GameObjectsTable
-          tag={{
-            include: appliedTagFilters.outputs.includeTags,
-            exclude: appliedTagFilters.outputs.excludeTags,
-            untaggedFilter: appliedTagFilters.outputs.untaggedFilter,
-          }}
-          onGameObjectCreated={handleGameObjectCreated}
-          additionalTopBarContent={(selectedRows) => (
-            <AdditionalTopBarContent
-              selectedGameObjectRows={selectedRows}
-              tagId={tagId}
-              tagFilter={appliedTagFilters.state.tagFilter}
-              setTagFilter={appliedTagFilters.state.setTagFilter}
+
+        <HStack maxWidth="100%" overflow="scroll">
+          <Box width="50%">
+            <Heading size="md">Tagged</Heading>
+            <GameObjectsTable
+              tag={{
+                include: [tag.id],
+                exclude: [],
+                untaggedFilter: "exclude",
+              }}
+              onGameObjectCreated={handleGameObjectCreated}
+              additionalTopBarContent={(selectedRows) => (
+                <AdditionalTopBarContent
+                  selectedGameObjectRows={selectedRows}
+                  tagId={tagId}
+                />
+              )}
+              additionalColumns={getAdditionalColumns(tagId)}
+              editable={false}
+              allowCreate={false}
             />
-          )}
-          additionalColumns={getAdditionalColumns(tagId)}
-          editable={false}
-          allowCreate={false}
-        />
+          </Box>
+          <Box width="50%">
+            <Heading size="md">Untagged</Heading>
+            <GameObjectsTable
+              tag={{
+                include: allTags,
+                exclude: [tagId],
+                untaggedFilter: "include",
+              }}
+              onGameObjectCreated={handleGameObjectCreated}
+              additionalTopBarContent={(selectedRows) => (
+                <AdditionalTopBarContent
+                  selectedGameObjectRows={selectedRows}
+                  tagId={tagId}
+                />
+              )}
+              additionalColumns={getAdditionalColumns(tagId)}
+              editable={false}
+              allowCreate={false}
+            />
+          </Box>
+        </HStack>
       </Stack>
     </>
   );
@@ -263,30 +292,33 @@ function useAppliedTagFilters(props: UseAppliedTagFiltersProps) {
 type AdditionalTopBarContentProps = {
   selectedGameObjectRows: GameObjectData[];
   tagId: Tag["id"];
-  tagFilter: SelectTagFiltersDrawerButtonProps["tagFilter"];
-  setTagFilter: SelectTagFiltersDrawerButtonProps["setTagFilter"];
 };
 function AdditionalTopBarContent(props: AdditionalTopBarContentProps) {
-  const { selectedGameObjectRows, tagId, tagFilter, setTagFilter } = props;
+  const { selectedGameObjectRows, tagId } = props;
+
+  const isDisabled = selectedGameObjectRows.length === 0;
 
   return (
     <>
       <ButtonGroup>
-        <TableActionMenu
-          selectedRows={selectedGameObjectRows}
-          actionItems={(context) => (
-            <>
-              <ToggleTagForSelectedGameObjects
-                context={context}
-                tagId={tagId}
-              />
-            </>
-          )}
-        />
-        <SelectTagFiltersDrawerButton
-          tagFilter={tagFilter}
-          setTagFilter={setTagFilter}
-        />
+        <Tooltip
+          label={isDisabled ? "Please select at least one game object." : ""}
+        >
+          <Box>
+            <TableActionMenu
+              isDisabled={isDisabled}
+              selectedRows={selectedGameObjectRows}
+              actionItems={(context) => (
+                <>
+                  <ToggleTagForSelectedGameObjects
+                    context={context}
+                    tagId={tagId}
+                  />
+                </>
+              )}
+            />
+          </Box>
+        </Tooltip>
       </ButtonGroup>
     </>
   );
