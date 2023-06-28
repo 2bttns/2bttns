@@ -199,8 +199,13 @@ function GameDetails(props: GameDetailsProps) {
         </ButtonGroup>
       </HStack>
 
-      <Box width="100%" height="100%" overflow="auto">
-        <Box minW="2xl" maxW="2xl">
+      <Box
+        width="100%"
+        maxHeight="calc(100vh - 120px)"
+        overflowX="auto"
+        overflowY="scroll"
+      >
+        <Box minW="2xl" maxW="2xl" paddingBottom="5rem">
           <TableContainer overflowX="visible" overflowY="visible">
             <Table variant="striped">
               <Thead>
