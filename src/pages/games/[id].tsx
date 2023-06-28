@@ -113,7 +113,7 @@ function GameDetails(props: GameDetailsProps) {
       const id = input.data.id;
       if (id && id !== gameId) {
         toast.close(updateToast);
-        updateDescription = `Redirecting to new game ID page (${id})...`;
+        updateDescription = `Redirecting to new Game ID page (${id})...`;
         updateToast = toast({
           title: "ID Changed",
           status: "loading",

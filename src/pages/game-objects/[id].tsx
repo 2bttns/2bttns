@@ -21,6 +21,7 @@ import {
   Th,
   Thead,
   Tr,
+  useToast,
   VStack,
 } from "@chakra-ui/react";
 import { GameObject, Tag } from "@prisma/client";
@@ -50,6 +51,7 @@ import useAllTagFilters from "../../features/tags/hooks/useAllTagFilters";
 import { prisma } from "../../server/db";
 import { api, RouterInputs } from "../../utils/api";
 import getSessionWithSignInRedirect from "../../utils/getSessionWithSignInRedirect";
+import wait from "../../utils/wait";
 
 export type GameObjectByIdPageProps = {
   gameObjectId: GameObject["id"];
@@ -91,45 +93,50 @@ const GameObjectById: NextPage<GameObjectByIdPageProps> = (props) => {
   const tagFilter = useAllTagFilters();
   const router = useRouter();
 
+  const [tabIndex, setTabIndex] = useState(0);
+
   return (
     <>
       <Box width="100%" height="100%" padding="1rem" overflow="auto">
         <GameObjectBreadcrumb gameObjectId={gameObjectId} />
 
-        <Tabs>
+        <Tabs tabIndex={tabIndex} onChange={setTabIndex}>
           <TabList>
             <Tab>Details</Tab>
-            <Tab>Relationships</Tab>
+            <Tab onChange={console.log}>Relationships</Tab>
           </TabList>
 
           <TabPanels>
             <TabPanel>
-              <GameObjectDetails gameObjectId={gameObjectId} />
+              {/* Render only when tab is active */}
+              {tabIndex === 0 && (
+                <GameObjectDetails gameObjectId={gameObjectId} />
+              )}
             </TabPanel>
             <TabPanel>
-              <GameObjectsTable
-                allowCreate={false}
-                gameObjectsToExclude={[gameObjectId]}
-                tag={{
-                  include: tagFilter.results.includeTags,
-                  exclude: tagFilter.results.excludeTags,
-                  untaggedFilter: tagFilter.results.untaggedFilter,
-                }}
-                additionalColumns={getAdditionalColumns(gameObjectId)}
-                constrainToRemainingSpaceProps={{
-                  bottomOffset: 120,
-                }}
-                additionalTopBarContent={(selectedRows) => (
-                  <AdditionalTopBarContent
-                    selectedRows={selectedRows}
-                    tagFilter={tagFilter}
-                  />
-                )}
-                editable={false}
-                onRowDoubleClicked={async (row) => {
-                  await router.push(`/game-objects/${row.id}`);
-                }}
-              />
+              {/* Render only when tab is active -- otherwise the table may not render properly when hidden and not appear properly when changing to its tab */}
+              {tabIndex === 1 && (
+                <GameObjectsTable
+                  allowCreate={false}
+                  gameObjectsToExclude={[gameObjectId]}
+                  tag={{
+                    include: tagFilter.results.includeTags,
+                    exclude: tagFilter.results.excludeTags,
+                    untaggedFilter: tagFilter.results.untaggedFilter,
+                  }}
+                  additionalColumns={getAdditionalColumns(gameObjectId)}
+                  additionalTopBarContent={(selectedRows) => (
+                    <AdditionalTopBarContent
+                      selectedRows={selectedRows}
+                      tagFilter={tagFilter}
+                    />
+                  )}
+                  editable={false}
+                  onRowDoubleClicked={async (row) => {
+                    await router.push(`/game-objects/${row.id}`);
+                  }}
+                />
+              )}
             </TabPanel>
           </TabPanels>
         </Tabs>
@@ -219,17 +226,56 @@ function GameObjectDetails(props: GameObjectDetailsProps) {
   });
   const gameObject = gameObjectQuery.data?.gameObject;
 
+  const toast = useToast();
+  const router = useRouter();
+
   const utils = api.useContext();
   const updateGameObjectMutation = api.gameObjects.updateById.useMutation();
   const handleUpdateGameObject = async (
     input: RouterInputs["gameObjects"]["updateById"]
   ) => {
+    let updateDescription = `Saving changes...`;
+    let updateToast = toast({
+      title: "Updating Game Object",
+      status: "loading",
+      description: updateDescription,
+    });
     try {
       await updateGameObjectMutation.mutateAsync(input);
-      await utils.gameObjects.invalidate();
+
+      // Redirect to the new game object ID page if the ID changed
+      const id = input.data.id;
+      if (id && id !== gameObjectId) {
+        toast.close(updateToast);
+        updateDescription = `Redirecting to new Game Object ID page (${id})...`;
+        updateToast = toast({
+          title: "ID Changed",
+          status: "loading",
+          description: updateDescription,
+        });
+        await wait(1);
+        await router.replace(`/game-objects/${id}`);
+      }
+
+      updateDescription = ``;
+      toast.update(updateToast, {
+        title: "Saved",
+        status: "success",
+        description: updateDescription,
+      });
+      await utils.gameObjects.getById.invalidate({ id: gameObjectId });
     } catch (error) {
+      updateDescription = `Failed to update (Game Object ID=${gameObjectId}). See console for details`;
+      toast.update(updateToast, {
+        title: "Error",
+        status: "error",
+        description: updateDescription,
+      });
+
+      // This will be caught by CustomEditable component using this function
+      // it will revert the value to the previous value when it receives an error
       console.error(error);
-      window.alert("Error updating game object. See console for details.");
+      throw error;
     }
   };
 
@@ -336,7 +382,7 @@ function GameObjectDetails(props: GameObjectDetailsProps) {
                   <Td>
                     <CustomEditable
                       value={gameObject?.name ?? ""}
-                      placeholder="<Untitled Game>"
+                      placeholder="<Untitled Game Object>"
                       handleSave={async (value) => {
                         await handleUpdateGameObject({
                           id: gameObjectId,
