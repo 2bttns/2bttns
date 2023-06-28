@@ -5,11 +5,16 @@ import {
   BreadcrumbItem,
   BreadcrumbLink,
   ButtonGroup,
-  Divider,
   Heading,
   HStack,
+  Skeleton,
+  Tab,
   Table,
   TableContainer,
+  TabList,
+  TabPanel,
+  TabPanels,
+  Tabs,
   Tbody,
   Td,
   Text,
@@ -18,11 +23,12 @@ import {
   Tr,
   VStack,
 } from "@chakra-ui/react";
-import { GameObject } from "@prisma/client";
+import { GameObject, Tag } from "@prisma/client";
 import type { GetServerSideProps, NextPage } from "next";
 import { Session } from "next-auth";
 import Head from "next/head";
 import { useRouter } from "next/router";
+import { useEffect, useState } from "react";
 import DeleteGameObjectButton from "../../features/gameobjects/containers/DeleteGameObjectButton";
 import GameObjectsTable, {
   GameObjectData,
@@ -37,7 +43,9 @@ import TableActionsMenuItemDelete from "../../features/shared/components/Table/c
 import UnderlinedTextTooltip from "../../features/shared/components/UnderlinedTextTooltip";
 import { EditTagsForGameObjectsButtonDrawer } from "../../features/tags/containers/EditTagsForGameObjectsButtonDrawer";
 import { SelectTagFiltersDrawerButton } from "../../features/tags/containers/SelectTagFiltersDrawerButton";
-import TagBadges from "../../features/tags/containers/TagBadges";
+import TagMultiSelect, {
+  TagMultiSelectProps,
+} from "../../features/tags/containers/TagMultiSelect";
 import useAllTagFilters from "../../features/tags/hooks/useAllTagFilters";
 import { prisma } from "../../server/db";
 import { api, RouterInputs } from "../../utils/api";
@@ -86,35 +94,45 @@ const GameObjectById: NextPage<GameObjectByIdPageProps> = (props) => {
   return (
     <>
       <Box width="100%" height="100%" padding="1rem" overflow="auto">
-        <Box>
-          <GameObjectDetails gameObjectId={gameObjectId} />
-          <Divider />
-        </Box>
+        <GameObjectBreadcrumb gameObjectId={gameObjectId} />
 
-        <GameObjectsTable
-          allowCreate={false}
-          gameObjectsToExclude={[gameObjectId]}
-          tag={{
-            include: tagFilter.results.includeTags,
-            exclude: tagFilter.results.excludeTags,
-            untaggedFilter: tagFilter.results.untaggedFilter,
-          }}
-          additionalColumns={getAdditionalColumns(gameObjectId)}
-          // TODO: Fix table fitting -- maybe delay rendering until after the game object details have rendered?
-          constrainToRemainingSpaceProps={{
-            bottomOffset: 120,
-          }}
-          additionalTopBarContent={(selectedRows) => (
-            <AdditionalTopBarContent
-              selectedRows={selectedRows}
-              tagFilter={tagFilter}
-            />
-          )}
-          editable={false}
-          onRowDoubleClicked={async (row) => {
-            await router.push(`/game-objects/${row.id}`);
-          }}
-        />
+        <Tabs>
+          <TabList>
+            <Tab>Details</Tab>
+            <Tab>Relationships</Tab>
+          </TabList>
+
+          <TabPanels>
+            <TabPanel>
+              <GameObjectDetails gameObjectId={gameObjectId} />
+            </TabPanel>
+            <TabPanel>
+              <GameObjectsTable
+                allowCreate={false}
+                gameObjectsToExclude={[gameObjectId]}
+                tag={{
+                  include: tagFilter.results.includeTags,
+                  exclude: tagFilter.results.excludeTags,
+                  untaggedFilter: tagFilter.results.untaggedFilter,
+                }}
+                additionalColumns={getAdditionalColumns(gameObjectId)}
+                constrainToRemainingSpaceProps={{
+                  bottomOffset: 120,
+                }}
+                additionalTopBarContent={(selectedRows) => (
+                  <AdditionalTopBarContent
+                    selectedRows={selectedRows}
+                    tagFilter={tagFilter}
+                  />
+                )}
+                editable={false}
+                onRowDoubleClicked={async (row) => {
+                  await router.push(`/game-objects/${row.id}`);
+                }}
+              />
+            </TabPanel>
+          </TabPanels>
+        </Tabs>
       </Box>
     </>
   );
@@ -200,7 +218,6 @@ function GameObjectDetails(props: GameObjectDetailsProps) {
     includeTags: true,
   });
   const gameObject = gameObjectQuery.data?.gameObject;
-  const name = gameObject?.name ?? "Untitled Game Object";
 
   const utils = api.useContext();
   const updateGameObjectMutation = api.gameObjects.updateById.useMutation();
@@ -216,50 +233,25 @@ function GameObjectDetails(props: GameObjectDetailsProps) {
     }
   };
 
-  const router = useRouter();
-  const onDeleted = () => {
-    router.push("/game-objects");
-  };
+  const [inputTags, setInputTags] = useState<
+    TagMultiSelectProps["value"] | null
+  >(null);
+
+  useEffect(() => {
+    if (!gameObject) return;
+    const data = gameObject.tags.map((t) => ({
+      value: t.id,
+      label: t.name,
+    }));
+    setInputTags(data);
+  }, [gameObject]);
 
   if (!gameObject) return null;
 
   return (
     <Box>
-      <Head>
-        <title>{name} - GameObjects | 2bttns</title>
-        <meta name="description" content="Manage Game Object" />
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
-
-      <HStack justifyContent="space-between">
-        <Breadcrumb
-          spacing="4px"
-          separator={<ChevronRightIcon color="gray.500" />}
-          marginBottom="1rem"
-        >
-          <BreadcrumbItem>
-            <BreadcrumbLink href="/game-objects">Game Objects</BreadcrumbLink>
-          </BreadcrumbItem>
-
-          <BreadcrumbItem isCurrentPage>
-            <BreadcrumbLink href={`/game-objects/${gameObject.id}`}>
-              {name || "Untitled Game Object"}
-              <Text color="blue.500" display="inline">
-                {" "}
-                ({gameObject.id})
-              </Text>
-            </BreadcrumbLink>
-          </BreadcrumbItem>
-        </Breadcrumb>
-
-        <DeleteGameObjectButton
-          gameObjectId={gameObject.id}
-          onDeleted={onDeleted}
-        />
-      </HStack>
-
-      <Box width="100%" height="100%" overflow="auto">
-        <Box minW="2xl" maxW="2xl">
+      <Box width="100%" height="calc(100vh - 200px)">
+        <Box minW="2xl" maxW="2xl" paddingBottom="5rem">
           <TableContainer overflowX="visible" overflowY="visible">
             <Table variant="striped">
               <Thead>
@@ -415,38 +407,93 @@ function GameObjectDetails(props: GameObjectDetailsProps) {
                     </UnderlinedTextTooltip>
                   </Td>
                   <Td>
-                    {/* {!inputTags && <Skeleton height="24px" width="100%" />}
+                    {!inputTags && <Skeleton height="24px" width="100%" />}
                     {inputTags && (
                       <TagMultiSelect
                         value={inputTags}
                         onChange={async (nextValue) => {
                           setInputTags(nextValue);
                           await handleUpdateGameObject({
-                            id: gameObjectId
+                            id: gameObjectId,
                             data: {
-                              inputTags: nextValue.map(
-                                (t) => t.value as Tag["id"]
-                              ),
+                              tags: nextValue.map((t) => t.value as Tag["id"]),
                             },
                           });
                         }}
                       />
-                    )} */}
+                    )}
                   </Td>
                 </Tr>
               </Tbody>
             </Table>
           </TableContainer>
         </Box>
-
-        <Box marginTop="1rem">
-          <TagBadges
-            selectedTags={gameObject.tags}
-            collapseLetterLimit="disabled"
-          />
-        </Box>
       </Box>
     </Box>
+  );
+}
+
+type GameObjectBreadcrumbProps = {
+  gameObjectId: GameObject["id"];
+};
+
+function GameObjectBreadcrumb(props: GameObjectBreadcrumbProps) {
+  const { gameObjectId } = props;
+
+  const router = useRouter();
+  const onDeleted = async () => {
+    await router.push("/game-objects");
+  };
+
+  const gameObjectQuery = api.gameObjects.getById.useQuery({
+    id: gameObjectId,
+  });
+
+  const name =
+    gameObjectQuery?.data?.gameObject?.name || "<Untitled Game Object>";
+
+  return (
+    <>
+      <Head>
+        <title>{name} - GameObjects | 2bttns</title>
+        <meta name="description" content="Manage Game Object" />
+        <link rel="icon" href="/favicon.ico" />
+      </Head>
+
+      <HStack justifyContent="space-between" alignItems="center">
+        {gameObjectQuery.isLoading ? (
+          <Skeleton width="100%" height="40px" />
+        ) : (
+          <>
+            <Breadcrumb
+              spacing="4px"
+              separator={<ChevronRightIcon color="gray.500" />}
+            >
+              <BreadcrumbItem>
+                <BreadcrumbLink href="/game-objects">
+                  Game Objects
+                </BreadcrumbLink>
+              </BreadcrumbItem>
+
+              <BreadcrumbItem isCurrentPage>
+                <BreadcrumbLink href={`/game-objects/${gameObjectId}`}>
+                  {name || "Untitled Game Object"}
+                  <Text color="blue.500" display="inline">
+                    {" "}
+                    ({gameObjectId})
+                  </Text>
+                </BreadcrumbLink>
+              </BreadcrumbItem>
+            </Breadcrumb>
+
+            <DeleteGameObjectButton
+              gameObjectId={gameObjectId}
+              onDeleted={onDeleted}
+            />
+          </>
+        )}
+      </HStack>
+    </>
   );
 }
 

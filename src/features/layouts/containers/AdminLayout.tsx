@@ -4,6 +4,8 @@ import { useRouter } from "next/router";
 import { useMemo } from "react";
 import AdminNavbar from "../../navbar/containers/AdminNavbar";
 
+export const ADMIN_SIDEBAR_WIDTH = "200px";
+
 export type AdminLayoutProps = {
   children: React.ReactNode;
   rootBoxProps?: BoxProps;
@@ -50,8 +52,8 @@ export default function AdminLayout(props: AdminLayoutProps) {
         <VStack
           backgroundColor="twobttns.blue"
           height="100%"
-          minWidth="200px"
-          width="200px"
+          minWidth={ADMIN_SIDEBAR_WIDTH}
+          width={ADMIN_SIDEBAR_WIDTH}
           spacing={0}
           color="gray.100"
           zIndex={99}
@@ -90,7 +92,7 @@ export default function AdminLayout(props: AdminLayoutProps) {
             );
           })}
         </VStack>
-        <Box width="calc(100% - 200px)" height="100%">
+        <Box width={`calc(100% - ${ADMIN_SIDEBAR_WIDTH})`} height="100%">
           {children}
         </Box>
       </Stack>
