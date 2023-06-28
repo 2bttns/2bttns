@@ -103,7 +103,7 @@ const GameObjectById: NextPage<GameObjectByIdPageProps> = (props) => {
         <Tabs tabIndex={tabIndex} onChange={setTabIndex}>
           <TabList>
             <Tab>Details</Tab>
-            <Tab onChange={console.log}>Relationships</Tab>
+            <Tab isDisabled>Relationships</Tab>
           </TabList>
 
           <TabPanels>
