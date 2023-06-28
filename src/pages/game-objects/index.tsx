@@ -149,7 +149,7 @@ function Actions(props: ActionsProps) {
       <ButtonGroup width="100%" justifyContent="center">
         <EditTagsForGameObjectsButtonDrawer gameObjectIds={[gameObjectId]} />
         <ManageGameObjectButton gameObjectId={gameObjectId} />
-        <DeleteGameObjectButton gameObjectId={gameObjectId} />
+        {/* <DeleteGameObjectButton gameObjectId={gameObjectId} /> */}
       </ButtonGroup>
     </>
   );

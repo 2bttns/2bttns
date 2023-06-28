@@ -8,7 +8,15 @@ import {
   Divider,
   Heading,
   HStack,
+  Table,
+  TableContainer,
+  Tbody,
+  Td,
   Text,
+  Th,
+  Thead,
+  Tr,
+  VStack,
 } from "@chakra-ui/react";
 import { GameObject } from "@prisma/client";
 import type { GetServerSideProps, NextPage } from "next";
@@ -26,6 +34,7 @@ import CustomEditable from "../../features/shared/components/CustomEditable";
 import { AdditionalColumns } from "../../features/shared/components/Table/containers/PaginatedTable";
 import TableActionMenu from "../../features/shared/components/Table/containers/TableActionsMenu";
 import TableActionsMenuItemDelete from "../../features/shared/components/Table/containers/TableActionsMenu/TableActionsMenuItemDelete";
+import UnderlinedTextTooltip from "../../features/shared/components/UnderlinedTextTooltip";
 import { EditTagsForGameObjectsButtonDrawer } from "../../features/tags/containers/EditTagsForGameObjectsButtonDrawer";
 import { SelectTagFiltersDrawerButton } from "../../features/tags/containers/SelectTagFiltersDrawerButton";
 import TagBadges from "../../features/tags/containers/TagBadges";
@@ -76,7 +85,7 @@ const GameObjectById: NextPage<GameObjectByIdPageProps> = (props) => {
 
   return (
     <>
-      <Box width="100%" height="100%" padding="1rem">
+      <Box width="100%" height="100%" padding="1rem" overflow="auto">
         <Box>
           <GameObjectDetails gameObjectId={gameObjectId} />
           <Divider />
@@ -249,34 +258,193 @@ function GameObjectDetails(props: GameObjectDetailsProps) {
         />
       </HStack>
 
-      <Heading size="xl">
-        <CustomEditable
-          value={gameObject.name ?? ""}
-          placeholder="Untitled Game Object"
-          handleSave={async (value) => {
-            handleUpdateGameObject({
-              id: gameObject.id,
-              data: { name: value },
-            });
-          }}
-        />
-      </Heading>
-      <CustomEditable
-        isTextarea
-        value={gameObject.description ?? ""}
-        placeholder="No description"
-        handleSave={async (value) => {
-          handleUpdateGameObject({
-            id: gameObject.id,
-            data: { description: value },
-          });
-        }}
-      />
-      <Box marginTop="1rem">
-        <TagBadges
-          selectedTags={gameObject.tags}
-          collapseLetterLimit="disabled"
-        />
+      <Box width="100%" height="100%" overflow="auto">
+        <Box minW="2xl" maxW="2xl">
+          <TableContainer overflowX="visible" overflowY="visible">
+            <Table variant="striped">
+              <Thead>
+                <Tr>
+                  <Th>
+                    <Heading size="md">Game Setup</Heading>
+                  </Th>
+                </Tr>
+              </Thead>
+              <Tbody>
+                <Tr>
+                  <Td>
+                    <UnderlinedTextTooltip
+                      tooltipProps={{
+                        label: (
+                          <VStack
+                            spacing={1}
+                            alignItems="start"
+                            fontSize="12px"
+                            padding="1rem"
+                          >
+                            <Text fontWeight="bold">ID</Text>
+                            <Text>
+                              A default ID is generated for you when a Game
+                              Object is created.
+                            </Text>
+                            <Text>
+                              An ID may only contain alphanumeric, underscore
+                              (_), and hyphen (-) characters.
+                            </Text>
+                            <Text
+                              color="yellow.500"
+                              fontStyle="bold"
+                              textDecoration="underline"
+                            >
+                              ⚠️ Warning: Changing the ID will change the URL of
+                              the Game Object. This may break external
+                              references to the Game Object.
+                            </Text>
+                          </VStack>
+                        ),
+                      }}
+                    >
+                      ID
+                    </UnderlinedTextTooltip>
+                  </Td>
+                  <Td>
+                    <CustomEditable
+                      value={gameObject.id ?? ""}
+                      placeholder="<Missing ID>"
+                      handleSave={async (value) => {
+                        await handleUpdateGameObject({
+                          id: gameObjectId,
+                          data: { id: value },
+                        });
+                      }}
+                    />
+                  </Td>
+                </Tr>
+                <Tr>
+                  <Td>
+                    <UnderlinedTextTooltip
+                      tooltipProps={{
+                        label: (
+                          <VStack
+                            spacing={1}
+                            alignItems="start"
+                            fontSize="12px"
+                            padding="1rem"
+                          >
+                            <Text fontWeight="bold">NAME</Text>
+                            <Text>
+                              Optional display name of the Game Object.
+                            </Text>
+                          </VStack>
+                        ),
+                      }}
+                    >
+                      Name
+                    </UnderlinedTextTooltip>
+                  </Td>
+                  <Td>
+                    <CustomEditable
+                      value={gameObject?.name ?? ""}
+                      placeholder="<Untitled Game>"
+                      handleSave={async (value) => {
+                        await handleUpdateGameObject({
+                          id: gameObjectId,
+                          data: { name: value },
+                        });
+                      }}
+                    />
+                  </Td>
+                </Tr>
+                <Tr>
+                  <Td verticalAlign="top">
+                    <UnderlinedTextTooltip
+                      tooltipProps={{
+                        label: (
+                          <VStack
+                            spacing={1}
+                            alignItems="start"
+                            fontSize="12px"
+                            padding="1rem"
+                          >
+                            <Text fontWeight="bold">DESCRIPTION</Text>
+                            <Text>
+                              Optional text description of the Game Object.
+                            </Text>
+                          </VStack>
+                        ),
+                      }}
+                    >
+                      Description
+                    </UnderlinedTextTooltip>
+                  </Td>
+                  <Td verticalAlign="top">
+                    <CustomEditable
+                      isTextarea
+                      value={gameObject?.description ?? ""}
+                      placeholder="<No Description>"
+                      handleSave={async (value) => {
+                        await handleUpdateGameObject({
+                          id: gameObjectId,
+                          data: { description: value },
+                        });
+                      }}
+                    />
+                  </Td>
+                </Tr>
+                <Tr>
+                  <Td>
+                    <UnderlinedTextTooltip
+                      tooltipProps={{
+                        label: (
+                          <VStack
+                            spacing={1}
+                            alignItems="start"
+                            fontSize="12px"
+                            padding="1rem"
+                          >
+                            <Text fontWeight="bold">INPUT TAGS</Text>
+                            <Text>
+                              Choose the tag(s) corresponding to the collection
+                              of Game Objects that players should see when they
+                              play the Game.
+                            </Text>
+                          </VStack>
+                        ),
+                      }}
+                    >
+                      Input Tags
+                    </UnderlinedTextTooltip>
+                  </Td>
+                  <Td>
+                    {/* {!inputTags && <Skeleton height="24px" width="100%" />}
+                    {inputTags && (
+                      <TagMultiSelect
+                        value={inputTags}
+                        onChange={async (nextValue) => {
+                          setInputTags(nextValue);
+                          await handleUpdateGameObject({
+                            id: gameObjectId
+                            data: {
+                              inputTags: nextValue.map(
+                                (t) => t.value as Tag["id"]
+                              ),
+                            },
+                          });
+                        }}
+                      />
+                    )} */}
+                  </Td>
+                </Tr>
+              </Tbody>
+            </Table>
+          </TableContainer>
+        </Box>
+
+        <Box marginTop="1rem">
+          <TagBadges
+            selectedTags={gameObject.tags}
+            collapseLetterLimit="disabled"
+          />
+        </Box>
       </Box>
     </Box>
   );
