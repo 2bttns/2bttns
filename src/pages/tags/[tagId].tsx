@@ -5,12 +5,16 @@ import {
   BreadcrumbItem,
   BreadcrumbLink,
   ButtonGroup,
-  Divider,
   Heading,
   HStack,
   Stack,
+  Tab,
   Table,
   TableContainer,
+  TabList,
+  TabPanel,
+  TabPanels,
+  Tabs,
   Tbody,
   Td,
   Text,
@@ -26,7 +30,7 @@ import { GetServerSideProps, NextPage } from "next";
 import { Session } from "next-auth";
 import Head from "next/head";
 import { useRouter } from "next/router";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import GameObjectsTable, {
   GameObjectData,
   GameObjectsTableProps,
@@ -65,7 +69,6 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 const TagByIdPage: NextPage<TagByIdPageProps> = (props) => {
   const router = useRouter();
   const tagId = router.query.tagId as string;
-  const toast = useToast();
   const utils = api.useContext();
 
   const getTagByIdQuery = api.tags.getById.useQuery(
@@ -80,6 +83,175 @@ const TagByIdPage: NextPage<TagByIdPageProps> = (props) => {
       refetchOnWindowFocus: false,
     }
   );
+
+  const updateTagMutation = api.tags.updateById.useMutation();
+  const handleGameObjectCreated: GameObjectsTableProps["onGameObjectCreated"] =
+    async (gameObjectId) => {
+      try {
+        await updateTagMutation.mutateAsync({
+          id: tagId,
+          data: { addGameObjects: [gameObjectId] },
+        });
+        await utils.gameObjects.invalidate();
+      } catch (error) {
+        window.alert("Error creating game object. See console for details.");
+        console.error(error);
+      }
+    };
+
+  const tagsCountQuery = api.tags.getCount.useQuery();
+  const tagsQuery = api.tags.getAll.useQuery(
+    { take: tagsCountQuery.data?.count ?? 0 },
+    { enabled: tagsCountQuery.data?.count !== undefined }
+  );
+  const allTags = useMemo(() => {
+    if (!tagsQuery.data?.tags) return [];
+    return tagsQuery.data.tags.map((t) => t.id);
+  }, [tagsQuery.data?.tags, tagId]);
+
+  const [tabIndex, setTabIndex] = useState(0);
+
+  const tag = getTagByIdQuery.data?.tag;
+  if (!tag) return <></>;
+
+  return (
+    <>
+      <Head>
+        <title>Tags - {tag?.name} | 2bttns</title>
+        <meta name="description" content="2bttns Tag Management" />
+        <link rel="icon" href="/favicon.ico" />
+      </Head>
+      <Stack direction="column" width="100%" spacing="1rem" padding="1rem">
+        {
+          <HStack justifyContent="space-between">
+            <Breadcrumb
+              spacing="4px"
+              separator={<ChevronRightIcon color="gray.500" />}
+              marginBottom="1rem"
+            >
+              <BreadcrumbItem>
+                <BreadcrumbLink href="/tags">Tags</BreadcrumbLink>
+              </BreadcrumbItem>
+
+              <BreadcrumbItem isCurrentPage>
+                <BreadcrumbLink href={`/tags/${tag.id}`}>
+                  {tag.name || "Untitled Tag"}
+                  <Text color="blue.500" display="inline">
+                    {" "}
+                    ({tag.id})
+                  </Text>
+                </BreadcrumbLink>
+              </BreadcrumbItem>
+            </Breadcrumb>
+
+            <ButtonGroup>
+              <DeleteTagButton tagId={tag.id} />
+            </ButtonGroup>
+          </HStack>
+        }
+
+        <Tabs tabIndex={tabIndex} onChange={setTabIndex}>
+          <TabList>
+            <Tab>Details</Tab>
+            <Tab>Manage Game Objects</Tab>
+          </TabList>
+
+          <TabPanels>
+            <TabPanel>
+              {/* Render only when tab is active */}
+              {tabIndex === 0 && <TagDetails tagId={tagId} />}
+            </TabPanel>
+            <TabPanel>
+              {/* Render only when tab is active -- otherwise the tables may not render properly when hidden and not appear properly when changing to its tab */}
+              {tabIndex === 1 && (
+                <>
+                  <HStack maxWidth="100%" overflow="scroll">
+                    <Box width="50%">
+                      <Heading size="md">Tagged</Heading>
+                      <GameObjectsTable
+                        tag={{
+                          include: [tag.id],
+                          exclude: [],
+                          untaggedFilter: "exclude",
+                        }}
+                        onGameObjectCreated={handleGameObjectCreated}
+                        additionalTopBarContent={(selectedRows) => (
+                          <AdditionalTopBarContent
+                            selectedGameObjectRows={selectedRows}
+                            tagId={tagId}
+                          />
+                        )}
+                        additionalColumns={getAdditionalColumns(tagId)}
+                        editable={false}
+                        allowCreate={false}
+                        omitColumns={["TAGS", "UPDATED_AT"]}
+                        onRowDoubleClicked={async (row) => {
+                          await router.push(`/game-objects/${row.id}`);
+                        }}
+                      />
+                    </Box>
+                    <Box width="50%">
+                      <Heading size="md">Untagged</Heading>
+                      <GameObjectsTable
+                        tag={{
+                          include: allTags,
+                          exclude: [tagId],
+                          untaggedFilter: "include",
+                        }}
+                        onGameObjectCreated={handleGameObjectCreated}
+                        additionalTopBarContent={(selectedRows) => (
+                          <AdditionalTopBarContent
+                            selectedGameObjectRows={selectedRows}
+                            tagId={tagId}
+                          />
+                        )}
+                        additionalColumns={getAdditionalColumns(tagId)}
+                        editable={false}
+                        allowCreate={false}
+                        omitColumns={["TAGS", "UPDATED_AT"]}
+                        onRowDoubleClicked={async (row) => {
+                          await router.push(`/game-objects/${row.id}`);
+                        }}
+                      />
+                    </Box>
+                  </HStack>
+                </>
+              )}
+            </TabPanel>
+          </TabPanels>
+        </Tabs>
+      </Stack>
+    </>
+  );
+};
+
+type AdditionalTopBarContentProps = {
+  selectedGameObjectRows: GameObjectData[];
+  tagId: Tag["id"];
+};
+
+type TagDetailsProps = {
+  tagId: Tag["id"];
+};
+function TagDetails(props: TagDetailsProps) {
+  const { tagId } = props;
+  const toast = useToast();
+  const utils = api.useContext();
+  const router = useRouter();
+
+  const getTagByIdQuery = api.tags.getById.useQuery(
+    { id: tagId },
+    {
+      enabled: !!tagId,
+      retry: false,
+      onError: async () => {
+        await router.replace("/tags");
+      },
+      keepPreviousData: true,
+      refetchOnWindowFocus: false,
+    }
+  );
+  const tag = getTagByIdQuery.data?.tag;
 
   const updateTagMutation = api.tags.updateById.useMutation();
   const handleUpdateTag = async (input: RouterInputs["tags"]["updateById"]) => {
@@ -128,266 +300,142 @@ const TagByIdPage: NextPage<TagByIdPageProps> = (props) => {
     }
   };
 
-  const handleGameObjectCreated: GameObjectsTableProps["onGameObjectCreated"] =
-    async (gameObjectId) => {
-      try {
-        await updateTagMutation.mutateAsync({
-          id: tagId,
-          data: { addGameObjects: [gameObjectId] },
-        });
-        await utils.gameObjects.invalidate();
-      } catch (error) {
-        window.alert("Error creating game object. See console for details.");
-        console.error(error);
-      }
-    };
-
-  const tagsCountQuery = api.tags.getCount.useQuery();
-  const tagsQuery = api.tags.getAll.useQuery(
-    { take: tagsCountQuery.data?.count ?? 0 },
-    { enabled: tagsCountQuery.data?.count !== undefined }
-  );
-  const allTags = useMemo(() => {
-    if (!tagsQuery.data?.tags) return [];
-    return tagsQuery.data.tags.map((t) => t.id);
-  }, [tagsQuery.data?.tags, tagId]);
-
-  const tag = getTagByIdQuery.data?.tag;
   if (!tag) return <></>;
 
   return (
-    <>
-      <Head>
-        <title>Tags - {tag?.name} | 2bttns</title>
-        <meta name="description" content="2bttns Tag Management" />
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
-      <Stack direction="column" width="100%" spacing="1rem" padding="1rem">
-        {
-          <HStack justifyContent="space-between">
-            <Breadcrumb
-              spacing="4px"
-              separator={<ChevronRightIcon color="gray.500" />}
-              marginBottom="1rem"
-            >
-              <BreadcrumbItem>
-                <BreadcrumbLink href="/tags">Tags</BreadcrumbLink>
-              </BreadcrumbItem>
-
-              <BreadcrumbItem isCurrentPage>
-                <BreadcrumbLink href={`/tags/${tag.id}`}>
-                  {tag.name || "Untitled Tag"}
-                  <Text color="blue.500" display="inline">
-                    {" "}
-                    ({tag.id})
-                  </Text>
-                </BreadcrumbLink>
-              </BreadcrumbItem>
-            </Breadcrumb>
-
-            <ButtonGroup>
-              <DeleteTagButton tagId={tag.id} />
-            </ButtonGroup>
-          </HStack>
-        }
-
-        <Box minW="2xl" maxW="2xl" paddingBottom="5rem">
-          <TableContainer overflowX="visible" overflowY="visible">
-            <Table variant="striped">
-              <Thead>
-                <Tr>
-                  <Th>
-                    <Heading size="md">Tag Details</Heading>
-                  </Th>
-                </Tr>
-              </Thead>
-              <Tbody>
-                <Tr>
-                  <Td>
-                    <UnderlinedTextTooltip
-                      tooltipProps={{
-                        label: (
-                          <VStack
-                            spacing={1}
-                            alignItems="start"
-                            fontSize="12px"
-                            padding="1rem"
-                          >
-                            <Text fontWeight="bold">ID</Text>
-                            <Text>
-                              A default ID is generated for you when a Tag is
-                              created.
-                            </Text>
-                            <Text>
-                              An ID may only contain alphanumeric, underscore
-                              (_), and hyphen (-) characters.
-                            </Text>
-                            <Text
-                              color="yellow.500"
-                              fontStyle="bold"
-                              textDecoration="underline"
-                            >
-                              ⚠️ Warning: Changing the ID will change the URL of
-                              the Tag. This may break external references to the
-                              Tag.
-                            </Text>
-                          </VStack>
-                        ),
-                      }}
-                    >
-                      ID
-                    </UnderlinedTextTooltip>
-                  </Td>
-                  <Td>
-                    <CustomEditable
-                      value={tag?.id ?? ""}
-                      placeholder="<Missing ID>"
-                      handleSave={async (value) => {
-                        await handleUpdateTag({
-                          id: tag.id,
-                          data: { id: value },
-                        });
-                      }}
-                    />
-                  </Td>
-                </Tr>
-                <Tr>
-                  <Td>
-                    <UnderlinedTextTooltip
-                      tooltipProps={{
-                        label: (
-                          <VStack
-                            spacing={1}
-                            alignItems="start"
-                            fontSize="12px"
-                            padding="1rem"
-                          >
-                            <Text fontWeight="bold">NAME</Text>
-                            <Text>
-                              Optional display name of the Game Object.
-                            </Text>
-                          </VStack>
-                        ),
-                      }}
-                    >
-                      Name
-                    </UnderlinedTextTooltip>
-                  </Td>
-                  <Td>
-                    <CustomEditable
-                      value={tag?.name ?? ""}
-                      placeholder="<Untitled Tag>"
-                      handleSave={async (value) => {
-                        await handleUpdateTag({
-                          id: tag.id,
-                          data: { name: value },
-                        });
-                      }}
-                    />
-                  </Td>
-                </Tr>
-                <Tr>
-                  <Td verticalAlign="top">
-                    <UnderlinedTextTooltip
-                      tooltipProps={{
-                        label: (
-                          <VStack
-                            spacing={1}
-                            alignItems="start"
-                            fontSize="12px"
-                            padding="1rem"
-                          >
-                            <Text fontWeight="bold">DESCRIPTION</Text>
-                            <Text>
-                              Optional text description of the Game Object.
-                            </Text>
-                          </VStack>
-                        ),
-                      }}
-                    >
-                      Description
-                    </UnderlinedTextTooltip>
-                  </Td>
-                  <Td verticalAlign="top">
-                    <CustomEditable
-                      isTextarea
-                      value={tag?.description ?? ""}
-                      placeholder="<No Description>"
-                      handleSave={async (value) => {
-                        await handleUpdateTag({
-                          id: tag.id,
-                          data: { description: value },
-                        });
-                      }}
-                    />
-                  </Td>
-                </Tr>
-              </Tbody>
-            </Table>
-          </TableContainer>
-        </Box>
-
-        <Divider />
-
-        <HStack maxWidth="100%" overflow="scroll">
-          <Box width="50%">
-            <Heading size="md">Tagged</Heading>
-            <GameObjectsTable
-              tag={{
-                include: [tag.id],
-                exclude: [],
-                untaggedFilter: "exclude",
-              }}
-              onGameObjectCreated={handleGameObjectCreated}
-              additionalTopBarContent={(selectedRows) => (
-                <AdditionalTopBarContent
-                  selectedGameObjectRows={selectedRows}
-                  tagId={tagId}
+    <Box minW="2xl" maxW="2xl" paddingBottom="5rem">
+      <TableContainer overflowX="visible" overflowY="visible">
+        <Table variant="striped">
+          <Thead>
+            <Tr>
+              <Th>
+                <Heading size="md">Tag Details</Heading>
+              </Th>
+            </Tr>
+          </Thead>
+          <Tbody>
+            <Tr>
+              <Td>
+                <UnderlinedTextTooltip
+                  tooltipProps={{
+                    label: (
+                      <VStack
+                        spacing={1}
+                        alignItems="start"
+                        fontSize="12px"
+                        padding="1rem"
+                      >
+                        <Text fontWeight="bold">ID</Text>
+                        <Text>
+                          A default ID is generated for you when a Tag is
+                          created.
+                        </Text>
+                        <Text>
+                          An ID may only contain alphanumeric, underscore (_),
+                          and hyphen (-) characters.
+                        </Text>
+                        <Text
+                          color="yellow.500"
+                          fontStyle="bold"
+                          textDecoration="underline"
+                        >
+                          ⚠️ Warning: Changing the ID will change the URL of the
+                          Tag. This may break external references to the Tag.
+                        </Text>
+                      </VStack>
+                    ),
+                  }}
+                >
+                  ID
+                </UnderlinedTextTooltip>
+              </Td>
+              <Td>
+                <CustomEditable
+                  value={tag?.id ?? ""}
+                  placeholder="<Missing ID>"
+                  handleSave={async (value) => {
+                    await handleUpdateTag({
+                      id: tag.id,
+                      data: { id: value },
+                    });
+                  }}
                 />
-              )}
-              additionalColumns={getAdditionalColumns(tagId)}
-              editable={false}
-              allowCreate={false}
-              omitColumns={["TAGS", "UPDATED_AT"]}
-              onRowDoubleClicked={async (row) => {
-                await router.push(`/game-objects/${row.id}`);
-              }}
-            />
-          </Box>
-          <Box width="50%">
-            <Heading size="md">Untagged</Heading>
-            <GameObjectsTable
-              tag={{
-                include: allTags,
-                exclude: [tagId],
-                untaggedFilter: "include",
-              }}
-              onGameObjectCreated={handleGameObjectCreated}
-              additionalTopBarContent={(selectedRows) => (
-                <AdditionalTopBarContent
-                  selectedGameObjectRows={selectedRows}
-                  tagId={tagId}
+              </Td>
+            </Tr>
+            <Tr>
+              <Td>
+                <UnderlinedTextTooltip
+                  tooltipProps={{
+                    label: (
+                      <VStack
+                        spacing={1}
+                        alignItems="start"
+                        fontSize="12px"
+                        padding="1rem"
+                      >
+                        <Text fontWeight="bold">NAME</Text>
+                        <Text>Optional display name of the Tag.</Text>
+                      </VStack>
+                    ),
+                  }}
+                >
+                  Name
+                </UnderlinedTextTooltip>
+              </Td>
+              <Td>
+                <CustomEditable
+                  value={tag?.name ?? ""}
+                  placeholder="<Untitled Tag>"
+                  handleSave={async (value) => {
+                    await handleUpdateTag({
+                      id: tag.id,
+                      data: { name: value },
+                    });
+                  }}
                 />
-              )}
-              additionalColumns={getAdditionalColumns(tagId)}
-              editable={false}
-              allowCreate={false}
-              omitColumns={["TAGS", "UPDATED_AT"]}
-              onRowDoubleClicked={async (row) => {
-                await router.push(`/game-objects/${row.id}`);
-              }}
-            />
-          </Box>
-        </HStack>
-      </Stack>
-    </>
+              </Td>
+            </Tr>
+            <Tr>
+              <Td verticalAlign="top">
+                <UnderlinedTextTooltip
+                  tooltipProps={{
+                    label: (
+                      <VStack
+                        spacing={1}
+                        alignItems="start"
+                        fontSize="12px"
+                        padding="1rem"
+                      >
+                        <Text fontWeight="bold">DESCRIPTION</Text>
+                        <Text>Optional text description of the Tag.</Text>
+                      </VStack>
+                    ),
+                  }}
+                >
+                  Description
+                </UnderlinedTextTooltip>
+              </Td>
+              <Td verticalAlign="top">
+                <CustomEditable
+                  isTextarea
+                  value={tag?.description ?? ""}
+                  placeholder="<No Description>"
+                  handleSave={async (value) => {
+                    await handleUpdateTag({
+                      id: tag.id,
+                      data: { description: value },
+                    });
+                  }}
+                />
+              </Td>
+            </Tr>
+          </Tbody>
+        </Table>
+      </TableContainer>
+    </Box>
   );
-};
+}
 
-type AdditionalTopBarContentProps = {
-  selectedGameObjectRows: GameObjectData[];
-  tagId: Tag["id"];
-};
 function AdditionalTopBarContent(props: AdditionalTopBarContentProps) {
   const { selectedGameObjectRows, tagId } = props;
 
@@ -443,3 +491,6 @@ function getAdditionalColumns(
 }
 
 export default TagByIdPage;
+function toast(arg0: { title: string; status: string; description: string }) {
+  throw new Error("Function not implemented.");
+}
