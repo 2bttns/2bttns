@@ -175,6 +175,8 @@ const TagByIdPage: NextPage<TagByIdPageProps> = (props) => {
             />
           )}
           additionalColumns={getAdditionalColumns(tagId)}
+          editable={false}
+          allowCreate={false}
         />
       </Stack>
     </>

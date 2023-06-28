@@ -2,6 +2,7 @@ import { Box, ButtonGroup, Divider } from "@chakra-ui/react";
 import type { GetServerSideProps } from "next";
 import { Session } from "next-auth";
 import Head from "next/head";
+import { useRouter } from "next/router";
 import DeleteGameObjectButton from "../../features/gameobjects/containers/DeleteGameObjectButton";
 import GameObjectsTable, {
   GameObjectData,
@@ -42,6 +43,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 
 const GameObjects: NextPageWithLayout<GameObjectsPageProps> = (props) => {
   const tagFilter = useAllTagFilters();
+  const router = useRouter();
 
   return (
     <>
@@ -64,6 +66,10 @@ const GameObjects: NextPageWithLayout<GameObjectsPageProps> = (props) => {
             />
           )}
           additionalColumns={getAdditionalColumns()}
+          editable={false}
+          onRowDoubleClicked={async (row) => {
+            await router.push(`/game-objects/${row.id}`);
+          }}
         />
       </Box>
     </>

@@ -36,6 +36,7 @@ export type GameObjectsTableProps = {
   constrainToRemainingSpaceProps?: Partial<ConstrainToRemainingSpaceProps>;
   topBarProps?: Partial<StackProps>;
   allowCreate?: boolean;
+  onRowDoubleClicked?: PaginatedTableProps<GameObjectData>["onRowDoubleClicked"];
 };
 
 export default function GameObjectsTable(props: GameObjectsTableProps) {
@@ -49,6 +50,7 @@ export default function GameObjectsTable(props: GameObjectsTableProps) {
     constrainToRemainingSpaceProps,
     topBarProps,
     allowCreate = true,
+    onRowDoubleClicked,
   } = props;
   const toast = useToast();
 
@@ -303,6 +305,7 @@ export default function GameObjectsTable(props: GameObjectsTableProps) {
               selectedRows={selectedRows}
               totalRows={gameObjectsCountQuery.data?.count ?? 0}
               toggleCleared={toggleCleared}
+              onRowDoubleClicked={onRowDoubleClicked}
             />
           );
         }}

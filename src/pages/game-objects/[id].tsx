@@ -72,6 +72,7 @@ const GameObjectById: NextPage<GameObjectByIdPageProps> = (props) => {
   const { gameObjectId } = props;
 
   const tagFilter = useAllTagFilters();
+  const router = useRouter();
 
   return (
     <>
@@ -100,6 +101,10 @@ const GameObjectById: NextPage<GameObjectByIdPageProps> = (props) => {
               tagFilter={tagFilter}
             />
           )}
+          editable={false}
+          onRowDoubleClicked={async (row) => {
+            await router.push(`/game-objects/${row.id}`);
+          }}
         />
       </Box>
     </>
