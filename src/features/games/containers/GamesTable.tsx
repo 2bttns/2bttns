@@ -38,6 +38,7 @@ export type GamesTableProps = {
   topBarProps?: Partial<StackProps>;
   allowCreate?: boolean;
   areRowsSelectable?: boolean;
+  onRowDoubleClicked?: PaginatedTableProps<GameData>["onRowDoubleClicked"];
 };
 
 export default function GamesTable(props: GamesTableProps) {
@@ -51,6 +52,7 @@ export default function GamesTable(props: GamesTableProps) {
     topBarProps,
     allowCreate = true,
     areRowsSelectable = true,
+    onRowDoubleClicked,
   } = props;
 
   const toast = useToast();
@@ -228,7 +230,7 @@ export default function GamesTable(props: GamesTableProps) {
       },
       {
         name: "Mode",
-        cell: (row) => row.mode ?? "",
+        cell: (row) => <div data-tag="allowRowEvents">{row.mode ?? ""}</div>,
         minWidth: "128px",
         reorder: true,
       },
@@ -326,6 +328,7 @@ export default function GamesTable(props: GamesTableProps) {
               selectedRows={selectedRows}
               totalRows={gamesCountQuery.data?.count ?? 0}
               toggleCleared={toggleCleared}
+              onRowDoubleClicked={onRowDoubleClicked}
             />
           );
         }}

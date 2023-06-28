@@ -19,6 +19,7 @@ export type PaginatedTableProps<T> = {
   totalRows: number;
   toggleCleared?: IDataTableProps<T>["clearSelectedRows"];
   loadDelayMs?: number;
+  onRowDoubleClicked?: IDataTableProps<T>["onRowDoubleClicked"];
 };
 
 export type AdditionalColumns<T> = {
@@ -44,6 +45,7 @@ export default function PaginatedTable<T>(props: PaginatedTableProps<T>) {
     totalRows,
     toggleCleared,
     loadDelayMs = 500,
+    onRowDoubleClicked,
   } = props;
 
   const controlledColumns = useMemo<PaginatedTableProps<T>["columns"]>(() => {
@@ -109,6 +111,7 @@ export default function PaginatedTable<T>(props: PaginatedTableProps<T>) {
               borderLeftWidth: ".5px",
               borderRightWidth: ".5px",
               borderColor: "rgba(200, 200, 200, .25)",
+              fontSize: "12px",
             },
           },
           headCells: {
@@ -126,12 +129,27 @@ export default function PaginatedTable<T>(props: PaginatedTableProps<T>) {
               borderRadius: "0",
             },
           },
+          rows: {
+            // Make the rows look clickable if there is an onRowDoubleClicked handler
+            style: onRowDoubleClicked
+              ? {
+                  cursor: "pointer",
+                  "&:hover": {
+                    backgroundColor: "rgba(200, 200, 200, .25)",
+                  },
+                  "&:active": {
+                    backgroundColor: "rgba(200, 200, 200, .5)",
+                  },
+                }
+              : undefined,
+          },
         }}
         striped
         progressPending={progressPending}
         progressComponent={
           <ProgressComponent areRowsSelectable={areRowsSelectable} />
         }
+        onRowDoubleClicked={onRowDoubleClicked}
       />
     </Box>
   );
