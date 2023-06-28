@@ -22,6 +22,13 @@ import TagBadges from "../../tags/containers/TagBadges";
 export type GameObjectData =
   RouterOutputs["gameObjects"]["getAll"]["gameObjects"][0];
 
+export const columnIds = {
+  ID: "id",
+  NAME: "name",
+  TAGS: "tags",
+  UPDATED_AT: "updatedAt",
+};
+
 export type GameObjectsTableProps = {
   tag?: {
     include: Tag["id"][];
@@ -37,6 +44,7 @@ export type GameObjectsTableProps = {
   topBarProps?: Partial<StackProps>;
   allowCreate?: boolean;
   onRowDoubleClicked?: PaginatedTableProps<GameObjectData>["onRowDoubleClicked"];
+  omitColumns?: (keyof typeof columnIds)[];
 };
 
 export default function GameObjectsTable(props: GameObjectsTableProps) {
@@ -51,7 +59,9 @@ export default function GameObjectsTable(props: GameObjectsTableProps) {
     topBarProps,
     allowCreate = true,
     onRowDoubleClicked,
+    omitColumns,
   } = props;
+
   const toast = useToast();
 
   const { perPage, currentPage, handlePageChange, handlePerRowsChange } =
@@ -196,8 +206,10 @@ export default function GameObjectsTable(props: GameObjectsTableProps) {
           />
         ),
         sortable: true,
-        sortField: "id",
+        id: columnIds.ID,
+        sortField: columnIds.ID,
         minWidth: "256px",
+        omit: omitColumns?.includes("ID"),
       },
       {
         name: "Name",
@@ -214,8 +226,10 @@ export default function GameObjectsTable(props: GameObjectsTableProps) {
           />
         ),
         sortable: true,
-        sortField: "name",
+        id: columnIds.NAME,
+        sortField: columnIds.NAME,
         minWidth: "256px",
+        omit: omitColumns?.includes("NAME"),
       },
       {
         name: "Tags",
@@ -236,18 +250,22 @@ export default function GameObjectsTable(props: GameObjectsTableProps) {
           );
         },
         sortable: true,
-        sortField: "tags",
+        id: columnIds.TAGS,
+        sortField: columnIds.TAGS,
         minWidth: "256px",
+        omit: omitColumns?.includes("TAGS"),
       },
       {
         name: "Last Updated",
         cell: (row) => row.updatedAt.toLocaleString(),
         sortable: true,
-        sortField: "updatedAt",
+        id: columnIds.UPDATED_AT,
+        sortField: columnIds.UPDATED_AT,
         minWidth: "256px",
+        omit: omitColumns?.includes("UPDATED_AT"),
       },
     ];
-  }, [editable, tagDataById]);
+  }, [editable, tagDataById, omitColumns]);
 
   const { selectedRows, handleSelectedRowsChange, toggleCleared } =
     useSelectRows<GameObjectData>({
