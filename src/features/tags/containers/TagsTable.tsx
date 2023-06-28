@@ -214,7 +214,7 @@ export default function TagsTable(props: TagsTableProps) {
       },
       {
         name: "Last Updated",
-        cell: (row) => row.updatedAt.toLocaleString(),
+        cell: (row) => new Date(row.updatedAt).toLocaleString(),
         sortable: true,
         sortField: "updatedAt",
         minWidth: "256px",

@@ -257,7 +257,7 @@ export default function GameObjectsTable(props: GameObjectsTableProps) {
       },
       {
         name: "Last Updated",
-        cell: (row) => row.updatedAt.toLocaleString(),
+        cell: (row) => new Date(row.updatedAt).toLocaleString(),
         sortable: true,
         id: columnIds.UPDATED_AT,
         sortField: columnIds.UPDATED_AT,
