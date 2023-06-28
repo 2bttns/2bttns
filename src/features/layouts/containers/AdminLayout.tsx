@@ -1,7 +1,16 @@
-import { Box, BoxProps, Divider, Stack, Text, VStack } from "@chakra-ui/react";
+import {
+  Box,
+  BoxProps,
+  Divider,
+  HStack,
+  Stack,
+  Text,
+  VStack,
+} from "@chakra-ui/react";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useMemo } from "react";
+import { FaExternalLinkAlt } from "react-icons/fa";
 import AdminNavbar from "../../navbar/containers/AdminNavbar";
 
 export const ADMIN_SIDEBAR_WIDTH = "200px";
@@ -12,7 +21,7 @@ export type AdminLayoutProps = {
 };
 
 export type NavMenuLink =
-  | { href: string; label: string; newTab?: boolean }
+  | { href: string; label: string; external?: boolean }
   | "divider";
 const links: NavMenuLink[] = [
   { href: "/", label: "Home" },
@@ -23,7 +32,7 @@ const links: NavMenuLink[] = [
   "divider",
   { href: "/settings", label: "Settings" },
   { href: "/api-documentation", label: "API" },
-  { href: "https://docs.2bttns.com", label: "Documentation", newTab: true },
+  { href: "https://docs.2bttns.com", label: "Documentation", external: true },
   // { href: "/testRankedOutputs", label: "Outputs" },
 ];
 
@@ -64,7 +73,7 @@ export default function AdminLayout(props: AdminLayoutProps) {
             }
 
             const isCurrentRootPage = currentRootPage === link.href;
-            const target = link.newTab ? "_blank" : "_self";
+            const target = link.external ? "_blank" : "_self";
             return (
               <Link
                 href={link.href}
@@ -86,7 +95,12 @@ export default function AdminLayout(props: AdminLayoutProps) {
                   backgroundColor={isCurrentRootPage ? "gray.400" : "inherit"}
                   color={isCurrentRootPage ? "gray.800" : "inherit"}
                 >
-                  <Text>{link.label}</Text>
+                  <HStack alignItems="center">
+                    <Text>{link.label}</Text>
+                    {link.external && (
+                      <FaExternalLinkAlt display="inline" fontSize="16px" />
+                    )}
+                  </HStack>
                 </Box>
               </Link>
             );

@@ -11,8 +11,8 @@ import Link from "next/link";
 
 export type PreviewLinkCardProps = {
   icon: IconButtonProps["icon"];
-  title: string;
-  description: string;
+  title: React.ReactNode;
+  description: React.ReactNode;
   link: string;
 };
 

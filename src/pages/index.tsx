@@ -1,8 +1,15 @@
-import { Box, Stack, VStack } from "@chakra-ui/react";
+import { Box, HStack, Stack, Text, VStack } from "@chakra-ui/react";
 import { GetServerSideProps, type NextPage } from "next";
 import { Session } from "next-auth";
 import Head from "next/head";
-import { FaGamepad, FaKey, FaShapes, FaTags } from "react-icons/fa";
+import {
+  FaBookOpen,
+  FaExternalLinkAlt,
+  FaGamepad,
+  FaKey,
+  FaShapes,
+  FaTags,
+} from "react-icons/fa";
 import PreviewLinkCard from "../features/shared/components/PreviewLinkCard";
 import getSessionWithSignInRedirect from "../utils/getSessionWithSignInRedirect";
 
@@ -67,6 +74,17 @@ const Home: NextPage<HomePageProps> = (props) => {
               description="Integrate your app with 2bttns"
               icon={<FaKey />}
               link="/settings"
+            />
+            <PreviewLinkCard
+              title={
+                <HStack alignItems="center">
+                  <Text>Documentation</Text>
+                  <FaExternalLinkAlt display="inline" fontSize="16px" />
+                </HStack>
+              }
+              description="Find detailed information about 2bttns features"
+              icon={<FaBookOpen />}
+              link="https://docs.2bttns.com"
             />
           </Stack>
         </VStack>
