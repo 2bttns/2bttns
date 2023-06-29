@@ -55,7 +55,7 @@ const SettingsPage: NextPage<SettingsPageProps> = (props) => {
         <Tabs>
           <TabList>
             <Tab>Secrets</Tab>
-            <Tab>Foo</Tab>
+            <Tab>Administrators</Tab>
           </TabList>
 
           <TabPanels>

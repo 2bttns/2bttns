@@ -3,6 +3,7 @@ import {
   commaSeparatedStringToArray,
   paginationSkip,
   paginationTake,
+  sortOrder,
 } from "../../../shared/z";
 import { OPENAPI_TAGS } from "../../openapi/openApiTags";
 import { adminOrApiKeyProtectedProcedure } from "../../trpc";
@@ -21,10 +22,7 @@ const input = z
       .enum(["id", "name", "description", "updatedAt", "createdAt"])
       .describe("Field to sort by")
       .optional(),
-    sortOrder: z
-      .enum(["asc", "desc"])
-      .describe("Sort order for the selected field")
-      .optional(),
+    sortOrder,
   })
   .optional();
 

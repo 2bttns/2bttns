@@ -6,4 +6,5 @@ export const OPENAPI_TAGS = {
   PLAYERS: "Players",
   EXPORT_DATA: "Export Data",
   IMPORT_DATA: "Import Data",
+  ADMINISTRATORS: "Administrators",
 };
