@@ -1,6 +1,6 @@
 import { Box, HStack, StackProps, useToast } from "@chakra-ui/react";
 import { useMemo } from "react";
-import { api, RouterInputs, RouterOutputs } from "../../../utils/api";
+import { api, RouterOutputs } from "../../../utils/api";
 import ConstrainToRemainingSpace, {
   ConstrainToRemainingSpaceProps,
 } from "../../shared/components/ConstrainToRemainingSpace";
@@ -14,12 +14,13 @@ import usePagination from "../../shared/components/Table/hooks/usePagination";
 import useSelectRows from "../../shared/components/Table/hooks/useSelectRows";
 import useSort from "../../shared/components/Table/hooks/useSort";
 
-export type SecretData = RouterOutputs["secrets"]["getAll"]["secrets"][0];
+export type AdminData =
+  RouterOutputs["administrators"]["getAll"]["administrators"][0];
 
 export type AdministratorsTableProps = {
-  onAdminCreated?: (secret: SecretData) => Promise<void>;
-  additionalColumns?: PaginatedTableProps<SecretData>["additionalColumns"];
-  additionalTopBarContent?: (selectedRows: SecretData[]) => React.ReactNode;
+  onAdminCreated?: (secret: AdminData) => Promise<void>;
+  additionalColumns?: PaginatedTableProps<AdminData>["additionalColumns"];
+  additionalTopBarContent?: (selectedRows: AdminData[]) => React.ReactNode;
   editable?: boolean;
   constrainToRemainingSpaceProps?: Partial<ConstrainToRemainingSpaceProps>;
   topBarProps?: Partial<StackProps>;
@@ -32,8 +33,8 @@ export default function AdministratorsTable(props: AdministratorsTableProps) {
     additionalTopBarContent,
     areRowsSelectable = true,
     constrainToRemainingSpaceProps,
-    editable = true,
-    onAdminCreated: onSecretCreated,
+    editable = false,
+    onAdminCreated,
     topBarProps,
   } = props;
 
@@ -41,46 +42,31 @@ export default function AdministratorsTable(props: AdministratorsTableProps) {
 
   const { perPage, currentPage, handlePageChange, handlePerRowsChange } =
     usePagination();
-  const { getSortOrder: getSort, handleSort } = useSort<SecretData>();
+  const { handleSort, sorting } = useSort<AdminData>();
 
   const utils = api.useContext();
   const globalFilter = useDebouncedValue();
 
-  const secretsQuery = api.secrets.getAll.useQuery(
+  const adminQuery = api.administrators.getAll.useQuery(
     {
       skip: (currentPage! - 1) * perPage,
       take: perPage,
-      filter: globalFilter.debouncedInput
-        ? {
-            mode: "OR",
-            id: { contains: globalFilter.debouncedInput },
-            name: { contains: globalFilter.debouncedInput },
-          }
-        : undefined,
-      sort: {
-        id: getSort("id"),
-        name: getSort("name"),
-        description: getSort("description"),
-        secret: getSort("secret"),
-        updatedAt: getSort("updatedAt"),
-      },
+      allowFuzzyEmailFilter: true,
+      emailFilter: globalFilter.debouncedInput,
+      sortField: sorting?.sortField,
+      sortOrder: sorting?.order,
     },
     {
       keepPreviousData: true,
       refetchOnWindowFocus: false,
     }
   );
-  const data: SecretData[] = secretsQuery.data?.secrets ?? [];
+  const data: AdminData[] = adminQuery.data?.administrators ?? [];
 
-  const secretsCountQuery = api.secrets.getCount.useQuery(
+  const adminCountQuery = api.administrators.getCount.useQuery(
     {
-      filter: globalFilter.debouncedInput
-        ? {
-            mode: "OR",
-            id: { contains: globalFilter.debouncedInput },
-            name: { contains: globalFilter.debouncedInput },
-          }
-        : undefined,
+      allowFuzzyEmailFilter: true,
+      emailFilter: globalFilter.debouncedInput,
     },
     {
       keepPreviousData: true,
@@ -88,127 +74,23 @@ export default function AdministratorsTable(props: AdministratorsTableProps) {
     }
   );
 
-  const updateSecretMutation = api.secrets.updateById.useMutation();
-  const handleUpdateSecret = async (
-    id: string,
-    data: RouterInputs["secrets"]["updateById"]["data"]
-  ) => {
-    const updateDescription = `ID=${id}`;
-    const updateToast = toast({
-      title: "Updating GameObject",
-      description: updateDescription,
-      status: "loading",
-    });
-    try {
-      await updateSecretMutation.mutateAsync({ id, data });
-      await utils.secrets.invalidate();
-      toast.update(updateToast, {
-        title: "Success: Secret Updated",
-        description: updateDescription,
-        status: "success",
-      });
-    } catch (error) {
-      toast.update(updateToast, {
-        title: "Error",
-        description: `Failed to update Secret (ID=${id}). See console for details`,
-        status: "error",
-      });
-      // This will be caught by CustomEditable component using this function
-      // it will revert the value to the previous value when it receives an error
-      throw error;
-    }
-  };
-
-  const createSecretsMutation = api.secrets.create.useMutation();
-  const handleCreateSecret = async (name: string) => {
-    const createDescription = `Name=${name}`;
-    const createToast = toast({
-      title: "Creating Tag",
-      description: createDescription,
-      status: "loading",
-    });
-    try {
-      const result = await createSecretsMutation.mutateAsync({ name });
-      if (onSecretCreated) await onSecretCreated(result.createdSecret);
-      await utils.secrets.invalidate();
-      toast.update(createToast, {
-        title: "Success: Tag Created",
-        description: createDescription,
-        status: "success",
-      });
-    } catch (error) {
-      console.error(error);
-      toast.update(createToast, {
-        title: "Error",
-        description: `Failed to create Tag (Name=${name}). See console for details`,
-        status: "error",
-      });
-    }
-  };
-
-  const columns = useMemo<PaginatedTableProps<SecretData>["columns"]>(() => {
+  const columns = useMemo<PaginatedTableProps<AdminData>["columns"]>(() => {
     return [
       {
-        name: "ID",
+        name: "Email",
         cell: (row) => (
           <CustomEditable
-            value={row.id}
+            value={row.email}
             placeholder="No ID"
-            handleSave={async (nextValue) =>
-              handleUpdateSecret(row.id, {
-                id: nextValue,
-              })
-            }
+            handleSave={async (nextValue) => {
+              // TODO: implement admin update handler
+            }}
             isEditable={editable}
           />
         ),
         sortable: true,
         sortField: "id",
         minWidth: "256px",
-      },
-      {
-        name: "Name",
-        cell: (row) => (
-          <CustomEditable
-            value={row.name ?? undefined}
-            placeholder="No name"
-            handleSave={async (nextValue) =>
-              handleUpdateSecret(row.id, {
-                name: nextValue,
-              })
-            }
-            isEditable={editable}
-          />
-        ),
-        sortable: true,
-        sortField: "name",
-        minWidth: "256px",
-      },
-      {
-        name: "Description",
-        cell: (row) => (
-          <CustomEditable
-            value={row.description ?? undefined}
-            placeholder="No description"
-            handleSave={async (nextValue) =>
-              handleUpdateSecret(row.id, {
-                description: nextValue,
-              })
-            }
-            isEditable={editable}
-            isTextarea
-          />
-        ),
-        sortable: true,
-        sortField: "description",
-        minWidth: "512px",
-      },
-      {
-        name: "Secret",
-        cell: (row) => row.secret ?? "",
-        minWidth: "256px",
-        sortable: true,
-        sortField: "secret",
       },
       {
         name: "Last Updated",
@@ -221,7 +103,7 @@ export default function AdministratorsTable(props: AdministratorsTableProps) {
   }, [editable]);
 
   const { selectedRows, handleSelectedRowsChange, toggleCleared } =
-    useSelectRows<SecretData>({
+    useSelectRows<AdminData>({
       clearRowsUponChangeDependencies: [
         globalFilter.debouncedInput,
         perPage,
@@ -235,27 +117,27 @@ export default function AdministratorsTable(props: AdministratorsTableProps) {
         <SearchAndCreateBar
           value={globalFilter.input}
           onChange={globalFilter.setInput}
-          onCreate={(name) => handleCreateSecret(name)}
+          // onCreate={(name) => handleCreateSecret(name)}
         />
         {additionalTopBarContent && additionalTopBarContent(selectedRows)}
       </HStack>
       <ConstrainToRemainingSpace {...constrainToRemainingSpaceProps}>
         {(remainingHeight) => {
           return (
-            <PaginatedTable<SecretData>
+            <PaginatedTable<AdminData>
               additionalColumns={additionalColumns}
               areRowsSelectable={areRowsSelectable}
               columns={columns}
               data={data}
               fixedHeight={remainingHeight}
-              itemIdField="id"
-              loading={secretsQuery.isLoading}
+              itemIdField="email"
+              loading={adminQuery.isLoading}
               onChangePage={handlePageChange}
               onChangeRowsPerPage={handlePerRowsChange}
               onSelectedRowsChange={handleSelectedRowsChange}
               onSort={handleSort}
               selectedRows={selectedRows}
-              totalRows={secretsCountQuery.data?.count ?? 0}
+              totalRows={adminCountQuery.data?.count ?? 0}
               toggleCleared={toggleCleared}
             />
           );

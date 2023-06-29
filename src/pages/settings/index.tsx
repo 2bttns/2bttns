@@ -17,6 +17,7 @@ import { Secret } from "@prisma/client";
 import { GetServerSideProps, NextPage } from "next";
 import { Session } from "next-auth";
 import Head from "next/head";
+import AdministratorsTable from "../../features/settings/containers/AdministratorsTable";
 import SecretsTable from "../../features/settings/containers/SecretsTable";
 import ConfirmAlert from "../../features/shared/components/ConfirmAlert";
 import { api } from "../../utils/api";
@@ -70,7 +71,7 @@ const SettingsPage: NextPage<SettingsPageProps> = (props) => {
               />
             </TabPanel>
             <TabPanel>
-              <h2>Foo</h2>
+              <AdministratorsTable />
             </TabPanel>
           </TabPanels>
         </Tabs>
