@@ -17,11 +17,13 @@ import { Secret } from "@prisma/client";
 import { GetServerSideProps, NextPage } from "next";
 import { Session } from "next-auth";
 import Head from "next/head";
+import { useEffect, useState } from "react";
 import AdministratorsTable from "../../features/settings/containers/AdministratorsTable";
 import SecretsTable from "../../features/settings/containers/SecretsTable";
 import ConfirmAlert from "../../features/shared/components/ConfirmAlert";
 import { api } from "../../utils/api";
 import getSessionWithSignInRedirect from "../../utils/getSessionWithSignInRedirect";
+import wait from "../../utils/wait";
 
 export type SettingsPageProps = {
   session: Session;
@@ -44,6 +46,18 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 };
 
 const SettingsPage: NextPage<SettingsPageProps> = (props) => {
+  const [tabIndex, setTabIndex] = useState(-1);
+  const [isTabRendering, setTabRendering] = useState(true);
+  const handleTabChange = async (index: number) => {
+    setTabIndex(index);
+    setTabRendering(true);
+    await wait(0.25);
+    setTabRendering(false);
+  };
+  useEffect(() => {
+    handleTabChange(0);
+  }, []);
+
   return (
     <>
       <Head>
@@ -52,26 +66,39 @@ const SettingsPage: NextPage<SettingsPageProps> = (props) => {
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <Box padding="1rem">
-        <Tabs>
+      <Box>
+        <Tabs tabIndex={tabIndex} onChange={handleTabChange}>
           <TabList>
             <Tab>Secrets</Tab>
             <Tab>Administrators</Tab>
           </TabList>
 
           <TabPanels>
-            <TabPanel>
-              <SecretsTable
-                additionalColumns={{
-                  columns: [
-                    { cell: (row) => <CellActions secretId={row.id} /> },
-                  ],
-                  dependencies: [],
-                }}
-              />
+            <TabPanel sx={{ display: isTabRendering ? "none" : "block" }}>
+              {/* Render only when tab is active -- otherwise the tables may not render properly when hidden and not appear properly when changing to its tab */}
+              {tabIndex === 0 && (
+                <SecretsTable
+                  additionalColumns={{
+                    columns: [
+                      { cell: (row) => <CellActions secretId={row.id} /> },
+                    ],
+                    dependencies: [],
+                  }}
+                  constrainToRemainingSpaceProps={{
+                    bottomOffset: 120,
+                  }}
+                />
+              )}
             </TabPanel>
-            <TabPanel>
-              <AdministratorsTable />
+            <TabPanel sx={{ display: isTabRendering ? "none" : "block" }}>
+              {/* Render only when tab is active -- otherwise the tables may not render properly when hidden and not appear properly when changing to its tab */}
+              {tabIndex === 1 && (
+                <AdministratorsTable
+                  constrainToRemainingSpaceProps={{
+                    bottomOffset: 120,
+                  }}
+                />
+              )}
             </TabPanel>
           </TabPanels>
         </Tabs>

@@ -83,6 +83,11 @@ export default function PaginatedTable<T>(props: PaginatedTableProps<T>) {
     }
   }, [selectedRows, onSelectedRowsChange, data, itemIdField]);
 
+  const scrollHeight = useMemo(
+    () => `calc(${fixedHeight} - 64px - 64px)`,
+    [fixedHeight]
+  );
+
   return (
     <Box height="100%" width="100%" overflow="scroll">
       <DataTable
@@ -97,19 +102,30 @@ export default function PaginatedTable<T>(props: PaginatedTableProps<T>) {
         onChangeRowsPerPage={onChangeRowsPerPage}
         fixedHeader
         // Fixed table height; subtract 64px for the pagination bar
-        fixedHeaderScrollHeight={`calc(${fixedHeight} - 64px - 64px)`}
+        fixedHeaderScrollHeight={scrollHeight}
         selectableRows={areRowsSelectable}
         onSelectedRowsChange={onSelectedRowsChange}
         selectableRowsHighlight
         clearSelectedRows={toggleCleared}
         paginationRowsPerPageOptions={[5, 10, 25, 50, 100]}
         customStyles={{
+          tableWrapper: {
+            style: {
+              height: scrollHeight,
+            },
+          },
+          table: {
+            style: {
+              height: scrollHeight,
+            },
+          },
           cells: {
             style: {
               alignItems: "center",
               padding: "1rem",
               borderLeftWidth: ".5px",
               borderRightWidth: ".5px",
+              borderBottom: ".5px",
               borderColor: "rgba(200, 200, 200, .25)",
               fontSize: "12px",
             },
