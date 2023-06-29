@@ -1,8 +1,19 @@
 import { z } from "zod";
+import { booleanEnum, commaSeparatedStringToArray } from "../../../shared/z";
 import { OPENAPI_TAGS } from "../../openapi/openApiTags";
 import { adminOrApiKeyProtectedProcedure } from "../../trpc";
+import { getAllWhereInput } from "./getAll";
 
-const input = z.void();
+const input = z.object({
+  emailFilter: commaSeparatedStringToArray
+    .describe("Comma-separated emails to filter by")
+    .optional(),
+  allowFuzzyEmailFilter: booleanEnum
+    .describe(
+      "Set to `true` to enable fuzzy email filtering. If false, only returns exact matches."
+    )
+    .default(false),
+});
 
 const output = z.object({
   count: z.number(),
@@ -23,7 +34,11 @@ export const getCount = adminOrApiKeyProtectedProcedure
   .input(input)
   .output(output)
   .query(async ({ input, ctx }) => {
-    const count = await ctx.prisma.allowedAdmin.count({});
+    const { emailFilter, allowFuzzyEmailFilter } = input;
+    const where = getAllWhereInput(emailFilter, allowFuzzyEmailFilter);
+    const count = await ctx.prisma.allowedAdmin.count({
+      where,
+    });
     const processed: z.infer<typeof output> = {
       count,
     };

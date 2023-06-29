@@ -18,7 +18,7 @@ const input = z
       .optional(),
     allowFuzzyIdFilter: booleanEnum
       .describe(
-        "Set to `true` to enable fuzzy ID filtering, only returning exact matches"
+        "Set to `true` to enable fuzzy ID filtering. If false, only returns exact matches."
       )
       .default(false),
     nameFilter: commaSeparatedStringToArray
@@ -26,7 +26,7 @@ const input = z
       .optional(),
     allowFuzzyNameFilter: booleanEnum
       .describe(
-        "Set to `true` to enable fuzzy name filtering, only returning exact matches"
+        "Set to `true` to enable fuzzy name filtering. If false, only returns exact matches."
       )
       .default(false),
     tagFilter: commaSeparatedStringToArray

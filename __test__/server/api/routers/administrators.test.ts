@@ -1,9 +1,11 @@
 import { afterEach, beforeEach, describe, expect, test } from "vitest";
 import { appRouter } from "../../../../src/server/api/root";
 import { prisma } from "../../../../src/server/db";
+import { RouterInputs } from "../../../../src/utils/api";
 import {
   clearDbsTest,
   createInnerTRPCContextWithSessionForTest,
+  testUserSessionEmail,
 } from "./helpers";
 
 describe("administrators router", () => {
@@ -20,8 +22,31 @@ describe("administrators router", () => {
     const caller = appRouter.createCaller(ctx);
 
     const adminCount = await prisma.allowedAdmin.count({});
-    const result = await caller.administrators.getCount();
+    const result = await caller.administrators.getCount({});
     expect(result.count).toEqual(adminCount);
+  });
+
+  test("get admin count fuzzy search", async () => {
+    const ctx = await createInnerTRPCContextWithSessionForTest();
+    const caller = appRouter.createCaller(ctx);
+
+    const input: RouterInputs["administrators"]["getCount"] = {
+      allowFuzzyEmailFilter: true,
+      emailFilter: "test",
+    };
+
+    // Fuzzy search using part of the test admin's email
+    let result = await caller.administrators.getCount(input);
+    expect(result.count).toBe(1);
+
+    // Exact search using the test admin's email
+    input.allowFuzzyEmailFilter = false;
+    result = await caller.administrators.getCount(input);
+    expect(result.count).toBe(0);
+
+    input.emailFilter = testUserSessionEmail;
+    result = await caller.administrators.getCount(input);
+    expect(result.count).toBe(1);
   });
 
   test("get test admin", async () => {
@@ -30,6 +55,29 @@ describe("administrators router", () => {
 
     // The only admin should be the test admin created via createInnerTRPCContextWithSessionForTest
     const result = await caller.administrators.getAll({});
+    expect(result.administrators).toHaveLength(1);
+  });
+
+  test("get test admin fuzzy search", async () => {
+    const ctx = await createInnerTRPCContextWithSessionForTest();
+    const caller = appRouter.createCaller(ctx);
+
+    const input: RouterInputs["administrators"]["getAll"] = {
+      allowFuzzyEmailFilter: true,
+      emailFilter: "test",
+    };
+
+    // Fuzzy search using part of the test admin's email
+    let result = await caller.administrators.getAll(input);
+    expect(result.administrators).toHaveLength(1);
+
+    // Exact search using the test admin's email
+    input.allowFuzzyEmailFilter = false;
+    result = await caller.administrators.getAll(input);
+    expect(result.administrators).toHaveLength(0);
+
+    input.emailFilter = testUserSessionEmail;
+    result = await caller.administrators.getAll(input);
     expect(result.administrators).toHaveLength(1);
   });
 });
