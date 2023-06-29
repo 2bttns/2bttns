@@ -89,7 +89,9 @@ export function getAllWhereInput(
   emailFilter: z.infer<typeof input>["emailFilter"],
   allowFuzzyEmailFilter: z.infer<typeof input>["allowFuzzyEmailFilter"]
 ) {
-  const mode: Prisma.QueryMode = "insensitive";
+  const mode: Prisma.QueryMode = allowFuzzyEmailFilter
+    ? "insensitive"
+    : "default";
   const where: Prisma.AllowedAdminWhereInput = emailFilter
     ? {
         // Match any of the emails in the filter

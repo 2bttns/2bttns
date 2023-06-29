@@ -30,16 +30,24 @@ describe("administrators router", () => {
     const ctx = await createInnerTRPCContextWithSessionForTest();
     const caller = appRouter.createCaller(ctx);
 
-    const input: RouterInputs["administrators"]["getCount"] = {
-      allowFuzzyEmailFilter: true,
-      emailFilter: "test",
-    };
+    const input: RouterInputs["administrators"]["getCount"] = {};
 
+    //
     // Fuzzy search using part of the test admin's email
+    //
+    input.allowFuzzyEmailFilter = true;
+    input.emailFilter = "test";
     let result = await caller.administrators.getCount(input);
     expect(result.count).toBe(1);
 
+    // Case insensitive
+    input.emailFilter = "test".toUpperCase();
+    result = await caller.administrators.getCount(input);
+    expect(result.count).toBe(1);
+
+    //
     // Exact search using the test admin's email
+    //
     input.allowFuzzyEmailFilter = false;
     result = await caller.administrators.getCount(input);
     expect(result.count).toBe(0);
@@ -47,6 +55,11 @@ describe("administrators router", () => {
     input.emailFilter = testUserSessionEmail;
     result = await caller.administrators.getCount(input);
     expect(result.count).toBe(1);
+
+    // Case sensitive
+    input.emailFilter = testUserSessionEmail.toUpperCase();
+    result = await caller.administrators.getCount(input);
+    expect(result.count).toBe(0);
   });
 
   test("get test admin", async () => {
@@ -62,16 +75,24 @@ describe("administrators router", () => {
     const ctx = await createInnerTRPCContextWithSessionForTest();
     const caller = appRouter.createCaller(ctx);
 
-    const input: RouterInputs["administrators"]["getAll"] = {
-      allowFuzzyEmailFilter: true,
-      emailFilter: "test",
-    };
+    const input: RouterInputs["administrators"]["getAll"] = {};
 
+    //
     // Fuzzy search using part of the test admin's email
+    //
+    input.allowFuzzyEmailFilter = true;
+    input.emailFilter = "test";
     let result = await caller.administrators.getAll(input);
     expect(result.administrators).toHaveLength(1);
 
+    // Case insensitive
+    input.emailFilter = "test".toUpperCase();
+    result = await caller.administrators.getAll(input);
+    expect(result.administrators).toHaveLength(1);
+
+    //
     // Exact search using the test admin's email
+    //
     input.allowFuzzyEmailFilter = false;
     result = await caller.administrators.getAll(input);
     expect(result.administrators).toHaveLength(0);
@@ -79,5 +100,10 @@ describe("administrators router", () => {
     input.emailFilter = testUserSessionEmail;
     result = await caller.administrators.getAll(input);
     expect(result.administrators).toHaveLength(1);
+
+    // Case sensitive
+    input.emailFilter = testUserSessionEmail.toUpperCase();
+    result = await caller.administrators.getAll(input);
+    expect(result.administrators).toHaveLength(0);
   });
 });
