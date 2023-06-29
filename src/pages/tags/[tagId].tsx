@@ -167,12 +167,12 @@ const TagByIdPage: NextPage<TagByIdPageProps> = (props) => {
                 <>
                   <HStack maxWidth="100%" overflow="scroll">
                     <Box width="50%">
-                      <Heading size="md">Tagged</Heading>
+                      <Heading size="md">Untagged</Heading>
                       <GameObjectsTable
                         tag={{
-                          include: [tag.id],
-                          exclude: [],
-                          untaggedFilter: "exclude",
+                          include: allTags,
+                          exclude: [tagId],
+                          untaggedFilter: "include",
                         }}
                         onGameObjectCreated={handleGameObjectCreated}
                         additionalTopBarContent={(selectedRows) => (
@@ -191,12 +191,12 @@ const TagByIdPage: NextPage<TagByIdPageProps> = (props) => {
                       />
                     </Box>
                     <Box width="50%">
-                      <Heading size="md">Untagged</Heading>
+                      <Heading size="md">Tagged</Heading>
                       <GameObjectsTable
                         tag={{
-                          include: allTags,
-                          exclude: [tagId],
-                          untaggedFilter: "include",
+                          include: [tag.id],
+                          exclude: [],
+                          untaggedFilter: "exclude",
                         }}
                         onGameObjectCreated={handleGameObjectCreated}
                         additionalTopBarContent={(selectedRows) => (
