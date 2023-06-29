@@ -125,7 +125,8 @@ export default function PaginatedTable<T>(props: PaginatedTableProps<T>) {
               padding: "1rem",
               borderLeftWidth: ".5px",
               borderRightWidth: ".5px",
-              borderBottom: ".5px",
+              borderBottomWidth: ".5px",
+              borderTopWidth: "0px",
               borderColor: "rgba(200, 200, 200, .25)",
               fontSize: "12px",
             },
@@ -167,6 +168,19 @@ export default function PaginatedTable<T>(props: PaginatedTableProps<T>) {
         }
         onRowDoubleClicked={onRowDoubleClicked}
       />
+      {(progressPending || data.length === 0) && (
+        <Box
+          height="56px"
+          bgColor="white"
+          borderColor="rgba(0,0,0,0.12)"
+          borderTopWidth="1px"
+          padding="1rem"
+        >
+          {progressPending && (
+            <Skeleton width="400px" height="100%" ml="auto" />
+          )}
+        </Box>
+      )}
     </Box>
   );
 }
