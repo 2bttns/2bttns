@@ -1,14 +1,29 @@
 import { ChevronRightIcon } from "@chakra-ui/icons";
 import {
+  Box,
   Breadcrumb,
   BreadcrumbItem,
   BreadcrumbLink,
   ButtonGroup,
-  Divider,
   Heading,
   HStack,
   Stack,
+  Tab,
+  Table,
+  TableContainer,
+  TabList,
+  TabPanel,
+  TabPanels,
+  Tabs,
+  Tbody,
+  Td,
   Text,
+  Th,
+  Thead,
+  Tooltip,
+  Tr,
+  useToast,
+  VStack,
 } from "@chakra-ui/react";
 import { Tag } from "@prisma/client";
 import { GetServerSideProps, NextPage } from "next";
@@ -16,26 +31,20 @@ import { Session } from "next-auth";
 import Head from "next/head";
 import { useRouter } from "next/router";
 import { useMemo, useState } from "react";
-import { z } from "zod";
 import GameObjectsTable, {
   GameObjectData,
   GameObjectsTableProps,
 } from "../../features/gameobjects/containers/GameObjectsTable";
-import ManageGameObjectButton from "../../features/gameobjects/containers/ManageGameObjectButton";
 import CustomEditable from "../../features/shared/components/CustomEditable";
 import { AdditionalColumns } from "../../features/shared/components/Table/containers/PaginatedTable";
 import TableActionMenu from "../../features/shared/components/Table/containers/TableActionsMenu";
+import UnderlinedTextTooltip from "../../features/shared/components/UnderlinedTextTooltip";
 import DeleteTagButton from "../../features/tags/containers/DeleteTagButton";
-import {
-  SelectTagFiltersDrawerButton,
-  SelectTagFiltersDrawerButtonProps,
-} from "../../features/tags/containers/SelectTagFiltersDrawerButton";
 import ToggleTagForSelectedGameObjects from "../../features/tags/containers/TableActionsMenu/ToggleTagForSelectedGameObjects";
-import { TagFilter } from "../../features/tags/containers/TagFilterToggles";
 import ToggleTagButton from "../../features/tags/containers/ToggleTagButton";
-import { untaggedFilterEnum } from "../../server/shared/z";
 import { api, RouterInputs } from "../../utils/api";
 import getSessionWithSignInRedirect from "../../utils/getSessionWithSignInRedirect";
+import wait from "../../utils/wait";
 
 export type TagByIdPageProps = {
   session: Session;
@@ -60,7 +69,6 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 const TagByIdPage: NextPage<TagByIdPageProps> = (props) => {
   const router = useRouter();
   const tagId = router.query.tagId as string;
-
   const utils = api.useContext();
 
   const getTagByIdQuery = api.tags.getById.useQuery(
@@ -68,8 +76,8 @@ const TagByIdPage: NextPage<TagByIdPageProps> = (props) => {
     {
       enabled: !!tagId,
       retry: false,
-      onError: (error) => {
-        router.push("/tags");
+      onError: async () => {
+        await router.replace("/tags");
       },
       keepPreviousData: true,
       refetchOnWindowFocus: false,
@@ -77,16 +85,6 @@ const TagByIdPage: NextPage<TagByIdPageProps> = (props) => {
   );
 
   const updateTagMutation = api.tags.updateById.useMutation();
-  const handleUpdateTag = async (input: RouterInputs["tags"]["updateById"]) => {
-    try {
-      await updateTagMutation.mutateAsync(input);
-      await utils.tags.invalidate();
-    } catch (error) {
-      window.alert("Error updating tag. See console for details.");
-      console.error(error);
-    }
-  };
-
   const handleGameObjectCreated: GameObjectsTableProps["onGameObjectCreated"] =
     async (gameObjectId) => {
       try {
@@ -101,19 +99,17 @@ const TagByIdPage: NextPage<TagByIdPageProps> = (props) => {
       }
     };
 
-  const appliedTagFilters = useAppliedTagFilters({ tagId });
+  const tagsCountQuery = api.tags.getCount.useQuery();
+  const tagsQuery = api.tags.getAll.useQuery(
+    { take: tagsCountQuery.data?.count ?? 0 },
+    { enabled: tagsCountQuery.data?.count !== undefined }
+  );
+  const allTags = useMemo(() => {
+    if (!tagsQuery.data?.tags) return [];
+    return tagsQuery.data.tags.map((t) => t.id);
+  }, [tagsQuery.data?.tags, tagId]);
 
-  if (getTagByIdQuery.isFetching) {
-    return (
-      <>
-        <Head>
-          <title>Tags - Loading... | 2bttns</title>
-          <meta name="description" content="2bttns Tag Management" />
-          <link rel="icon" href="/favicon.ico" />
-        </Head>
-      </>
-    );
-  }
+  const [tabIndex, setTabIndex] = useState(0);
 
   const tag = getTagByIdQuery.data?.tag;
   if (!tag) return <></>;
@@ -141,6 +137,7 @@ const TagByIdPage: NextPage<TagByIdPageProps> = (props) => {
                 <BreadcrumbLink href={`/tags/${tag.id}`}>
                   {tag.name || "Untitled Tag"}
                   <Text color="blue.500" display="inline">
+                    {" "}
                     ({tag.id})
                   </Text>
                 </BreadcrumbLink>
@@ -152,151 +149,319 @@ const TagByIdPage: NextPage<TagByIdPageProps> = (props) => {
             </ButtonGroup>
           </HStack>
         }
-        <Heading size="xl">
-          <CustomEditable
-            value={tag?.name || ""}
-            placeholder="Untitled Tag"
-            handleSave={async (value) => {
-              handleUpdateTag({ id: tag.id, data: { name: value } });
-            }}
-          />
-        </Heading>
-        <CustomEditable
-          isTextarea
-          value={tag?.description || ""}
-          placeholder="No description"
-          handleSave={async (value) => {
-            handleUpdateTag({ id: tag.id, data: { description: value } });
-          }}
-        />
-        <Divider />
-        <Heading size="md">Tagged Game Objects</Heading>
-        <GameObjectsTable
-          tag={{
-            include: appliedTagFilters.outputs.includeTags,
-            exclude: appliedTagFilters.outputs.excludeTags,
-            untaggedFilter: appliedTagFilters.outputs.untaggedFilter,
-          }}
-          onGameObjectCreated={handleGameObjectCreated}
-          additionalTopBarContent={(selectedRows) => (
-            <AdditionalTopBarContent
-              selectedGameObjectRows={selectedRows}
-              tagId={tagId}
-              tagFilter={appliedTagFilters.state.tagFilter}
-              setTagFilter={appliedTagFilters.state.setTagFilter}
-            />
-          )}
-          additionalColumns={getAdditionalColumns(tagId)}
-        />
+
+        <Tabs tabIndex={tabIndex} onChange={setTabIndex}>
+          <TabList>
+            <Tab>Details</Tab>
+            <Tab>Manage Game Objects</Tab>
+          </TabList>
+
+          <TabPanels>
+            <TabPanel>
+              {/* Render only when tab is active */}
+              {tabIndex === 0 && <TagDetails tagId={tagId} />}
+            </TabPanel>
+            <TabPanel>
+              {/* Render only when tab is active -- otherwise the tables may not render properly when hidden and not appear properly when changing to its tab */}
+              {tabIndex === 1 && (
+                <>
+                  <HStack maxWidth="100%" overflow="scroll">
+                    <Box width="50%">
+                      <Heading size="md">Untagged</Heading>
+                      <GameObjectsTable
+                        tag={{
+                          include: allTags,
+                          exclude: [tagId],
+                          untaggedFilter: "include",
+                        }}
+                        onGameObjectCreated={handleGameObjectCreated}
+                        additionalTopBarContent={(selectedRows) => (
+                          <AdditionalTopBarContent
+                            selectedGameObjectRows={selectedRows}
+                            tagId={tagId}
+                          />
+                        )}
+                        additionalColumns={getAdditionalColumns(tagId)}
+                        editable={false}
+                        allowCreate={false}
+                        omitColumns={["TAGS", "UPDATED_AT"]}
+                        onRowDoubleClicked={async (row) => {
+                          await router.push(`/game-objects/${row.id}`);
+                        }}
+                      />
+                    </Box>
+                    <Box width="50%">
+                      <Heading size="md">Tagged</Heading>
+                      <GameObjectsTable
+                        tag={{
+                          include: [tag.id],
+                          exclude: [],
+                          untaggedFilter: "exclude",
+                        }}
+                        onGameObjectCreated={handleGameObjectCreated}
+                        additionalTopBarContent={(selectedRows) => (
+                          <AdditionalTopBarContent
+                            selectedGameObjectRows={selectedRows}
+                            tagId={tagId}
+                          />
+                        )}
+                        additionalColumns={getAdditionalColumns(tagId)}
+                        editable={false}
+                        allowCreate={false}
+                        omitColumns={["TAGS", "UPDATED_AT"]}
+                        onRowDoubleClicked={async (row) => {
+                          await router.push(`/game-objects/${row.id}`);
+                        }}
+                      />
+                    </Box>
+                  </HStack>
+                </>
+              )}
+            </TabPanel>
+          </TabPanels>
+        </Tabs>
       </Stack>
     </>
   );
 };
 
-// Tag Filters hook that provides "Applied", "Not Applied" , and "Untagged" filters
-// Exposes the tagFilter state and the include/exclude tags and includeUntagged outputs
-type UseAppliedTagFiltersProps = {
-  tagId: Tag["id"];
-};
-function useAppliedTagFilters(props: UseAppliedTagFiltersProps) {
-  const { tagId } = props;
-
-  const tagsCountQuery = api.tags.getCount.useQuery();
-  const tagsQuery = api.tags.getAll.useQuery(
-    { take: tagsCountQuery.data?.count },
-    {
-      enabled: tagsCountQuery.data?.count !== undefined,
-      refetchOnWindowFocus: false,
-    }
-  );
-  const [tagFilter, setTagFilter] = useState<TagFilter>({
-    Untagged: {
-      tagName: "Untagged",
-      on: false,
-      colorScheme: "blackAlpha",
-    },
-    Applied: {
-      tagName: "Applied",
-      on: true,
-      colorScheme: "green",
-    },
-    "Not Applied": {
-      tagName: "Not Applied",
-      on: false,
-      colorScheme: "red",
-    },
-  });
-
-  const tagsToFilterGameObjectsBy = useMemo(() => {
-    return tagsQuery.data?.tags.filter((tag) => {
-      if (tag.id === tagId && tagFilter["Applied"]!.on) return true;
-      return tagFilter["Not Applied"]!.on;
-    });
-  }, [tagsQuery.data, tagFilter, tagId]);
-
-  const includeTags = useMemo(() => {
-    return tagsToFilterGameObjectsBy?.map((tag) => tag.id) || [];
-  }, [tagsToFilterGameObjectsBy]);
-
-  const excludeTags = useMemo(() => {
-    if (tagFilter["Not Applied"]!.on && !tagFilter["Applied"]!.on) {
-      return [tagId];
-    }
-    return [];
-  }, [tagFilter]);
-
-  const untaggedFilter = useMemo<z.infer<typeof untaggedFilterEnum>>(() => {
-    if (!tagFilter["Untagged"]?.on) {
-      return "exclude";
-    }
-
-    if (includeTags.length === 0 && excludeTags.length === 0) {
-      return "untagged-only";
-    }
-
-    return "include";
-  }, [tagFilter, includeTags, excludeTags]);
-
-  return {
-    state: {
-      tagFilter,
-      setTagFilter,
-    },
-    outputs: {
-      includeTags,
-      excludeTags,
-      untaggedFilter,
-    },
-  };
-}
-
 type AdditionalTopBarContentProps = {
   selectedGameObjectRows: GameObjectData[];
   tagId: Tag["id"];
-  tagFilter: SelectTagFiltersDrawerButtonProps["tagFilter"];
-  setTagFilter: SelectTagFiltersDrawerButtonProps["setTagFilter"];
 };
+
+type TagDetailsProps = {
+  tagId: Tag["id"];
+};
+function TagDetails(props: TagDetailsProps) {
+  const { tagId } = props;
+  const toast = useToast();
+  const utils = api.useContext();
+  const router = useRouter();
+
+  const getTagByIdQuery = api.tags.getById.useQuery(
+    { id: tagId },
+    {
+      enabled: !!tagId,
+      retry: false,
+      onError: async () => {
+        await router.replace("/tags");
+      },
+      keepPreviousData: true,
+      refetchOnWindowFocus: false,
+    }
+  );
+  const tag = getTagByIdQuery.data?.tag;
+
+  const updateTagMutation = api.tags.updateById.useMutation();
+  const handleUpdateTag = async (input: RouterInputs["tags"]["updateById"]) => {
+    let updateDescription = `Saving changes...`;
+    let updateToast = toast({
+      title: "Updating Tag",
+      status: "loading",
+      description: updateDescription,
+    });
+    try {
+      await updateTagMutation.mutateAsync(input);
+
+      // Redirect to the new tag ID page if the ID changed
+      const id = input.data.id;
+      if (id && id !== tagId) {
+        toast.close(updateToast);
+        updateDescription = `Redirecting to new Tag ID page (${id})...`;
+        updateToast = toast({
+          title: "ID Changed",
+          status: "loading",
+          description: updateDescription,
+        });
+        await wait(1);
+        await router.replace(`/tags/${id}`);
+      }
+
+      updateDescription = ``;
+      toast.update(updateToast, {
+        title: "Saved",
+        status: "success",
+        description: updateDescription,
+      });
+      await utils.tags.getById.invalidate({ id: tagId });
+    } catch (error) {
+      updateDescription = `Failed to update (Tag ID=${tagId}). See console for details`;
+      toast.update(updateToast, {
+        title: "Error",
+        status: "error",
+        description: updateDescription,
+      });
+
+      // This will be caught by CustomEditable component using this function
+      // it will revert the value to the previous value when it receives an error
+      console.error(error);
+      throw error;
+    }
+  };
+
+  if (!tag) return <></>;
+
+  return (
+    <Box minW="2xl" maxW="2xl" paddingBottom="5rem">
+      <TableContainer overflowX="visible" overflowY="visible">
+        <Table variant="striped">
+          <Thead>
+            <Tr>
+              <Th>
+                <Heading size="md">Tag Details</Heading>
+              </Th>
+            </Tr>
+          </Thead>
+          <Tbody>
+            <Tr>
+              <Td>
+                <UnderlinedTextTooltip
+                  tooltipProps={{
+                    label: (
+                      <VStack
+                        spacing={1}
+                        alignItems="start"
+                        fontSize="12px"
+                        padding="1rem"
+                      >
+                        <Text fontWeight="bold">ID</Text>
+                        <Text>
+                          A default ID is generated for you when a Tag is
+                          created.
+                        </Text>
+                        <Text>
+                          An ID may only contain alphanumeric, underscore (_),
+                          and hyphen (-) characters.
+                        </Text>
+                        <Text
+                          color="yellow.500"
+                          fontStyle="bold"
+                          textDecoration="underline"
+                        >
+                          ⚠️ Warning: Changing the ID will change the URL of the
+                          Tag. This may break external references to the Tag.
+                        </Text>
+                      </VStack>
+                    ),
+                  }}
+                >
+                  ID
+                </UnderlinedTextTooltip>
+              </Td>
+              <Td>
+                <CustomEditable
+                  value={tag?.id ?? ""}
+                  placeholder="<Missing ID>"
+                  handleSave={async (value) => {
+                    await handleUpdateTag({
+                      id: tag.id,
+                      data: { id: value },
+                    });
+                  }}
+                />
+              </Td>
+            </Tr>
+            <Tr>
+              <Td>
+                <UnderlinedTextTooltip
+                  tooltipProps={{
+                    label: (
+                      <VStack
+                        spacing={1}
+                        alignItems="start"
+                        fontSize="12px"
+                        padding="1rem"
+                      >
+                        <Text fontWeight="bold">NAME</Text>
+                        <Text>Optional display name of the Tag.</Text>
+                      </VStack>
+                    ),
+                  }}
+                >
+                  Name
+                </UnderlinedTextTooltip>
+              </Td>
+              <Td>
+                <CustomEditable
+                  value={tag?.name ?? ""}
+                  placeholder="<Untitled Tag>"
+                  handleSave={async (value) => {
+                    await handleUpdateTag({
+                      id: tag.id,
+                      data: { name: value },
+                    });
+                  }}
+                />
+              </Td>
+            </Tr>
+            <Tr>
+              <Td verticalAlign="top">
+                <UnderlinedTextTooltip
+                  tooltipProps={{
+                    label: (
+                      <VStack
+                        spacing={1}
+                        alignItems="start"
+                        fontSize="12px"
+                        padding="1rem"
+                      >
+                        <Text fontWeight="bold">DESCRIPTION</Text>
+                        <Text>Optional text description of the Tag.</Text>
+                      </VStack>
+                    ),
+                  }}
+                >
+                  Description
+                </UnderlinedTextTooltip>
+              </Td>
+              <Td verticalAlign="top">
+                <CustomEditable
+                  isTextarea
+                  value={tag?.description ?? ""}
+                  placeholder="<No Description>"
+                  handleSave={async (value) => {
+                    await handleUpdateTag({
+                      id: tag.id,
+                      data: { description: value },
+                    });
+                  }}
+                />
+              </Td>
+            </Tr>
+          </Tbody>
+        </Table>
+      </TableContainer>
+    </Box>
+  );
+}
+
 function AdditionalTopBarContent(props: AdditionalTopBarContentProps) {
-  const { selectedGameObjectRows, tagId, tagFilter, setTagFilter } = props;
+  const { selectedGameObjectRows, tagId } = props;
+
+  const isDisabled = selectedGameObjectRows.length === 0;
 
   return (
     <>
       <ButtonGroup>
-        <TableActionMenu
-          selectedRows={selectedGameObjectRows}
-          actionItems={(context) => (
-            <>
-              <ToggleTagForSelectedGameObjects
-                context={context}
-                tagId={tagId}
-              />
-            </>
-          )}
-        />
-        <SelectTagFiltersDrawerButton
-          tagFilter={tagFilter}
-          setTagFilter={setTagFilter}
-        />
+        <Tooltip
+          label={isDisabled ? "Please select at least one game object." : ""}
+        >
+          <Box>
+            <TableActionMenu
+              isDisabled={isDisabled}
+              selectedRows={selectedGameObjectRows}
+              actionItems={(context) => (
+                <>
+                  <ToggleTagForSelectedGameObjects
+                    context={context}
+                    tagId={tagId}
+                  />
+                </>
+              )}
+            />
+          </Box>
+        </Tooltip>
       </ButtonGroup>
     </>
   );
@@ -310,9 +475,9 @@ function getAdditionalColumns(
       {
         cell: ({ id }) => {
           return (
-            <ButtonGroup width="100%" justifyContent="end">
+            <ButtonGroup width="100%" justifyContent="start">
               <ToggleTagButton gameObjectIds={[id]} tagId={tagId} />
-              <ManageGameObjectButton gameObjectId={id} />
+              {/* <ManageGameObjectButton gameObjectId={id} /> */}
             </ButtonGroup>
           );
         },
@@ -326,3 +491,6 @@ function getAdditionalColumns(
 }
 
 export default TagByIdPage;
+function toast(arg0: { title: string; status: string; description: string }) {
+  throw new Error("Function not implemented.");
+}

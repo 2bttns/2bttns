@@ -1,7 +1,17 @@
-import { Box, HStack, StackProps } from "@chakra-ui/react";
-import { useMemo } from "react";
+import {
+  Box,
+  Code,
+  HStack,
+  StackProps,
+  Text,
+  useDisclosure,
+  useToast,
+} from "@chakra-ui/react";
+import { useRouter } from "next/router";
+import { useMemo, useState } from "react";
 import { tagFilter } from "../../../server/shared/z";
 import { api, RouterInputs, RouterOutputs } from "../../../utils/api";
+import ConfirmAlert from "../../shared/components/ConfirmAlert";
 import ConstrainToRemainingSpace, {
   ConstrainToRemainingSpaceProps,
 } from "../../shared/components/ConstrainToRemainingSpace";
@@ -28,6 +38,7 @@ export type GamesTableProps = {
   topBarProps?: Partial<StackProps>;
   allowCreate?: boolean;
   areRowsSelectable?: boolean;
+  onRowDoubleClicked?: PaginatedTableProps<GameData>["onRowDoubleClicked"];
 };
 
 export default function GamesTable(props: GamesTableProps) {
@@ -41,7 +52,11 @@ export default function GamesTable(props: GamesTableProps) {
     topBarProps,
     allowCreate = true,
     areRowsSelectable = true,
+    onRowDoubleClicked,
   } = props;
+
+  const toast = useToast();
+  const router = useRouter();
 
   const { perPage, currentPage, handlePageChange, handlePerRowsChange } =
     usePagination();
@@ -105,10 +120,27 @@ export default function GamesTable(props: GamesTableProps) {
     id: string,
     data: RouterInputs["games"]["updateById"]["data"]
   ) => {
+    const updateDescription = `Game ID: ${id}`;
+    const updateToast = toast({
+      title: "Updating Game",
+      status: "loading",
+      description: updateDescription,
+    });
     try {
       await updateGameMutation.mutateAsync({ id, data });
       await utils.games.invalidate();
+      toast.update(updateToast, {
+        title: "Success: Game Updated",
+        status: "success",
+        description: updateDescription,
+      });
     } catch (error) {
+      toast.update(updateToast, {
+        title: "Error",
+        status: "error",
+        description: `Failed to update (Game ID=${id}). See console for details`,
+      });
+
       // This will be caught by CustomEditable component using this function
       // it will revert the value to the previous value when it receives an error
       throw error;
@@ -116,17 +148,44 @@ export default function GamesTable(props: GamesTableProps) {
   };
 
   const createGameMutation = api.games.create.useMutation();
-  const handleCreateGame = async (name: string) => {
+  const [nameToCreateWith, setNameToCreateWith] = useState("");
+  const createGameDisclosure = useDisclosure();
+  const openCreateGameConfirmation = async (name: string) => {
+    createGameDisclosure.onOpen();
+    setNameToCreateWith(name);
+  };
+
+  const handleCreateConfirm = async () => {
+    const createToast = toast({
+      title: "Creating Game",
+      status: "loading",
+      description: `Name: ${nameToCreateWith}`,
+    });
+
     try {
-      const result = await createGameMutation.mutateAsync({ name });
+      const result = await createGameMutation.mutateAsync({
+        name: nameToCreateWith,
+      });
       if (onGameCreated) {
         await onGameCreated(result.createdGame.id);
       }
+      await router.push(`/games/${result.createdGame.id}`);
+      toast.update(createToast, {
+        title: "Game Created",
+        status: "success",
+        description: `Name: ${nameToCreateWith}, ID: ${result.createdGame.id}`,
+      });
       await utils.games.invalidate();
     } catch (error) {
-      window.alert("Error creating Game\n See console for details");
       console.error(error);
+      toast.update(createToast, {
+        title: "Error",
+        status: "error",
+        description: `Failed to create Game (Name=${nameToCreateWith}). See console for details`,
+      });
     }
+    createGameDisclosure.onClose();
+    setNameToCreateWith("");
   };
 
   const columns = useMemo<PaginatedTableProps<GameData>["columns"]>(() => {
@@ -148,6 +207,7 @@ export default function GamesTable(props: GamesTableProps) {
         sortable: true,
         sortField: "id",
         minWidth: "256px",
+        reorder: true,
       },
       {
         name: "Name",
@@ -166,25 +226,13 @@ export default function GamesTable(props: GamesTableProps) {
         sortable: true,
         sortField: "name",
         minWidth: "256px",
+        reorder: true,
       },
       {
-        name: "Description",
-        cell: (row) => (
-          <CustomEditable
-            value={row.description ?? undefined}
-            placeholder="No description"
-            handleSave={async (nextValue) =>
-              handleUpdateGame(row.id, {
-                description: nextValue,
-              })
-            }
-            isEditable={editable}
-            isTextarea
-          />
-        ),
-        sortable: true,
-        sortField: "description",
-        minWidth: "512px",
+        name: "Mode",
+        cell: (row) => <div data-tag="allowRowEvents">{row.mode ?? ""}</div>,
+        minWidth: "128px",
+        reorder: true,
       },
       {
         name: "Input Tags",
@@ -200,11 +248,7 @@ export default function GamesTable(props: GamesTableProps) {
         sortable: true,
         sortField: "tags",
         minWidth: "256px",
-      },
-      {
-        name: "Mode",
-        cell: (row) => row.mode ?? "",
-        minWidth: "128px",
+        reorder: true,
       },
       {
         name: "Last Updated",
@@ -212,6 +256,7 @@ export default function GamesTable(props: GamesTableProps) {
         sortable: true,
         sortField: "updatedAt",
         minWidth: "256px",
+        reorder: true,
       },
     ];
   }, [editable]);
@@ -228,11 +273,40 @@ export default function GamesTable(props: GamesTableProps) {
 
   return (
     <Box>
+      <>
+        <ConfirmAlert
+          isOpen={createGameDisclosure.isOpen}
+          onClose={createGameDisclosure.onClose}
+          handleConfirm={handleCreateConfirm}
+          alertTitle="Create Game"
+          confirmButtonProps={{
+            colorScheme: "green",
+          }}
+          confirmText="Create"
+        >
+          {nameToCreateWith ? (
+            <Text>
+              Create new game with name: <Code>{nameToCreateWith}</Code>?
+            </Text>
+          ) : (
+            <Text>Create a new untitled game?</Text>
+          )}
+
+          <Text mt="1rem">
+            You can edit the game&apos;s name via its configuration page.
+          </Text>
+          <Text mt="1rem">
+            You will be redirected to the new game&apos;s configuration page
+            after clicking &apos;Create&apos;.
+          </Text>
+        </ConfirmAlert>
+      </>
       <HStack spacing="4px" marginBottom="4px" width="100%" {...topBarProps}>
         <SearchAndCreateBar
           value={globalFilter.input}
           onChange={globalFilter.setInput}
-          onCreate={allowCreate ? handleCreateGame : undefined}
+          onCreate={allowCreate ? openCreateGameConfirmation : undefined}
+          allowCreateWithEmptyValue
         />
         {additionalTopBarContent && additionalTopBarContent(selectedRows)}
       </HStack>
@@ -254,6 +328,7 @@ export default function GamesTable(props: GamesTableProps) {
               selectedRows={selectedRows}
               totalRows={gamesCountQuery.data?.count ?? 0}
               toggleCleared={toggleCleared}
+              onRowDoubleClicked={onRowDoubleClicked}
             />
           );
         }}

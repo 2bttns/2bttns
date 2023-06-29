@@ -1,5 +1,6 @@
 import { z } from "zod";
 import {
+  booleanEnum,
   commaSeparatedStringToArray,
   untaggedFilterEnum,
 } from "../../../shared/z";
@@ -11,9 +12,19 @@ const input = z
     idFilter: commaSeparatedStringToArray
       .describe("Comma-separated Game Object IDs to filter by")
       .optional(),
+    allowFuzzyIdFilter: booleanEnum
+      .describe(
+        "Set to `true` to enable fuzzy ID filtering. If false, only returns exact matches."
+      )
+      .default(false),
     nameFilter: commaSeparatedStringToArray
       .describe("Comma-separated Game Object names to filter by")
       .optional(),
+    allowFuzzyNameFilter: booleanEnum
+      .describe(
+        "Set to `true` to disable fuzzy name filtering. If false, only returns exact matches."
+      )
+      .default(false),
     tagFilter: commaSeparatedStringToArray
       .describe(
         "Comma-separated list of tag IDs the resulting game objects must have"
@@ -60,18 +71,30 @@ export const getCount = adminOrApiKeyProtectedProcedure
         AND: [
           {
             OR: [
-              ...(input?.idFilter
+              ...(input?.idFilter && input.allowFuzzyIdFilter
                 ? input.idFilter.map((id) => ({
                     id: {
                       contains: id,
                     },
                   }))
+                : input?.idFilter
+                ? input.idFilter.map((id) => ({
+                    id: {
+                      equals: id,
+                    },
+                  }))
                 : []),
 
-              ...(input?.nameFilter
+              ...(input?.nameFilter && input.allowFuzzyNameFilter
                 ? input.nameFilter.map((name) => ({
                     name: {
                       contains: name,
+                    },
+                  }))
+                : input?.nameFilter
+                ? input.nameFilter.map((name) => ({
+                    name: {
+                      equals: name,
                     },
                   }))
                 : []),

@@ -74,14 +74,7 @@ export default function CustomEditable(props: CustomEditableProps) {
     handleSave(nextValue).catch((error) => {
       // If there's an error, revert the input back to the original value
       setLiveValue(value);
-
       console.error("Failed to save value", error);
-
-      if (error instanceof Error) {
-        window.alert(
-          `Invalid Update -- Reverting to previous value\n\n ${error.message}`
-        );
-      }
     });
   };
 
@@ -103,7 +96,7 @@ export default function CustomEditable(props: CustomEditableProps) {
           <Stack
             direction="row"
             justifyContent="space-between"
-            alignItems="center"
+            alignItems={isTextarea ? "flex-start" : "center"}
             width="100%"
           >
             <EditablePreview
@@ -111,7 +104,7 @@ export default function CustomEditable(props: CustomEditableProps) {
               sx={{
                 whiteSpace: "pre-wrap",
                 maxHeight: "64px",
-                overflowY: "scroll",
+                overflowY: "auto",
                 flex: 1,
               }}
             />
@@ -120,7 +113,7 @@ export default function CustomEditable(props: CustomEditableProps) {
                 height="64px"
                 sx={{
                   maxHeight: "64px",
-                  overflowY: "scroll",
+                  overflowY: "auto",
                   flex: 1,
                 }}
               />

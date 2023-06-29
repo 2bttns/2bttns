@@ -3,16 +3,15 @@ import { Tag } from "@prisma/client";
 import { GetServerSideProps, NextPage } from "next";
 import { Session } from "next-auth";
 import Head from "next/head";
+import { useRouter } from "next/router";
 import TableActionMenu from "../../features/shared/components/Table/containers/TableActionsMenu";
 import TableActionsMenuItemDelete from "../../features/shared/components/Table/containers/TableActionsMenu/TableActionsMenuItemDelete";
 import TableActionsMenuItemImportJSON from "../../features/shared/components/Table/containers/TableActionsMenu/TableActionsMenuItemImportJSON";
-import DeleteTagButton from "../../features/tags/containers/DeleteTagButton";
 import ManageTagButton from "../../features/tags/containers/ManageTagButton";
 import ExportAllTagsJSON from "../../features/tags/containers/TableActionsMenu/ExportAllTagsJSON";
 import ExportSelectedTagsJSON from "../../features/tags/containers/TableActionsMenu/ExportSelectedTagsJSON";
 import TagsTable, { TagData } from "../../features/tags/containers/TagsTable";
 import useDeleteTags from "../../features/tags/hooks/useDeleteTags";
-import { api } from "../../utils/api";
 import getSessionWithSignInRedirect from "../../utils/getSessionWithSignInRedirect";
 
 export type TagsPageProps = {
@@ -36,6 +35,8 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 };
 
 const TagsPage: NextPage<TagsPageProps> = (props) => {
+  const router = useRouter();
+
   return (
     <>
       <Head>
@@ -53,6 +54,11 @@ const TagsPage: NextPage<TagsPageProps> = (props) => {
           additionalTopBarContent={(selectedRows) => (
             <AdditionalTopBarContent selectedRows={selectedRows} />
           )}
+          editable={false}
+          onRowDoubleClicked={async (row) => {
+            const { id } = row;
+            await router.push(`/tags/${id}`);
+          }}
         />
       </Box>
     </>
@@ -82,6 +88,7 @@ function AdditionalTopBarContent(props: AdditionalTopBarContentProps) {
               handleDelete={async (selectedRows) => {
                 await handleDeleteTag(selectedRows.map((row) => row.id));
               }}
+              closeMenuMode="on-confirm"
             />
           </>
         )}
@@ -95,12 +102,11 @@ export type CellActionsProps = {
 };
 function CellActions(props: CellActionsProps) {
   const { tagId } = props;
-  const utils = api.useContext();
 
   return (
-    <ButtonGroup width="100%" justifyContent="end">
+    <ButtonGroup width="100%" justifyContent="start">
       <ManageTagButton tagId={tagId} />
-      <DeleteTagButton tagId={tagId} />
+      {/* <DeleteTagButton tagId={tagId} /> */}
     </ButtonGroup>
   );
 }

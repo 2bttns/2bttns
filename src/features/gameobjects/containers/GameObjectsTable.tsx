@@ -1,4 +1,4 @@
-import { Box, HStack, StackProps } from "@chakra-ui/react";
+import { Box, HStack, StackProps, useToast } from "@chakra-ui/react";
 import { Tag } from "@prisma/client";
 import { useMemo } from "react";
 import { z } from "zod";
@@ -22,6 +22,13 @@ import TagBadges from "../../tags/containers/TagBadges";
 export type GameObjectData =
   RouterOutputs["gameObjects"]["getAll"]["gameObjects"][0];
 
+export const columnIds = {
+  ID: "id",
+  NAME: "name",
+  TAGS: "tags",
+  UPDATED_AT: "updatedAt",
+};
+
 export type GameObjectsTableProps = {
   tag?: {
     include: Tag["id"][];
@@ -36,6 +43,8 @@ export type GameObjectsTableProps = {
   constrainToRemainingSpaceProps?: Partial<ConstrainToRemainingSpaceProps>;
   topBarProps?: Partial<StackProps>;
   allowCreate?: boolean;
+  onRowDoubleClicked?: PaginatedTableProps<GameObjectData>["onRowDoubleClicked"];
+  omitColumns?: (keyof typeof columnIds)[];
 };
 
 export default function GameObjectsTable(props: GameObjectsTableProps) {
@@ -49,7 +58,11 @@ export default function GameObjectsTable(props: GameObjectsTableProps) {
     constrainToRemainingSpaceProps,
     topBarProps,
     allowCreate = true,
+    onRowDoubleClicked,
+    omitColumns,
   } = props;
+
+  const toast = useToast();
 
   const { perPage, currentPage, handlePageChange, handlePerRowsChange } =
     usePagination();
@@ -63,7 +76,9 @@ export default function GameObjectsTable(props: GameObjectsTableProps) {
       skip: (currentPage! - 1) * perPage,
       take: perPage,
       idFilter: globalFilter.debouncedInput,
+      allowFuzzyIdFilter: true,
       nameFilter: globalFilter.debouncedInput,
+      allowFuzzyNameFilter: true,
       tagFilter: tag?.include.join(","),
       tagExcludeFilter: tag?.exclude.join(","),
       untaggedFilter: tag?.untaggedFilter,
@@ -95,7 +110,9 @@ export default function GameObjectsTable(props: GameObjectsTableProps) {
   const gameObjectsCountQuery = api.gameObjects.getCount.useQuery(
     {
       idFilter: globalFilter.debouncedInput,
+      allowFuzzyIdFilter: true,
       nameFilter: globalFilter.debouncedInput,
+      allowFuzzyNameFilter: true,
       tagFilter: tag?.include.join(","),
       tagExcludeFilter: tag?.exclude.join(","),
       untaggedFilter: tag?.untaggedFilter,
@@ -113,10 +130,27 @@ export default function GameObjectsTable(props: GameObjectsTableProps) {
     id: string,
     data: RouterInputs["gameObjects"]["updateById"]["data"]
   ) => {
+    const updateDescription = `ID=${id}`;
+    const updateToast = toast({
+      title: "Updating GameObject",
+      description: updateDescription,
+      status: "loading",
+    });
     try {
       await updateGameObjectMutation.mutateAsync({ id, data });
       await utils.gameObjects.invalidate();
+      toast.update(updateToast, {
+        title: "Success: GameObject Updated",
+        description: updateDescription,
+        status: "success",
+      });
     } catch (error) {
+      toast.update(updateToast, {
+        title: "Error",
+        description: `Failed to update GameObject (ID=${id}). See console for details`,
+        status: "error",
+      });
+
       // This will be caught by CustomEditable component using this function
       // it will revert the value to the previous value when it receives an error
       throw error;
@@ -125,15 +159,31 @@ export default function GameObjectsTable(props: GameObjectsTableProps) {
 
   const createGameObjectMutation = api.gameObjects.create.useMutation();
   const handleCreateGameObject = async (name: string) => {
+    const createDescription = `Name=${name}`;
+    const createToast = toast({
+      title: "Creating GameObject",
+      description: createDescription,
+      status: "loading",
+    });
+
     try {
       const result = await createGameObjectMutation.mutateAsync({ name });
       if (onGameObjectCreated) {
         await onGameObjectCreated(result.createdGameObject.id);
       }
       await utils.gameObjects.invalidate();
+      toast.update(createToast, {
+        title: "Success: GameObject Created",
+        description: createDescription,
+        status: "success",
+      });
     } catch (error) {
-      window.alert("Error creating Game Object\n See console for details");
       console.error(error);
+      toast.update(createToast, {
+        title: "Error",
+        description: `Failed to create GameObject (Name=${name}). See console for details`,
+        status: "error",
+      });
     }
   };
 
@@ -156,8 +206,11 @@ export default function GameObjectsTable(props: GameObjectsTableProps) {
           />
         ),
         sortable: true,
-        sortField: "id",
+        id: columnIds.ID,
+        sortField: columnIds.ID,
         minWidth: "256px",
+        omit: omitColumns?.includes("ID"),
+        reorder: true,
       },
       {
         name: "Name",
@@ -174,27 +227,11 @@ export default function GameObjectsTable(props: GameObjectsTableProps) {
           />
         ),
         sortable: true,
-        sortField: "name",
+        id: columnIds.NAME,
+        sortField: columnIds.NAME,
         minWidth: "256px",
-      },
-      {
-        name: "Description",
-        cell: (row) => (
-          <CustomEditable
-            value={row.description ?? undefined}
-            placeholder="No description"
-            handleSave={async (nextValue) =>
-              handleUpdateGameObject(row.id, {
-                description: nextValue,
-              })
-            }
-            isEditable={editable}
-            isTextarea
-          />
-        ),
-        sortable: true,
-        sortField: "description",
-        minWidth: "512px",
+        omit: omitColumns?.includes("NAME"),
+        reorder: true,
       },
       {
         name: "Tags",
@@ -215,18 +252,24 @@ export default function GameObjectsTable(props: GameObjectsTableProps) {
           );
         },
         sortable: true,
-        sortField: "tags",
+        id: columnIds.TAGS,
+        sortField: columnIds.TAGS,
         minWidth: "256px",
+        omit: omitColumns?.includes("TAGS"),
+        reorder: true,
       },
       {
         name: "Last Updated",
-        cell: (row) => row.updatedAt.toLocaleString(),
+        cell: (row) => new Date(row.updatedAt).toLocaleString(),
         sortable: true,
-        sortField: "updatedAt",
+        id: columnIds.UPDATED_AT,
+        sortField: columnIds.UPDATED_AT,
         minWidth: "256px",
+        omit: omitColumns?.includes("UPDATED_AT"),
+        reorder: true,
       },
     ];
-  }, [editable, tagDataById]);
+  }, [editable, tagDataById, omitColumns]);
 
   const { selectedRows, handleSelectedRowsChange, toggleCleared } =
     useSelectRows<GameObjectData>({
@@ -265,6 +308,7 @@ export default function GameObjectsTable(props: GameObjectsTableProps) {
               selectedRows={selectedRows}
               totalRows={gameObjectsCountQuery.data?.count ?? 0}
               toggleCleared={toggleCleared}
+              onRowDoubleClicked={onRowDoubleClicked}
             />
           );
         }}

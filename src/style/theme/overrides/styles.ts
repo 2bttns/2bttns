@@ -1,10 +1,10 @@
+import { Theme } from "@chakra-ui/react";
 import { GlobalStyleProps, mode } from "@chakra-ui/theme-tools";
 
-const styles = {
+const styles: Theme["styles"] = {
   global: (props: GlobalStyleProps) => ({
     body: {
-      fontFamily: "verdana",
-      color: mode("gray.800", "whiteAlpha.900")(props),
+      color: mode("twobttns.darktext", "twobttns.lighttext")(props),
       bg: mode("white", "gray.800")(props),
     },
   }),

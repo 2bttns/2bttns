@@ -11,10 +11,16 @@ export const tagFilter = z.object({
   includeUntagged: z.boolean().default(false),
 });
 
-export const sort = z.enum(["asc", "desc"]);
-
 export const paginationTake = z.number().min(0).optional().default(10);
 export const paginationSkip = z.number().min(0).optional().default(0);
+
+// TODO: Remove sort in favor of sortOrder; will need to refactor Games & Secrets getAll router procedures
+export const sort = z.enum(["asc", "desc"]);
+
+export const sortOrder = z
+  .enum(["asc", "desc"])
+  .describe("Sort order for the selected field")
+  .optional();
 
 export const booleanEnum = z
   // For some reason, z.boolean() doesn't work when setting it via the swagger docs UI; everything is registered as true

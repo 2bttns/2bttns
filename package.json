@@ -5,7 +5,7 @@
   "scripts": {
     "build": "next build",
     "dev": "next dev -p 3001",
-    "postinstall": "prisma generate",
+    "postinstall": "prisma generate; npm run gen:theme-typings",
     "lint": "next lint --quiet",
     "start": "next start -p 3262",
     "test": "dotenv -e .env.test -- npm run init-db:test && vitest && npm run docker:rm:test-db",
@@ -23,7 +23,8 @@
     "docker:up:test-db": "docker-compose up test-db -d",
     "docker:stop": "docker-compose stop",
     "docker:rm:test-db": "docker-compose rm -svf test-db",
-    "docker:rm:dev-db": "docker-compose rm -svf dev-db"
+    "docker:rm:dev-db": "docker-compose rm -svf dev-db",
+    "gen:theme-typings": "chakra-cli tokens src/style/theme/typings-only.ts"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
@@ -34,6 +35,7 @@
     "@emotion/react": "^11.10.5",
     "@emotion/styled": "^11.10.5",
     "@next-auth/prisma-adapter": "^1.0.5",
+    "@next/font": "^13.1.6",
     "@prisma/client": "^4.9.0",
     "@react-hook/window-size": "^3.1.1",
     "@tanstack/react-query": "^4.20.0",
@@ -63,15 +65,16 @@
     "swagger-ui-react": "^4.15.5",
     "trpc-openapi": "^1.1.2",
     "use-debounce": "^9.0.4",
-    "use-fit-text": "^2.4.0",
     "whatwg-fetch": "^3.6.2",
     "winston": "^3.8.2",
     "xstate": "^4.35.4",
     "zod": "^3.20.2"
   },
   "devDependencies": {
+    "@chakra-ui/cli": "^2.4.1",
     "@types/color-hash": "^1.0.2",
     "@types/jsonwebtoken": "^9.0.1",
+    "@types/next": "^9.0.0",
     "@types/node": "^18.11.18",
     "@types/react": "^18.0.26",
     "@types/react-dom": "^18.0.10",

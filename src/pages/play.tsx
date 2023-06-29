@@ -183,6 +183,11 @@ const Play: NextPageWithLayout<ReturnType> = (props) => {
     setPlayerToken(playerToken);
   }, []);
 
+  const modeFrontendComponent = useMemo(() => {
+    if (!gameModeData.mode) return null;
+    return getModeUI(gameModeData.mode)?.FrontendComponent;
+  }, [gameModeData.mode]);
+
   return (
     <Layout showAdminLayout={showAdminLayout} userId={gameData.playerId}>
       <Head>
@@ -194,13 +199,21 @@ const Play: NextPageWithLayout<ReturnType> = (props) => {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <ScoresModal gameId={gameId} playerId={gameData.playerId} />
-      <PlayMode
-        ModeFrontendComponent={getModeUI(gameModeData.mode).FrontendComponent}
-        modeFrontendProps={{
-          gameData,
-          config: gameModeData.config,
-        }}
-      />
+      {modeFrontendComponent && (
+        <PlayMode
+          ModeFrontendComponent={modeFrontendComponent}
+          modeFrontendProps={{
+            gameData,
+            config: gameModeData.config,
+          }}
+        />
+      )}
+      {!modeFrontendComponent && (
+        <h1>
+          Game mode not found. If you are the administator, please update your
+          game&apos;s configuration.
+        </h1>
+      )}
     </Layout>
   );
 };

@@ -1,3 +1,4 @@
+import { administratorsRouter } from "./routers/administrators/_index";
 import { exampleRouter } from "./routers/example/_index";
 import { exportDataRouter } from "./routers/export-data/_index";
 import { gameObjectsRouter } from "./routers/gameobjects/_index";
@@ -26,6 +27,7 @@ export const appRouter = createTRPCRouter({
   players: playersRouter,
   exportData: exportDataRouter,
   importData: importDataRouter,
+  administrators: administratorsRouter,
 });
 
 // export type definition of API

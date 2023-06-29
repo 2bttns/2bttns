@@ -8,18 +8,21 @@ import {
   VStack,
 } from "@chakra-ui/react";
 import Link from "next/link";
+import { FaExternalLinkAlt } from "react-icons/fa";
 
 export type PreviewLinkCardProps = {
   icon: IconButtonProps["icon"];
-  title: string;
-  description: string;
+  title: React.ReactNode;
+  description: React.ReactNode;
   link: string;
+  external?: boolean;
 };
 
 export default function PreviewLinkCard(props: PreviewLinkCardProps) {
-  const { icon, title, description, link } = props;
+  const { icon, title, description, link, external = false } = props;
 
   const [isLargerThan450] = useMediaQuery("(min-width: 450px)");
+  const target = external ? "_blank" : undefined;
 
   return (
     <HStack
@@ -29,7 +32,7 @@ export default function PreviewLinkCard(props: PreviewLinkCardProps) {
       spacing="1rem"
     >
       {isLargerThan450 && (
-        <Link href={link}>
+        <Link href={link} target={target}>
           <IconButton
             icon={icon}
             aria-label="Manage Games"
@@ -41,9 +44,14 @@ export default function PreviewLinkCard(props: PreviewLinkCardProps) {
         </Link>
       )}
       <VStack alignItems="start" spacing={0}>
-        <Link href={link}>
+        <Link href={link} target={target}>
           <Heading size="md" color="blue.600">
-            {title}
+            <HStack alignItems="center">
+              <Text>{title}</Text>
+              {external && (
+                <FaExternalLinkAlt display="inline" fontSize="16px" />
+              )}
+            </HStack>
           </Heading>
         </Link>
         <Text color="gray.500" fontStyle="italic" whiteSpace="break-spaces">

@@ -7,6 +7,6 @@ const modesUIRegistry = {
 };
 
 export const getModeUI = (mode: AvailableModes) => {
-  if (!modesUIRegistry[mode]) throw new Error(`Mode ${mode} not found`);
+  if (!modesUIRegistry[mode]) return null;
   return modesUIRegistry[mode];
 };

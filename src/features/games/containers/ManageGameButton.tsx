@@ -21,7 +21,7 @@ export default function ManageGameButton(props: ManageGameButtonProps) {
         colorScheme="blue"
         onClick={handleManageGameRedirect}
         icon={<SettingsIcon />}
-        aria-label={`Manage game with ID: ${gameId}`}
+        aria-label={`Manage game with ID=${gameId}`}
         size="sm"
         variant="outline"
       />

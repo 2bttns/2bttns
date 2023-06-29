@@ -2,6 +2,7 @@ import { Box, ButtonGroup, Divider } from "@chakra-ui/react";
 import { GetServerSideProps, NextPage } from "next";
 import { Session } from "next-auth";
 import Head from "next/head";
+import { useRouter } from "next/router";
 import DeleteGameButton from "../../features/games/containers/DeleteGameButton";
 import GamesTable, {
   GameData,
@@ -38,6 +39,8 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 };
 
 const GamesPage: NextPage<GamesPageProps> = (props) => {
+  const router = useRouter();
+
   return (
     <>
       <Head>
@@ -52,6 +55,11 @@ const GamesPage: NextPage<GamesPageProps> = (props) => {
           additionalTopBarContent={(selectedRows) => (
             <AdditionalTopBarContent selectedRows={selectedRows} />
           )}
+          editable={false}
+          onRowDoubleClicked={async (row) => {
+            const { id } = row;
+            await router.push(`/games/${id}`);
+          }}
         />
       </Box>
     </>
@@ -81,6 +89,7 @@ function AdditionalTopBarContent(props: AdditionalTopBarContentProps) {
               handleDelete={async () => {
                 await handleDeleteGame(context.selectedRows.map((r) => r.id));
               }}
+              closeMenuMode="on-confirm"
             />
           </>
         )}
@@ -97,10 +106,10 @@ function getAdditionalColumns(): AdditionalColumns<GameData> {
         cell: (row) => {
           const { id } = row;
           return (
-            <ButtonGroup width="100%" justifyContent="end">
-              <PlayGameButton gameId={id} />
+            <ButtonGroup width="100%" justifyContent="start">
+              {/* <PlayGameButton gameId={id} /> */}
               <ManageGameButton gameId={id} />
-              <DeleteGameButton gameId={id} />
+              {/* <DeleteGameButton gameId={id} /> */}
             </ButtonGroup>
           );
         },

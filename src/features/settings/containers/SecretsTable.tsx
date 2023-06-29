@@ -1,4 +1,4 @@
-import { Box, HStack, StackProps } from "@chakra-ui/react";
+import { Box, HStack, StackProps, useToast } from "@chakra-ui/react";
 import { useMemo } from "react";
 import { api, RouterInputs, RouterOutputs } from "../../../utils/api";
 import ConstrainToRemainingSpace, {
@@ -36,6 +36,8 @@ export default function SecretsTable(props: SecretsTableProps) {
     onSecretCreated,
     topBarProps,
   } = props;
+
+  const toast = useToast();
 
   const { perPage, currentPage, handlePageChange, handlePerRowsChange } =
     usePagination();
@@ -91,10 +93,26 @@ export default function SecretsTable(props: SecretsTableProps) {
     id: string,
     data: RouterInputs["secrets"]["updateById"]["data"]
   ) => {
+    const updateDescription = `ID=${id}`;
+    const updateToast = toast({
+      title: "Updating GameObject",
+      description: updateDescription,
+      status: "loading",
+    });
     try {
       await updateSecretMutation.mutateAsync({ id, data });
       await utils.secrets.invalidate();
+      toast.update(updateToast, {
+        title: "Success: Secret Updated",
+        description: updateDescription,
+        status: "success",
+      });
     } catch (error) {
+      toast.update(updateToast, {
+        title: "Error",
+        description: `Failed to update Secret (ID=${id}). See console for details`,
+        status: "error",
+      });
       // This will be caught by CustomEditable component using this function
       // it will revert the value to the previous value when it receives an error
       throw error;
@@ -103,13 +121,28 @@ export default function SecretsTable(props: SecretsTableProps) {
 
   const createSecretsMutation = api.secrets.create.useMutation();
   const handleCreateSecret = async (name: string) => {
+    const createDescription = `Name=${name}`;
+    const createToast = toast({
+      title: "Creating Tag",
+      description: createDescription,
+      status: "loading",
+    });
     try {
       const result = await createSecretsMutation.mutateAsync({ name });
       if (onSecretCreated) await onSecretCreated(result.createdSecret);
       await utils.secrets.invalidate();
+      toast.update(createToast, {
+        title: "Success: Tag Created",
+        description: createDescription,
+        status: "success",
+      });
     } catch (error) {
-      window.alert("Error creating Secret\n See console for details");
       console.error(error);
+      toast.update(createToast, {
+        title: "Error",
+        description: `Failed to create Tag (Name=${name}). See console for details`,
+        status: "error",
+      });
     }
   };
 

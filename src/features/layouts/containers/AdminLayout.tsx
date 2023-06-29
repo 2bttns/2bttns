@@ -1,28 +1,43 @@
-import { Box, Divider, Stack, Text, VStack } from "@chakra-ui/react";
+import {
+  Box,
+  BoxProps,
+  Divider,
+  HStack,
+  Stack,
+  Text,
+  VStack,
+} from "@chakra-ui/react";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useMemo } from "react";
+import { FaExternalLinkAlt } from "react-icons/fa";
 import AdminNavbar from "../../navbar/containers/AdminNavbar";
+
+export const ADMIN_SIDEBAR_WIDTH = "200px";
 
 export type AdminLayoutProps = {
   children: React.ReactNode;
+  rootBoxProps?: BoxProps;
 };
 
-export type NavMenuLink = { href: string; label: string } | "divider";
+export type NavMenuLink =
+  | { href: string; label: string; external?: boolean }
+  | "divider";
 const links: NavMenuLink[] = [
   { href: "/", label: "Home" },
   "divider",
   { href: "/games", label: "Games" },
-  { href: "/game-objects", label: "Game Objects" },
   { href: "/tags", label: "Tags" },
+  { href: "/game-objects", label: "Game Objects" },
   "divider",
   { href: "/settings", label: "Settings" },
-  { href: "/docs", label: "Docs" },
-  { href: "/testRankedOutputs", label: "Outputs" },
+  { href: "/api-documentation", label: "API" },
+  { href: "https://docs.2bttns.com", label: "Documentation", external: true },
+  // { href: "/testRankedOutputs", label: "Outputs" },
 ];
 
 export default function AdminLayout(props: AdminLayoutProps) {
-  const { children } = props;
+  const { children, rootBoxProps } = props;
 
   const router = useRouter();
 
@@ -37,16 +52,17 @@ export default function AdminLayout(props: AdminLayoutProps) {
       backgroundColor="gray.300"
       position="relative"
       overflow="hidden"
+      {...rootBoxProps}
     >
       <Box position="sticky" top="0" zIndex="99">
         <AdminNavbar />
       </Box>
       <Stack width="100%" height="100%" direction="row" spacing={0}>
         <VStack
-          backgroundColor="blue.700"
+          backgroundColor="twobttns.blue"
           height="100%"
-          minWidth="200px"
-          width="200px"
+          minWidth={ADMIN_SIDEBAR_WIDTH}
+          width={ADMIN_SIDEBAR_WIDTH}
           spacing={0}
           color="gray.100"
           zIndex={99}
@@ -57,9 +73,14 @@ export default function AdminLayout(props: AdminLayoutProps) {
             }
 
             const isCurrentRootPage = currentRootPage === link.href;
-
+            const target = link.external ? "_blank" : "_self";
             return (
-              <Link href={link.href} key={link.href} style={{ width: "100%" }}>
+              <Link
+                href={link.href}
+                key={link.href}
+                style={{ width: "100%" }}
+                target={target}
+              >
                 <Box
                   width="100%"
                   textAlign="left"
@@ -74,13 +95,18 @@ export default function AdminLayout(props: AdminLayoutProps) {
                   backgroundColor={isCurrentRootPage ? "gray.400" : "inherit"}
                   color={isCurrentRootPage ? "gray.800" : "inherit"}
                 >
-                  <Text>{link.label}</Text>
+                  <HStack alignItems="center">
+                    <Text>{link.label}</Text>
+                    {link.external && (
+                      <FaExternalLinkAlt display="inline" fontSize="16px" />
+                    )}
+                  </HStack>
                 </Box>
               </Link>
             );
           })}
         </VStack>
-        <Box width="calc(100% - 200px)" height="100%">
+        <Box width={`calc(100% - ${ADMIN_SIDEBAR_WIDTH})`} height="100%">
           {children}
         </Box>
       </Stack>

@@ -10,29 +10,37 @@ import {
   Stack,
   Tooltip,
 } from "@chakra-ui/react";
-import { useEffect, useRef, useState } from "react";
+import { ReactNode, useEffect, useRef, useState } from "react";
 
 export type SearchAndCreateBarProps = {
   value: string | undefined;
   onChange: (search: string) => void;
   onCreate?: (name: string) => Promise<void>;
+  tooltipLabel?: ReactNode;
+  allowCreateWithEmptyValue?: boolean;
 };
 
 // Input for updating a search string state variable
-// Has a button to create a new game object with the search string as the name, if a create function is provided
+// Has a button that uses the search string as a parameter for a custom create function
 export default function SearchAndCreateBar(props: SearchAndCreateBarProps) {
-  const { value, onChange, onCreate } = props;
+  const {
+    value,
+    onChange,
+    onCreate,
+    tooltipLabel = "Create new item with input as name",
+    allowCreateWithEmptyValue = false,
+  } = props;
 
   const inputRef = useRef<HTMLInputElement>(null);
 
   const [isCreating, setIsCreating] = useState(false);
   const handleCreate = async () => {
     if (!onCreate) return;
-    if (!value) return;
     if (isCreating) return;
+    if (!allowCreateWithEmptyValue && !value) return;
 
     setIsCreating(true);
-    await onCreate(value);
+    await onCreate(value ?? "");
     setIsCreating(false);
   };
 
@@ -69,6 +77,7 @@ export default function SearchAndCreateBar(props: SearchAndCreateBarProps) {
           bgColor="gray.200"
           isDisabled={isCreating}
           ref={inputRef}
+          focusBorderColor="twobttns.green"
         />
         {onCreate && (
           <InputRightElement>
@@ -84,7 +93,7 @@ export default function SearchAndCreateBar(props: SearchAndCreateBarProps) {
                     spacing="0"
                     padding="0.5rem"
                   >
-                    <div>Create new item with input as name</div>
+                    <div>{tooltipLabel}</div>
                     <div>
                       <Kbd backgroundColor="gray.900">shift</Kbd>
                       <span>+</span>
@@ -97,7 +106,7 @@ export default function SearchAndCreateBar(props: SearchAndCreateBarProps) {
               hasArrow
             >
               <IconButton
-                colorScheme="blue"
+                colorScheme="green"
                 icon={isCreating ? <Spinner size="sm" /> : <AddIcon />}
                 aria-label="Create new item"
                 size="sm"

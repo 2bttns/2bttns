@@ -1,5 +1,11 @@
 import { LinkIcon } from "@chakra-ui/icons";
-import { ButtonProps, IconButton, Spinner, Tooltip } from "@chakra-ui/react";
+import {
+  ButtonProps,
+  IconButton,
+  Spinner,
+  Tooltip,
+  useToast,
+} from "@chakra-ui/react";
 import { GameObject, Tag } from "@prisma/client";
 import { useEffect, useMemo, useState } from "react";
 import { useToggleTagForGameObjects } from "../hooks/useToggleTagForGameObjects";
@@ -46,8 +52,8 @@ export default function ToggleTagButton(props: ToggleTagButtonProps) {
 
   const ariaLabel = useMemo(() => {
     if (isLoading) return `Loading`;
-    if (isTagAppliedToAll) return `Remove tag with ID: ${tagId}`;
-    return `Apply tag with ID: ${tagId}`;
+    if (isTagAppliedToAll) return `Remove tag with ID=${tagId}`;
+    return `Apply tag with ID=${tagId}`;
   }, [isTagAppliedToAll, isLoading, tagId]);
 
   const colorScheme = useMemo<ButtonProps["colorScheme"]>(() => {

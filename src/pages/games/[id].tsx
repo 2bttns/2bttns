@@ -7,21 +7,35 @@ import {
   ButtonGroup,
   Heading,
   HStack,
+  Skeleton,
+  Table,
+  TableContainer,
+  Tbody,
+  Td,
   Text,
+  Th,
+  Thead,
+  Tr,
+  useToast,
   VStack,
 } from "@chakra-ui/react";
-import { Game } from "@prisma/client";
+import { Game, Tag } from "@prisma/client";
 import type { GetServerSideProps, NextPage } from "next";
 import { Session } from "next-auth";
 import { useRouter } from "next/router";
+import { useEffect, useState } from "react";
 import DeleteGameButton from "../../features/games/containers/DeleteGameButton";
 import EditGameMode from "../../features/games/containers/EditGameMode";
 import PlayGameButton from "../../features/games/containers/PlayGameButton";
 import CustomEditable from "../../features/shared/components/CustomEditable";
-import GameInputTagsFilterToggles from "../../features/tags/containers/GameInputTagsFilterToggles";
+import UnderlinedTextTooltip from "../../features/shared/components/UnderlinedTextTooltip";
+import TagMultiSelect, {
+  TagMultiSelectProps,
+} from "../../features/tags/containers/TagMultiSelect";
 import { prisma } from "../../server/db";
 import { api, RouterInputs } from "../../utils/api";
 import getSessionWithSignInRedirect from "../../utils/getSessionWithSignInRedirect";
+import wait from "../../utils/wait";
 
 export type GameByIdPageProps = {
   gameId: Game["id"];
@@ -65,14 +79,6 @@ const GameById: NextPage<GameByIdPageProps> = (props) => {
       <Box width="100%" height="100%" padding="1rem">
         <VStack spacing="1rem" width="100%" alignItems="start">
           <GameDetails gameId={gameId} />
-          <HStack alignItems="start" width="100%">
-            <Text fontWeight="bold" minWidth="128px">
-              Input Tags:
-            </Text>
-            <Box flex={1} backgroundColor="white" padding="1rem">
-              <GameInputTagsFilterToggles gameId={gameId} />
-            </Box>
-          </HStack>
         </VStack>
       </Box>
     </>
@@ -85,20 +91,76 @@ type GameDetailsProps = {
 function GameDetails(props: GameDetailsProps) {
   const { gameId } = props;
 
+  const toast = useToast();
+  const router = useRouter();
+
   const utils = api.useContext();
   const gameQuery = api.games.getById.useQuery({ id: gameId });
   const updateGameMutation = api.games.updateById.useMutation();
   const handleUpdateGame = async (
     input: RouterInputs["games"]["updateById"]
   ) => {
-    await updateGameMutation.mutateAsync(input);
-    await utils.games.getById.invalidate({ id: input.id });
+    let updateDescription = `Saving changes...`;
+    let updateToast = toast({
+      title: "Updating Game",
+      status: "loading",
+      description: updateDescription,
+    });
+    try {
+      await updateGameMutation.mutateAsync(input);
+
+      // Redirect to the new game ID page if the ID changed
+      const id = input.data.id;
+      if (id && id !== gameId) {
+        toast.close(updateToast);
+        updateDescription = `Redirecting to new Game ID page (${id})...`;
+        updateToast = toast({
+          title: "ID Changed",
+          status: "loading",
+          description: updateDescription,
+        });
+        await wait(1);
+        await router.replace(`/games/${id}`);
+        await utils.games.getById.invalidate({ id: input.id });
+      }
+
+      updateDescription = ``;
+      toast.update(updateToast, {
+        title: "Saved",
+        status: "success",
+        description: updateDescription,
+      });
+    } catch (error) {
+      updateDescription = `Failed to update (Game ID=${gameId}). See console for details`;
+      toast.update(updateToast, {
+        title: "Error",
+        status: "error",
+        description: updateDescription,
+      });
+
+      // This will be caught by CustomEditable component using this function
+      // it will revert the value to the previous value when it receives an error
+      console.error(error);
+      throw error;
+    }
   };
 
-  const router = useRouter();
   const onDeleted = () => {
     router.push("/games");
   };
+
+  const [inputTags, setInputTags] = useState<
+    TagMultiSelectProps["value"] | null
+  >(null);
+
+  useEffect(() => {
+    if (!gameQuery.data) return;
+    const data = gameQuery.data.game.inputTags.map((t) => ({
+      value: t.id,
+      label: t.name,
+    }));
+    setInputTags(data);
+  }, [gameQuery.data]);
 
   if (gameQuery.isLoading || !gameQuery.data) {
     return null;
@@ -136,64 +198,192 @@ function GameDetails(props: GameDetailsProps) {
           <DeleteGameButton gameId={gameId} onDeleted={onDeleted} />
         </ButtonGroup>
       </HStack>
-      <Heading size="xl">
-        <CustomEditable
-          value={gameQuery.data.game.name ?? ""}
-          placeholder="Untitled Game"
-          handleSave={async (value) => {
-            handleUpdateGame({
-              id: gameId,
-              data: { name: value },
-            });
-          }}
-        />
-      </Heading>
-      <CustomEditable
-        isTextarea
-        value={gameQuery.data.game.description ?? ""}
-        placeholder="No description"
-        handleSave={async (value) => {
-          handleUpdateGame({
-            id: gameId,
-            data: { description: value },
-          });
-        }}
-      />
-      <Text>Configure</Text>
 
-      <HStack>
-        <Text fontWeight="bold"># Items Per Round:</Text>
-        <CustomEditable
-          value={gameQuery.data.game.defaultNumItemsPerRound?.toString() ?? ""}
-          placeholder="ALL"
-          handleSave={async (nextValue) => {
-            // Null means ALL
-            // Otherwise this must be a number greater than 0
-            let value: Game["defaultNumItemsPerRound"] = null;
-            if (nextValue !== "") {
-              try {
-                const parsed = parseInt(nextValue, 10);
-                if (isNaN(parsed)) throw new Error("Must be a number");
-                if (parsed <= 0) throw new Error("Must be greater than 0");
-                value = parsed;
-              } catch (error) {
-                throw error;
-              }
-            }
-            await handleUpdateGame({
-              id: gameId,
-              data: {
-                defaultNumItemsPerRound: value,
-              },
-            });
-          }}
-        />
-      </HStack>
-      <Box sx={{ marginY: "1rem" }}>
-        <EditGameMode gameId={gameId} />
+      <Box
+        width="100%"
+        maxHeight="calc(100vh - 120px)"
+        overflowX="auto"
+        overflowY="scroll"
+      >
+        <Box minW="2xl" maxW="2xl" paddingBottom="5rem">
+          <TableContainer overflowX="visible" overflowY="visible">
+            <Table variant="striped">
+              <Thead>
+                <Tr>
+                  <Th>
+                    <Heading size="md">Game Setup</Heading>
+                  </Th>
+                </Tr>
+              </Thead>
+              <Tbody>
+                <Tr>
+                  <Td>
+                    <UnderlinedTextTooltip
+                      tooltipProps={{
+                        label: (
+                          <VStack
+                            spacing={1}
+                            alignItems="start"
+                            fontSize="12px"
+                            padding="1rem"
+                          >
+                            <Text fontWeight="bold">ID</Text>
+                            <Text>
+                              A default ID is generated for you when a Game is
+                              created.
+                            </Text>
+                            <Text>
+                              An ID may only contain alphanumeric, underscore
+                              (_), and hyphen (-) characters.
+                            </Text>
+                            <Text
+                              color="yellow.500"
+                              fontStyle="bold"
+                              textDecoration="underline"
+                            >
+                              ⚠️ Warning: Changing the ID will change the URL of
+                              the Game. This may break external connections to
+                              your Game.
+                            </Text>
+                          </VStack>
+                        ),
+                      }}
+                    >
+                      ID
+                    </UnderlinedTextTooltip>
+                  </Td>
+                  <Td>
+                    <CustomEditable
+                      value={gameQuery.data.game.id ?? ""}
+                      placeholder="<Missing ID>"
+                      handleSave={async (value) => {
+                        await handleUpdateGame({
+                          id: gameId,
+                          data: { id: value },
+                        });
+                      }}
+                    />
+                  </Td>
+                </Tr>
+                <Tr>
+                  <Td>
+                    <UnderlinedTextTooltip
+                      tooltipProps={{
+                        label: (
+                          <VStack
+                            spacing={1}
+                            alignItems="start"
+                            fontSize="12px"
+                            padding="1rem"
+                          >
+                            <Text fontWeight="bold">NAME</Text>
+                            <Text>Optional display name of the Game.</Text>
+                          </VStack>
+                        ),
+                      }}
+                    >
+                      Name
+                    </UnderlinedTextTooltip>
+                  </Td>
+                  <Td>
+                    <CustomEditable
+                      value={gameQuery.data.game.name ?? ""}
+                      placeholder="<Untitled Game>"
+                      handleSave={async (value) => {
+                        await handleUpdateGame({
+                          id: gameId,
+                          data: { name: value },
+                        });
+                      }}
+                    />
+                  </Td>
+                </Tr>
+                <Tr>
+                  <Td verticalAlign="top">
+                    <UnderlinedTextTooltip
+                      tooltipProps={{
+                        label: (
+                          <VStack
+                            spacing={1}
+                            alignItems="start"
+                            fontSize="12px"
+                            padding="1rem"
+                          >
+                            <Text fontWeight="bold">DESCRIPTION</Text>
+                            <Text>Optional text description of the Game.</Text>
+                          </VStack>
+                        ),
+                      }}
+                    >
+                      Description
+                    </UnderlinedTextTooltip>
+                  </Td>
+                  <Td verticalAlign="top">
+                    <CustomEditable
+                      isTextarea
+                      value={gameQuery.data.game.description ?? ""}
+                      placeholder="<No Description>"
+                      handleSave={async (value) => {
+                        await handleUpdateGame({
+                          id: gameId,
+                          data: { description: value },
+                        });
+                      }}
+                    />
+                  </Td>
+                </Tr>
+                <Tr>
+                  <Td>
+                    <UnderlinedTextTooltip
+                      tooltipProps={{
+                        label: (
+                          <VStack
+                            spacing={1}
+                            alignItems="start"
+                            fontSize="12px"
+                            padding="1rem"
+                          >
+                            <Text fontWeight="bold">INPUT TAGS</Text>
+                            <Text>
+                              Choose the tag(s) corresponding to the collection
+                              of Game Objects that players should see when they
+                              play the Game.
+                            </Text>
+                          </VStack>
+                        ),
+                      }}
+                    >
+                      Input Tags
+                    </UnderlinedTextTooltip>
+                  </Td>
+                  <Td>
+                    {!inputTags && <Skeleton height="24px" width="100%" />}
+                    {inputTags && (
+                      <TagMultiSelect
+                        value={inputTags}
+                        onChange={async (nextValue) => {
+                          setInputTags(nextValue);
+                          await handleUpdateGame({
+                            id: gameId,
+                            data: {
+                              inputTags: nextValue.map(
+                                (t) => t.value as Tag["id"]
+                              ),
+                            },
+                          });
+                        }}
+                      />
+                    )}
+                  </Td>
+                </Tr>
+              </Tbody>
+            </Table>
+          </TableContainer>
+          <Box sx={{ marginY: "1rem" }}>
+            <EditGameMode gameId={gameId} />
+          </Box>
+        </Box>
       </Box>
-      {/* <Text>Mode</Text> */}
-      {/* <Text>Game Objects</Text> */}
     </Box>
   );
 }

@@ -1,4 +1,4 @@
-import { Box, HStack, StackProps } from "@chakra-ui/react";
+import { Box, HStack, StackProps, useToast } from "@chakra-ui/react";
 import { useMemo } from "react";
 import { api, RouterInputs, RouterOutputs } from "../../../utils/api";
 import ConstrainToRemainingSpace, {
@@ -18,6 +18,13 @@ import useSort from "../../shared/components/Table/hooks/useSort";
 
 export type TagData = RouterOutputs["tags"]["getAll"]["tags"][0];
 
+export const columnIds = {
+  ID: "id",
+  NAME: "name",
+  DESCRIPTION: "description",
+  UPDATED_AT: "updatedAt",
+};
+
 export type TagsTableProps = {
   additionalColumns?: PaginatedTableProps<TagData>["additionalColumns"];
   additionalTopBarContent?: (selectedRows: TagData[]) => React.ReactNode;
@@ -25,15 +32,10 @@ export type TagsTableProps = {
   areRowsSelectable?: boolean;
   constrainToRemainingSpaceProps?: Partial<ConstrainToRemainingSpaceProps>;
   editable?: boolean;
-  hideColumns?: HideTagsTableColumn;
   onTagCreated?: (tag: TagData) => Promise<void>;
   topBarProps?: Partial<StackProps>;
-};
-
-export type TagsTableColumns = "id" | "name" | "description" | "updatedAt";
-
-export type HideTagsTableColumn = {
-  [key in TagsTableColumns]?: boolean;
+  onRowDoubleClicked?: PaginatedTableProps<TagData>["onRowDoubleClicked"];
+  omitColumns?: (keyof typeof columnIds)[];
 };
 
 export default function TagsTable(props: TagsTableProps) {
@@ -44,10 +46,12 @@ export default function TagsTable(props: TagsTableProps) {
     areRowsSelectable,
     constrainToRemainingSpaceProps,
     editable = true,
-    hideColumns,
     onTagCreated,
     topBarProps,
+    onRowDoubleClicked,
+    omitColumns,
   } = props;
+  const toast = useToast();
 
   const { perPage, currentPage, handlePageChange, handlePerRowsChange } =
     usePagination();
@@ -88,10 +92,26 @@ export default function TagsTable(props: TagsTableProps) {
     id: string,
     data: RouterInputs["tags"]["updateById"]["data"]
   ) => {
+    const updateDescription = `ID=${id}`;
+    const updateToast = toast({
+      title: "Updating Tag",
+      description: updateDescription,
+      status: "loading",
+    });
     try {
       await updateTagMutation.mutateAsync({ id, data });
       await utils.tags.invalidate();
+      toast.update(updateToast, {
+        title: "Success: Tag Updated",
+        description: updateDescription,
+        status: "success",
+      });
     } catch (error) {
+      toast.update(updateToast, {
+        title: "Error",
+        description: `Failed to update Tag (ID=${id}). See console for details`,
+        status: "error",
+      });
       // This will be caught by CustomEditable component using this function
       // it will revert the value to the previous value when it receives an error
       throw error;
@@ -102,21 +122,32 @@ export default function TagsTable(props: TagsTableProps) {
   const handleCreateTag: SearchAndCreateBarProps["onCreate"] = async (
     value
   ) => {
+    const createDescription = `Name=${value}`;
+    const createToast = toast({
+      title: "Creating Tag",
+      description: createDescription,
+      status: "loading",
+    });
     try {
       const result = await createTagMutation.mutateAsync({
         name: value,
       });
       if (onTagCreated) await onTagCreated(result.createdTag);
       await utils.tags.invalidate();
+      toast.update(createToast, {
+        title: "Success: Tag Created",
+        description: createDescription,
+        status: "success",
+      });
     } catch (error) {
-      window.alert("Error creating Tag\n See console for details");
       console.error(error);
+      toast.update(createToast, {
+        title: "Error",
+        description: `Failed to create Tag (Name=${name}). See console for details`,
+        status: "error",
+      });
     }
   };
-
-  const numColumnsToHide = useMemo<number>(() => {
-    return Object.values(hideColumns ?? {}).filter((v) => v === true).length;
-  }, [hideColumns]);
 
   const columns = useMemo<PaginatedTableProps<TagData>["columns"]>(() => {
     return [
@@ -135,9 +166,11 @@ export default function TagsTable(props: TagsTableProps) {
           />
         ),
         sortable: true,
-        sortField: "id",
+        id: columnIds["ID"],
+        sortField: columnIds["ID"],
         minWidth: "256px",
-        omit: hideColumns?.id,
+        omit: omitColumns?.includes("ID"),
+        reorder: true,
       },
       {
         name: "Name",
@@ -154,9 +187,11 @@ export default function TagsTable(props: TagsTableProps) {
           />
         ),
         sortable: true,
-        sortField: "name",
+        id: columnIds.NAME,
+        sortField: columnIds.NAME,
         minWidth: "256px",
-        omit: hideColumns?.name,
+        omit: omitColumns?.includes("NAME"),
+        reorder: true,
       },
       {
         name: "Description",
@@ -174,20 +209,24 @@ export default function TagsTable(props: TagsTableProps) {
           />
         ),
         sortable: true,
-        sortField: "description",
+        id: columnIds.DESCRIPTION,
+        sortField: columnIds.DESCRIPTION,
         minWidth: "512px",
-        omit: hideColumns?.description,
+        omit: omitColumns?.includes("DESCRIPTION"),
+        reorder: true,
       },
       {
         name: "Last Updated",
-        cell: (row) => row.updatedAt.toLocaleString(),
+        cell: (row) => new Date(row.updatedAt).toLocaleString(),
         sortable: true,
-        sortField: "updatedAt",
+        id: columnIds.UPDATED_AT,
+        sortField: columnIds.UPDATED_AT,
         minWidth: "256px",
-        omit: hideColumns?.updatedAt,
+        omit: omitColumns?.includes("UPDATED_AT"),
+        reorder: true,
       },
     ];
-  }, [editable, numColumnsToHide]);
+  }, [editable, omitColumns]);
 
   const { selectedRows, handleSelectedRowsChange, toggleCleared } =
     useSelectRows<TagData>({
@@ -226,6 +265,7 @@ export default function TagsTable(props: TagsTableProps) {
               selectedRows={selectedRows}
               totalRows={tagsCountQuery.data?.count ?? 0}
               toggleCleared={toggleCleared}
+              onRowDoubleClicked={onRowDoubleClicked}
             />
           );
         }}

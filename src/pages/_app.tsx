@@ -28,7 +28,16 @@ const MyApp = ({
 
   return (
     <SessionProvider session={session}>
-      <ChakraProvider theme={theme}>
+      <ChakraProvider
+        theme={theme}
+        toastOptions={{
+          defaultOptions: {
+            duration: 5000,
+            isClosable: true,
+            position: "bottom-right",
+          },
+        }}
+      >
         {getLayout(<Component {...pageProps} />)}
       </ChakraProvider>
     </SessionProvider>

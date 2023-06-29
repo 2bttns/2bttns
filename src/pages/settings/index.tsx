@@ -8,17 +8,22 @@ import {
   TabPanel,
   TabPanels,
   Tabs,
+  Text,
   Tooltip,
   useDisclosure,
+  useToast,
 } from "@chakra-ui/react";
 import { Secret } from "@prisma/client";
 import { GetServerSideProps, NextPage } from "next";
 import { Session } from "next-auth";
 import Head from "next/head";
+import { useEffect, useState } from "react";
+import AdministratorsTable from "../../features/settings/containers/AdministratorsTable";
 import SecretsTable from "../../features/settings/containers/SecretsTable";
 import ConfirmAlert from "../../features/shared/components/ConfirmAlert";
 import { api } from "../../utils/api";
 import getSessionWithSignInRedirect from "../../utils/getSessionWithSignInRedirect";
+import wait from "../../utils/wait";
 
 export type SettingsPageProps = {
   session: Session;
@@ -41,6 +46,18 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 };
 
 const SettingsPage: NextPage<SettingsPageProps> = (props) => {
+  const [tabIndex, setTabIndex] = useState(-1);
+  const [isTabRendering, setTabRendering] = useState(true);
+  const handleTabChange = async (index: number) => {
+    setTabIndex(index);
+    setTabRendering(true);
+    await wait(0.25);
+    setTabRendering(false);
+  };
+  useEffect(() => {
+    handleTabChange(0);
+  }, []);
+
   return (
     <>
       <Head>
@@ -49,26 +66,39 @@ const SettingsPage: NextPage<SettingsPageProps> = (props) => {
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <Box padding="1rem">
-        <Tabs>
+      <Box>
+        <Tabs tabIndex={tabIndex} onChange={handleTabChange}>
           <TabList>
             <Tab>Secrets</Tab>
-            <Tab>Foo</Tab>
+            <Tab>Administrators</Tab>
           </TabList>
 
           <TabPanels>
-            <TabPanel>
-              <SecretsTable
-                additionalColumns={{
-                  columns: [
-                    { cell: (row) => <CellActions secretId={row.id} /> },
-                  ],
-                  dependencies: [],
-                }}
-              />
+            <TabPanel sx={{ display: isTabRendering ? "none" : "block" }}>
+              {/* Render only when tab is active -- otherwise the tables may not render properly when hidden and not appear properly when changing to its tab */}
+              {tabIndex === 0 && (
+                <SecretsTable
+                  additionalColumns={{
+                    columns: [
+                      { cell: (row) => <CellActions secretId={row.id} /> },
+                    ],
+                    dependencies: [],
+                  }}
+                  constrainToRemainingSpaceProps={{
+                    bottomOffset: 120,
+                  }}
+                />
+              )}
             </TabPanel>
-            <TabPanel>
-              <h2>Foo</h2>
+            <TabPanel sx={{ display: isTabRendering ? "none" : "block" }}>
+              {/* Render only when tab is active -- otherwise the tables may not render properly when hidden and not appear properly when changing to its tab */}
+              {tabIndex === 1 && (
+                <AdministratorsTable
+                  constrainToRemainingSpaceProps={{
+                    bottomOffset: 120,
+                  }}
+                />
+              )}
             </TabPanel>
           </TabPanels>
         </Tabs>
@@ -83,31 +113,66 @@ export type CellActionsProps = {
 function CellActions(props: CellActionsProps) {
   const { secretId } = props;
   const utils = api.useContext();
+  const toast = useToast();
 
   const regenerateSecretDisclosure = useDisclosure();
   const updateSecretMutation = api.secrets.updateById.useMutation();
   const regenerateSecret = async (id: Secret["id"]) => {
+    const regenDescription = `App ID: ${id}`;
+    const regenToast = toast({
+      title: "Regenerating secret...",
+      status: "loading",
+      description: regenDescription,
+    });
+    regenerateSecretDisclosure.onClose(); // Close the disclosure; toasts will notifiy the user of success/failure
+
     try {
       await updateSecretMutation.mutateAsync({
         id,
         generateNewSecret: true,
       });
       await utils.secrets.getAll.invalidate();
+      toast.update(regenToast, {
+        title: "Success: Secret regenerated",
+        status: "success",
+        description: regenDescription,
+      });
     } catch (error) {
       console.error(error);
-      window.alert("Error regenerating secret\n See console for details");
+      toast.update(regenToast, {
+        title: `Error (App ID=${id})`,
+        status: "error",
+        description: `Failed to regenerate secret. See console for details`,
+      });
     }
   };
 
   const deleteSecretDisclosure = useDisclosure();
   const deleteSecretMutation = api.secrets.deleteById.useMutation();
   const handleDeleteSecret = async (id: Secret["id"]) => {
+    const toastDescription = `App ID: ${id}`;
+    deleteSecretDisclosure.onClose(); // Close the disclosure; toasts will notifiy the user of success/failure
+    const deleteToast = toast({
+      title: "Deleting secret...",
+      status: "loading",
+      description: toastDescription,
+    });
+
     try {
       await deleteSecretMutation.mutateAsync({ id });
       await utils.secrets.invalidate();
+      toast.update(deleteToast, {
+        title: "Success: Secret deleted",
+        status: "success",
+        description: toastDescription,
+      });
     } catch (error) {
       console.error(error);
-      window.alert("Error deleting secret\n See console for details");
+      toast.update(deleteToast, {
+        title: `Error (App ID=${id})`,
+        status: "error",
+        description: `Failed to delete secret. See console for details`,
+      });
     }
   };
 
@@ -144,14 +209,18 @@ function CellActions(props: CellActionsProps) {
           handleConfirm={() => handleDeleteSecret(secretId)}
           performingConfirmActionText="Deleting..."
         >
-          This action cannot be undone.
+          <Text>Click &apos;Confirm&apos; to delete the following Secret:</Text>
+          <Text textDecoration="underline">(App ID={secretId})</Text>
+          <Text mt="1rem" color="red.500" fontStyle="italic">
+            Warning: This action cannot be undone.
+          </Text>
         </ConfirmAlert>
         <Tooltip label={`Delete`} placement="top">
           <IconButton
             colorScheme="red"
             onClick={deleteSecretDisclosure.onOpen}
             icon={<DeleteIcon />}
-            aria-label={`Delete secret with ID: ${secretId}`}
+            aria-label={`Delete secret with ID=${secretId}`}
             size="sm"
             variant="outline"
           />

@@ -1,5 +1,5 @@
-import { Button, ButtonProps, Flex } from "@chakra-ui/react";
-import { Dispatch, SetStateAction } from "react";
+import { Button, ButtonProps, Checkbox, Divider, Flex } from "@chakra-ui/react";
+import { Dispatch, MouseEventHandler, SetStateAction } from "react";
 
 export type TagFilter = {
   [tagId: string]: {
@@ -50,8 +50,8 @@ export default function TagFilterToggles(props: TagFilterTogglesProps) {
               key="All"
               colorScheme="blackAlpha"
               onClick={() => handleToggleAll(true)}
-              variant={areAllOn ? "solid" : "ghost"}
               size="sm"
+              rightIcon={<CheckboxIcon on={areAllOn} />}
             >
               All
             </Button>
@@ -59,16 +59,19 @@ export default function TagFilterToggles(props: TagFilterTogglesProps) {
               key="None"
               colorScheme="blackAlpha"
               onClick={() => handleToggleAll(false)}
-              variant={areAllOff ? "solid" : "ghost"}
               size="sm"
+              rightIcon={<CheckboxIcon on={areAllOff} />}
             >
               None
             </Button>
           </>
         )}
 
+        <Divider my="1rem" />
+
         {Object.entries(filter).map(([tagId, { tagName, on, colorScheme }]) => {
-          const handleClick = () => {
+          const handleClick: MouseEventHandler = (e) => {
+            e.stopPropagation();
             setFilter((prevFilter) => {
               if (!prevFilter || !prevFilter[tagId]) return prevFilter;
               const newFilter = { ...prevFilter };
@@ -86,8 +89,8 @@ export default function TagFilterToggles(props: TagFilterTogglesProps) {
               key={tagId}
               colorScheme={colorScheme}
               onClick={handleClick}
-              variant={on ? "solid" : "outline"}
               size="sm"
+              rightIcon={<CheckboxIcon on={on} />}
             >
               {tagName}
             </Button>
@@ -95,5 +98,26 @@ export default function TagFilterToggles(props: TagFilterTogglesProps) {
         })}
       </Flex>
     </>
+  );
+}
+
+type CheckboxIconProps = {
+  on: boolean;
+};
+function CheckboxIcon(props: CheckboxIconProps) {
+  const { on } = props;
+  return (
+    <Checkbox
+      isChecked={on}
+      isDisabled
+      sx={{
+        userSelect: "none",
+        cursor: "pointer",
+        _disabled: {
+          cursor: "pointer",
+          userSelect: "none",
+        },
+      }}
+    />
   );
 }

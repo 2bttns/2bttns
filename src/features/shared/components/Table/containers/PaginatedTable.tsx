@@ -19,6 +19,7 @@ export type PaginatedTableProps<T> = {
   totalRows: number;
   toggleCleared?: IDataTableProps<T>["clearSelectedRows"];
   loadDelayMs?: number;
+  onRowDoubleClicked?: IDataTableProps<T>["onRowDoubleClicked"];
 };
 
 export type AdditionalColumns<T> = {
@@ -44,6 +45,7 @@ export default function PaginatedTable<T>(props: PaginatedTableProps<T>) {
     totalRows,
     toggleCleared,
     loadDelayMs = 500,
+    onRowDoubleClicked,
   } = props;
 
   const controlledColumns = useMemo<PaginatedTableProps<T>["columns"]>(() => {
@@ -81,6 +83,11 @@ export default function PaginatedTable<T>(props: PaginatedTableProps<T>) {
     }
   }, [selectedRows, onSelectedRowsChange, data, itemIdField]);
 
+  const scrollHeight = useMemo(
+    () => `calc(${fixedHeight} - 64px - 64px)`,
+    [fixedHeight]
+  );
+
   return (
     <Box height="100%" width="100%" overflow="scroll">
       <DataTable
@@ -95,20 +102,33 @@ export default function PaginatedTable<T>(props: PaginatedTableProps<T>) {
         onChangeRowsPerPage={onChangeRowsPerPage}
         fixedHeader
         // Fixed table height; subtract 64px for the pagination bar
-        fixedHeaderScrollHeight={`calc(${fixedHeight} - 64px - 64px)`}
+        fixedHeaderScrollHeight={scrollHeight}
         selectableRows={areRowsSelectable}
         onSelectedRowsChange={onSelectedRowsChange}
         selectableRowsHighlight
         clearSelectedRows={toggleCleared}
         paginationRowsPerPageOptions={[5, 10, 25, 50, 100]}
         customStyles={{
+          tableWrapper: {
+            style: {
+              height: scrollHeight,
+            },
+          },
+          table: {
+            style: {
+              height: scrollHeight,
+            },
+          },
           cells: {
             style: {
               alignItems: "center",
               padding: "1rem",
               borderLeftWidth: ".5px",
               borderRightWidth: ".5px",
+              borderBottomWidth: ".5px",
+              borderTopWidth: "0px",
               borderColor: "rgba(200, 200, 200, .25)",
+              fontSize: "12px",
             },
           },
           headCells: {
@@ -126,13 +146,41 @@ export default function PaginatedTable<T>(props: PaginatedTableProps<T>) {
               borderRadius: "0",
             },
           },
+          rows: {
+            // Make the rows look clickable if there is an onRowDoubleClicked handler
+            style: onRowDoubleClicked
+              ? {
+                  cursor: "pointer",
+                  "&:hover": {
+                    backgroundColor: "rgba(200, 200, 200, .25)",
+                  },
+                  "&:active": {
+                    backgroundColor: "rgba(200, 200, 200, .5)",
+                  },
+                }
+              : undefined,
+          },
         }}
         striped
         progressPending={progressPending}
         progressComponent={
           <ProgressComponent areRowsSelectable={areRowsSelectable} />
         }
+        onRowDoubleClicked={onRowDoubleClicked}
       />
+      {(progressPending || data.length === 0) && (
+        <Box
+          height="56px"
+          bgColor="white"
+          borderColor="rgba(0,0,0,0.12)"
+          borderTopWidth="1px"
+          padding="1rem"
+        >
+          {progressPending && (
+            <Skeleton width="400px" height="100%" ml="auto" />
+          )}
+        </Box>
+      )}
     </Box>
   );
 }

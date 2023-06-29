@@ -68,7 +68,9 @@ model VerificationToken {
 
 // 2bttns specific models
 model AllowedAdmin {
-    email String @id
+    email     String   @id
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
 }
 
 model Game {

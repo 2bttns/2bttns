@@ -3,6 +3,8 @@
 ///
 
 import { useState } from "react";
+import { z } from "zod";
+import { sortOrder } from "../../../../../server/shared/z";
 import { PaginatedTableProps } from "../containers/PaginatedTable";
 
 /**
@@ -12,7 +14,7 @@ import { PaginatedTableProps } from "../containers/PaginatedTable";
 export default function useSort<T extends object = any>() {
   const [sorting, setSorting] = useState<{
     sortField: keyof T;
-    order: "asc" | "desc";
+    order: z.infer<typeof sortOrder>;
   } | null>(null);
 
   /**

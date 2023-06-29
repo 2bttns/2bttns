@@ -5,6 +5,7 @@ import React from "react";
 export type TableActionMenuProps<T extends object> = {
   selectedRows: T[];
   actionItems: (context: TableActionMenuContext<T>) => React.ReactNode;
+  isDisabled?: boolean;
 };
 
 export type TableActionMenuContext<T extends object> = {
@@ -16,12 +17,16 @@ export type TableActionMenuContext<T extends object> = {
 export default function TableActionMenu<T extends object>(
   props: TableActionMenuProps<T>
 ) {
-  const { selectedRows, actionItems } = props;
+  const { selectedRows, actionItems, isDisabled = false } = props;
   return (
     <Menu>
       {({ isOpen, onClose }) => (
         <>
-          <MenuButton as={Button} rightIcon={<ChevronDownIcon />}>
+          <MenuButton
+            as={Button}
+            rightIcon={<ChevronDownIcon />}
+            isDisabled={isDisabled}
+          >
             Actions
           </MenuButton>
           <MenuList zIndex={99}>
