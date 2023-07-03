@@ -57,8 +57,10 @@ export function useToggleTagForGameObjects(
   const handleApplyTag = async () => {
     if (isApplyingChanges) return;
 
+    const tagOperation = gameObjectIds.length > 1 ? "Bulk Tag" : "Tag";
+
     const applyTagToast = toast({
-      title: `Performing Bulk Tag operation...`,
+      title: `Performing ${tagOperation} operation...`,
       status: "loading",
       duration: null,
     });
@@ -73,8 +75,9 @@ export function useToggleTagForGameObjects(
         },
       });
       await utils.gameObjects.invalidate();
+
       toast.update(applyTagToast, {
-        title: `Success: Bulk Tag operation`,
+        title: `Success: ${tagOperation} operation`,
         description: `Tag "${tagName}" ${
           isTagAppliedToAll ? "removed from" : "applied to"
         } ${gameObjectIds.length} GameObjects`,
@@ -83,7 +86,7 @@ export function useToggleTagForGameObjects(
     } catch (error) {
       console.error(error);
       toast.update(applyTagToast, {
-        title: `Error: Bulk Tag operation failed`,
+        title: `Error: ${tagOperation} operation failed`,
         description: "See console for more details.",
         status: "error",
       });

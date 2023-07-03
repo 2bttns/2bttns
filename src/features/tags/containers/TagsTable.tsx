@@ -36,8 +36,8 @@ export type TagsTableProps = {
   topBarProps?: Partial<StackProps>;
   onRowDoubleClicked?: PaginatedTableProps<TagData>["onRowDoubleClicked"];
   omitColumns?: (keyof typeof columnIds)[];
-  defaultSortFieldId: PaginatedTableProps<TagData>["defaultSortFieldId"];
-  defaultSortAsc: PaginatedTableProps<TagData>["defaultSortAsc"];
+  defaultSortFieldId?: PaginatedTableProps<TagData>["defaultSortFieldId"];
+  defaultSortAsc?: PaginatedTableProps<TagData>["defaultSortAsc"];
 };
 
 export default function TagsTable(props: TagsTableProps) {

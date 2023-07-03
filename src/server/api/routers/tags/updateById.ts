@@ -32,8 +32,32 @@ export const updateById = adminOrApiKeyProtectedProcedure
             ? input.data.removeGameObjects.map((id) => ({ id }))
             : undefined,
         },
+        updatedAt: new Date(),
       },
     });
+
+    // Update updatedAt timestamp on all gameObjects that were connected or disconnected
+    if (input.data.addGameObjects || input.data.removeGameObjects) {
+      await ctx.prisma.gameObject.updateMany({
+        where: {
+          OR: [
+            {
+              id: {
+                in: input.data.addGameObjects ?? [],
+              },
+            },
+            {
+              id: {
+                in: input.data.removeGameObjects ?? [],
+              },
+            },
+          ],
+        },
+        data: {
+          updatedAt: new Date(),
+        },
+      });
+    }
 
     return {
       updatedTag,

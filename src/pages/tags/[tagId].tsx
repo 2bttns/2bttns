@@ -32,6 +32,7 @@ import Head from "next/head";
 import { useRouter } from "next/router";
 import { useMemo, useState } from "react";
 import GameObjectsTable, {
+  columnIds,
   GameObjectData,
   GameObjectsTableProps,
 } from "../../features/gameobjects/containers/GameObjectsTable";
@@ -188,6 +189,8 @@ const TagByIdPage: NextPage<TagByIdPageProps> = (props) => {
                         onRowDoubleClicked={async (row) => {
                           await router.push(`/game-objects/${row.id}`);
                         }}
+                        defaultSortFieldId={columnIds.UPDATED_AT}
+                        defaultSortAsc={false}
                       />
                     </Box>
                     <Box width="50%">
@@ -212,6 +215,8 @@ const TagByIdPage: NextPage<TagByIdPageProps> = (props) => {
                         onRowDoubleClicked={async (row) => {
                           await router.push(`/game-objects/${row.id}`);
                         }}
+                        defaultSortFieldId={columnIds.UPDATED_AT}
+                        defaultSortAsc={false}
                       />
                     </Box>
                   </HStack>
