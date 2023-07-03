@@ -9,7 +9,9 @@ import {
 } from "@chakra-ui/react";
 import { useRouter } from "next/router";
 import { useMemo, useState } from "react";
-import { tagFilter } from "../../../server/shared/z";
+import { z } from "zod";
+import { OutputTag } from "../../../server/api/routers/games/getAll";
+import { untaggedFilterEnum } from "../../../server/shared/z";
 import { api, RouterInputs, RouterOutputs } from "../../../utils/api";
 import ConfirmAlert from "../../shared/components/ConfirmAlert";
 import ConstrainToRemainingSpace, {
@@ -35,9 +37,14 @@ export const columnIds = {
 };
 
 export type GameData = RouterOutputs["games"]["getAll"]["games"][0];
+export type TagData = NonNullable<RouterOutputs["games"]["getAll"]["tags"]>[0];
 
 export type GamesTableProps = {
-  tag?: typeof tagFilter._type;
+  tag?: {
+    include: TagData["id"][];
+    exclude: TagData["id"][];
+    untaggedFilter: z.infer<typeof untaggedFilterEnum>;
+  };
   onGameCreated?: (gameId: string) => Promise<void>;
   additionalColumns?: PaginatedTableProps<GameData>["additionalColumns"];
   additionalTopBarContent?: (selectedRows: GameData[]) => React.ReactNode;
@@ -47,6 +54,7 @@ export type GamesTableProps = {
   allowCreate?: boolean;
   areRowsSelectable?: boolean;
   onRowDoubleClicked?: PaginatedTableProps<GameData>["onRowDoubleClicked"];
+  gamesToExclude?: GameData["id"][];
 };
 
 export default function GamesTable(props: GamesTableProps) {
@@ -61,6 +69,7 @@ export default function GamesTable(props: GamesTableProps) {
     allowCreate = true,
     areRowsSelectable = true,
     onRowDoubleClicked,
+    gamesToExclude,
   } = props;
 
   const toast = useToast();
@@ -68,33 +77,26 @@ export default function GamesTable(props: GamesTableProps) {
 
   const { perPage, currentPage, handlePageChange, handlePerRowsChange } =
     usePagination();
-  const { getSortOrder: getSort, handleSort } = useSort<GameData>();
+  const { sorting, handleSort } = useSort<GameData>();
 
   const utils = api.useContext();
   const globalFilter = useDebouncedValue();
 
   const gamesQuery = api.games.getAll.useQuery(
     {
-      includeTags: true,
       skip: (currentPage! - 1) * perPage,
       take: perPage,
-      filter: globalFilter.debouncedInput
-        ? {
-            mode: "OR",
-            id: { contains: globalFilter.debouncedInput },
-            name: { contains: globalFilter.debouncedInput },
-            tag,
-          }
-        : {
-            tag,
-          },
-      sort: {
-        id: getSort("id"),
-        name: getSort("name"),
-        description: getSort("description"),
-        inputTags: getSort("inputTags"),
-        updatedAt: getSort("updatedAt"),
-      },
+      idFilter: globalFilter.debouncedInput,
+      allowFuzzyIdFilter: true,
+      nameFilter: globalFilter.debouncedInput,
+      allowFuzzyNameFilter: true,
+      tagFilter: tag?.include.join(","),
+      tagExcludeFilter: tag?.exclude.join(","),
+      untaggedFilter: tag?.untaggedFilter,
+      sortField: sorting?.sortField,
+      sortOrder: sorting?.order,
+      excludeGames: gamesToExclude?.join(","),
+      includeTagData: true,
     },
     {
       enabled: currentPage !== null,
@@ -104,18 +106,20 @@ export default function GamesTable(props: GamesTableProps) {
   );
   const data: GameData[] = gamesQuery.data?.games ?? [];
 
+  const tagDataById = useMemo(() => {
+    if (gamesQuery.isLoading || !gamesQuery.data?.tags) return null;
+
+    const map = new Map<string, OutputTag>();
+    gamesQuery.data?.tags?.forEach((tag) => {
+      map.set(tag.id, tag);
+    });
+    return map;
+  }, [gamesQuery]);
+
   const gamesCountQuery = api.games.getCount.useQuery(
     {
-      filter: globalFilter.debouncedInput
-        ? {
-            mode: "OR",
-            id: { contains: globalFilter.debouncedInput },
-            name: { contains: globalFilter.debouncedInput },
-            tag,
-          }
-        : {
-            tag,
-          },
+      idFilter: globalFilter.debouncedInput,
+      nameFilter: globalFilter.debouncedInput,
     },
     {
       keepPreviousData: true,
@@ -249,9 +253,16 @@ export default function GamesTable(props: GamesTableProps) {
         cell: (row) => {
           return (
             <TagBadges
-              selectedTags={row.inputTags.map((t) => {
-                return { id: t.id, name: t.name };
-              })}
+              selectedTags={row.inputTags
+                .filter((tagId) => {
+                  return tagDataById?.get(tagId)?.name !== undefined;
+                })
+                .map((tagId) => {
+                  return {
+                    id: tagId,
+                    name: tagDataById!.get(tagId)!.name,
+                  };
+                })}
             />
           );
         },
@@ -271,7 +282,7 @@ export default function GamesTable(props: GamesTableProps) {
         reorder: true,
       },
     ];
-  }, [editable]);
+  }, [editable, tagDataById]);
 
   const { selectedRows, handleSelectedRowsChange, toggleCleared } =
     useSelectRows<GameData>({
