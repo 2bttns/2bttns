@@ -6,6 +6,7 @@ import {
 } from "../../../shared/z";
 import { OPENAPI_TAGS } from "../../openapi/openApiTags";
 import { adminOrApiKeyProtectedProcedure } from "../../trpc";
+import { getAllWhereInput } from "./getAll";
 
 const input = z
   .object({
@@ -66,139 +67,19 @@ export const getCount = adminOrApiKeyProtectedProcedure
   .input(input)
   .output(output)
   .query(async ({ ctx, input }) => {
+    const where = getAllWhereInput({
+      idFilter: input?.idFilter,
+      nameFilter: input?.nameFilter,
+      untaggedFilter: input?.untaggedFilter,
+      excludeGameObjects: input?.excludeGameObjects,
+      allowFuzzyIdFilter: input?.allowFuzzyIdFilter,
+      allowFuzzyNameFilter: input?.allowFuzzyNameFilter,
+      tagFilter: input?.tagFilter,
+      tagExcludeFilter: input?.tagExcludeFilter,
+    });
+
     const count = await ctx.prisma.gameObject.count({
-      where: {
-        AND: [
-          {
-            OR: [
-              ...(input?.idFilter && input.allowFuzzyIdFilter
-                ? input.idFilter.map((id) => ({
-                    id: {
-                      contains: id,
-                    },
-                  }))
-                : input?.idFilter
-                ? input.idFilter.map((id) => ({
-                    id: {
-                      equals: id,
-                    },
-                  }))
-                : []),
-
-              ...(input?.nameFilter && input.allowFuzzyNameFilter
-                ? input.nameFilter.map((name) => ({
-                    name: {
-                      contains: name,
-                    },
-                  }))
-                : input?.nameFilter
-                ? input.nameFilter.map((name) => ({
-                    name: {
-                      equals: name,
-                    },
-                  }))
-                : []),
-            ],
-          },
-          input?.untaggedFilter === "include"
-            ? {
-                OR: [
-                  {
-                    // Include items that have no tags
-                    tags: {
-                      none: {},
-                    },
-                  },
-                  {
-                    // Also include items that have tags, but only if they match the `tagFilter` and `tagExcludeFilter` filters
-                    AND: [
-                      {
-                        tags: {
-                          some: {},
-                        },
-                      },
-                      input?.tagFilter
-                        ? {
-                            tags: {
-                              some: {
-                                id: {
-                                  in: input?.tagFilter,
-                                },
-                              },
-                            },
-                          }
-                        : {},
-                      input?.tagExcludeFilter
-                        ? {
-                            tags: {
-                              none: {
-                                id: {
-                                  in: input?.tagExcludeFilter,
-                                },
-                              },
-                            },
-                          }
-                        : {},
-                    ],
-                  },
-                ],
-              }
-            : {},
-          input?.untaggedFilter === "exclude"
-            ? {
-                AND: [
-                  // Include only items that have tags
-                  {
-                    tags: {
-                      some: {},
-                    },
-                  },
-
-                  // If the `tagFilter` and `tagExcludeFilter` filters are set, we need to add a filter to the query to only return items that match those filters
-                  // Otherwise, items that have tags but don't match the filters will be included in the response, which is not what we want
-                  input?.tagExcludeFilter
-                    ? {
-                        tags: {
-                          none: {
-                            id: {
-                              in: input?.tagExcludeFilter,
-                            },
-                          },
-                        },
-                      }
-                    : {},
-
-                  input?.tagFilter
-                    ? {
-                        tags: {
-                          some: {
-                            id: {
-                              in: input?.tagFilter,
-                            },
-                          },
-                        },
-                      }
-                    : {},
-                ],
-              }
-            : {},
-          // If the untagged-only filter is set, we need to add a filter to the query to only return untagged items
-          // This ignores the `tagFilter` and `tagExcludeFilter` filters, since tagged items shouldn't appear in the when this option is set
-          input?.untaggedFilter === "untagged-only"
-            ? {
-                tags: {
-                  none: {},
-                },
-              }
-            : {},
-          {
-            // Exclude explicitly excluded items that were specified in the `excludeGameObjects` filter
-            id: {
-              notIn: input?.excludeGameObjects,
-            },
-          },
-        ],
-      },
+      where,
     });
     return { count };
   });
