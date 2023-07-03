@@ -71,6 +71,8 @@ export default function GameObjectsTable(props: GameObjectsTableProps) {
   const utils = api.useContext();
   const globalFilter = useDebouncedValue();
 
+  console.log(sorting);
+
   const gameObjectsQuery = api.gameObjects.getAll.useQuery(
     {
       skip: (currentPage! - 1) * perPage,
@@ -309,6 +311,8 @@ export default function GameObjectsTable(props: GameObjectsTableProps) {
               totalRows={gameObjectsCountQuery.data?.count ?? 0}
               toggleCleared={toggleCleared}
               onRowDoubleClicked={onRowDoubleClicked}
+              defaultSortFieldId={columnIds.UPDATED_AT}
+              defaultSortAsc={false}
             />
           );
         }}
