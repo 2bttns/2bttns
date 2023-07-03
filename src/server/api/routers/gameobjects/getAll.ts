@@ -218,6 +218,14 @@ export function getAllWhereInput(
   const tagFilter = params?.tagFilter;
   const tagExcludeFilter = params?.tagExcludeFilter;
 
+  const idMode: Prisma.QueryMode = allowFuzzyIdFilter
+    ? "insensitive"
+    : "default";
+
+  const nameMode: Prisma.QueryMode = allowFuzzyNameFilter
+    ? "insensitive"
+    : "default";
+
   return {
     AND: [
       {
@@ -226,12 +234,14 @@ export function getAllWhereInput(
             ? idFilter.map((id) => ({
                 id: {
                   contains: id,
+                  mode: idMode,
                 },
               }))
             : idFilter
             ? idFilter.map((id) => ({
                 id: {
                   equals: id,
+                  mode: idMode,
                 },
               }))
             : []),
@@ -240,12 +250,14 @@ export function getAllWhereInput(
             ? nameFilter.map((name) => ({
                 name: {
                   contains: name,
+                  mode: nameMode,
                 },
               }))
             : nameFilter
             ? nameFilter.map((name) => ({
                 name: {
                   equals: name,
+                  mode: nameMode,
                 },
               }))
             : []),
