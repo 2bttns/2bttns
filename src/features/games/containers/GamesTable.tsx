@@ -26,6 +26,14 @@ import useSelectRows from "../../shared/components/Table/hooks/useSelectRows";
 import useSort from "../../shared/components/Table/hooks/useSort";
 import TagBadges from "../../tags/containers/TagBadges";
 
+export const columnIds = {
+  ID: "id",
+  NAME: "name",
+  MODE: "mode",
+  TAGS: "tags",
+  UPDATED_AT: "updatedAt",
+};
+
 export type GameData = RouterOutputs["games"]["getAll"]["games"][0];
 
 export type GamesTableProps = {
@@ -205,7 +213,8 @@ export default function GamesTable(props: GamesTableProps) {
           />
         ),
         sortable: true,
-        sortField: "id",
+        id: columnIds.ID,
+        sortField: columnIds.ID,
         minWidth: "256px",
         reorder: true,
       },
@@ -224,7 +233,8 @@ export default function GamesTable(props: GamesTableProps) {
           />
         ),
         sortable: true,
-        sortField: "name",
+        id: columnIds.NAME,
+        sortField: columnIds.NAME,
         minWidth: "256px",
         reorder: true,
       },
@@ -246,7 +256,8 @@ export default function GamesTable(props: GamesTableProps) {
           );
         },
         sortable: true,
-        sortField: "tags",
+        id: columnIds.TAGS,
+        sortField: columnIds.TAGS,
         minWidth: "256px",
         reorder: true,
       },
@@ -254,7 +265,8 @@ export default function GamesTable(props: GamesTableProps) {
         name: "Last Updated",
         cell: (row) => row.updatedAt.toLocaleString(),
         sortable: true,
-        sortField: "updatedAt",
+        id: columnIds.UPDATED_AT,
+        sortField: columnIds.UPDATED_AT,
         minWidth: "256px",
         reorder: true,
       },
@@ -329,6 +341,8 @@ export default function GamesTable(props: GamesTableProps) {
               totalRows={gamesCountQuery.data?.count ?? 0}
               toggleCleared={toggleCleared}
               onRowDoubleClicked={onRowDoubleClicked}
+              defaultSortFieldId={columnIds.UPDATED_AT}
+              defaultSortAsc={false}
             />
           );
         }}

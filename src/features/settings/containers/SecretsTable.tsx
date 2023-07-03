@@ -14,6 +14,14 @@ import usePagination from "../../shared/components/Table/hooks/usePagination";
 import useSelectRows from "../../shared/components/Table/hooks/useSelectRows";
 import useSort from "../../shared/components/Table/hooks/useSort";
 
+const columnIds = {
+  ID: "id",
+  NAME: "name",
+  DESCRIPTION: "description",
+  SECRET: "secret",
+  UPDATED_AT: "updatedAt",
+};
+
 export type SecretData = RouterOutputs["secrets"]["getAll"]["secrets"][0];
 
 export type SecretsTableProps = {
@@ -163,7 +171,8 @@ export default function SecretsTable(props: SecretsTableProps) {
           />
         ),
         sortable: true,
-        sortField: "id",
+        id: columnIds.ID,
+        sortField: columnIds.ID,
         minWidth: "256px",
       },
       {
@@ -181,7 +190,8 @@ export default function SecretsTable(props: SecretsTableProps) {
           />
         ),
         sortable: true,
-        sortField: "name",
+        id: columnIds.NAME,
+        sortField: columnIds.NAME,
         minWidth: "256px",
       },
       {
@@ -200,7 +210,8 @@ export default function SecretsTable(props: SecretsTableProps) {
           />
         ),
         sortable: true,
-        sortField: "description",
+        id: columnIds.DESCRIPTION,
+        sortField: columnIds.DESCRIPTION,
         minWidth: "512px",
       },
       {
@@ -208,13 +219,15 @@ export default function SecretsTable(props: SecretsTableProps) {
         cell: (row) => row.secret ?? "",
         minWidth: "256px",
         sortable: true,
-        sortField: "secret",
+        id: columnIds.SECRET,
+        sortField: columnIds.SECRET,
       },
       {
         name: "Last Updated",
         cell: (row) => row.updatedAt.toLocaleString(),
         sortable: true,
-        sortField: "updatedAt",
+        id: columnIds.UPDATED_AT,
+        sortField: columnIds.UPDATED_AT,
         minWidth: "256px",
       },
     ];
@@ -257,6 +270,8 @@ export default function SecretsTable(props: SecretsTableProps) {
               selectedRows={selectedRows}
               totalRows={secretsCountQuery.data?.count ?? 0}
               toggleCleared={toggleCleared}
+              defaultSortFieldId={columnIds.UPDATED_AT}
+              defaultSortAsc={false}
             />
           );
         }}

@@ -14,6 +14,11 @@ import usePagination from "../../shared/components/Table/hooks/usePagination";
 import useSelectRows from "../../shared/components/Table/hooks/useSelectRows";
 import useSort from "../../shared/components/Table/hooks/useSort";
 
+const columnIds = {
+  EMAIL: "email",
+  UPDATED_AT: "updatedAt",
+};
+
 export type AdminData =
   RouterOutputs["administrators"]["getAll"]["administrators"][0];
 
@@ -81,7 +86,7 @@ export default function AdministratorsTable(props: AdministratorsTableProps) {
         cell: (row) => (
           <CustomEditable
             value={row.email}
-            placeholder="No ID"
+            placeholder="No Email"
             handleSave={async (nextValue) => {
               // TODO: implement admin update handler
             }}
@@ -89,14 +94,16 @@ export default function AdministratorsTable(props: AdministratorsTableProps) {
           />
         ),
         sortable: true,
-        sortField: "id",
+        id: columnIds.EMAIL,
+        sortField: columnIds.EMAIL,
         minWidth: "256px",
       },
       {
         name: "Last Updated",
-        cell: (row) => row.updatedAt.toLocaleString(),
+        cell: (row) => new Date(row.updatedAt).toLocaleString(),
         sortable: true,
-        sortField: "updatedAt",
+        id: columnIds.UPDATED_AT,
+        sortField: columnIds.UPDATED_AT,
         minWidth: "256px",
       },
     ];
@@ -139,6 +146,8 @@ export default function AdministratorsTable(props: AdministratorsTableProps) {
               selectedRows={selectedRows}
               totalRows={adminCountQuery.data?.count ?? 0}
               toggleCleared={toggleCleared}
+              defaultSortFieldId={columnIds.UPDATED_AT}
+              defaultSortAsc={false}
             />
           );
         }}

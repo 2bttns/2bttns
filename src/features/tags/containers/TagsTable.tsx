@@ -266,6 +266,8 @@ export default function TagsTable(props: TagsTableProps) {
               totalRows={tagsCountQuery.data?.count ?? 0}
               toggleCleared={toggleCleared}
               onRowDoubleClicked={onRowDoubleClicked}
+              defaultSortFieldId={columnIds.UPDATED_AT}
+              defaultSortAsc={false}
             />
           );
         }}
