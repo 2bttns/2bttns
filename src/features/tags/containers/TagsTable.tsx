@@ -36,6 +36,8 @@ export type TagsTableProps = {
   topBarProps?: Partial<StackProps>;
   onRowDoubleClicked?: PaginatedTableProps<TagData>["onRowDoubleClicked"];
   omitColumns?: (keyof typeof columnIds)[];
+  defaultSortFieldId: PaginatedTableProps<TagData>["defaultSortFieldId"];
+  defaultSortAsc: PaginatedTableProps<TagData>["defaultSortAsc"];
 };
 
 export default function TagsTable(props: TagsTableProps) {
@@ -50,6 +52,8 @@ export default function TagsTable(props: TagsTableProps) {
     topBarProps,
     onRowDoubleClicked,
     omitColumns,
+    defaultSortFieldId,
+    defaultSortAsc,
   } = props;
   const toast = useToast();
 
@@ -266,8 +270,8 @@ export default function TagsTable(props: TagsTableProps) {
               totalRows={tagsCountQuery.data?.count ?? 0}
               toggleCleared={toggleCleared}
               onRowDoubleClicked={onRowDoubleClicked}
-              defaultSortFieldId={columnIds.UPDATED_AT}
-              defaultSortAsc={false}
+              defaultSortFieldId={defaultSortFieldId}
+              defaultSortAsc={defaultSortAsc}
             />
           );
         }}

@@ -30,7 +30,7 @@ import { FaTags } from "react-icons/fa";
 import { api } from "../../../utils/api";
 import { GameObjectData } from "../../gameobjects/containers/GameObjectsTable";
 import ManageTagButton from "./ManageTagButton";
-import TagsTable from "./TagsTable";
+import TagsTable, { columnIds } from "./TagsTable";
 import ToggleTagButton from "./ToggleTagButton";
 
 export type EditTagsForGameObjectsButtonDrawerProps = {
@@ -124,6 +124,8 @@ export function EditTagsForGameObjectsDrawer(
                 ],
                 dependencies: [],
               }}
+              defaultSortAsc={true}
+              defaultSortFieldId={columnIds.NAME}
             />
           </Stack>
         </DrawerBody>

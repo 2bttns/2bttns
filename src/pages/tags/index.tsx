@@ -10,7 +10,10 @@ import TableActionsMenuItemImportJSON from "../../features/shared/components/Tab
 import ManageTagButton from "../../features/tags/containers/ManageTagButton";
 import ExportAllTagsJSON from "../../features/tags/containers/TableActionsMenu/ExportAllTagsJSON";
 import ExportSelectedTagsJSON from "../../features/tags/containers/TableActionsMenu/ExportSelectedTagsJSON";
-import TagsTable, { TagData } from "../../features/tags/containers/TagsTable";
+import TagsTable, {
+  columnIds,
+  TagData,
+} from "../../features/tags/containers/TagsTable";
 import useDeleteTags from "../../features/tags/hooks/useDeleteTags";
 import getSessionWithSignInRedirect from "../../utils/getSessionWithSignInRedirect";
 
@@ -59,6 +62,8 @@ const TagsPage: NextPage<TagsPageProps> = (props) => {
             const { id } = row;
             await router.push(`/tags/${id}`);
           }}
+          defaultSortFieldId={columnIds.UPDATED_AT}
+          defaultSortAsc={false}
         />
       </Box>
     </>
