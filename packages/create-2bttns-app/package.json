@@ -1,0 +1,21 @@
+{
+  "name": "create-2bttns-app",
+  "version": "1.0.0-alpha",
+  "description": "Create your 2bttns app with a single command.",
+  "bin": {
+    "create-2bttns-app": "./dist/index.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "rm -rf bin && rm -rf types && tsc",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "typescript": "^5.1.6"
+  }
+}
