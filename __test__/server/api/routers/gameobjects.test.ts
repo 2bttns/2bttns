@@ -411,6 +411,16 @@ describe("gameobjects router", () => {
     expect(result.gameObjects).toHaveLength(1);
     expect(result.gameObjects[0]!.id).toBe("test-gameobject-id-1");
 
+    // Non-fuzzy search is case sensitive
+    input.idFilter = "TEST-GAMEOBJECT-ID-1";
+    result = await caller.gameObjects.getAll(input);
+    expect(result.gameObjects).toHaveLength(0);
+
+    input.idFilter = undefined;
+    input.nameFilter = "TEST-GAMEOBJECT-1";
+    result = await caller.gameObjects.getAll(input);
+    expect(result.gameObjects).toHaveLength(0);
+
     // The same starting from the first test case, but for name filtering
     input = { nameFilter: "1", allowFuzzyNameFilter: true };
     result = await caller.gameObjects.getAll(input);

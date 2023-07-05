@@ -73,21 +73,21 @@ describe("games router", () => {
         .slice(0, 10);
 
       type Input = inferProcedureInput<AppRouter["games"]["getAll"]>;
-      const input: Input = { sort: { name: "asc" } };
+      const input: Input = { sortField: "name", sortOrder: "asc" };
 
       const result = await caller.games.getAll(input);
       expect(result.games).length(10);
-      expect(result.games).toEqual(first10Asc);
+      for (let i = 0; i < 10; i++) {
+        expect(result.games[i]!.id).toBe(first10Asc[i]!.id);
+      }
 
-      const input2: Input = { sort: { name: "desc" } };
+      const input2: Input = { sortField: "name", sortOrder: "desc" };
       const result2 = await caller.games.getAll(input2);
       expect(result2.games).length(10);
-      expect(result2.games).toEqual(first10Desc);
+      for (let i = 0; i < 10; i++) {
+        expect(result2.games[i]!.id).toBe(first10Desc[i]!.id);
+      }
     });
-
-    // TODO: test pagination
-    // TODO: test filters
-    // TODO: test other sorting params
   });
 
   describe("games.getPlayerScores", () => {

@@ -32,6 +32,7 @@ import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import DeleteGameObjectButton from "../../features/gameobjects/containers/DeleteGameObjectButton";
 import GameObjectsTable, {
+  columnIds,
   GameObjectData,
 } from "../../features/gameobjects/containers/GameObjectsTable";
 import ManageGameObjectButton from "../../features/gameobjects/containers/ManageGameObjectButton";
@@ -135,6 +136,8 @@ const GameObjectById: NextPage<GameObjectByIdPageProps> = (props) => {
                   onRowDoubleClicked={async (row) => {
                     await router.push(`/game-objects/${row.id}`);
                   }}
+                  defaultSortFieldId={columnIds.UPDATED_AT}
+                  defaultSortAsc={false}
                 />
               )}
             </TabPanel>

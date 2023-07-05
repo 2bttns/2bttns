@@ -20,6 +20,8 @@ export type PaginatedTableProps<T> = {
   toggleCleared?: IDataTableProps<T>["clearSelectedRows"];
   loadDelayMs?: number;
   onRowDoubleClicked?: IDataTableProps<T>["onRowDoubleClicked"];
+  defaultSortFieldId?: IDataTableProps<T>["defaultSortFieldId"];
+  defaultSortAsc?: IDataTableProps<T>["defaultSortAsc"];
 };
 
 export type AdditionalColumns<T> = {
@@ -46,6 +48,8 @@ export default function PaginatedTable<T>(props: PaginatedTableProps<T>) {
     toggleCleared,
     loadDelayMs = 500,
     onRowDoubleClicked,
+    defaultSortFieldId,
+    defaultSortAsc,
   } = props;
 
   const controlledColumns = useMemo<PaginatedTableProps<T>["columns"]>(() => {
@@ -95,6 +99,8 @@ export default function PaginatedTable<T>(props: PaginatedTableProps<T>) {
         data={data}
         sortServer
         onSort={onSort}
+        defaultSortFieldId={defaultSortFieldId}
+        defaultSortAsc={defaultSortAsc}
         pagination
         paginationServer
         paginationTotalRows={totalRows}

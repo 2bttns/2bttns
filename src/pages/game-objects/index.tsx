@@ -5,6 +5,7 @@ import Head from "next/head";
 import { useRouter } from "next/router";
 import DeleteGameObjectButton from "../../features/gameobjects/containers/DeleteGameObjectButton";
 import GameObjectsTable, {
+  columnIds,
   GameObjectData,
 } from "../../features/gameobjects/containers/GameObjectsTable";
 import ManageGameObjectButton from "../../features/gameobjects/containers/ManageGameObjectButton";
@@ -70,6 +71,8 @@ const GameObjects: NextPageWithLayout<GameObjectsPageProps> = (props) => {
           onRowDoubleClicked={async (row) => {
             await router.push(`/game-objects/${row.id}`);
           }}
+          defaultSortFieldId={columnIds.UPDATED_AT}
+          defaultSortAsc={false}
         />
       </Box>
     </>

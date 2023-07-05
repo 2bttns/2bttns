@@ -45,6 +45,8 @@ export type GameObjectsTableProps = {
   allowCreate?: boolean;
   onRowDoubleClicked?: PaginatedTableProps<GameObjectData>["onRowDoubleClicked"];
   omitColumns?: (keyof typeof columnIds)[];
+  defaultSortFieldId?: PaginatedTableProps<GameObjectData>["defaultSortFieldId"];
+  defaultSortAsc?: PaginatedTableProps<GameObjectData>["defaultSortAsc"];
 };
 
 export default function GameObjectsTable(props: GameObjectsTableProps) {
@@ -60,6 +62,8 @@ export default function GameObjectsTable(props: GameObjectsTableProps) {
     allowCreate = true,
     onRowDoubleClicked,
     omitColumns,
+    defaultSortFieldId,
+    defaultSortAsc,
   } = props;
 
   const toast = useToast();
@@ -309,6 +313,8 @@ export default function GameObjectsTable(props: GameObjectsTableProps) {
               totalRows={gameObjectsCountQuery.data?.count ?? 0}
               toggleCleared={toggleCleared}
               onRowDoubleClicked={onRowDoubleClicked}
+              defaultSortFieldId={defaultSortFieldId}
+              defaultSortAsc={defaultSortAsc}
             />
           );
         }}
