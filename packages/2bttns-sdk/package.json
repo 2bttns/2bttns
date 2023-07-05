@@ -1,12 +1,12 @@
 {
   "name": "@2bttns/sdk",
-  "version": "1.0.0-alpha",
+  "version": "1.0.1-alpha",
   "description": "The official 2bttns Node.js SDK",
   "main": "dist/index.js",
   "types": "types/index.d.ts",
   "repository": {
     "type": "git",
-    "url": "https://github.com/2bttns/2bttns-sdk"
+    "url": "https://github.com/2bttns/2bttns"
   },
   "scripts": {
     "prebuild": "npm run generate-openapi-types",
