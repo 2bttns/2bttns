@@ -1,7 +1,11 @@
 {
-  "name": "create-2bttns-app",
+  "name": "@2bttns/create-2bttns-app",
   "version": "1.0.0-alpha",
   "description": "Create your 2bttns app with a single command.",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/2bttns/2bttns"
+  },
   "bin": {
     "create-2bttns-app": "./dist/index.js"
   },
