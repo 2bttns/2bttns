@@ -10,7 +10,11 @@
     "dist"
   ],
   "scripts": {
-    "build": "rm -rf bin && rm -rf types && tsc",
+    "prebuild": "npm run unlink && rm -rf bin && rm -rf types",
+    "build": "tsc",
+    "postbuild": "npm run link",
+    "unlink": "npm unlink create-2bttns-app",
+    "link": "npm link",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],

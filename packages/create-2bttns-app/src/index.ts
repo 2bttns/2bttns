@@ -42,9 +42,13 @@ async function main() {
   let tempFile: string | null = null;
   try {
     tempFile = await downloadTar(downloadUrl);
+
     await tar.x({
       file: tempFile,
       cwd: targetDir,
+      // TODO: Update strip params based on public app/ repo folder structure
+      strip: 1,
+      filter: (p) => p.includes(`2bttns-sdk-main/src`),
     });
     console.log("Successfully initialized 2bttns app!");
   } catch (error) {
