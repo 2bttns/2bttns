@@ -57,39 +57,39 @@ function PlayGameButton() {
     if (typeof window === "undefined") {
       return;
     }
-    const game_id = window.prompt("Enter game id");
-    if (!game_id) return;
-    const user_id = window.prompt(
-      "Enter user id (random strings are fine for now)"
+    const gameId = window.prompt("Enter game id");
+    if (!gameId) return;
+    const playerId = window.prompt(
+      "Enter player id (random strings are fine for now)"
     );
-    if (!user_id) return;
-    let num_items: any = window.prompt(
+    if (!playerId) return;
+    let numItems: any = window.prompt(
       "Enter #items (ALL for all items; or leave blank to use the configured default)"
     );
 
     const queryParams = new URLSearchParams();
-    queryParams.append("game_id", game_id);
-    queryParams.append("user_id", user_id);
-    if (num_items) {
-      if (num_items.toUpperCase() === "ALL") {
-        num_items = "ALL";
-      } else if (!isNaN(parseInt(num_items))) {
-        num_items = parseInt(num_items);
+    queryParams.append("gameId", gameId);
+    queryParams.append("playerId", playerId);
+    if (numItems) {
+      if (numItems.toUpperCase() === "ALL") {
+        numItems = "ALL";
+      } else if (!isNaN(parseInt(numItems))) {
+        numItems = parseInt(numItems);
 
-        if (num_items < 1) {
-          window.alert(`Invalid value: num_items=${num_items}`);
+        if (numItems < 1) {
+          window.alert(`Invalid value: numItems=${numItems}`);
           return;
         }
       } else {
-        window.alert(`Invalid value: num_items=${num_items}`);
+        window.alert(`Invalid value: numItems=${numItems}`);
         return;
       }
 
-      if (num_items) {
-        queryParams.append("num_items", num_items);
+      if (numItems) {
+        queryParams.append("numItems", numItems);
       }
     }
-    queryParams.append("callback_url", `${window.location.href}/`);
+    queryParams.append("callbackUrl", `${window.location.href}/`);
 
     window.location.href = `/api/play2bttns?${queryParams.toString()}`;
   };

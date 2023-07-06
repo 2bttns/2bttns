@@ -12,15 +12,17 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.TwoBttnsApi = void 0;
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const openapi_typescript_fetch_1 = require("openapi-typescript-fetch");
+require("./fetch-polyfill");
 /**
  * **!! Important !! -- The 2bttns SDK is intended for server-side use only.**
  *
  *  It should not be used by client-side code, because API requests are made using an access token generated using an API Key secret
  *  that should not be exposed.
  */
-class TwoBttns {
+class TwoBttnsApi {
     constructor(config) {
         if (typeof window !== "undefined") {
             throw new Error("Raised an Error because `window` was detected -- this likely means you are trying to use the 2bttns SDK in a client-side context, which is not allowed. The 2bttns SDK is intended for server-side use only.");
@@ -29,7 +31,7 @@ class TwoBttns {
         this.appId = appId;
         this.secret = secret;
         this.url = url;
-        this.apiAccessToken = TwoBttns.generateApiAccessToken({ appId, secret });
+        this.apiAccessToken = TwoBttnsApi.generateApiAccessToken({ appId, secret });
         this.api = openapi_typescript_fetch_1.Fetcher.for();
         this.api.configure({
             baseUrl: `${url}/api`,
@@ -56,22 +58,22 @@ class TwoBttns {
      * This URL should be generated on the server-side of your application, and then used on the server or client-side to redirect the user to 2bttns.
      */
     generatePlayUrl(params, expiresIn = "1h") {
-        const { game_id, user_id, num_items, callback_url } = params;
-        const token = TwoBttns.generatePlayerToken({
+        const { gameId, playerId, numItems, callbackUrl } = params;
+        const token = TwoBttnsApi.generatePlayerToken({
             appId: this.appId,
             secret: this.secret,
-            userId: user_id,
+            playerId,
             expiresIn,
         });
         const queryBuilder = new URLSearchParams();
-        queryBuilder.append("game_id", game_id);
+        queryBuilder.append("game_id", gameId);
         queryBuilder.append("app_id", this.appId);
         queryBuilder.append("jwt", token);
-        if (num_items) {
-            queryBuilder.append("num_items", num_items.toString());
+        if (numItems) {
+            queryBuilder.append("num_items", numItems.toString());
         }
-        if (callback_url) {
-            queryBuilder.append("callback_url", callback_url);
+        if (callbackUrl) {
+            queryBuilder.append("callback_url", callbackUrl);
         }
         return `${this.url}/play?${queryBuilder.toString()}`;
     }
@@ -80,8 +82,8 @@ class TwoBttns {
      * @param expiresIn *[optional]* How long the token should be valid for. Defaults to "1h".
      */
     static generatePlayerToken(params) {
-        const { appId, secret, userId, expiresIn = "1hr" } = params;
-        const token = jsonwebtoken_1.default.sign({ type: "player_token", appId, userId }, secret, {
+        const { appId, secret, playerId, expiresIn = "1hr" } = params;
+        const token = jsonwebtoken_1.default.sign({ type: "player_token", appId, playerId }, secret, {
             expiresIn,
         });
         return token;
@@ -99,8 +101,8 @@ class TwoBttns {
         if (decodedObj.type !== "player_token") {
             throw new Error(`Invalid token: received type ${decodedObj.type}; expected type "player_token"`);
         }
-        if (!decodedObj.userId) {
-            throw new Error("Invalid token: no userId");
+        if (!decodedObj.playerId) {
+            throw new Error("Invalid token: no playerId");
         }
         return decodedObj;
     }
@@ -113,4 +115,4 @@ class TwoBttns {
         return token;
     }
 }
-exports.default = TwoBttns;
+exports.TwoBttnsApi = TwoBttnsApi;

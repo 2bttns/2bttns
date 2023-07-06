@@ -7,18 +7,19 @@ export default async function handler(
   res: NextApiResponse
 ) {
   try {
-    const game_id = req.query.game_id as GeneratePlayURLParams["game_id"];
-    const user_id = req.query.user_id as GeneratePlayURLParams["user_id"];
-    const num_items = req.query.num_items as GeneratePlayURLParams["num_items"];
-    const callback_url = req.query
-      .callback_url as GeneratePlayURLParams["callback_url"];
+    const gameId = req.query.gameId as GeneratePlayURLParams["gameId"];
+    const playerId = req.query.playerId as GeneratePlayURLParams["playerId"];
+    const numItems = req.query.numItems as GeneratePlayURLParams["numItems"];
+    const callbackUrl = req.query
+      .callbackUrl as GeneratePlayURLParams["callbackUrl"];
 
     const url = twobttns.generatePlayUrl({
-      game_id,
-      user_id,
-      num_items,
-      callback_url,
+      gameId,
+      playerId,
+      numItems,
+      callbackUrl,
     });
+    console.log(url);
     return res.redirect(url);
   } catch (error) {
     if (error instanceof Error) {

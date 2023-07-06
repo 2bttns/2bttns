@@ -9,7 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@2bttns/sdk": "^1.0.1-alpha",
+    "@2bttns/sdk": "^1.0.3-alpha",
     "@next/font": "13.1.6",
     "@tanstack/react-query": "^4.29.1",
     "@types/node": "18.13.0",

@@ -1,10 +1,11 @@
 import { Fetcher, OpArgType } from "openapi-typescript-fetch";
 import { paths } from "../2bttns-api";
+import "./fetch-polyfill";
 export type GeneratePlayURLParams = {
-    game_id: string;
-    user_id: string;
-    num_items?: number | "ALL";
-    callback_url?: string;
+    gameId: string;
+    playerId: string;
+    numItems?: number | "ALL";
+    callbackUrl?: string;
 };
 export type TwoBttnsConfig = {
     appId: string;
@@ -18,7 +19,7 @@ export type ApiResponses = paths;
  *  It should not be used by client-side code, because API requests are made using an access token generated using an API Key secret
  *  that should not be exposed.
  */
-export default class TwoBttns {
+export declare class TwoBttnsApi {
     /**
      * 2bttns App ID corresponding to a 2bttns API Key
      */
@@ -133,7 +134,7 @@ export default class TwoBttns {
     static generatePlayerToken(params: {
         appId: string;
         secret: string;
-        userId: string;
+        playerId: string;
         expiresIn: string;
     }): string;
     /**
@@ -144,7 +145,7 @@ export default class TwoBttns {
         secret: string;
     }): {
         type: string;
-        userId: string;
+        playerId: string;
     };
     /**
      * Generate an API access token JWT for a given API Key

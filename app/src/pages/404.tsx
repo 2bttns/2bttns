@@ -2,7 +2,7 @@ import { Heading, VStack } from "@chakra-ui/react";
 import { useSession } from "next-auth/react";
 import Head from "next/head";
 import AdminLayout from "../features/layouts/containers/AdminLayout";
-import UserLayout from "../features/layouts/containers/UserLayout";
+import PlayerLayout from "../features/layouts/containers/PlayerLayout";
 import { NextPageWithLayout } from "./_app";
 
 const FourOhFourPage: NextPageWithLayout = () => {
@@ -23,9 +23,9 @@ const FourOhFourPage: NextPageWithLayout = () => {
       )}
 
       {session.status === "unauthenticated" && (
-        <UserLayout>
+        <PlayerLayout>
           <Content />
-        </UserLayout>
+        </PlayerLayout>
       )}
     </>
   );

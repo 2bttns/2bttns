@@ -16,13 +16,29 @@ npm install @2bttns/sdk
 
 To use the SDK, you should instantiate the `TwoBttns` class using your 2bttns App ID, App Secret, and the base URL of your 2bttns app.
 
+TypeScript:
+
 ```typescript
 /*  server/some/path/twobttns.ts  */
-import TwoBttns from "@2bttns/sdk";
-export const twobttns = new TwoBttns({
+import { TwoBttnsApi } from "@2bttns/sdk";
+
+export const twobttns = new TwoBttnsApi({
   appId: process.env.TWOBTTNS_APP_ID,
   secret: process.env.TWOBTTNS_APP_SECRET,
   url: process.env.TWOBTTNS_BASE_URL,
+});
+```
+
+CommonJS:
+
+```javascript
+/*  server/some/path/twobttns.js  */
+const { TwoBttnsApi } = require("@2bttns/sdk");
+
+export const twobttns = new TwoBttnsApi({
+  appId: "example-app",
+  secret: "example-secret-value",
+  url: "http://localhost:3001",
 });
 ```
 
@@ -53,15 +69,15 @@ const { data } = await twobttns.callApi("/players", "get");
 
 You can create a play URL using the `.generatePlayUrl(...)` method.
 
-This method will return a secure URL that you redirect your users to in order to play a 2bttns game you specify.
+This method will return a secure URL that you should redirect your users to in order to play a 2bttns game you specify.
 
 ```typescript
 /*  server/path/to/api/handler.ts  */
 const url = twobttns.generatePlayUrl({
-  game_id: "game_id",
-  user_id: "user_id",
-  num_items: "ALL",
-  callback_url: "https://example.com/callback",
+  gameId: "your-awesome-game",
+  playerId: "some-player-id",
+  numItems: 42,
+  callbackUrl: "https://example.com/callback",
 });
 ```
 

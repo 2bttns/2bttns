@@ -1,6 +1,6 @@
 {
   "name": "@2bttns/sdk",
-  "version": "1.0.1-alpha",
+  "version": "1.0.3-alpha",
   "description": "The official 2bttns Node.js SDK",
   "main": "dist/index.js",
   "types": "types/index.d.ts",
@@ -21,7 +21,9 @@
     "typescript": "^4.9.5"
   },
   "dependencies": {
+    "@types/node-fetch": "^2.6.4",
     "jsonwebtoken": "^9.0.0",
+    "node-fetch": "^2.6.12",
     "openapi-typescript-fetch": "^1.1.3"
   }
 }

@@ -50,10 +50,10 @@ export const getPlayerScores = anyAuthProtectedProcedure
   .output(output)
   .query(async ({ ctx, input }) => {
     if (ctx.authData.type === "player_token") {
-      if (ctx.authData.userId !== input.player_id) {
+      if (ctx.authData.playerId !== input.player_id) {
         throw new TRPCError({
           code: "UNAUTHORIZED",
-          message: `Player ${ctx.authData.userId} is only authorized to get their own scores`,
+          message: `Player ${ctx.authData.playerId} is only authorized to get their own scores`,
         });
       }
     }

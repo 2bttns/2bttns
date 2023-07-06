@@ -219,7 +219,7 @@ describe("games router", () => {
         {
           type: "player_token",
           appId: secret.id,
-          userId: player_id,
+          playerId: player_id,
         },
         secret.secret
       );
@@ -246,7 +246,7 @@ describe("games router", () => {
         {
           type: "player_token",
           appId: secret.id,
-          userId: player_id,
+          playerId: player_id,
         },
         secret.secret
       );
