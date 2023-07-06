@@ -1,6 +1,7 @@
 import jwt from "jsonwebtoken";
 import { Fetcher, OpArgType } from "openapi-typescript-fetch";
 import { paths } from "../2bttns-api";
+import './fetch-polyfill';
 
 export type GeneratePlayURLParams = {
   game_id: string; // ID of the game to play
@@ -22,7 +23,7 @@ export type ApiResponses = paths;
  *  It should not be used by client-side code, because API requests are made using an access token generated using an API Key secret
  *  that should not be exposed.
  */
-export default class TwoBttns {
+export class TwoBttnsApi {
   /**
    * 2bttns App ID corresponding to a 2bttns API Key
    */
@@ -60,7 +61,7 @@ export default class TwoBttns {
     this.secret = secret;
     this.url = url;
 
-    this.apiAccessToken = TwoBttns.generateApiAccessToken({ appId, secret });
+    this.apiAccessToken = TwoBttnsApi.generateApiAccessToken({ appId, secret });
 
     this.api = Fetcher.for<paths>();
     this.api.configure({
@@ -98,7 +99,7 @@ export default class TwoBttns {
   generatePlayUrl(params: GeneratePlayURLParams, expiresIn: string = "1h") {
     const { game_id, user_id, num_items, callback_url } = params;
 
-    const token = TwoBttns.generatePlayerToken({
+    const token = TwoBttnsApi.generatePlayerToken({
       appId: this.appId,
       secret: this.secret,
       userId: user_id,

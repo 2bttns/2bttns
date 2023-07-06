@@ -1,5 +1,6 @@
 import { Fetcher, OpArgType } from "openapi-typescript-fetch";
 import { paths } from "../2bttns-api";
+import './fetch-polyfill';
 export type GeneratePlayURLParams = {
     game_id: string;
     user_id: string;
@@ -18,7 +19,7 @@ export type ApiResponses = paths;
  *  It should not be used by client-side code, because API requests are made using an access token generated using an API Key secret
  *  that should not be exposed.
  */
-export default class TwoBttns {
+export declare class TwoBttnsApi {
     /**
      * 2bttns App ID corresponding to a 2bttns API Key
      */

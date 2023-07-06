@@ -12,15 +12,17 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.TwoBttnsApi = void 0;
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const openapi_typescript_fetch_1 = require("openapi-typescript-fetch");
+require("./fetch-polyfill");
 /**
  * **!! Important !! -- The 2bttns SDK is intended for server-side use only.**
  *
  *  It should not be used by client-side code, because API requests are made using an access token generated using an API Key secret
  *  that should not be exposed.
  */
-class TwoBttns {
+class TwoBttnsApi {
     constructor(config) {
         if (typeof window !== "undefined") {
             throw new Error("Raised an Error because `window` was detected -- this likely means you are trying to use the 2bttns SDK in a client-side context, which is not allowed. The 2bttns SDK is intended for server-side use only.");
@@ -29,7 +31,7 @@ class TwoBttns {
         this.appId = appId;
         this.secret = secret;
         this.url = url;
-        this.apiAccessToken = TwoBttns.generateApiAccessToken({ appId, secret });
+        this.apiAccessToken = TwoBttnsApi.generateApiAccessToken({ appId, secret });
         this.api = openapi_typescript_fetch_1.Fetcher.for();
         this.api.configure({
             baseUrl: `${url}/api`,
@@ -57,7 +59,7 @@ class TwoBttns {
      */
     generatePlayUrl(params, expiresIn = "1h") {
         const { game_id, user_id, num_items, callback_url } = params;
-        const token = TwoBttns.generatePlayerToken({
+        const token = TwoBttnsApi.generatePlayerToken({
             appId: this.appId,
             secret: this.secret,
             userId: user_id,
@@ -113,4 +115,4 @@ class TwoBttns {
         return token;
     }
 }
-exports.default = TwoBttns;
+exports.TwoBttnsApi = TwoBttnsApi;

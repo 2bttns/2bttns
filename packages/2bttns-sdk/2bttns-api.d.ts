@@ -209,12 +209,12 @@ export type external = Record<string, never>;
 
 export interface operations {
 
+  /**
+   * Say hello 
+   * @description Say hello to the world
+   */
   "query.example.hello": {
-    /**
-     * Say hello 
-     * @description Say hello to the world
-     */
-    parameters?: {
+    parameters: {
       query?: {
         text?: string;
       };
@@ -231,11 +231,11 @@ export interface operations {
       default: components["responses"]["error"];
     };
   };
+  /**
+   * Create example 
+   * @description Create an example object in the database
+   */
   "mutation.example.create": {
-    /**
-     * Create example 
-     * @description Create an example object in the database
-     */
     requestBody?: {
       content: {
         "application/json": {
@@ -255,11 +255,11 @@ export interface operations {
       default: components["responses"]["error"];
     };
   };
+  /**
+   * Get all examples 
+   * @description Get all examples
+   */
   "query.example.getAll": {
-    /**
-     * Get all examples 
-     * @description Get all examples
-     */
     responses: {
       /** @description Successful response */
       200: {
@@ -278,11 +278,11 @@ export interface operations {
       default: components["responses"]["error"];
     };
   };
+  /**
+   * Get secret message 
+   * @description This endpoint will return a message that tells you what type of authentication you used, if you are authenticated.
+   */
   "query.example.getSecretMessage": {
-    /**
-     * Get secret message 
-     * @description This endpoint will return a message that tells you what type of authentication you used, if you are authenticated.
-     */
     responses: {
       /** @description Successful response */
       200: {
@@ -293,18 +293,27 @@ export interface operations {
       default: components["responses"]["error"];
     };
   };
+  /**
+   * Get All Games 
+   * @description Get all Games. Paginated by default. Supports filtering and sorting.
+   */
   "query.games.getAll": {
-    /**
-     * Get All Games 
-     * @description Get all Games. Paginated by default. Supports filtering and sorting.
-     */
-    parameters?: {
+    parameters: {
+      query?: {
+        take?: unknown;
+        skip?: unknown;
         /** @description Comma-separated Game IDs to filter by */
+        idFilter?: unknown;
         /** @description Set to `true` to enable fuzzy ID filtering. If false, only returns exact matches. */
+        allowFuzzyIdFilter?: boolean;
         /** @description Comma-separated Game names to filter by */
+        nameFilter?: unknown;
         /** @description Set to `true` to enable fuzzy name filtering. If false, only returns exact matches. */
+        allowFuzzyNameFilter?: boolean;
         /** @description Comma-separated list of input tag IDs the resulting game must have */
+        tagFilter?: unknown;
         /** @description Comma-separated list of input tag IDs to exclude from the response. Use this to exclude games that have a specific input tag, even if they match the `requiredTags` filter. */
+        tagExcludeFilter?: unknown;
         /**
          * @description `include`: Include all games, regardless of whether they have input tags or not. 
          * 
@@ -312,24 +321,15 @@ export interface operations {
          * 
          * `untagged-only`: Only return games that have no input tags. Setting this option will ignore `requiredTags` and `excludeTags`, since tagged items shouldn't appear in the results.
          */
-        /** @description Field to sort by */
-        /** @description Sort order for the selected field */
-        /** @description Set to `true` to include additional tags info in the response */
-        /** @description Comma-separated list of Game IDs to exclude from the response */
-      query?: {
-        take?: Record<string, never> | number;
-        skip?: Record<string, never> | number;
-        idFilter?: Record<string, never> | (string)[];
-        allowFuzzyIdFilter?: boolean;
-        nameFilter?: Record<string, never> | (string)[];
-        allowFuzzyNameFilter?: boolean;
-        tagFilter?: Record<string, never> | (string)[];
-        tagExcludeFilter?: Record<string, never> | (string)[];
         untaggedFilter?: "include" | "exclude" | "untagged-only";
+        /** @description Field to sort by */
         sortField?: "id" | "name" | "description" | "updatedAt" | "createdAt" | "inputTags" | "mode";
+        /** @description Sort order for the selected field */
         sortOrder?: "asc" | "desc";
+        /** @description Set to `true` to include additional tags info in the response */
         includeTagData?: boolean;
-        excludeGames?: Record<string, never> | (string)[];
+        /** @description Comma-separated list of Game IDs to exclude from the response */
+        excludeGames?: unknown;
       };
     };
     responses: {
@@ -364,12 +364,12 @@ export interface operations {
       default: components["responses"]["error"];
     };
   };
+  /**
+   * Delete Games 
+   * @description Delete one or more Games by their IDs
+   */
   "mutation.games.delete": {
-    /**
-     * Delete Games 
-     * @description Delete one or more Games by their IDs
-     */
-    parameters?: {
+    parameters: {
       query?: {
         id?: (string)[];
       };
@@ -386,18 +386,25 @@ export interface operations {
       default: components["responses"]["error"];
     };
   };
+  /**
+   * Get Game Count 
+   * @description Get Game Count
+   */
   "query.games.getCount": {
-    /**
-     * Get Game Count 
-     * @description Get Game Count
-     */
-    parameters?: {
+    parameters: {
+      query?: {
         /** @description Comma-separated Game IDs to filter by */
+        idFilter?: unknown;
         /** @description Set to `true` to enable fuzzy ID filtering. If false, only returns exact matches. */
+        allowFuzzyIdFilter?: boolean;
         /** @description Comma-separated Game names to filter by */
+        nameFilter?: unknown;
         /** @description Set to `true` to enable fuzzy name filtering. If false, only returns exact matches. */
+        allowFuzzyNameFilter?: boolean;
         /** @description Comma-separated list of input tag IDs the resulting game must have */
+        tagFilter?: unknown;
         /** @description Comma-separated list of input tag IDs to exclude from the response. Use this to exclude games that have a specific input tag, even if they match the `requiredTags` filter. */
+        tagExcludeFilter?: unknown;
         /**
          * @description `include`: Include all games, regardless of whether they have input tags or not. 
          * 
@@ -405,16 +412,9 @@ export interface operations {
          * 
          * `untagged-only`: Only return games that have no input tags. Setting this option will ignore `requiredTags` and `excludeTags`, since tagged items shouldn't appear in the results.
          */
-        /** @description Comma-separated list of Game IDs to exclude from the response */
-      query?: {
-        idFilter?: Record<string, never> | (string)[];
-        allowFuzzyIdFilter?: boolean;
-        nameFilter?: Record<string, never> | (string)[];
-        allowFuzzyNameFilter?: boolean;
-        tagFilter?: Record<string, never> | (string)[];
-        tagExcludeFilter?: Record<string, never> | (string)[];
         untaggedFilter?: "include" | "exclude" | "untagged-only";
-        excludeGames?: Record<string, never> | (string)[];
+        /** @description Comma-separated list of Game IDs to exclude from the response */
+        excludeGames?: unknown;
       };
     };
     responses: {
@@ -429,18 +429,18 @@ export interface operations {
       default: components["responses"]["error"];
     };
   };
+  /**
+   * Get Player Scores 
+   * @description Get a player's score data for a specific game
+   */
   "query.games.getPlayerScores": {
-    /**
-     * Get Player Scores 
-     * @description Get a player's score data for a specific game
-     */
     parameters: {
-        /** @description The game id to get scores for */
-        /** @description The player id to get scores for */
-        /** @description Whether to include game objects in the response */
       query: {
+        /** @description The game id to get scores for */
         game_id: string;
+        /** @description The player id to get scores for */
         player_id: string;
+        /** @description Whether to include game objects in the response */
         include_game_objects?: boolean;
       };
     };
@@ -469,18 +469,27 @@ export interface operations {
       default: components["responses"]["error"];
     };
   };
+  /**
+   * Get All Game Objects 
+   * @description Get all Game Objects. Paginated by default. Supports filtering and sorting.
+   */
   "query.gameObjects.getAll": {
-    /**
-     * Get All Game Objects 
-     * @description Get all Game Objects. Paginated by default. Supports filtering and sorting.
-     */
-    parameters?: {
+    parameters: {
+      query?: {
+        take?: unknown;
+        skip?: unknown;
         /** @description Comma-separated Game Object IDs to filter by */
+        idFilter?: unknown;
         /** @description Set to `true` to enable fuzzy ID filtering. If false, only returns exact matches. */
+        allowFuzzyIdFilter?: boolean;
         /** @description Comma-separated Game Object names to filter by */
+        nameFilter?: unknown;
         /** @description Set to `true` to enable fuzzy name filtering. If false, only returns exact matches. */
+        allowFuzzyNameFilter?: boolean;
         /** @description Comma-separated list of tag IDs the resulting game objects must have */
+        tagFilter?: unknown;
         /** @description Comma-separated list of tag IDs to exclude from the response. Use this to exclude game objects that have a specific tag, even if they match the `requiredTags` filter. */
+        tagExcludeFilter?: unknown;
         /**
          * @description `include`: Include all game objects, regardless of whether they have tags or not. 
          * 
@@ -488,24 +497,15 @@ export interface operations {
          * 
          * `untagged-only`: Only return game objects that have no tags. Setting this option will ignore `requiredTags` and `excludeTags`, since tagged items shouldn't appear in the results.
          */
-        /** @description Field to sort by */
-        /** @description Sort order for the selected field */
-        /** @description Set to `true` to include additional tags info in the response */
-        /** @description Comma-separated list of Game Object IDs to exclude from the response */
-      query?: {
-        take?: Record<string, never> | number;
-        skip?: Record<string, never> | number;
-        idFilter?: Record<string, never> | (string)[];
-        allowFuzzyIdFilter?: boolean;
-        nameFilter?: Record<string, never> | (string)[];
-        allowFuzzyNameFilter?: boolean;
-        tagFilter?: Record<string, never> | (string)[];
-        tagExcludeFilter?: Record<string, never> | (string)[];
         untaggedFilter?: "include" | "exclude" | "untagged-only";
+        /** @description Field to sort by */
         sortField?: "id" | "name" | "description" | "updatedAt" | "createdAt" | "tags" | "related";
+        /** @description Sort order for the selected field */
         sortOrder?: "asc" | "desc";
+        /** @description Set to `true` to include additional tags info in the response */
         includeTagData?: boolean;
-        excludeGameObjects?: Record<string, never> | (string)[];
+        /** @description Comma-separated list of Game Object IDs to exclude from the response */
+        excludeGameObjects?: unknown;
       };
     };
     responses: {
@@ -540,12 +540,12 @@ export interface operations {
       default: components["responses"]["error"];
     };
   };
+  /**
+   * Delete Game Objects 
+   * @description Delete one or more game objects by their IDs
+   */
   "mutation.gameObjects.delete": {
-    /**
-     * Delete Game Objects 
-     * @description Delete one or more game objects by their IDs
-     */
-    parameters?: {
+    parameters: {
       query?: {
         id?: (string)[];
       };
@@ -562,18 +562,25 @@ export interface operations {
       default: components["responses"]["error"];
     };
   };
+  /**
+   * Get Game Object Count 
+   * @description Get the total Game Object count. Supports filtering.
+   */
   "query.gameObjects.getCount": {
-    /**
-     * Get Game Object Count 
-     * @description Get the total Game Object count. Supports filtering.
-     */
-    parameters?: {
+    parameters: {
+      query?: {
         /** @description Comma-separated Game Object IDs to filter by */
+        idFilter?: unknown;
         /** @description Set to `true` to enable fuzzy ID filtering. If false, only returns exact matches. */
+        allowFuzzyIdFilter?: boolean;
         /** @description Comma-separated Game Object names to filter by */
+        nameFilter?: unknown;
         /** @description Set to `true` to disable fuzzy name filtering. If false, only returns exact matches. */
+        allowFuzzyNameFilter?: boolean;
         /** @description Comma-separated list of tag IDs the resulting game objects must have */
+        tagFilter?: unknown;
         /** @description Comma-separated list of tag IDs to exclude from the response. Use this to exclude game objects that have a specific tag, even if they match the `requiredTags` filter. */
+        tagExcludeFilter?: unknown;
         /**
          * @description `include`: Include all game objects, regardless of whether they have tags or not. 
          * 
@@ -581,16 +588,9 @@ export interface operations {
          * 
          * `untagged-only`: Only return game objects that have no tags. Setting this option will ignore `requiredTags` and `excludeTags`, since tagged items shouldn't appear in the results.
          */
-        /** @description Comma-separated list of Game Object IDs to exclude from the response */
-      query?: {
-        idFilter?: Record<string, never> | (string)[];
-        allowFuzzyIdFilter?: boolean;
-        nameFilter?: Record<string, never> | (string)[];
-        allowFuzzyNameFilter?: boolean;
-        tagFilter?: Record<string, never> | (string)[];
-        tagExcludeFilter?: Record<string, never> | (string)[];
         untaggedFilter?: "include" | "exclude" | "untagged-only";
-        excludeGameObjects?: Record<string, never> | (string)[];
+        /** @description Comma-separated list of Game Object IDs to exclude from the response */
+        excludeGameObjects?: unknown;
       };
     };
     responses: {
@@ -605,22 +605,22 @@ export interface operations {
       default: components["responses"]["error"];
     };
   };
+  /**
+   * Get Ranked Results 
+   * @description Get ranked Game Object results for a player
+   */
   "query.gameObjects.getRanked": {
-    /**
-     * Get Ranked Results 
-     * @description Get ranked Game Object results for a player
-     */
     parameters: {
+      query: {
         /** @description ID value. Only alphanumeric, underscore, and hyphen are allowed. */
+        playerId: string;
         /**
          * @description Specify comma-separated input tags that will be used to score the game objects associated with the output tag.
          * 
          * If the output tag is included in the input tags, the player's score for those game object will be used as base scores
          */
-        /** @description Specify the output tag of the game objects to get ranked results for */
-      query: {
-        playerId: string;
         inputTags: string;
+        /** @description Specify the output tag of the game objects to get ranked results for */
         outputTag: string;
       };
     };
@@ -642,22 +642,22 @@ export interface operations {
       default: components["responses"]["error"];
     };
   };
+  /**
+   * Get All Tags 
+   * @description Get all tags
+   */
   "query.tags.getAll": {
-    /**
-     * Get All Tags 
-     * @description Get all tags
-     */
-    parameters?: {
-        /** @description Comma-separated tag IDs to filter by */
-        /** @description Comma-separated tag names to filter by */
-        /** @description Field to sort by */
-        /** @description Sort order for the selected field */
+    parameters: {
       query?: {
-        idFilter?: Record<string, never> | (string)[];
-        nameFilter?: Record<string, never> | (string)[];
-        take?: Record<string, never> | number;
-        skip?: Record<string, never> | number;
+        /** @description Comma-separated tag IDs to filter by */
+        idFilter?: unknown;
+        /** @description Comma-separated tag names to filter by */
+        nameFilter?: unknown;
+        take?: unknown;
+        skip?: unknown;
+        /** @description Field to sort by */
         sortField?: "id" | "name" | "description" | "updatedAt" | "createdAt";
+        /** @description Sort order for the selected field */
         sortOrder?: "asc" | "desc";
       };
     };
@@ -681,11 +681,11 @@ export interface operations {
       default: components["responses"]["error"];
     };
   };
+  /**
+   * Create Tag 
+   * @description Create Tag
+   */
   "mutation.tags.create": {
-    /**
-     * Create Tag 
-     * @description Create Tag
-     */
     requestBody: {
       content: {
         "application/json": {
@@ -716,12 +716,12 @@ export interface operations {
       default: components["responses"]["error"];
     };
   };
+  /**
+   * Delete Tags 
+   * @description Delete one or more Tags by their IDs
+   */
   "mutation.tags.delete": {
-    /**
-     * Delete Tags 
-     * @description Delete one or more Tags by their IDs
-     */
-    parameters?: {
+    parameters: {
       query?: {
         id?: (string)[];
       };
@@ -738,17 +738,17 @@ export interface operations {
       default: components["responses"]["error"];
     };
   };
+  /**
+   * Get Tag Count 
+   * @description Get Tag Count
+   */
   "query.tags.getCount": {
-    /**
-     * Get Tag Count 
-     * @description Get Tag Count
-     */
-    parameters?: {
-        /** @description Comma-separated tag IDs to filter by */
-        /** @description Comma-separated tag names to filter by */
+    parameters: {
       query?: {
-        idFilter?: Record<string, never> | (string)[];
-        nameFilter?: Record<string, never> | (string)[];
+        /** @description Comma-separated tag IDs to filter by */
+        idFilter?: unknown;
+        /** @description Comma-separated tag names to filter by */
+        nameFilter?: unknown;
       };
     };
     responses: {
@@ -763,11 +763,11 @@ export interface operations {
       default: components["responses"]["error"];
     };
   };
+  /**
+   * Create Player 
+   * @description Creates a player with the given ID and an optional name. The ID must be unique, and ideally corresponds with a user ID used by the app integrating with 2bttns.
+   */
   "mutation.players.create": {
-    /**
-     * Create Player 
-     * @description Creates a player with the given ID and an optional name. The ID must be unique, and ideally corresponds with a user ID used by the app integrating with 2bttns.
-     */
     requestBody: {
       content: {
         "application/json": {
@@ -797,11 +797,11 @@ export interface operations {
       default: components["responses"]["error"];
     };
   };
+  /**
+   * Get All Players 
+   * @description Get all players
+   */
   "query.players.getAll": {
-    /**
-     * Get All Players 
-     * @description Get all players
-     */
     responses: {
       /** @description Successful response */
       200: {
@@ -821,11 +821,11 @@ export interface operations {
       default: components["responses"]["error"];
     };
   };
+  /**
+   * Get Player Count 
+   * @description Get player count
+   */
   "query.players.getCount": {
-    /**
-     * Get Player Count 
-     * @description Get player count
-     */
     responses: {
       /** @description Successful response */
       200: {
@@ -838,14 +838,14 @@ export interface operations {
       default: components["responses"]["error"];
     };
   };
+  /**
+   * Get Player by ID 
+   * @description Get player by ID
+   */
   "query.players.getById": {
-    /**
-     * Get Player by ID 
-     * @description Get player by ID
-     */
     parameters: {
-        /** @description ID value. Only alphanumeric, underscore, and hyphen are allowed. */
       path: {
+        /** @description ID value. Only alphanumeric, underscore, and hyphen are allowed. */
         id: string;
       };
     };
@@ -868,14 +868,14 @@ export interface operations {
       default: components["responses"]["error"];
     };
   };
+  /**
+   * Update Player by ID 
+   * @description Update player by ID.
+   */
   "mutation.players.updateById": {
-    /**
-     * Update Player by ID 
-     * @description Update player by ID.
-     */
     parameters: {
-        /** @description ID value. Only alphanumeric, underscore, and hyphen are allowed. */
       path: {
+        /** @description ID value. Only alphanumeric, underscore, and hyphen are allowed. */
         id: string;
       };
     };
@@ -909,14 +909,14 @@ export interface operations {
       default: components["responses"]["error"];
     };
   };
+  /**
+   * Delete Player by ID 
+   * @description Delete player by ID
+   */
   "mutation.players.deleteById": {
-    /**
-     * Delete Player by ID 
-     * @description Delete player by ID
-     */
     parameters: {
-        /** @description ID value. Only alphanumeric, underscore, and hyphen are allowed. */
       path: {
+        /** @description ID value. Only alphanumeric, underscore, and hyphen are allowed. */
         id: string;
       };
     };
@@ -939,27 +939,31 @@ export interface operations {
       default: components["responses"]["error"];
     };
   };
+  /**
+   * Export Data 
+   * @description Get exported 2bttns data. 
+   * 
+   * You can choose to export all data or only the data you need from the Game, Tag, and Game Object database tables used by 2bttns. 
+   * 
+   * Supports JSON format.
+   */
   "query.exportData.exportData": {
-    /**
-     * Export Data 
-     * @description Get exported 2bttns data. 
-     * 
-     * You can choose to export all data or only the data you need from the Game, Tag, and Game Object database tables used by 2bttns. 
-     * 
-     * Supports JSON format.
-     */
-    parameters?: {
+    parameters: {
+      query?: {
         /**
          * @description Set to true to export Games. 
          * 
          * The Game data will include associated Tag IDs if `includeTags` is `true`
          */
+        includeGames?: boolean;
         /**
          * @description Set to true to export Game Objects. 
          * 
          * The GameObject data will include associated Tag IDs if `includeTags` is `true`
          */
+        includeGameObjects?: boolean;
         /** @description Set to true to export Tags. */
+        includeTags?: boolean;
         /**
          * @description `include`: include the count of each type of data exported with the results
          * 
@@ -967,34 +971,30 @@ export interface operations {
          * 
          * `no-count`: do not include the count
          */
+        count?: "include" | "count-only" | "no-count";
         /**
          * @description Comma-separated ID list of Games to export.
          * 
          * Leave this field empty if you want the results to include all Games.
          */
+        filterGameIds?: unknown;
         /**
          * @description Comma-separated ID list of GameObjects to export.
          * 
          * Leave this field empty if you want the results to include all GameObjects.
          */
+        filterGameObjectIds?: unknown;
         /** @description Set to `false` to exclude GameObjects that have no tags. */
+        filterAllowUntaggedGameObjects?: boolean;
         /**
          * @description Comma-separated ID list of Tags to export.
          * 
          * Leave this field empty if you want the results to include all Tags.
          */
+        filterTagIds?: unknown;
         /** @description Set to `true` to only include Tags that are associated with the games that are being exported. */
-        /** @description Set to `true` to only include Tags that are associated with the game objects that are being exported. */
-      query?: {
-        includeGames?: boolean;
-        includeGameObjects?: boolean;
-        includeTags?: boolean;
-        count?: "include" | "count-only" | "no-count";
-        filterGameIds?: Record<string, never> | (string)[];
-        filterGameObjectIds?: Record<string, never> | (string)[];
-        filterAllowUntaggedGameObjects?: boolean;
-        filterTagIds?: Record<string, never> | (string)[];
         filterTagsMustBeInGames?: boolean;
+        /** @description Set to `true` to only include Tags that are associated with the game objects that are being exported. */
         filterTagsMustBeInGameObjects?: boolean;
       };
     };
@@ -1031,11 +1031,11 @@ export interface operations {
       default: components["responses"]["error"];
     };
   };
+  /**
+   * Import Data 
+   * @description Import 2bttns data from a JSON file.
+   */
   "mutation.importData.importData": {
-    /**
-     * Import Data 
-     * @description Import 2bttns data from a JSON file.
-     */
     requestBody: {
       content: {
         "application/json": {
@@ -1056,22 +1056,22 @@ export interface operations {
       default: components["responses"]["error"];
     };
   };
+  /**
+   * Get All Admins 
+   * @description Get all administrators
+   */
   "query.administrators.getAll": {
-    /**
-     * Get All Admins 
-     * @description Get all administrators
-     */
-    parameters?: {
-        /** @description Comma-separated emails to filter by */
-        /** @description Set to `true` to enable fuzzy email filtering. If false, only returns exact matches. */
-        /** @description Field to sort by */
-        /** @description Sort order for the selected field */
+    parameters: {
       query?: {
-        take?: Record<string, never> | number;
-        skip?: Record<string, never> | number;
-        emailFilter?: Record<string, never> | (string)[];
+        take?: unknown;
+        skip?: unknown;
+        /** @description Comma-separated emails to filter by */
+        emailFilter?: unknown;
+        /** @description Set to `true` to enable fuzzy email filtering. If false, only returns exact matches. */
         allowFuzzyEmailFilter?: boolean;
+        /** @description Field to sort by */
         sortField?: "email" | "updatedAt" | "createdAt";
+        /** @description Sort order for the selected field */
         sortOrder?: "asc" | "desc";
       };
     };
@@ -1093,16 +1093,16 @@ export interface operations {
       default: components["responses"]["error"];
     };
   };
+  /**
+   * Get Admin Count 
+   * @description Get the total number of administrators. Useful for pagination.
+   */
   "query.administrators.getCount": {
-    /**
-     * Get Admin Count 
-     * @description Get the total number of administrators. Useful for pagination.
-     */
-    parameters?: {
-        /** @description Comma-separated emails to filter by */
-        /** @description Set to `true` to enable fuzzy email filtering. If false, only returns exact matches. */
+    parameters: {
       query?: {
-        emailFilter?: Record<string, never> | (string)[];
+        /** @description Comma-separated emails to filter by */
+        emailFilter?: unknown;
+        /** @description Set to `true` to enable fuzzy email filtering. If false, only returns exact matches. */
         allowFuzzyEmailFilter?: boolean;
       };
     };
