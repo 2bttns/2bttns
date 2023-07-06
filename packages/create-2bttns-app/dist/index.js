@@ -16,7 +16,7 @@ import { Stream } from "stream";
 import tar from "tar";
 import { promisify } from "util";
 // Set this to null to use the default branch of the repo, or specify a branch of the repo
-const CURRENT_BRANCH = "alpha-setup";
+const CURRENT_BRANCH = null;
 const pipeline = promisify(Stream.pipeline);
 main();
 function main() {
