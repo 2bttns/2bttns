@@ -19,7 +19,7 @@ import Head from "next/head";
 import { useEffect, useMemo } from "react";
 import { z } from "zod";
 import AdminLayout from "../features/layouts/containers/AdminLayout";
-import UserLayout from "../features/layouts/containers/UserLayout";
+import PlayerLayout from "../features/layouts/containers/PlayerLayout";
 import PlayMode from "../features/play/containers/PlayMode";
 import { AvailableModes } from "../modes/availableModes";
 import { getModeUI } from "../modes/modesUIRegistry";
@@ -30,7 +30,7 @@ import { api, setPlayerToken } from "../utils/api";
 import { NextPageWithLayout } from "./_app";
 
 const jwtSchema = z.object({
-  userId: z.string(),
+  playerId: z.string(),
   iat: z.preprocess((value) => new Date((value as number) * 1000), z.date()),
   exp: z.preprocess((value) => new Date((value as number) * 1000), z.date()),
 });
@@ -64,16 +64,16 @@ export const getServerSideProps: GetServerSideProps<ReturnType> = async (
 
     const session = await getSession(context);
 
-    let userId: string | null = null;
+    let playerId: string | null = null;
     if (session) {
       // The user is an admin signed into this 2bttns admin app
       // Note that users playing the game would never be signed into the admin app
-      userId = session.user.id;
+      playerId = session.user.id;
     }
 
     if (incomingJwt) {
       // The user was redirected here from an external app via JWT
-      // Get the userId from that JWT
+      // Get the playerId from that JWT
 
       // This can override the admin user id if the JWT is valid, indicating that the logged in admin was redirected here with a player token
       //  (this allows admins to test the game as if they are a player)
@@ -95,11 +95,11 @@ export const getServerSideProps: GetServerSideProps<ReturnType> = async (
       jwt.verify(incomingJwt, appSecret.secret, {});
       const decodedJwtRaw = jwt.decode(incomingJwt, {});
       const decoded = jwtSchema.parse(decodedJwtRaw);
-      userId = decoded.userId;
+      playerId = decoded.playerId;
     }
 
-    if (!userId) {
-      throw new Error("No user id found");
+    if (!playerId) {
+      throw new Error("No playerId found");
     }
 
     // Ensure the game exists while getting the necessary data
@@ -142,7 +142,7 @@ export const getServerSideProps: GetServerSideProps<ReturnType> = async (
           config: game.modeConfigJson ? JSON.parse(game.modeConfigJson) : {},
         },
         gameData: {
-          playerId: userId,
+          playerId: playerId,
           game: JSON.parse(JSON.stringify(game)),
           numRoundItems: numItemsToGet,
           callbackUrl,
@@ -189,7 +189,7 @@ const Play: NextPageWithLayout<ReturnType> = (props) => {
   }, [gameModeData.mode]);
 
   return (
-    <Layout showAdminLayout={showAdminLayout} userId={gameData.playerId}>
+    <Layout showAdminLayout={showAdminLayout} playerId={gameData.playerId}>
       <Head>
         <title>Play 2bttns</title>
         <meta
@@ -222,24 +222,24 @@ export default Play;
 
 type LayoutProps = {
   children: React.ReactNode;
-  userId: string;
+  playerId: string;
   showAdminLayout: boolean;
 };
 function Layout(props: LayoutProps) {
-  const { children, showAdminLayout, userId } = props;
+  const { children, showAdminLayout, playerId } = props;
 
   if (showAdminLayout) {
     return <AdminLayout>{children}</AdminLayout>;
   }
 
   return (
-    <UserLayout
+    <PlayerLayout
       navbarProps={{
-        additionalContentEnd: <h1>Playing 2bttns | User ID: {userId}</h1>,
+        additionalContentEnd: <h1>Playing 2bttns | Player ID: {playerId}</h1>,
       }}
     >
       {children}
-    </UserLayout>
+    </PlayerLayout>
   );
 }
 

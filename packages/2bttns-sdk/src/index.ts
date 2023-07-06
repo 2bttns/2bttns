@@ -1,13 +1,13 @@
 import jwt from "jsonwebtoken";
 import { Fetcher, OpArgType } from "openapi-typescript-fetch";
 import { paths } from "../2bttns-api";
-import './fetch-polyfill';
+import "./fetch-polyfill";
 
 export type GeneratePlayURLParams = {
-  game_id: string; // ID of the game to play
-  user_id: string; // ID of the user who is playing the game
-  num_items?: number | "ALL"; // Number of items to show in the game; otherwise defaults to the game's default number of items
-  callback_url?: string; // URL to redirect to after the game is complete
+  gameId: string; // ID of the game to play
+  playerId: string; // ID of the user who is playing the game
+  numItems?: number | "ALL"; // Number of items to show in the game; otherwise defaults to the game's default number of items
+  callbackUrl?: string; // URL to redirect to after the game is complete
 };
 
 export type TwoBttnsConfig = {
@@ -97,24 +97,24 @@ export class TwoBttnsApi {
    * This URL should be generated on the server-side of your application, and then used on the server or client-side to redirect the user to 2bttns.
    */
   generatePlayUrl(params: GeneratePlayURLParams, expiresIn: string = "1h") {
-    const { game_id, user_id, num_items, callback_url } = params;
+    const { gameId, playerId, numItems, callbackUrl } = params;
 
     const token = TwoBttnsApi.generatePlayerToken({
       appId: this.appId,
       secret: this.secret,
-      userId: user_id,
+      playerId,
       expiresIn,
     });
     const queryBuilder = new URLSearchParams();
-    queryBuilder.append("game_id", game_id);
+    queryBuilder.append("game_id", gameId);
     queryBuilder.append("app_id", this.appId);
     queryBuilder.append("jwt", token);
-    if (num_items) {
-      queryBuilder.append("num_items", num_items.toString());
+    if (numItems) {
+      queryBuilder.append("num_items", numItems.toString());
     }
 
-    if (callback_url) {
-      queryBuilder.append("callback_url", callback_url);
+    if (callbackUrl) {
+      queryBuilder.append("callback_url", callbackUrl);
     }
 
     return `${this.url}/play?${queryBuilder.toString()}`;
@@ -127,11 +127,11 @@ export class TwoBttnsApi {
   static generatePlayerToken(params: {
     appId: string;
     secret: string;
-    userId: string;
+    playerId: string;
     expiresIn: string;
   }) {
-    const { appId, secret, userId, expiresIn = "1hr" } = params;
-    const token = jwt.sign({ type: "player_token", appId, userId }, secret, {
+    const { appId, secret, playerId, expiresIn = "1hr" } = params;
+    const token = jwt.sign({ type: "player_token", appId, playerId }, secret, {
       expiresIn,
     });
     return token;
@@ -143,7 +143,7 @@ export class TwoBttnsApi {
   static decodeUserToken(params: { token: string; secret: string }) {
     const { token, secret } = params;
     const decoded = jwt.verify(token, secret);
-    const decodedObj = decoded as { type: string; userId: string };
+    const decodedObj = decoded as { type: string; playerId: string };
 
     if (!decodedObj) {
       throw new Error("Invalid token: no data");
@@ -155,8 +155,8 @@ export class TwoBttnsApi {
       );
     }
 
-    if (!decodedObj.userId) {
-      throw new Error("Invalid token: no userId");
+    if (!decodedObj.playerId) {
+      throw new Error("Invalid token: no playerId");
     }
     return decodedObj;
   }

@@ -1,11 +1,11 @@
 import { Fetcher, OpArgType } from "openapi-typescript-fetch";
 import { paths } from "../2bttns-api";
-import './fetch-polyfill';
+import "./fetch-polyfill";
 export type GeneratePlayURLParams = {
-    game_id: string;
-    user_id: string;
-    num_items?: number | "ALL";
-    callback_url?: string;
+    gameId: string;
+    playerId: string;
+    numItems?: number | "ALL";
+    callbackUrl?: string;
 };
 export type TwoBttnsConfig = {
     appId: string;
@@ -134,7 +134,7 @@ export declare class TwoBttnsApi {
     static generatePlayerToken(params: {
         appId: string;
         secret: string;
-        userId: string;
+        playerId: string;
         expiresIn: string;
     }): string;
     /**
@@ -145,7 +145,7 @@ export declare class TwoBttnsApi {
         secret: string;
     }): {
         type: string;
-        userId: string;
+        playerId: string;
     };
     /**
      * Generate an API access token JWT for a given API Key

@@ -58,22 +58,22 @@ class TwoBttnsApi {
      * This URL should be generated on the server-side of your application, and then used on the server or client-side to redirect the user to 2bttns.
      */
     generatePlayUrl(params, expiresIn = "1h") {
-        const { game_id, user_id, num_items, callback_url } = params;
+        const { gameId, playerId, numItems, callbackUrl } = params;
         const token = TwoBttnsApi.generatePlayerToken({
             appId: this.appId,
             secret: this.secret,
-            userId: user_id,
+            playerId,
             expiresIn,
         });
         const queryBuilder = new URLSearchParams();
-        queryBuilder.append("game_id", game_id);
+        queryBuilder.append("game_id", gameId);
         queryBuilder.append("app_id", this.appId);
         queryBuilder.append("jwt", token);
-        if (num_items) {
-            queryBuilder.append("num_items", num_items.toString());
+        if (numItems) {
+            queryBuilder.append("num_items", numItems.toString());
         }
-        if (callback_url) {
-            queryBuilder.append("callback_url", callback_url);
+        if (callbackUrl) {
+            queryBuilder.append("callback_url", callbackUrl);
         }
         return `${this.url}/play?${queryBuilder.toString()}`;
     }
@@ -82,8 +82,8 @@ class TwoBttnsApi {
      * @param expiresIn *[optional]* How long the token should be valid for. Defaults to "1h".
      */
     static generatePlayerToken(params) {
-        const { appId, secret, userId, expiresIn = "1hr" } = params;
-        const token = jsonwebtoken_1.default.sign({ type: "player_token", appId, userId }, secret, {
+        const { appId, secret, playerId, expiresIn = "1hr" } = params;
+        const token = jsonwebtoken_1.default.sign({ type: "player_token", appId, playerId }, secret, {
             expiresIn,
         });
         return token;
@@ -101,8 +101,8 @@ class TwoBttnsApi {
         if (decodedObj.type !== "player_token") {
             throw new Error(`Invalid token: received type ${decodedObj.type}; expected type "player_token"`);
         }
-        if (!decodedObj.userId) {
-            throw new Error("Invalid token: no userId");
+        if (!decodedObj.playerId) {
+            throw new Error("Invalid token: no playerId");
         }
         return decodedObj;
     }

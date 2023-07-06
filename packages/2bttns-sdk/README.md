@@ -69,15 +69,15 @@ const { data } = await twobttns.callApi("/players", "get");
 
 You can create a play URL using the `.generatePlayUrl(...)` method.
 
-This method will return a secure URL that you redirect your users to in order to play a 2bttns game you specify.
+This method will return a secure URL that you should redirect your users to in order to play a 2bttns game you specify.
 
 ```typescript
 /*  server/path/to/api/handler.ts  */
 const url = twobttns.generatePlayUrl({
-  game_id: "game_id",
-  user_id: "user_id",
-  num_items: "ALL",
-  callback_url: "https://example.com/callback",
+  gameId: "your-awesome-game",
+  playerId: "some-player-id",
+  numItems: 42,
+  callbackUrl: "https://example.com/callback",
 });
 ```
 

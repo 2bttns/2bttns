@@ -20,7 +20,7 @@ export const twobttnsBaseJwtSchema = z
 export const playerTokenSchema = z
   .object({
     type: z.literal("player_token"),
-    userId: z.string(),
+    playerId: z.string(),
   })
   .merge(twobttnsBaseJwtSchema);
 

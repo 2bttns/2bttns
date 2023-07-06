@@ -23,7 +23,8 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-// fetch-polyfill.ts
+// Set up node-fetch as a global polyfill for fetch, Headers, Request, and Response.
+// Without this, server-side API calls won't work because fetch is not defined by default in Node.
 const node_fetch_1 = __importStar(require("node-fetch"));
 if (!globalThis.fetch) {
     globalThis.fetch = node_fetch_1.default;

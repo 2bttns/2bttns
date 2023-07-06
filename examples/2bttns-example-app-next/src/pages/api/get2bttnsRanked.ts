@@ -16,8 +16,8 @@ export default async function handler(
 
   try {
     if (!req.query.inputTags) throw "req.query.inputTags is required";
-    if (!req.query.outputTag) throw "req.query.inputTags is required";
-    if (!req.query.playerId) throw "req.query.inputTags is required";
+    if (!req.query.outputTag) throw "req.query.outputTag is required";
+    if (!req.query.playerId) throw "req.query.playerId is required";
   } catch (msg) {
     return res.status(400).json({ code: 400, message: msg as string });
   }

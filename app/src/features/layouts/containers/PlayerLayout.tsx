@@ -1,12 +1,12 @@
 import { Box } from "@chakra-ui/react";
 import Navbar, { NavbarProps } from "../../navbar/views/Navbar";
 
-export type UserLayoutProps = {
+export type PlayerLayoutProps = {
   children: React.ReactNode;
   navbarProps?: NavbarProps;
 };
 
-export default function UserLayout(props: UserLayoutProps) {
+export default function PlayerLayout(props: PlayerLayoutProps) {
   const { children, navbarProps } = props;
 
   return (

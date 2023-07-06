@@ -48,7 +48,7 @@ describe("example router", () => {
       {
         type: "player_token",
         appId: secret.id,
-        userId: player.id,
+        playerId: player.id,
       },
       secret.secret
     );
@@ -62,7 +62,7 @@ describe("example router", () => {
       {
         type: "player_token",
         appId: "invalid-app-id",
-        userId: "some-player-id",
+        playerId: "some-player-id",
       },
       "invalid-secret-value"
     );
