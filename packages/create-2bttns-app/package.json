@@ -1,0 +1,35 @@
+{
+  "name": "@2bttns/create-2bttns-app",
+  "version": "1.0.0-alpha",
+  "description": "Create your 2bttns app with a single command.",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/2bttns/2bttns"
+  },
+  "bin": {
+    "create-2bttns-app": "./dist/index.js"
+  },
+  "type": "module",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "prebuild": "npm run unlink && rm -rf bin && rm -rf types",
+    "build": "tsc",
+    "postbuild": "npm run link",
+    "unlink": "npm unlink create-2bttns-app",
+    "link": "npm link",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/got": "^9.6.12",
+    "@types/node": "^20.3.3",
+    "@types/tar": "^6.1.5",
+    "got": "^13.0.0",
+    "tar": "^6.1.15",
+    "typescript": "^5.1.6"
+  }
+}
