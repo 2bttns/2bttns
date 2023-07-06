@@ -69,7 +69,11 @@ async function main() {
     return;
   }
 
-  console.log(`Initializing 2bttns app at ${targetDir}...`);
+  if (targetDir === ".") {
+    console.log(`Initializing 2bttns app in current directory...`);
+  } else {
+    console.log(`Initializing 2bttns app at ${targetDir}...`);
+  }
 
   const targetBranch = CURRENT_BRANCH ?? defaultBranch;
   const downloadUrl = `https://codeload.github.com/${fullRepoName}/tar.gz/${targetBranch}`;
