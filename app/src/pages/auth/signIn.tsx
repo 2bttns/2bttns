@@ -1,10 +1,13 @@
 import {
   Box,
   Button,
+  ButtonGroup,
   Card,
   CardBody,
   Divider,
   Input,
+  InputGroup,
+  InputLeftAddon,
   Stack,
 } from "@chakra-ui/react";
 import { GetServerSideProps } from "next";
@@ -18,7 +21,8 @@ import {
   signIn,
 } from "next-auth/react";
 import Image from "next/image";
-import { FaGithub } from "react-icons/fa";
+import { useMemo, useState } from "react";
+import { FaGithub, FaKey, FaUser } from "react-icons/fa";
 import { NextPageWithLayout } from "../_app";
 
 export type SignInPageProps = {
@@ -53,6 +57,23 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 
 const SignInPage: NextPageWithLayout<SignInPageProps> = (props) => {
   const { providers, csrfToken } = props;
+
+  const filteredProviders = useMemo(() => {
+    if (!providers) return null;
+
+    // Exclude the credentials provider, since we're using a custom form for it.
+    return Object.values(providers).filter((p) => p.id !== "credentials");
+  }, [providers]);
+
+  const [credentialsInput, setCredentialsInput] = useState({
+    username: "",
+    password: "",
+  });
+
+  const [credentialsInputStep, setCredentialsInputStep] = useState<
+    "username" | "password"
+  >("username");
+
   return (
     <Box width="100vw" height="100vh" overflow="hidden" bgColor="blue.900">
       <Stack
@@ -78,23 +99,90 @@ const SignInPage: NextPageWithLayout<SignInPageProps> = (props) => {
                 style={{ margin: "0 auto", userSelect: "none" }}
               />
               <Input name="csrfToken" type="hidden" defaultValue={csrfToken} />
-              <Input
-                placeholder="Email (Not Setup - Please Use Github)"
-                fontSize="12px"
-                padding="8px"
-                bgColor="gray.100"
-                border="1px solid black"
-                isDisabled
-              />
-              <Button width="100%" mt="1rem" isDisabled>
-                Sign In
-              </Button>
+              <InputGroup fontSize="12px" padding="0">
+                <InputLeftAddon bgColor="gray.200">
+                  {credentialsInputStep === "username" ? <FaUser /> : <FaKey />}
+                </InputLeftAddon>
+                <Input
+                  bgColor="gray.100"
+                  type={
+                    credentialsInputStep === "username" ? "text" : "password"
+                  }
+                  placeholder={
+                    credentialsInputStep === "username"
+                      ? "Enter Admin Username"
+                      : "Enter Password"
+                  }
+                  value={
+                    credentialsInputStep === "username"
+                      ? credentialsInput.username
+                      : credentialsInput.password
+                  }
+                  onChange={(e) => {
+                    if (credentialsInputStep === "username") {
+                      setCredentialsInput({
+                        ...credentialsInput,
+                        username: e.target.value,
+                      });
+                    } else {
+                      setCredentialsInput({
+                        ...credentialsInput,
+                        password: e.target.value,
+                      });
+                    }
+                  }}
+                />
+              </InputGroup>
+              <ButtonGroup width="100%" mt="1rem">
+                {credentialsInputStep === "password" && (
+                  <Button
+                    onClick={() => {
+                      if (credentialsInputStep === "password") {
+                        setCredentialsInput({
+                          ...credentialsInput,
+                          password: "",
+                        });
+                        setCredentialsInputStep("username");
+                      }
+                    }}
+                    flex={1}
+                  >
+                    Back
+                  </Button>
+                )}
+                <Button
+                  onClick={async () => {
+                    if (credentialsInputStep === "username") {
+                      setCredentialsInputStep("password");
+                      return;
+                    }
+
+                    if (credentialsInputStep === "password") {
+                      await signIn("credentials", {
+                        username: credentialsInput.username,
+                        password: credentialsInput.password,
+                        redirect: true,
+                        callbackUrl: "/games",
+                      });
+                    }
+                  }}
+                  flex={1}
+                  transition="none !important"
+                  isDisabled={
+                    credentialsInputStep === "username"
+                      ? credentialsInput.username === ""
+                      : credentialsInput.password === ""
+                  }
+                >
+                  {credentialsInputStep === "username" ? "Next" : "Sign In"}
+                </Button>
+              </ButtonGroup>
               <Divider my="1rem" borderColor="whiteAlpha.700" />
-              {providers &&
-                Object.values(providers).map((provider) => (
+              {filteredProviders &&
+                filteredProviders.map((provider) => (
                   <div key={provider.name} style={{ marginBottom: 0 }}>
                     <Button
-                      onClick={() => signIn(provider.id)}
+                      onClick={() => signIn(provider.id, { redirect: false })}
                       width="100%"
                       bgColor="black"
                       color="white"

@@ -12,13 +12,13 @@ export default async function getSessionWithSignInRedirect(
   const session = await getSession(context);
 
   // Check if the user is still an admin -- in case they were removed from the admin list while having an active session
-  const isStillAdmin =
-    session?.user.email &&
-    (await isAdmin({
-      email: session.user.email,
-      userId: session.user.id,
-      clearSessionsIfNotFound: true,
-    }));
+  const isStillAdmin = session
+    ? await isAdmin({
+        email: session.user.email ?? undefined,
+        userId: session.user.id,
+        clearSessionsIfNotFound: true,
+      })
+    : false;
 
   const shouldRedirectToSignIn = !session || !isStillAdmin;
 

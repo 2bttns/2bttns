@@ -63,6 +63,14 @@ CREATE TABLE "AllowedAdmin" (
 );
 
 -- CreateTable
+CREATE TABLE "AdminCredential" (
+    "username" TEXT NOT NULL,
+    "hashedPassword" TEXT NOT NULL,
+
+    CONSTRAINT "AdminCredential_pkey" PRIMARY KEY ("username")
+);
+
+-- CreateTable
 CREATE TABLE "Game" (
     "id" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,

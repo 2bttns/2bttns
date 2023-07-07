@@ -3,7 +3,7 @@ import fs from "fs";
 import path from "path";
 import { z } from "zod";
 import { defaultMode } from "../src/modes/availableModes";
-import { logger } from "../src/server/helpers/logger";
+import { logger } from "../src/utils/logger";
 const prisma = new PrismaClient();
 async function main() {
   // Seed initial admin allow list using adminAllowList.json

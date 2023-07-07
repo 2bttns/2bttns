@@ -1,9 +1,9 @@
 import { TRPCError } from "@trpc/server";
 import jwt from "jsonwebtoken";
 import { z } from "zod";
+import { logger } from "../../utils/logger";
 import { CreateContextOptions } from "../api/trpc";
 import isAdmin from "../shared/isAdmin";
-import { logger } from "./logger";
 
 const jwtBaseSchema = z.object({
   sub: z.string().optional(),

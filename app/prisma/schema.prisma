@@ -73,6 +73,12 @@ model AllowedAdmin {
     updatedAt DateTime @updatedAt
 }
 
+model AdminCredential {
+    // Admin username-password credentials for use by the Auth.js credentials provider
+    username       String @id
+    hashedPassword String
+}
+
 model Game {
     id          String   @id @default(cuid())
     createdAt   DateTime @default(now())

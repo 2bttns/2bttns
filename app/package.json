@@ -24,7 +24,9 @@
     "docker:stop": "docker-compose stop",
     "docker:rm:test-db": "docker-compose rm -svf test-db",
     "docker:rm:dev-db": "docker-compose rm -svf dev-db",
-    "gen:theme-typings": "chakra-cli tokens src/style/theme/typings-only.ts"
+    "gen:theme-typings": "chakra-cli tokens src/style/theme/typings-only.ts",
+    "create-admin-with-credentials:dev": "dotenv -e .env -- ts-node --transpile-only prisma/createAdminCredentials.ts",
+    "create-admin-with-credentials:prod": "dotenv -e .env.production -- ts-node prisma/createAdminCredentials.ts"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
