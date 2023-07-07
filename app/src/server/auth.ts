@@ -1,5 +1,4 @@
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
-import crypto from "crypto";
 import type { GetServerSidePropsContext } from "next";
 import {
   DefaultUser,
@@ -15,6 +14,8 @@ import hashPassword from "../utils/hashPassword";
 import { logger } from "../utils/logger";
 import { prisma } from "./db";
 import isAdmin from "./shared/isAdmin";
+
+const adapter = PrismaAdapter(prisma);
 
 /**
  * Module augmentation for `next-auth` types
@@ -43,10 +44,10 @@ declare module "next-auth" {
  * @see https://next-auth.js.org/configuration/options
  **/
 export const authOptions: NextAuthOptions = {
+  session: { strategy: "jwt" },
   callbacks: {
     async signIn({ user }) {
       const sessionUser = user as Session["user"];
-
       try {
         if (!sessionUser) throw new Error("User session is undefined");
 
@@ -73,15 +74,24 @@ export const authOptions: NextAuthOptions = {
         return false;
       }
     },
-    session({ session, user }) {
+    async session({ session, user }) {
       if (session.user) {
-        session.user.id = user.id;
+        // Set the session ID based on the user's email from the database
+        if (!session.user.id && session.user.email) {
+          const id = (await adapter.getUserByEmail(session.user.email))?.id;
+          if (id) session.user.id = id;
+        }
+
+        // Otherwise, try to set the ID to the username from the Credentials provider
+        if (!session.user.id && user?.name) {
+          session.user.id = user.name;
+        }
         // session.user.role = user.role; <-- put other properties on the session here
       }
       return session;
     },
   },
-  adapter: PrismaAdapter(prisma),
+  adapter,
   providers: [
     GitHubProvider({
       clientId: env.GITHUB_ID,
@@ -136,20 +146,18 @@ export const authOptions: NextAuthOptions = {
             name: adminCredentials.username,
           };
 
-          // @TODO: Get sessions working manually for credentials provider; Credentials doesn't seem to be supported with adapters
-          // @TODO:  Also -- think about how to clear sessions for credentials provider when necessary
-          await prisma.session.create({
-            data: {
-              expires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 30), // 30 days
-              sessionToken: crypto.randomUUID(),
-              user: {
-                connectOrCreate: {
-                  where: { id: user.id },
-                  create: user,
-                },
-              },
-            },
+          const existingUser = await prisma.user.findFirst({
+            where: { id: adminCredentials.username },
           });
+
+          if (!existingUser) {
+            await prisma.user.create({
+              data: {
+                id: adminCredentials.username,
+                name: adminCredentials.username,
+              },
+            });
+          }
 
           return user;
         } catch (e) {

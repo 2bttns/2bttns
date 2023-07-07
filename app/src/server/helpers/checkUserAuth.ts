@@ -102,9 +102,9 @@ export async function checkUserAuth(
     // Even if they have a session, ensure their access is still valid via the admin allow list database table
     // For example, the admin user may have been deleted from the allow list while they were still logged in
     if (
-      !ctx.session?.user?.email ||
+      !ctx.session ||
       !(await isAdmin({
-        email: ctx.session.user.email,
+        email: ctx.session.user.email ?? undefined,
         userId: ctx.session.user.id,
         clearSessionsIfNotFound: true,
       }))

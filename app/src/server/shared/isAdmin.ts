@@ -10,7 +10,10 @@ export default async function isAdmin(params: {
 
   const usingCredentials =
     !email &&
-    (await prisma.adminCredential.findFirst({ where: { username: userId } }));
+    (await prisma.adminCredential.findFirst({
+      where: { username: userId },
+      select: { username: true },
+    }));
 
   if (usingCredentials) {
     logger.info(

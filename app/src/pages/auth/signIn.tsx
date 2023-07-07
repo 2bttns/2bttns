@@ -21,6 +21,7 @@ import {
   signIn,
 } from "next-auth/react";
 import Image from "next/image";
+import { useRouter } from "next/router";
 import { useMemo, useState } from "react";
 import { FaGithub, FaKey, FaUser } from "react-icons/fa";
 import { NextPageWithLayout } from "../_app";
@@ -57,6 +58,8 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 
 const SignInPage: NextPageWithLayout<SignInPageProps> = (props) => {
   const { providers, csrfToken } = props;
+
+  const router = useRouter();
 
   const filteredProviders = useMemo(() => {
     if (!providers) return null;
@@ -158,12 +161,16 @@ const SignInPage: NextPageWithLayout<SignInPageProps> = (props) => {
                     }
 
                     if (credentialsInputStep === "password") {
-                      await signIn("credentials", {
-                        username: credentialsInput.username,
-                        password: credentialsInput.password,
-                        redirect: true,
-                        callbackUrl: "/games",
-                      });
+                      try {
+                        await signIn("credentials", {
+                          username: credentialsInput.username,
+                          password: credentialsInput.password,
+                          redirect: false,
+                        });
+                        await router.push("/");
+                      } catch (e) {
+                        console.error(e);
+                      }
                     }
                   }}
                   flex={1}
