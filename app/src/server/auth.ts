@@ -136,6 +136,8 @@ export const authOptions: NextAuthOptions = {
             name: adminCredentials.username,
           };
 
+          // @TODO: Get sessions working manually for credentials provider; Credentials doesn't seem to be supported with adapters
+          // @TODO:  Also -- think about how to clear sessions for credentials provider when necessary
           await prisma.session.create({
             data: {
               expires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 30), // 30 days
