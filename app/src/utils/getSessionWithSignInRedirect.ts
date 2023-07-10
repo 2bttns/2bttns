@@ -1,6 +1,8 @@
 import { GetServerSidePropsContext } from "next";
 import { getSession } from "next-auth/react";
 import isAdmin from "../server/shared/isAdmin";
+import { logger } from "./logger";
+import wait from "./wait";
 
 export default async function getSessionWithSignInRedirect(
   context: GetServerSidePropsContext,
@@ -16,9 +18,25 @@ export default async function getSessionWithSignInRedirect(
     ? await isAdmin({
         email: session.user.email ?? undefined,
         userId: session.user.id,
-        clearSessionsIfNotFound: true,
       })
     : false;
+
+  // Clear the session if the user is no longer an admin -- this means they were removed from the admin list while having an active session
+  if (!isStillAdmin) {
+    // TODO: Fix inifinite redirect loop when remove the admin user from the db while they have an active session & click on a link that requires admin access
+    context.res.setHeader("Set-Cookie", [
+      `next-auth.session-token=deleted; Max-Age=0`,
+    ]);
+
+    logger.info(`Clearing session for user with id: ${session?.user.id}`);
+    return {
+      session: null,
+      redirect: {
+        destination: `/auth/signIn?callbackUrl=${callbackUrl}`,
+        permanent: false,
+      },
+    };
+  }
 
   const shouldRedirectToSignIn = !session || !isStillAdmin;
 

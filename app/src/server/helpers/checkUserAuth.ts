@@ -106,7 +106,6 @@ export async function checkUserAuth(
       !(await isAdmin({
         email: ctx.session.user.email ?? undefined,
         userId: ctx.session.user.id,
-        clearSessionsIfNotFound: true,
       }))
     ) {
       logger.silly("checkUserAuth - end (UNAUTHORIZED)");

@@ -36,7 +36,7 @@ export const getCount = adminOrApiKeyProtectedProcedure
   .query(async ({ input, ctx }) => {
     const { emailFilter, allowFuzzyEmailFilter } = input;
     const where = getAllWhereInput(emailFilter, allowFuzzyEmailFilter);
-    const count = await ctx.prisma.allowedAdmin.count({
+    const count = await ctx.prisma.adminOAuthAllowList.count({
       where,
     });
     const processed: z.infer<typeof output> = {

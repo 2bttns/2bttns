@@ -1,4 +1,3 @@
-import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import type { GetServerSidePropsContext } from "next";
 import {
   DefaultUser,
@@ -14,8 +13,6 @@ import hashPassword from "../utils/hashPassword";
 import { logger } from "../utils/logger";
 import { prisma } from "./db";
 import isAdmin from "./shared/isAdmin";
-
-const adapter = PrismaAdapter(prisma);
 
 /**
  * Module augmentation for `next-auth` types
@@ -54,7 +51,6 @@ export const authOptions: NextAuthOptions = {
         const canSignIn = await isAdmin({
           userId: sessionUser.id,
           email: sessionUser.email ?? undefined,
-          clearSessionsIfNotFound: false,
         });
 
         if (canSignIn) {
@@ -74,24 +70,17 @@ export const authOptions: NextAuthOptions = {
         return false;
       }
     },
-    async session({ session, user }) {
-      if (session.user) {
-        // Set the session ID based on the user's email from the database
-        if (!session.user.id && session.user.email) {
-          const id = (await adapter.getUserByEmail(session.user.email))?.id;
-          if (id) session.user.id = id;
-        }
+    async session({ session }) {
+      const { id, email, name } = session.user;
 
-        // Otherwise, try to set the ID to the username from the Credentials provider
-        if (!session.user.id && user?.name) {
-          session.user.id = user.name;
-        }
-        // session.user.role = user.role; <-- put other properties on the session here
+      // Can add custom properties to the session object here
+      if (!id) {
+        const adminId = await findAdminId(email, name);
+        session.user.id = adminId;
       }
       return session;
     },
   },
-  adapter,
   providers: [
     GitHubProvider({
       clientId: env.GITHUB_ID,
@@ -131,6 +120,8 @@ export const authOptions: NextAuthOptions = {
             env.NEXTAUTH_SECRET
           );
 
+          // Find the admin credentials entry based on the username and hashed password
+          // You can create new credentials via the `npm run create-admin-with-credentials:dev` script
           const adminCredentials = await prisma.adminCredential.findFirst({
             where: { username: credentials.username, hashedPassword },
           });
@@ -145,19 +136,6 @@ export const authOptions: NextAuthOptions = {
             id: adminCredentials.username,
             name: adminCredentials.username,
           };
-
-          const existingUser = await prisma.user.findFirst({
-            where: { id: adminCredentials.username },
-          });
-
-          if (!existingUser) {
-            await prisma.user.create({
-              data: {
-                id: adminCredentials.username,
-                name: adminCredentials.username,
-              },
-            });
-          }
 
           return user;
         } catch (e) {
@@ -183,3 +161,31 @@ export const getServerAuthSession = (ctx: {
 }) => {
   return getServerSession(ctx.req, ctx.res, authOptions);
 };
+
+/**
+ * Find the admin ID based on whether the admin signed in via OAuth or credentials
+ */
+async function findAdminId(
+  email: string | null | undefined,
+  name: string | null | undefined
+) {
+  let adminId: string | null = null;
+  if (email) {
+    const oauthAdmin = await prisma.adminUser.findFirst({
+      where: { id: email },
+    });
+    adminId = oauthAdmin?.id ?? null;
+  } else if (name) {
+    const credentialsAdmin = await prisma.adminCredential.findFirst({
+      where: { username: name },
+    });
+    const credentialsAdminUser = await prisma.adminUser.findFirst({
+      where: { id: credentialsAdmin?.username },
+    });
+    adminId = credentialsAdminUser?.id ?? null;
+  }
+  if (!adminId) {
+    throw new Error("Admin id is undefined. Cannot create session.");
+  }
+  return adminId;
+}

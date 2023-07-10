@@ -21,7 +21,7 @@ describe("administrators router", () => {
     const ctx = await createInnerTRPCContextWithSessionForTest();
     const caller = appRouter.createCaller(ctx);
 
-    const adminCount = await prisma.allowedAdmin.count({});
+    const adminCount = await prisma.adminOAuthAllowList.count({});
     const result = await caller.administrators.getCount({});
     expect(result.count).toEqual(adminCount);
   });

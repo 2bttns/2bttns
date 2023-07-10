@@ -8,11 +8,13 @@ import { setPlayerToken } from "../../../../src/utils/api";
 
 export const testUserSessionEmail = "test-user-session-email@example.com";
 export const createInnerTRPCContextWithSessionForTest = async () => {
-  const existingAllowedTestAdmin = await prisma.allowedAdmin.findFirst({
+  const existingAllowedTestAdmin = await prisma.adminOAuthAllowList.findFirst({
     where: { email: testUserSessionEmail },
   });
   if (!existingAllowedTestAdmin) {
-    await prisma.allowedAdmin.create({ data: { email: testUserSessionEmail } });
+    await prisma.adminOAuthAllowList.create({
+      data: { AdminUser: { create: { id: testUserSessionEmail } } },
+    });
   }
 
   return createInnerTRPCContext({
@@ -41,18 +43,15 @@ export const createInnerTRPCContextWithPlayerTokenAuthForTest = (
 
 export async function clearDbsTest(prisma: PrismaClient) {
   await prisma.$transaction([
-    prisma.account.deleteMany(),
     prisma.example.deleteMany(),
     prisma.game.deleteMany(),
     prisma.gameObject.deleteMany(),
     prisma.gameObjectRelationship.deleteMany(),
     prisma.player.deleteMany(),
     prisma.playerScore.deleteMany(),
-    prisma.session.deleteMany(),
     prisma.secret.deleteMany(),
     prisma.tag.deleteMany(),
-    prisma.user.deleteMany(),
-    prisma.verificationToken.deleteMany(),
+    prisma.adminUser.deleteMany(),
     prisma.weight.deleteMany(),
   ]);
 }
@@ -124,5 +123,5 @@ export async function getAllTags() {
 }
 
 export async function clearAllowedAdmins() {
-  return await prisma.allowedAdmin.deleteMany();
+  return await prisma.adminOAuthAllowList.deleteMany();
 }

@@ -28,12 +28,23 @@ async function main() {
   console.log("\n");
   const hashedPassword = await askForPassword(secret);
 
-  await prisma.adminCredential.create({
-    data: {
-      username,
-      hashedPassword,
-    },
-  });
+  try {
+    await prisma.adminCredential.create({
+      data: {
+        hashedPassword,
+        AdminUser: {
+          create: {
+            id: username,
+          },
+        },
+      },
+    });
+  } catch (error) {
+    console.log(error);
+    throw new Error(
+      `Failed to add admin credentials for ${username} in the database. An adminCredential entry already exists for this username.`
+    );
+  }
 
   logger.info(
     `Successfully added admin credentials for ${username} in the database.`

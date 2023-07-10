@@ -56,18 +56,18 @@ export const getAll = adminOrApiKeyProtectedProcedure
       sortOrder,
     } = input;
 
-    const where: Prisma.AllowedAdminWhereInput = getAllWhereInput(
+    const where: Prisma.AdminOAuthAllowListWhereInput = getAllWhereInput(
       emailFilter,
       allowFuzzyEmailFilter
     );
 
-    const orderBy: Prisma.AllowedAdminMinOrderByAggregateInput = {
+    const orderBy: Prisma.AdminOAuthAllowListOrderByWithAggregationInput = {
       email: sortField === "email" ? sortOrder : undefined,
       createdAt: sortField === "createdAt" ? sortOrder : undefined,
       updatedAt: sortField === "updatedAt" ? sortOrder : undefined,
     };
 
-    const admins = await ctx.prisma.allowedAdmin.findMany({
+    const admins = await ctx.prisma.adminOAuthAllowList.findMany({
       take,
       skip,
       where,
@@ -92,7 +92,7 @@ export function getAllWhereInput(
   const mode: Prisma.QueryMode = allowFuzzyEmailFilter
     ? "insensitive"
     : "default";
-  const where: Prisma.AllowedAdminWhereInput = emailFilter
+  const where: Prisma.AdminOAuthAllowListWhereInput = emailFilter
     ? {
         // Match any of the emails in the filter
         // If fuzzy matching is enabled, returns any emails that contain the filter. Otherwise, only returns exact matches.
