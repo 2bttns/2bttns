@@ -184,7 +184,9 @@ const SignInPage: NextPageWithLayout<SignInPageProps> = (props) => {
                   {credentialsInputStep === "username" ? "Next" : "Sign In"}
                 </Button>
               </ButtonGroup>
-              <Divider my="1rem" borderColor="whiteAlpha.700" />
+              {filteredProviders && filteredProviders.length > 0 && (
+                <Divider my="1rem" borderColor="whiteAlpha.700" />
+              )}
               {filteredProviders &&
                 filteredProviders.map((provider) => (
                   <div key={provider.name} style={{ marginBottom: 0 }}>

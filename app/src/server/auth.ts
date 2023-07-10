@@ -82,20 +82,6 @@ export const authOptions: NextAuthOptions = {
     },
   },
   providers: [
-    GitHubProvider({
-      clientId: env.GITHUB_ID,
-      clientSecret: env.GITHUB_SECRET,
-    }),
-    /**
-     * ...add more providers here
-     *
-     * Most other providers require a bit more work than the Discord provider.
-     * For example, the GitHub provider requires you to add the
-     * `refresh_token_expires_in` field to the Account model. Refer to the
-     * NextAuth.js docs for the provider you want to use. Example:
-     * @see https://next-auth.js.org/providers/github
-     **/
-
     CredentialsProvider({
       // The name to display on the sign in form (e.g. "Sign in with...")
       name: "Credentials",
@@ -147,6 +133,17 @@ export const authOptions: NextAuthOptions = {
         }
       },
     }),
+    ...(env.GITHUB_ID && env.GITHUB_SECRET
+      ? [
+          GitHubProvider({
+            clientId: env.GITHUB_ID,
+            clientSecret: env.GITHUB_SECRET,
+          }),
+        ]
+      : []),
+    /**
+     * ...add more providers here
+     **/
   ],
 };
 
