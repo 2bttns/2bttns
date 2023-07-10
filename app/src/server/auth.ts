@@ -24,6 +24,7 @@ declare module "next-auth" {
   interface Session extends DefaultSession {
     user: {
       id: string;
+      displayName?: string;
       // ...other properties
       // role: UserRole;
     } & DefaultSession["user"];
@@ -77,6 +78,13 @@ export const authOptions: NextAuthOptions = {
       if (!id) {
         const adminId = await findAdminId(email, name);
         session.user.id = adminId;
+
+        session.user.displayName =
+          (
+            await prisma.adminUser.findFirst({
+              where: { id: adminId },
+            })
+          )?.displayName ?? undefined;
       }
       return session;
     },

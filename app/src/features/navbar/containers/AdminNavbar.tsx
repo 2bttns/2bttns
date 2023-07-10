@@ -44,7 +44,7 @@ function AdminLoginLogout() {
           <Text fontStyle="italic">
             Logged in as Admin:{" "}
             <Text as="span" display="inline" fontWeight="bold">
-              {session.data.user?.email ?? "MISSING_EMAIL"}
+              {session.data.user.displayName ?? session.data.user.id}
             </Text>
           </Text>
           <ChakraLink onClick={() => signOut({ callbackUrl: "/auth/signIn" })}>

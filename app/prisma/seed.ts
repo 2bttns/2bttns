@@ -28,6 +28,7 @@ async function main() {
               AdminUser: {
                 create: {
                   id: email,
+                  displayName: email,
                 },
               },
             },
