@@ -13,6 +13,7 @@ CREATE TABLE "AdminUser" (
     "displayName" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
+    "lastSeen" TIMESTAMP(3),
 
     CONSTRAINT "AdminUser_pkey" PRIMARY KEY ("id")
 );

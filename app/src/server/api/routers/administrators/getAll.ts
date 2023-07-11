@@ -17,7 +17,7 @@ const input = z.object({
     )
     .default(false),
   sortField: z
-    .enum(["id", "displayName", "updatedAt", "createdAt"])
+    .enum(["id", "displayName", "updatedAt", "createdAt", "lastSeen"])
     .describe("Field to sort by")
     .optional(),
   sortOrder,
@@ -30,6 +30,7 @@ const output = z.object({
       displayName: z.string().optional(),
       createdAt: z.string().describe("ISO date string"),
       updatedAt: z.string().describe("ISO date string"),
+      lastSeen: z.string().describe("ISO date string").optional(),
     })
   ),
 });
@@ -58,6 +59,7 @@ export const getAll = adminOrApiKeyProtectedProcedure
       displayName: sortField === "displayName" ? sortOrder : undefined,
       createdAt: sortField === "createdAt" ? sortOrder : undefined,
       updatedAt: sortField === "updatedAt" ? sortOrder : undefined,
+      lastSeen: sortField === "lastSeen" ? sortOrder : undefined,
     };
 
     const admins = await ctx.prisma.adminUser.findMany({
@@ -73,8 +75,28 @@ export const getAll = adminOrApiKeyProtectedProcedure
         displayName: admin.displayName ?? undefined,
         createdAt: admin.createdAt.toISOString(),
         updatedAt: admin.createdAt.toISOString(),
+        lastSeen: admin.lastSeen?.toISOString() ?? undefined,
       })),
     };
+
+    // Special case: if sorting by lastSeen, place nulls at the end
+    if (sortField === "lastSeen") {
+      processed.administrators = processed.administrators.sort((a, b) => {
+        if (!a.lastSeen) {
+          return sortOrder === "desc" ? 1 : -1;
+        }
+        if (!b.lastSeen) {
+          return sortOrder === "desc" ? -1 : 1;
+        }
+
+        const aDate = new Date(a.lastSeen);
+        const bDate = new Date(b.lastSeen);
+
+        return sortOrder === "asc"
+          ? aDate.getTime() - bDate.getTime()
+          : bDate.getTime() - aDate.getTime();
+      });
+    }
 
     return processed;
   });

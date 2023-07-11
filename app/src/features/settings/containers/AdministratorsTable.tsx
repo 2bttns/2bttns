@@ -16,7 +16,9 @@ import useSort from "../../shared/components/Table/hooks/useSort";
 
 const columnIds = {
   ID: "id",
-  UPDATED_AT: "updatedAt",
+  DISPLAY_NAME: "displayName",
+  LAST_SEEN: "lastSeen",
+  CREATED_AT: "createdAt",
 };
 
 export type AdminData =
@@ -99,11 +101,42 @@ export default function AdministratorsTable(props: AdministratorsTableProps) {
         minWidth: "256px",
       },
       {
-        name: "Last Updated",
-        cell: (row) => new Date(row.updatedAt).toLocaleString(),
+        name: "Display Name",
+        cell: (row) => (
+          <CustomEditable
+            value={row.displayName}
+            placeholder="--"
+            handleSave={async (nextValue) => {
+              // TODO: implement admin update handler
+            }}
+            isEditable={editable}
+          />
+        ),
         sortable: true,
-        id: columnIds.UPDATED_AT,
-        sortField: columnIds.UPDATED_AT,
+        id: columnIds.DISPLAY_NAME,
+        sortField: columnIds.DISPLAY_NAME,
+        minWidth: "256px",
+      },
+      {
+        name: "Last Seen",
+        cell: (row) => {
+          if (!row.lastSeen) return <span>--</span>;
+          return new Date(row.lastSeen).toLocaleString();
+        },
+        sortable: true,
+        id: columnIds.LAST_SEEN,
+        sortField: columnIds.LAST_SEEN,
+        minWidth: "256px",
+      },
+      {
+        name: "Created At",
+        cell: (row) => {
+          if (!row.createdAt) return <span>--</span>;
+          return new Date(row.createdAt).toLocaleString();
+        },
+        sortable: true,
+        id: columnIds.CREATED_AT,
+        sortField: columnIds.CREATED_AT,
         minWidth: "256px",
       },
     ];
@@ -146,7 +179,7 @@ export default function AdministratorsTable(props: AdministratorsTableProps) {
               selectedRows={selectedRows}
               totalRows={adminCountQuery.data?.count ?? 0}
               toggleCleared={toggleCleared}
-              defaultSortFieldId={columnIds.UPDATED_AT}
+              defaultSortFieldId={columnIds.LAST_SEEN}
               defaultSortAsc={false}
             />
           );

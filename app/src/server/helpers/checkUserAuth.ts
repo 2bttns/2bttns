@@ -3,6 +3,7 @@ import jwt from "jsonwebtoken";
 import { z } from "zod";
 import { logger } from "../../utils/logger";
 import { CreateContextOptions } from "../api/trpc";
+import { prisma } from "../db";
 import isAdmin from "../shared/isAdmin";
 
 const jwtBaseSchema = z.object({
@@ -116,6 +117,22 @@ export async function checkUserAuth(
     }
 
     logger.silly("checkUserAuth - end (admin session found)");
+    try {
+      await prisma.adminUser.update({
+        where: {
+          id: ctx.session.user.id,
+        },
+        data: {
+          lastSeen: new Date(),
+        },
+      });
+    } catch (e) {
+      logger.error("checkUserAuth - error updating lastSeen");
+      if (e instanceof Error) {
+        logger.error(e.message);
+      }
+    }
+
     return { type: "admin_session" };
   }
 

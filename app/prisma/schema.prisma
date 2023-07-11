@@ -21,10 +21,11 @@ model Example {
 }
 
 model AdminUser {
-    id          String   @id
+    id          String    @id
     displayName String?
-    createdAt   DateTime @default(now())
-    updatedAt   DateTime @updatedAt
+    createdAt   DateTime  @default(now())
+    updatedAt   DateTime  @updatedAt
+    lastSeen    DateTime?
 
     AdminOAuthAllowList AdminOAuthAllowList?
     AdminCredential     AdminCredential?
