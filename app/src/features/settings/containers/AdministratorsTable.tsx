@@ -15,7 +15,7 @@ import useSelectRows from "../../shared/components/Table/hooks/useSelectRows";
 import useSort from "../../shared/components/Table/hooks/useSort";
 
 const columnIds = {
-  EMAIL: "email",
+  ID: "id",
   UPDATED_AT: "updatedAt",
 };
 
@@ -56,8 +56,8 @@ export default function AdministratorsTable(props: AdministratorsTableProps) {
     {
       skip: (currentPage! - 1) * perPage,
       take: perPage,
-      allowFuzzyEmailFilter: true,
-      emailFilter: globalFilter.debouncedInput,
+      allowFuzzyIdFilter: true,
+      idFilter: globalFilter.debouncedInput,
       sortField: sorting?.sortField,
       sortOrder: sorting?.order,
     },
@@ -70,8 +70,8 @@ export default function AdministratorsTable(props: AdministratorsTableProps) {
 
   const adminCountQuery = api.administrators.getCount.useQuery(
     {
-      allowFuzzyEmailFilter: true,
-      emailFilter: globalFilter.debouncedInput,
+      allowFuzzyIdFilter: true,
+      idFilter: globalFilter.debouncedInput,
     },
     {
       keepPreviousData: true,
@@ -82,11 +82,11 @@ export default function AdministratorsTable(props: AdministratorsTableProps) {
   const columns = useMemo<PaginatedTableProps<AdminData>["columns"]>(() => {
     return [
       {
-        name: "Email",
+        name: "ID",
         cell: (row) => (
           <CustomEditable
-            value={row.email}
-            placeholder="No Email"
+            value={row.id}
+            placeholder="<Missing ID>"
             handleSave={async (nextValue) => {
               // TODO: implement admin update handler
             }}
@@ -94,8 +94,8 @@ export default function AdministratorsTable(props: AdministratorsTableProps) {
           />
         ),
         sortable: true,
-        id: columnIds.EMAIL,
-        sortField: columnIds.EMAIL,
+        id: columnIds.ID,
+        sortField: columnIds.ID,
         minWidth: "256px",
       },
       {
@@ -137,7 +137,7 @@ export default function AdministratorsTable(props: AdministratorsTableProps) {
               columns={columns}
               data={data}
               fixedHeight={remainingHeight}
-              itemIdField="email"
+              itemIdField="id"
               loading={adminQuery.isLoading}
               onChangePage={handlePageChange}
               onChangeRowsPerPage={handlePerRowsChange}

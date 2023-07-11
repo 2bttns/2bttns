@@ -8,16 +8,16 @@ import { booleanEnum, commaSeparatedStringToArray } from "./../../../shared/z";
 const input = z.object({
   take: paginationTake,
   skip: paginationSkip,
-  emailFilter: commaSeparatedStringToArray
-    .describe("Comma-separated emails to filter by")
+  idFilter: commaSeparatedStringToArray
+    .describe("Comma-separated ids to filter by")
     .optional(),
-  allowFuzzyEmailFilter: booleanEnum
+  allowFuzzyIdFilter: booleanEnum
     .describe(
-      "Set to `true` to enable fuzzy email filtering. If false, only returns exact matches."
+      "Set to `true` to enable fuzzy id filtering. If false, only returns exact matches."
     )
     .default(false),
   sortField: z
-    .enum(["email", "updatedAt", "createdAt"])
+    .enum(["id", "displayName", "updatedAt", "createdAt"])
     .describe("Field to sort by")
     .optional(),
   sortOrder,
@@ -26,7 +26,8 @@ const input = z.object({
 const output = z.object({
   administrators: z.array(
     z.object({
-      email: z.string(),
+      id: z.string(),
+      displayName: z.string().optional(),
       createdAt: z.string().describe("ISO date string"),
       updatedAt: z.string().describe("ISO date string"),
     })
@@ -47,27 +48,19 @@ export const getAll = adminOrApiKeyProtectedProcedure
   .input(input)
   .output(output)
   .query(async ({ input, ctx }) => {
-    const {
-      skip,
-      take,
-      emailFilter,
-      allowFuzzyEmailFilter,
-      sortField,
-      sortOrder,
-    } = input;
+    const { skip, take, idFilter, allowFuzzyIdFilter, sortField, sortOrder } =
+      input;
 
-    const where: Prisma.AdminOAuthAllowListWhereInput = getAllWhereInput(
-      emailFilter,
-      allowFuzzyEmailFilter
-    );
+    const where = getAllWhereInput({ idFilter, allowFuzzyIdFilter });
 
-    const orderBy: Prisma.AdminOAuthAllowListOrderByWithAggregationInput = {
-      email: sortField === "email" ? sortOrder : undefined,
+    const orderBy: Prisma.AdminUserOrderByWithAggregationInput = {
+      id: sortField === "id" ? sortOrder : undefined,
+      displayName: sortField === "displayName" ? sortOrder : undefined,
       createdAt: sortField === "createdAt" ? sortOrder : undefined,
       updatedAt: sortField === "updatedAt" ? sortOrder : undefined,
     };
 
-    const admins = await ctx.prisma.adminOAuthAllowList.findMany({
+    const admins = await ctx.prisma.adminUser.findMany({
       take,
       skip,
       where,
@@ -76,36 +69,39 @@ export const getAll = adminOrApiKeyProtectedProcedure
 
     const processed: z.infer<typeof output> = {
       administrators: admins.map((admin) => ({
-        email: admin.email,
-        createdAt: (admin.createdAt as Date).toISOString(),
-        updatedAt: (admin.createdAt as Date).toISOString(),
+        id: admin.id,
+        displayName: admin.displayName ?? undefined,
+        createdAt: admin.createdAt.toISOString(),
+        updatedAt: admin.createdAt.toISOString(),
       })),
     };
 
     return processed;
   });
 
-export function getAllWhereInput(
-  emailFilter: z.infer<typeof input>["emailFilter"],
-  allowFuzzyEmailFilter: z.infer<typeof input>["allowFuzzyEmailFilter"]
-) {
-  const mode: Prisma.QueryMode = allowFuzzyEmailFilter
-    ? "insensitive"
-    : "default";
-  const where: Prisma.AdminOAuthAllowListWhereInput = emailFilter
+export type GetAllWhereInputParams = {
+  idFilter: z.infer<typeof input>["idFilter"];
+  allowFuzzyIdFilter: z.infer<typeof input>["allowFuzzyIdFilter"];
+};
+
+export function getAllWhereInput(params: GetAllWhereInputParams) {
+  const { idFilter, allowFuzzyIdFilter } = params;
+
+  const mode: Prisma.QueryMode = allowFuzzyIdFilter ? "insensitive" : "default";
+  const where: Prisma.AdminUserWhereInput = idFilter
     ? {
         // Match any of the emails in the filter
         // If fuzzy matching is enabled, returns any emails that contain the filter. Otherwise, only returns exact matches.
-        OR: allowFuzzyEmailFilter
-          ? emailFilter.map((email) => ({
-              email: {
-                contains: email,
+        OR: allowFuzzyIdFilter
+          ? idFilter.map((id) => ({
+              id: {
+                contains: id,
                 mode,
               },
             }))
-          : emailFilter.map((email) => ({
-              email: {
-                equals: email,
+          : idFilter.map((id) => ({
+              id: {
+                equals: id,
                 mode,
               },
             })),
