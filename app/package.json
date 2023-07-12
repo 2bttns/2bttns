@@ -75,6 +75,7 @@
   "devDependencies": {
     "@chakra-ui/cli": "^2.4.1",
     "@types/color-hash": "^1.0.2",
+    "@types/inquirer": "^8.2.6",
     "@types/jsonwebtoken": "^9.0.1",
     "@types/next": "^9.0.0",
     "@types/node": "^18.11.18",
@@ -88,6 +89,7 @@
     "dotenv-cli": "^7.2.1",
     "eslint": "^8.30.0",
     "eslint-config-next": "13.1.6",
+    "inquirer": "^8.2.5",
     "jsdom": "^21.1.1",
     "prisma": "^4.9.0",
     "ts-node": "^10.9.1",

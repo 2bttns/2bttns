@@ -2,6 +2,7 @@
 import { PrismaClient } from ".prisma/client";
 const prisma = new PrismaClient();
 
+import inquirer from "inquirer";
 import readline from "readline";
 import hashPassword from "../src/utils/hashPassword";
 import { logger } from "../src/utils/logger";
@@ -21,58 +22,73 @@ main().catch((e) => {
 });
 
 async function main() {
-  const secret = process.env.NEXTAUTH_SECRET;
-  if (!secret) throw new Error("NEXTAUTH_SECRET is undefined. Aborting.");
+  const { option } = await inquirer.prompt({
+    type: "list",
+    choices: [
+      { value: 0, name: "Add Admin OAuth Email to Allow List" },
+      { value: 1, name: "Create Admin Credentials using Username/Password" },
+    ],
+    message: "Select an option",
+    name: "option",
+  });
 
-  const username = await askForUsername();
-  console.log("\n");
-  const hashedPassword = await askForPassword(secret);
-
-  try {
-    await prisma.adminCredential.create({
-      data: {
-        hashedPassword,
-        AdminUser: {
-          create: {
-            id: username,
-            displayName: username,
-          },
-        },
-      },
-    });
-  } catch (error) {
-    console.log(error);
-    throw new Error(
-      `Failed to add admin credentials for ${username} in the database. An adminCredential entry already exists for this username.`
-    );
+  if (option === 0) {
+    return;
   }
 
-  logger.info(
-    `Successfully added admin credentials for ${username} in the database.`
-  );
-  process.exit(0);
+  if (option === 1) {
+    const secret = process.env.NEXTAUTH_SECRET;
+    if (!secret)
+      throw new Error(
+        "NEXTAUTH_SECRET is undefined, and is required to for hashing your password. Please set this environment variable. Aborting."
+      );
+
+    const { username } = await inquirer.prompt({
+      type: "input",
+      name: "username",
+    });
+    await validateUsername(username);
+
+    const { password } = await inquirer.prompt({
+      type: "password",
+      name: "password",
+    });
+    const hashedPassword = hashPassword(password, secret);
+
+    try {
+      await prisma.adminCredential.create({
+        data: {
+          hashedPassword,
+          AdminUser: {
+            create: {
+              id: username,
+              displayName: username,
+            },
+          },
+        },
+      });
+      logger.info(
+        `Successfully added admin credentials for ${username} in the database.`
+      );
+    } catch (error) {
+      console.log(error);
+      throw new Error(
+        `Failed to add admin credentials for ${username} in the database. An adminCredential entry already exists for this username.`
+      );
+    }
+    return;
+  }
 }
-async function askForUsername() {
-  const username = await question("Username:\n> ");
+async function validateUsername(username: string) {
   if (!username) throw new Error("Username cannot be empty");
 
   const existingUser = await prisma.adminCredential.findFirst({
     where: { username },
   });
   if (existingUser) {
-    console.log("EXISTING");
     throw new Error(
       `Username ${username} already exists in the database. Aborting.`
     );
   }
   return username;
-}
-
-async function askForPassword(secret: string) {
-  const password = await question(
-    "Plain-Text Password (will be hashed automatically using your NextAuth secret):\n> "
-  );
-  if (!password) throw new Error("Password cannot be empty");
-  const hashedPassword = hashPassword(password, secret);
-  return hashedPassword;
 }
