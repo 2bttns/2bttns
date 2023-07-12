@@ -101,16 +101,16 @@ const SignInPage: NextPageWithLayout<SignInPageProps> = (props) => {
         if (result?.error) {
           throw new Error(result.error);
         }
-        let successDescription = `Logged in as: ${credentialsInput.username}`;
-        if (providerName !== "credentials") {
-          successDescription = `Signed in via ${providerName}`;
-        }
 
-        toast.update(statusToast, {
-          title: "Success 👋",
-          description: successDescription,
-          status: "success",
-        });
+        if (providerName === "credentials") {
+          // For now, not showing success toast for OAuth providers like GitHub because the signIn callback doesn't return a result with proper data to check if the sign in was successful.
+          const successDescription = `Logged in as: ${credentialsInput.username}`;
+          toast.update(statusToast, {
+            title: "Success 👋",
+            description: successDescription,
+            status: "success",
+          });
+        }
       } catch (e) {
         const errorTitle = `Sign in failed`;
         const errorDescription = `Username and/or password may be incorrect.`;
