@@ -1,0 +1,23 @@
+{
+    "metadata": [
+      {
+        "tagId": "1",
+        "tagName": "Game Object 1",
+        "tagDescription": "This is game object 1",
+        "customKey1": "Custom Value 1"
+      },
+      {
+        "tagId": "2",
+        "tagName": "Game Object 2",
+        "tagDescription": "This is game object 2",
+        "customKey1": "Custom Value 2"
+      },
+      {
+        "tagId": "3",
+        "tagName": "Game Object 3",
+        "tagDescription": "This is game object 3",
+        "customKey1": "Custom Value 3"
+      }
+    ]
+  }
+  

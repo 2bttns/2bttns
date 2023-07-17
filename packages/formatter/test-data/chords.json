@@ -1,0 +1,61 @@
+{
+    "chords": [
+      {
+        "name": "C Major",
+        "notes": ["C", "E", "G"]
+      },
+      {
+        "name": "C Minor",
+        "notes": ["C", "Eb", "G"]
+      },
+      {
+        "name": "D Major",
+        "notes": ["D", "F#", "A"]
+      },
+      {
+        "name": "D Minor",
+        "notes": ["D", "F", "A"]
+      },
+      {
+        "name": "E Major",
+        "notes": ["E", "G#", "B"]
+      },
+      {
+        "name": "E Minor",
+        "notes": ["E", "G", "B"]
+      },
+      {
+        "name": "F Major",
+        "notes": ["F", "A", "C"]
+      },
+      {
+        "name": "F Minor",
+        "notes": ["F", "Ab", "C"]
+      },
+      {
+        "name": "G Major",
+        "notes": ["G", "B", "D"]
+      },
+      {
+        "name": "G Minor",
+        "notes": ["G", "Bb", "D"]
+      },
+      {
+        "name": "A Major",
+        "notes": ["A", "C#", "E"]
+      },
+      {
+        "name": "A Minor",
+        "notes": ["A", "C", "E"]
+      },
+      {
+        "name": "B Major",
+        "notes": ["B", "D#", "F#"]
+      },
+      {
+        "name": "B Minor",
+        "notes": ["B", "D", "F#"]
+      }
+    ]
+  }
+  
