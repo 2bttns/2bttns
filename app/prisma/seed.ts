@@ -3,7 +3,7 @@ import fs from "fs";
 import path from "path";
 import { z } from "zod";
 import { defaultMode } from "../src/modes/availableModes";
-import { logger } from "../src/server/helpers/logger";
+import { logger } from "../src/utils/logger";
 const prisma = new PrismaClient();
 async function main() {
   // Seed initial admin allow list using adminAllowList.json
@@ -22,10 +22,15 @@ async function main() {
 
     const createAdmins = allowedAdmins.map((email) => {
       return new Promise<void>((resolve) => {
-        prisma.allowedAdmin
+        prisma.adminOAuthAllowList
           .create({
             data: {
-              email,
+              AdminUser: {
+                create: {
+                  id: email,
+                  displayName: email,
+                },
+              },
             },
           })
           .then((result) => {
@@ -33,7 +38,8 @@ async function main() {
               `[Admin Allow List] Admin email added: ${result.email}`
             );
           })
-          .catch(() => {
+          .catch((e) => {
+            console.log(e);
             logger.warn(
               `[Admin Allow List] Admin email already exists: ${email}; skipping.`
             );

@@ -15,8 +15,10 @@ import useSelectRows from "../../shared/components/Table/hooks/useSelectRows";
 import useSort from "../../shared/components/Table/hooks/useSort";
 
 const columnIds = {
-  EMAIL: "email",
-  UPDATED_AT: "updatedAt",
+  ID: "id",
+  DISPLAY_NAME: "displayName",
+  LAST_SEEN: "lastSeen",
+  CREATED_AT: "createdAt",
 };
 
 export type AdminData =
@@ -56,8 +58,8 @@ export default function AdministratorsTable(props: AdministratorsTableProps) {
     {
       skip: (currentPage! - 1) * perPage,
       take: perPage,
-      allowFuzzyEmailFilter: true,
-      emailFilter: globalFilter.debouncedInput,
+      allowFuzzyIdFilter: true,
+      idFilter: globalFilter.debouncedInput,
       sortField: sorting?.sortField,
       sortOrder: sorting?.order,
     },
@@ -70,8 +72,8 @@ export default function AdministratorsTable(props: AdministratorsTableProps) {
 
   const adminCountQuery = api.administrators.getCount.useQuery(
     {
-      allowFuzzyEmailFilter: true,
-      emailFilter: globalFilter.debouncedInput,
+      allowFuzzyIdFilter: true,
+      idFilter: globalFilter.debouncedInput,
     },
     {
       keepPreviousData: true,
@@ -82,11 +84,11 @@ export default function AdministratorsTable(props: AdministratorsTableProps) {
   const columns = useMemo<PaginatedTableProps<AdminData>["columns"]>(() => {
     return [
       {
-        name: "Email",
+        name: "ID",
         cell: (row) => (
           <CustomEditable
-            value={row.email}
-            placeholder="No Email"
+            value={row.id}
+            placeholder="<Missing ID>"
             handleSave={async (nextValue) => {
               // TODO: implement admin update handler
             }}
@@ -94,16 +96,47 @@ export default function AdministratorsTable(props: AdministratorsTableProps) {
           />
         ),
         sortable: true,
-        id: columnIds.EMAIL,
-        sortField: columnIds.EMAIL,
+        id: columnIds.ID,
+        sortField: columnIds.ID,
         minWidth: "256px",
       },
       {
-        name: "Last Updated",
-        cell: (row) => new Date(row.updatedAt).toLocaleString(),
+        name: "Display Name",
+        cell: (row) => (
+          <CustomEditable
+            value={row.displayName}
+            placeholder="--"
+            handleSave={async (nextValue) => {
+              // TODO: implement admin update handler
+            }}
+            isEditable={editable}
+          />
+        ),
         sortable: true,
-        id: columnIds.UPDATED_AT,
-        sortField: columnIds.UPDATED_AT,
+        id: columnIds.DISPLAY_NAME,
+        sortField: columnIds.DISPLAY_NAME,
+        minWidth: "256px",
+      },
+      {
+        name: "Last Seen",
+        cell: (row) => {
+          if (!row.lastSeen) return <span>--</span>;
+          return new Date(row.lastSeen).toLocaleString();
+        },
+        sortable: true,
+        id: columnIds.LAST_SEEN,
+        sortField: columnIds.LAST_SEEN,
+        minWidth: "256px",
+      },
+      {
+        name: "Created At",
+        cell: (row) => {
+          if (!row.createdAt) return <span>--</span>;
+          return new Date(row.createdAt).toLocaleString();
+        },
+        sortable: true,
+        id: columnIds.CREATED_AT,
+        sortField: columnIds.CREATED_AT,
         minWidth: "256px",
       },
     ];
@@ -137,7 +170,7 @@ export default function AdministratorsTable(props: AdministratorsTableProps) {
               columns={columns}
               data={data}
               fixedHeight={remainingHeight}
-              itemIdField="email"
+              itemIdField="id"
               loading={adminQuery.isLoading}
               onChangePage={handlePageChange}
               onChangeRowsPerPage={handlePerRowsChange}
@@ -146,7 +179,7 @@ export default function AdministratorsTable(props: AdministratorsTableProps) {
               selectedRows={selectedRows}
               totalRows={adminCountQuery.data?.count ?? 0}
               toggleCleared={toggleCleared}
-              defaultSortFieldId={columnIds.UPDATED_AT}
+              defaultSortFieldId={columnIds.LAST_SEEN}
               defaultSortAsc={false}
             />
           );

@@ -5,12 +5,12 @@ import { adminOrApiKeyProtectedProcedure } from "../../trpc";
 import { getAllWhereInput } from "./getAll";
 
 const input = z.object({
-  emailFilter: commaSeparatedStringToArray
-    .describe("Comma-separated emails to filter by")
+  idFilter: commaSeparatedStringToArray
+    .describe("Comma-separated ids to filter by")
     .optional(),
-  allowFuzzyEmailFilter: booleanEnum
+  allowFuzzyIdFilter: booleanEnum
     .describe(
-      "Set to `true` to enable fuzzy email filtering. If false, only returns exact matches."
+      "Set to `true` to enable fuzzy id filtering. If false, only returns exact matches."
     )
     .default(false),
 });
@@ -34,9 +34,9 @@ export const getCount = adminOrApiKeyProtectedProcedure
   .input(input)
   .output(output)
   .query(async ({ input, ctx }) => {
-    const { emailFilter, allowFuzzyEmailFilter } = input;
-    const where = getAllWhereInput(emailFilter, allowFuzzyEmailFilter);
-    const count = await ctx.prisma.allowedAdmin.count({
+    const { idFilter, allowFuzzyIdFilter } = input;
+    const where = getAllWhereInput({ idFilter, allowFuzzyIdFilter });
+    const count = await ctx.prisma.adminUser.count({
       where,
     });
     const processed: z.infer<typeof output> = {

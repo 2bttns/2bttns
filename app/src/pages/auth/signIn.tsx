@@ -1,11 +1,15 @@
 import {
   Box,
   Button,
+  ButtonGroup,
   Card,
   CardBody,
   Divider,
   Input,
+  InputGroup,
+  InputLeftAddon,
   Stack,
+  useToast,
 } from "@chakra-ui/react";
 import { GetServerSideProps } from "next";
 import { BuiltInProviderType } from "next-auth/providers";
@@ -16,9 +20,13 @@ import {
   getSession,
   LiteralUnion,
   signIn,
+  SignInResponse,
 } from "next-auth/react";
 import Image from "next/image";
-import { FaGithub } from "react-icons/fa";
+import { useRouter } from "next/router";
+import { useCallback, useMemo, useState } from "react";
+import { FaGithub, FaKey, FaUser } from "react-icons/fa";
+import wait from "../../utils/wait";
 import { NextPageWithLayout } from "../_app";
 
 export type SignInPageProps = {
@@ -53,6 +61,73 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 
 const SignInPage: NextPageWithLayout<SignInPageProps> = (props) => {
   const { providers, csrfToken } = props;
+
+  const router = useRouter();
+  const toast = useToast();
+
+  const filteredProviders = useMemo(() => {
+    if (!providers) return null;
+
+    // Exclude the credentials provider, since we're using a custom form for it.
+    return Object.values(providers).filter((p) => p.id !== "credentials");
+  }, [providers]);
+
+  const [credentialsInput, setCredentialsInput] = useState({
+    username: "",
+    password: "",
+  });
+
+  const [credentialsInputStep, setCredentialsInputStep] = useState<
+    "username" | "password"
+  >("username");
+
+  const [isLoggingIn, setLoggingIn] = useState(false);
+
+  const handleSignIn = useCallback(
+    async (
+      signInMethod: () => Promise<SignInResponse | undefined>,
+      providerName: string | "credentials" = "credentials"
+    ) => {
+      setLoggingIn(true);
+      toast.closeAll();
+      const statusToast = toast({
+        title: "Signing in...",
+        status: "loading",
+      });
+      try {
+        await wait(0.25);
+        const result = await signInMethod();
+        await router.push("/");
+        if (result?.error) {
+          throw new Error(result.error);
+        }
+
+        if (providerName === "credentials") {
+          // For now, not showing success toast for OAuth providers like GitHub because the signIn callback doesn't return a result with proper data to check if the sign in was successful.
+          const successDescription = `Logged in as: ${credentialsInput.username}`;
+          toast.update(statusToast, {
+            title: "Success 👋",
+            description: successDescription,
+            status: "success",
+          });
+        }
+      } catch (e) {
+        const errorTitle = `Sign in failed`;
+        const errorDescription = `Username and/or password may be incorrect.`;
+        toast.update(statusToast, {
+          title: errorTitle,
+          description: errorDescription,
+          status: "error",
+        });
+
+        console.error(`${errorTitle}: ${errorDescription}`);
+        console.error(e);
+        setLoggingIn(false);
+      }
+    },
+    [credentialsInput.username, router, toast]
+  );
+
   return (
     <Box width="100vw" height="100vh" overflow="hidden" bgColor="blue.900">
       <Stack
@@ -78,23 +153,128 @@ const SignInPage: NextPageWithLayout<SignInPageProps> = (props) => {
                 style={{ margin: "0 auto", userSelect: "none" }}
               />
               <Input name="csrfToken" type="hidden" defaultValue={csrfToken} />
-              <Input
-                placeholder="Email (Not Setup - Please Use Github)"
+              <InputGroup
                 fontSize="12px"
-                padding="8px"
-                bgColor="gray.100"
-                border="1px solid black"
-                isDisabled
-              />
-              <Button width="100%" mt="1rem" isDisabled>
-                Sign In
-              </Button>
-              <Divider my="1rem" borderColor="whiteAlpha.700" />
-              {providers &&
-                Object.values(providers).map((provider) => (
+                padding="0"
+                transition="none !important"
+              >
+                <InputLeftAddon
+                  bgColor={isLoggingIn ? "blackAlpha.200" : "gray.200"}
+                  border="none"
+                  transition="none !important"
+                >
+                  {credentialsInputStep === "username" ? (
+                    <FaUser />
+                  ) : (
+                    <FaKey color={isLoggingIn ? "#79746A" : "inherit"} />
+                  )}
+                </InputLeftAddon>
+
+                <Input
+                  bgColor="gray.100"
+                  type={
+                    credentialsInputStep === "username" ? "text" : "password"
+                  }
+                  placeholder={
+                    credentialsInputStep === "username"
+                      ? "Enter Admin Username"
+                      : "Enter Password"
+                  }
+                  value={
+                    credentialsInputStep === "username"
+                      ? credentialsInput.username
+                      : credentialsInput.password
+                  }
+                  onChange={(e) => {
+                    if (credentialsInputStep === "username") {
+                      setCredentialsInput({
+                        ...credentialsInput,
+                        username: e.target.value,
+                      });
+                    } else {
+                      setCredentialsInput({
+                        ...credentialsInput,
+                        password: e.target.value,
+                      });
+                    }
+                  }}
+                  isDisabled={isLoggingIn}
+                  transition="none !important"
+                />
+              </InputGroup>
+              <ButtonGroup width="100%" mt="1rem">
+                {credentialsInputStep === "password" && (
+                  <Button
+                    onClick={() => {
+                      if (credentialsInputStep === "password") {
+                        setCredentialsInput({
+                          ...credentialsInput,
+                          password: "",
+                        });
+                        setCredentialsInputStep("username");
+                      }
+                    }}
+                    flex={1}
+                    isDisabled={isLoggingIn}
+                    transition="none !important"
+                  >
+                    Back
+                  </Button>
+                )}
+                <Button
+                  onClick={async () => {
+                    if (credentialsInputStep === "username") {
+                      setCredentialsInputStep("password");
+                      return;
+                    }
+
+                    if (credentialsInputStep === "password") {
+                      await handleSignIn(
+                        () =>
+                          new Promise(async (res, rej) => {
+                            const result = await signIn("credentials", {
+                              username: credentialsInput.username,
+                              password: credentialsInput.password,
+                              redirect: false,
+                            });
+                            if (!result) return rej();
+                            if (result?.error) return rej(result.error);
+                            res(result);
+                          }),
+                        "credentials"
+                      );
+                    }
+                  }}
+                  flex={1}
+                  transition="none !important"
+                  isDisabled={
+                    (credentialsInputStep === "username"
+                      ? credentialsInput.username === ""
+                      : credentialsInput.password === "") || isLoggingIn
+                  }
+                >
+                  {credentialsInputStep === "username" ? "Next" : "Sign In"}
+                </Button>
+              </ButtonGroup>
+              {filteredProviders && filteredProviders.length > 0 && (
+                <Divider my="1rem" borderColor="whiteAlpha.700" />
+              )}
+              {filteredProviders &&
+                filteredProviders.map((provider) => (
                   <div key={provider.name} style={{ marginBottom: 0 }}>
                     <Button
-                      onClick={() => signIn(provider.id)}
+                      onClick={async () => {
+                        await handleSignIn(
+                          () =>
+                            new Promise(async (res, rej) => {
+                              const result = await signIn(provider.id, {
+                                redirect: false,
+                              });
+                              res(result);
+                            }),
+                          provider.name
+                        );
+                      }}
                       width="100%"
                       bgColor="black"
                       color="white"
@@ -103,6 +283,7 @@ const SignInPage: NextPageWithLayout<SignInPageProps> = (props) => {
                         color: "white",
                       }}
                       rightIcon={getProviderIcon(provider.id) ?? undefined}
+                      isDisabled={isLoggingIn}
                     >
                       Sign in with {provider.name}
                     </Button>

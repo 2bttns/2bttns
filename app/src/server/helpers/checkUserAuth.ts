@@ -1,9 +1,10 @@
 import { TRPCError } from "@trpc/server";
 import jwt from "jsonwebtoken";
 import { z } from "zod";
+import { logger } from "../../utils/logger";
 import { CreateContextOptions } from "../api/trpc";
+import { prisma } from "../db";
 import isAdmin from "../shared/isAdmin";
-import { logger } from "./logger";
 
 const jwtBaseSchema = z.object({
   sub: z.string().optional(),
@@ -102,11 +103,10 @@ export async function checkUserAuth(
     // Even if they have a session, ensure their access is still valid via the admin allow list database table
     // For example, the admin user may have been deleted from the allow list while they were still logged in
     if (
-      !ctx.session?.user?.email ||
+      !ctx.session ||
       !(await isAdmin({
-        email: ctx.session.user.email,
+        email: ctx.session.user.email ?? undefined,
         userId: ctx.session.user.id,
-        clearSessionsIfNotFound: true,
       }))
     ) {
       logger.silly("checkUserAuth - end (UNAUTHORIZED)");
@@ -117,6 +117,22 @@ export async function checkUserAuth(
     }
 
     logger.silly("checkUserAuth - end (admin session found)");
+    try {
+      await prisma.adminUser.update({
+        where: {
+          id: ctx.session.user.id,
+        },
+        data: {
+          lastSeen: new Date(),
+        },
+      });
+    } catch (e) {
+      logger.error("checkUserAuth - error updating lastSeen");
+      if (e instanceof Error) {
+        logger.error(e.message);
+      }
+    }
+
     return { type: "admin_session" };
   }
 

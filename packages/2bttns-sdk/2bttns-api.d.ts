@@ -1065,12 +1065,12 @@ export interface operations {
       query?: {
         take?: unknown;
         skip?: unknown;
-        /** @description Comma-separated emails to filter by */
-        emailFilter?: unknown;
-        /** @description Set to `true` to enable fuzzy email filtering. If false, only returns exact matches. */
-        allowFuzzyEmailFilter?: boolean;
+        /** @description Comma-separated ids to filter by */
+        idFilter?: unknown;
+        /** @description Set to `true` to enable fuzzy id filtering. If false, only returns exact matches. */
+        allowFuzzyIdFilter?: boolean;
         /** @description Field to sort by */
-        sortField?: "email" | "updatedAt" | "createdAt";
+        sortField?: "id" | "displayName" | "updatedAt" | "createdAt" | "lastSeen";
         /** @description Sort order for the selected field */
         sortOrder?: "asc" | "desc";
       };
@@ -1081,11 +1081,14 @@ export interface operations {
         content: {
           "application/json": {
             administrators: ({
-                email: string;
+                id: string;
+                displayName?: string;
                 /** @description ISO date string */
                 createdAt: string;
                 /** @description ISO date string */
                 updatedAt: string;
+                /** @description ISO date string */
+                lastSeen?: string;
               })[];
           };
         };
@@ -1100,10 +1103,10 @@ export interface operations {
   "query.administrators.getCount": {
     parameters: {
       query?: {
-        /** @description Comma-separated emails to filter by */
-        emailFilter?: unknown;
-        /** @description Set to `true` to enable fuzzy email filtering. If false, only returns exact matches. */
-        allowFuzzyEmailFilter?: boolean;
+        /** @description Comma-separated ids to filter by */
+        idFilter?: unknown;
+        /** @description Set to `true` to enable fuzzy id filtering. If false, only returns exact matches. */
+        allowFuzzyIdFilter?: boolean;
       };
     };
     responses: {

@@ -1,9 +1,8 @@
 import winston from "winston";
-import { env } from "../../env/server.mjs";
 
 const logLevel =
-  (env.SERVER_LOG_LEVEL as keyof (typeof config)["levels"]) ?? "info";
-const locale = env.SERVER_LOG_LOCALE ?? "en-US";
+  (process.env.SERVER_LOG_LEVEL as keyof (typeof config)["levels"]) ?? "info";
+const locale = process.env.SERVER_LOG_LOCALE ?? "en-US";
 
 const config = {
   levels: {

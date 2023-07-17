@@ -24,7 +24,9 @@
     "docker:stop": "docker-compose stop",
     "docker:rm:test-db": "docker-compose rm -svf test-db",
     "docker:rm:dev-db": "docker-compose rm -svf dev-db",
-    "gen:theme-typings": "chakra-cli tokens src/style/theme/typings-only.ts"
+    "gen:theme-typings": "chakra-cli tokens src/style/theme/typings-only.ts",
+    "create-admin:dev": "dotenv -e .env -- ts-node --transpile-only prisma/createAdmin.ts",
+    "create-admin:prod": "dotenv -e .env.production -- ts-node prisma/createAdmin.ts"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
@@ -73,6 +75,7 @@
   "devDependencies": {
     "@chakra-ui/cli": "^2.4.1",
     "@types/color-hash": "^1.0.2",
+    "@types/inquirer": "^8.2.6",
     "@types/jsonwebtoken": "^9.0.1",
     "@types/next": "^9.0.0",
     "@types/node": "^18.11.18",
@@ -86,6 +89,7 @@
     "dotenv-cli": "^7.2.1",
     "eslint": "^8.30.0",
     "eslint-config-next": "13.1.6",
+    "inquirer": "^8.2.5",
     "jsdom": "^21.1.1",
     "prisma": "^4.9.0",
     "ts-node": "^10.9.1",

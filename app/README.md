@@ -30,6 +30,13 @@ $ npm run init-db:dev
 ```
 
 ```bash
+# Create an admin account before
+# using the 2bttns Console.
+#
+$ npm run create-admin:dev
+```
+
+```bash
  # Start the app
 $ npm run dev
 ```
@@ -70,11 +77,21 @@ If you plan to deploy the admin app to a production server via CI/CD or via serv
 
 Any reference to "Users" in the 2bttns admin app refers to dmin users logged in via GitHub OAuth. Admin users manage the 2bttns dashboard, managing various aspects of the app, such as games, gameobjects, and 2bttns API secret keys.
 
-Customers who are sent to 2bttns to play games are referred to as "Players".
+Consumers who are sent to 2bttns to play games are referred to as "Players".
 
-### GitHub OAuth
+### Credentials Login
 
-2bttns uses GitHub OAuth through NextAuth to authenticate 2bttns admin users.
+You can create admin users that can log in to the admin app with credentials (email and password) by running the `npm run create-admin:dev` command.
+
+Select the "Create Admin Credentials using Username/Password" prompt and enter the email and password you want the new admin user to use when logging in to the 2bttns admin console.
+
+Using these credentials, you can log in to the admin app at `/auth/signIn`. If you aren't logged in, you will be redirected to the login page automatically.
+
+In production, you can run the `npm run create-admin:prod` command. Be sure your `.env.production` environment variables are configured correctly.
+
+### GitHub OAuth (Optional)
+
+2bttns supports GitHub OAuth through NextAuth out of the box.
 
 To set up GitHub OAuth, set the following credentials in your `.env` file:
 
@@ -91,13 +108,17 @@ You can get these credentials by creating a new OAuth app via...
 
 For local development, when configuring the OAuth app, set the homepage URL to `http://localhost:3001` and set the callback url to `http://localhost:3001/api/auth/callback/github` (or use a custom port you've configured).
 
+If you do not set the `GITHUB_ID` and `GITHUB_SECRET` environment variables, the GitHub OAuth provider will not be enabled and will not appear on the login page.
+
 ### Admin Allow List
 
-Users who are not in the 2bttns-managed `AllowedAdmin` database table and attempt to log in to the admin panel will be denied access.
+OAuth admins who are not in the 2bttns-managed `AdminOAuthAllowList` database table and attempt to log in to the admin panel will be denied access.
 
-### Initial Admin Users
+You can add admin emails to the allow list in the following ways:
 
-The 2bttns app uses an `adminAllowList.json` file to populate the `AllowedAdmin` table with a list of emails associated with GitHub accounts allowed to log in to the admin app.
+#### 1. adminAllowLIst.json
+
+The 2bttns app uses an `adminAllowList.json` file to populate the `AdminOAuthAllowList` table with a list of emails associated with GitHub accounts allowed to log in to the admin app.
 
 To configure the initial admin allow list...
 
@@ -105,21 +126,23 @@ To configure the initial admin allow list...
 
 2. Add the emails associated with the GitHub accounts you want to grant access to.
 
-Now, whenever you seed the database (e.g. `npm run db-seed:dev`), the `AllowedAdmin` table will be updated with the emails in the `adminAllowList.json` file.
+Now, whenever you seed the database (e.g. `npm run db-seed:dev`), the `AdminOAuthAllowList` table will be updated with the emails in the `adminAllowList.json` file.
 
-### Adding Admin Users
+#### 2. `npm run create-admin:dev`
 
-Once you have the initial admin users set up, you can add more admin users in the following ways:
+Similar to how you can create admins with username-password credentials, you can add admins to the `AdminOAuthAllowList` table by running the `npm run create-admin:dev` command.
 
-#### via Prisma Studio or a Database Client
+Select the "Add Admin OAuth Email to Allow List" prompt and enter the email associated with the GitHub account you want to grant access to.Ø
 
-You can manually add allowed admin emails to the `AllowedAdmin` table via the Prisma Studio UI (`npx prisma studio`) or manually through another database client of your choice.
+#### 3. via Prisma Studio or a Database Client
 
-### via the 2bttns Admin Panel
+You can manually add allowed admin emails to the `AdminOAuthAllowList` table via the Prisma Studio UI (`npx prisma studio`) or manually through another database client of your choice.
 
-@TODO
+### 4. via the 2bttns Admin Panel
 
-When logged in as an admin user, you can add more admin users via the 2bttns Admin Panel at the `Settings > Admin Users` page.
+@TODO - this feature is not yet implemented.
+
+<!-- When logged in as an admin user, you can add more admin users via the 2bttns Admin Panel at the `Settings > Admin Users` page. -->
 
 ### Next Auth Secret
 

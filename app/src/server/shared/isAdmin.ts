@@ -1,26 +1,49 @@
+import { logger } from "../../utils/logger";
 import { prisma } from "../db";
-import { logger } from "../helpers/logger";
 
+/**
+ * Returns whether the user is an admin or not.
+ *
+ * @param params.userId - ID of the user to check. This is the email if signing in via OAuth, or the username if signing in via credentials.
+ * @param params.email - Email of the user to check. This is only used if signing in via OAuth.
+ */
 export default async function isAdmin(params: {
-  email: string;
   userId: string;
-  clearSessionsIfNotFound?: boolean;
+  email?: string;
 }) {
-  const { email, userId, clearSessionsIfNotFound = false } = params;
-  const allowedAdmins = await prisma.allowedAdmin.findMany();
-  const isAllowed = allowedAdmins.some((admin) => admin.email === email);
+  const { email, userId } = params;
 
-  if (!isAllowed && clearSessionsIfNotFound) {
+  const usingCredentials =
+    !email &&
+    (await prisma.adminCredential.findFirst({
+      where: { username: userId },
+      select: { username: true },
+    }));
+
+  if (usingCredentials) {
     logger.info(
-      `[isAdmin] [clearSessionsIfNotFound=true] Clearing sessions for user with email: ${email} and id: ${userId}. \n\nThis indicates the user was removed from the admin list while they had an active session.`
+      `[isAdmin] [usingCredentials=true] Found matching username admin credentials for user with userId: ${userId}. isAdmin will return true.`
     );
-    // Clear the user's session, because they are no longer an admin
-    await prisma.session.deleteMany({
-      where: {
-        userId,
-      },
-    });
+    return true;
   }
 
-  return isAllowed;
+  if (!email) {
+    logger.error(
+      `[isAdmin] [email=undefined] User with userId: "${userId}" is not using credentials to sign in. Email is undefined. isAdmin will return false.`
+    );
+    return false;
+  }
+
+  const allowedOAuthAdmins = await prisma.adminOAuthAllowList.findMany();
+  const isOAuthAdminAllowed = allowedOAuthAdmins.some(
+    (admin) => admin.email === email
+  );
+
+  if (isOAuthAdminAllowed) {
+    logger.info(
+      `[isAdmin] [isOAuthAdminAllowed=true] User with email: "${email}" and userId: "${userId}" was found in the admin allow list. isAdmin will return true.`
+    );
+  }
+
+  return isOAuthAdminAllowed;
 }

@@ -25,7 +25,7 @@ import { AvailableModes } from "../modes/availableModes";
 import { getModeUI } from "../modes/modesUIRegistry";
 import { ModeUIProps } from "../modes/types";
 import { prisma } from "../server/db";
-import { logger } from "../server/helpers/logger";
+import { logger } from "../utils/logger";
 import { api, setPlayerToken } from "../utils/api";
 import { NextPageWithLayout } from "./_app";
 
