@@ -30,6 +30,13 @@ $ npm run init-db:dev
 ```
 
 ```bash
+# Create an admin account before
+# using the 2bttns Console.
+#
+$ npm run create-admin:dev
+```
+
+```bash
  # Start the app
 $ npm run dev
 ```
