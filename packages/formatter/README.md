@@ -7,6 +7,28 @@ This script converts JSON data into a format readable by the 2bttns Console.
    npx @2bttns/formatter
    ```
 
+   ```
+    📁 Enter the path of the input JSON file: 
+    test-data/genres.json
+    🔍 Enter the path in JSON (e.g., parent.child.data) where the data to be converted is located: 
+    genres
+    ⭐️ Which key in your JSON corresponds to "id" with value type "string"?
+    👉 Enter "none" if none exists.
+    id
+    ⭐️ Which key in your JSON corresponds to "name" with value type "string"?
+    👉 Enter "none" if none exists.
+    name
+    ⭐️ Which key in your JSON corresponds to "description" with value type "string"?
+    👉 Enter "none" if none exists.
+    none
+    ⭐️ Which key in your JSON corresponds to "tagIds" with value type "object"?
+    👉 Enter "none" if none exists.
+    none
+    📁 Enter the path where you want to save the output JSON file: 
+    /Users/user/Downloads/genres_output.json
+    ✅ Output JSON file saved successfully! ✅
+   ```
+
 
 ## Table of Contents
 1. [Data Model](#game-objects-model)
