@@ -1,5 +1,5 @@
 # Game Object Formatter
-This script converts JSON data into a format readable by the 2bttns Console.
+Convert JSON data into a format readable by the 2bttns Console.
 
 ## Usage 
 
