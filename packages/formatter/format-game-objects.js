@@ -50,6 +50,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 Object.defineProperty(exports, "__esModule", { value: true });
 var readline = require("readline");
 var fs = require("fs");
+var path = require("path");
 var cuid = require("cuid");
 var outputShape = {
     gameObjects: [
@@ -130,7 +131,7 @@ function convertJSON(input, path, mappings) {
 // Function to start the conversion process
 function startConversion() {
     return __awaiter(this, void 0, void 0, function () {
-        var inputPath, inputData, inputJSON, jsonPath, mappings, fields, _i, fields_1, field, fieldType, promptMessage, key, convertedJSON, outputData, outputPath, error_1;
+        var inputPath, inputData, inputJSON, jsonPath, mappings, fields, _i, fields_1, field, fieldType, promptMessage, key, convertedJSON, outputData, outputPath, fullOutputPath, error_1;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
@@ -163,11 +164,12 @@ function startConversion() {
                 case 6:
                     convertedJSON = convertJSON(inputJSON, jsonPath, mappings);
                     outputData = JSON.stringify(convertedJSON, null, 2);
-                    return [4 /*yield*/, prompt('📁 Enter the path where you want to save the output JSON file: ')];
+                    return [4 /*yield*/, prompt('📁 Enter the path where you want to save the output JSON file (e.g., /your/path/name/): ')];
                 case 7:
                     outputPath = _a.sent();
+                    fullOutputPath = path.join(outputPath, 'ready-for-upload.json');
                     // Write the output JSON file
-                    fs.writeFileSync(outputPath, outputData, 'utf-8');
+                    fs.writeFileSync(fullOutputPath, outputData, 'utf-8');
                     console.log('✅ Output JSON file saved successfully! ✅');
                     rl.close();
                     return [3 /*break*/, 9];

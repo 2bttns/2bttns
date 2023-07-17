@@ -135,10 +135,13 @@ async function startConversion() {
     const outputData = JSON.stringify(convertedJSON, null, 2);
 
     // Ask for the output path
-    const outputPath = await prompt('📁 Enter the path where you want to save the output JSON file (/your/path/filename.json): ');
+    const outputPath = await prompt('📁 Enter the path where you want to save the output JSON file (e.g., /your/path/name/): ');
+
+    // Concatenate the output path with the output file name
+    const fullOutputPath = path.join(outputPath, 'ready-for-upload.json');
 
     // Write the output JSON file
-    fs.writeFileSync(outputPath, outputData, 'utf-8');
+    fs.writeFileSync(fullOutputPath, outputData, 'utf-8');
     console.log('✅ Output JSON file saved successfully! ✅');
 
     rl.close();
