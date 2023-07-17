@@ -12,7 +12,7 @@
     "game-objects-converter": "./format-game-objects.js"
   },
   "author": "2bttns Company",
-  "license": "ISC",
+  "license": "MIT",
   "dependencies": {
     "@types/node": "^20.3.2",
     "cuid": "^3.0.0",
