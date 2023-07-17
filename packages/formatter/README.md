@@ -25,7 +25,7 @@ This script converts JSON data into a format readable by the 2bttns Console.
     👉 Enter "none" if none exists.
     none
     📁 Enter the path where you want to save the output JSON file: 
-    /Users/user/Downloads/genres_output.json
+    /Users/user/Downloads/
     ✅ Output JSON file saved successfully! ✅
    ```
 
