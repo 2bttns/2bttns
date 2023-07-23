@@ -1,0 +1,185 @@
+{
+  "gameObjects": [
+    {
+      "id": "clkew6kai00000x6mh8j4exli",
+      "name": "parasailing",
+      "description": "",
+      "tagIds": []
+    },
+    {
+      "id": "clkew6kaj00010x6m264eceev",
+      "name": "rock climbing in a gym",
+      "description": "",
+      "tagIds": []
+    },
+    {
+      "id": "clkew6kaj00020x6m5tukbvjm",
+      "name": "river rafting",
+      "description": "",
+      "tagIds": []
+    },
+    {
+      "id": "clkew6kaj00030x6m1c3jbgn9",
+      "name": "backcountry skiing",
+      "description": "",
+      "tagIds": []
+    },
+    {
+      "id": "clkew6kaj00040x6mbhon9jzn",
+      "name": "cycling tour",
+      "description": "",
+      "tagIds": []
+    },
+    {
+      "id": "clkew6kaj00050x6mb5xc6hr8",
+      "name": "mountain boarding",
+      "description": "",
+      "tagIds": []
+    },
+    {
+      "id": "clkew6kaj00060x6m27q90wwh",
+      "name": "horseback riding",
+      "description": "",
+      "tagIds": []
+    },
+    {
+      "id": "clkew6kaj00070x6m6oi7bytw",
+      "name": "sailing regatta",
+      "description": "",
+      "tagIds": []
+    },
+    {
+      "id": "clkew6kaj00080x6mcfdnbhvd",
+      "name": "kite landboarding",
+      "description": "",
+      "tagIds": []
+    },
+    {
+      "id": "clkew6kaj00090x6m90273n15",
+      "name": "zip-lining",
+      "description": "",
+      "tagIds": []
+    },
+    {
+      "id": "clkew6kaj000a0x6mgrfv2u3e",
+      "name": "outdoor concert",
+      "description": "",
+      "tagIds": []
+    },
+    {
+      "id": "clkew6kaj000b0x6ma93kahen",
+      "name": "surf fishing",
+      "description": "",
+      "tagIds": []
+    },
+    {
+      "id": "clkew6kaj000c0x6m7b5ahppm",
+      "name": "mountain trail biking",
+      "description": "",
+      "tagIds": []
+    },
+    {
+      "id": "clkew6kaj000d0x6mfqvhcues",
+      "name": "canopy tour",
+      "description": "",
+      "tagIds": []
+    },
+    {
+      "id": "clkew6kaj000e0x6m4tfo8p0p",
+      "name": "whitewater kayaking",
+      "description": "",
+      "tagIds": []
+    },
+    {
+      "id": "clkew6kaj000f0x6m15uyfp74",
+      "name": "wildlife safari",
+      "description": "",
+      "tagIds": []
+    },
+    {
+      "id": "clkew6kaj000g0x6m8zk5dleo",
+      "name": "geocaching adventure",
+      "description": "",
+      "tagIds": []
+    },
+    {
+      "id": "clkew6kaj000h0x6mckv52dzw",
+      "name": "parkour training",
+      "description": "",
+      "tagIds": []
+    },
+    {
+      "id": "clkew6kaj000i0x6m7z7keoso",
+      "name": "outdoor archery",
+      "description": "",
+      "tagIds": []
+    },
+    {
+      "id": "clkew6kaj000j0x6m8dli7a7k",
+      "name": "cliff jumping",
+      "description": "",
+      "tagIds": []
+    },
+    {
+      "id": "clkew6kaj000k0x6m0ii32m2n",
+      "name": "coasteering",
+      "description": "",
+      "tagIds": []
+    },
+    {
+      "id": "clkew6kaj000l0x6m6a962239",
+      "name": "sunset paddleboarding",
+      "description": "",
+      "tagIds": []
+    },
+    {
+      "id": "clkew6kaj000m0x6mgap82vwo",
+      "name": "outdoor boot camp",
+      "description": "",
+      "tagIds": []
+    },
+    {
+      "id": "clkew6kaj000n0x6mdgnb8evn",
+      "name": "sandboarding",
+      "description": "",
+      "tagIds": []
+    },
+    {
+      "id": "clkew6kaj000o0x6m9jomc0xz",
+      "name": "kayak surfing",
+      "description": "",
+      "tagIds": []
+    },
+    {
+      "id": "clkew6kaj000p0x6m6fgs76bp",
+      "name": "rock scrambling",
+      "description": "",
+      "tagIds": []
+    },
+    {
+      "id": "clkew6kaj000q0x6m0b4170s0",
+      "name": "bungee jumping",
+      "description": "",
+      "tagIds": []
+    },
+    {
+      "id": "clkew6kaj000r0x6m8tin23a1",
+      "name": "cultural walking tour",
+      "description": "",
+      "tagIds": []
+    },
+    {
+      "id": "clkew6kaj000s0x6mhmpmd8jv",
+      "name": "river tubing",
+      "description": "",
+      "tagIds": []
+    }
+  ],
+  "tags": [
+    {
+      "id": "",
+      "name": "",
+      "description": ""
+    }
+  ]
+}
