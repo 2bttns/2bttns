@@ -49,6 +49,8 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 var fs = require('fs');
 var path = require('path');
 var cuid = require('cuid');
+var _a = require('enquirer'), AutoComplete = _a.AutoComplete, Input = _a.Input, Select = _a.Select;
+var glob = require('glob');
 /**
  * @typedef {Object} GameObject
  * @property {string} id
@@ -85,6 +87,10 @@ var outputShape = {
         }
     ]
 };
+// Function to get first level keys in JSON object
+function getFirstLevelKeys(obj) {
+    return Object.keys(obj);
+}
 // Function to get nested JSON by path
 function getNestedJSON(input, path) {
     var pathParts = path.split('.');
@@ -140,28 +146,29 @@ function convertJSON(input, path, mappings) {
 // Function to start the conversion process
 function startConversion() {
     return __awaiter(this, void 0, void 0, function () {
-        var inquirer, inputPath, inputData, inputJSON, jsonPath, mappings, fields, _i, fields_1, field, fieldType, promptMessage, key, convertedJSON, outputData, outputPath, fullOutputPath, error_1;
+        var inputPathPrompt, inputPath, inputData, inputJSON, keys, jsonPathPrompt, jsonPath, mappings, fields, _i, fields_1, field, fieldType, promptMessage, keyPrompt, key, convertedJSON, outputData, outputPathPrompt, outputPath, fullOutputPath, error_1;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
                     _a.trys.push([0, 8, , 9]);
-                    inquirer = require('inquirer');
-                    return [4 /*yield*/, inquirer.prompt({
-                            type: 'input',
-                            name: 'inputPath',
-                            message: '📁 Enter the path of the input JSON file: ',
-                        })];
+                    inputPathPrompt = new Input({
+                        name: 'inputPath',
+                        message: '📁 Enter the path of the input JSON file: ',
+                    });
+                    return [4 /*yield*/, inputPathPrompt.run()];
                 case 1:
-                    inputPath = (_a.sent()).inputPath;
+                    inputPath = _a.sent();
                     inputData = fs.readFileSync(inputPath, 'utf-8');
                     inputJSON = JSON.parse(inputData);
-                    return [4 /*yield*/, inquirer.prompt({
-                            type: 'input',
-                            name: 'jsonPath',
-                            message: '🔍 Enter the path in JSON (e.g., parent.child.data) where the data to be converted is located: ',
-                        })];
+                    keys = getFirstLevelKeys(inputJSON);
+                    jsonPathPrompt = new Select({
+                        name: 'jsonPath',
+                        message: '🔍 Select the path in JSON where the data to be converted is located: ',
+                        choices: keys,
+                    });
+                    return [4 /*yield*/, jsonPathPrompt.run()];
                 case 2:
-                    jsonPath = (_a.sent()).jsonPath;
+                    jsonPath = _a.sent();
                     mappings = {};
                     fields = Object.keys(outputShape.gameObjects[0]);
                     _i = 0, fields_1 = fields;
@@ -171,13 +178,13 @@ function startConversion() {
                     field = fields_1[_i];
                     fieldType = typeof outputShape.gameObjects[0][field];
                     promptMessage = "\u2B50\uFE0F Which key in your JSON corresponds to \"".concat(field, "\" with value type \"").concat(fieldType, "\"?") + '\n' + " \uD83D\uDC49 Enter \"none\" if none exists.";
-                    return [4 /*yield*/, inquirer.prompt({
-                            type: 'input',
-                            name: 'key',
-                            message: promptMessage,
-                        })];
+                    keyPrompt = new Input({
+                        name: 'key',
+                        message: promptMessage,
+                    });
+                    return [4 /*yield*/, keyPrompt.run()];
                 case 4:
-                    key = (_a.sent()).key;
+                    key = _a.sent();
                     mappings[field] = key === 'none' ? undefined : key;
                     _a.label = 5;
                 case 5:
@@ -186,13 +193,13 @@ function startConversion() {
                 case 6:
                     convertedJSON = convertJSON(inputJSON, jsonPath, mappings);
                     outputData = JSON.stringify(convertedJSON, null, 2);
-                    return [4 /*yield*/, inquirer.prompt({
-                            type: 'input',
-                            name: 'outputPath',
-                            message: '📁 Enter the path where you want to save the output JSON file (e.g., /your/path/name/): ',
-                        })];
+                    outputPathPrompt = new Input({
+                        name: 'outputPath',
+                        message: '📁 Enter the path where you want to save the output JSON file (e.g., /your/path/name/): ',
+                    });
+                    return [4 /*yield*/, outputPathPrompt.run()];
                 case 7:
-                    outputPath = (_a.sent()).outputPath;
+                    outputPath = _a.sent();
                     fullOutputPath = path.join(outputPath, 'ready-for-upload.json');
                     // Write the output JSON file
                     fs.writeFileSync(fullOutputPath, outputData, 'utf-8');

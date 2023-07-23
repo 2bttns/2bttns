@@ -3,6 +3,8 @@
 const fs = require('fs');
 const path = require('path');
 const cuid = require('cuid');
+const { AutoComplete, Input, Select } = require('enquirer');
+const glob = require('glob');
 
 /**
  * @typedef {Object} GameObject
@@ -44,6 +46,11 @@ const outputShape = {
   ]
 };
 
+// Function to get first level keys in JSON object
+function getFirstLevelKeys(obj) {
+  return Object.keys(obj);
+}
+
 // Function to get nested JSON by path
 function getNestedJSON(input, path) {
   const pathParts = path.split('.');
@@ -63,7 +70,6 @@ function getNestedJSON(input, path) {
  * @param {Record<string, string | undefined>} mappings
  * @returns {OutputShape}
  */
-
 function convertJSON(input, path, mappings) {
   const output = { ...outputShape };
 
@@ -103,25 +109,29 @@ function convertJSON(input, path, mappings) {
 // Function to start the conversion process
 async function startConversion() {
   try {
-    const inquirer = require('inquirer');
-
     // Ask for the path of the input JSON file
-    const { inputPath } = await inquirer.prompt({
-      type: 'input',
+    const inputPathPrompt = new Input({
       name: 'inputPath',
       message: '📁 Enter the path of the input JSON file: ',
     });
+
+    const inputPath = await inputPathPrompt.run();
 
     // Read the input JSON file
     const inputData = fs.readFileSync(inputPath, 'utf-8');
     const inputJSON = JSON.parse(inputData);
 
+    // Get first level keys in JSON
+    const keys = getFirstLevelKeys(inputJSON);
+
     // Ask for the path in JSON
-    const { jsonPath } = await inquirer.prompt({
-      type: 'input',
+    const jsonPathPrompt = new Select({
       name: 'jsonPath',
-      message: '🔍 Enter the path in JSON (e.g., parent.child.data) where the data to be converted is located: ',
+      message: '🔍 Select the path in JSON where the data to be converted is located: ',
+      choices: keys,
     });
+
+    const jsonPath = await jsonPathPrompt.run();
 
     // Collect user mappings
     const mappings = {};
@@ -129,11 +139,11 @@ async function startConversion() {
     for (const field of fields) {
       const fieldType = typeof outputShape.gameObjects[0][field];
       const promptMessage = `⭐️ Which key in your JSON corresponds to "${field}" with value type "${fieldType}"?` + '\n' + ` 👉 Enter "none" if none exists.`;
-      const { key } = await inquirer.prompt({
-        type: 'input',
+      const keyPrompt = new Input({
         name: 'key',
         message: promptMessage,
       });
+      const key = await keyPrompt.run();
       mappings[field] = key === 'none' ? undefined : key;
     }
 
@@ -142,11 +152,12 @@ async function startConversion() {
     const outputData = JSON.stringify(convertedJSON, null, 2);
 
     // Ask for the output path
-    const { outputPath } = await inquirer.prompt({
-      type: 'input',
+    const outputPathPrompt = new Input({
       name: 'outputPath',
       message: '📁 Enter the path where you want to save the output JSON file (e.g., /your/path/name/): ',
     });
+
+    const outputPath = await outputPathPrompt.run();
 
     // Concatenate the output path with the output file name
     const fullOutputPath = path.join(outputPath, 'ready-for-upload.json');
