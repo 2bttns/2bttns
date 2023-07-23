@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-"use strict";
 var __assign = (this && this.__assign) || function () {
     __assign = Object.assign || function(t) {
         for (var s, i = 1, n = arguments.length; i < n; i++) {
@@ -47,11 +46,28 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-Object.defineProperty(exports, "__esModule", { value: true });
-var readline = require("readline");
-var fs = require("fs");
-var path = require("path");
-var cuid = require("cuid");
+var fs = require('fs');
+var path = require('path');
+var cuid = require('cuid');
+/**
+ * @typedef {Object} GameObject
+ * @property {string} id
+ * @property {string} name
+ * @property {string} description
+ * @property {string[]} tagIds
+ * @property {Object} [key]
+ */
+/**
+ * @typedef {Object} Tag
+ * @property {string} id
+ * @property {string} name
+ * @property {string} description
+ */
+/**
+ * @typedef {Object} OutputShape
+ * @property {GameObject[]} gameObjects
+ * @property {Tag[]} tags
+ */
 var outputShape = {
     gameObjects: [
         {
@@ -69,19 +85,6 @@ var outputShape = {
         }
     ]
 };
-// Create a readline interface
-var rl = readline.createInterface({
-    input: process.stdin,
-    output: process.stdout
-});
-// Function to prompt the user for input
-function prompt(question) {
-    return new Promise(function (resolve) {
-        rl.question(question + '\n', function (answer) {
-            resolve(answer);
-        });
-    });
-}
 // Function to get nested JSON by path
 function getNestedJSON(input, path) {
     var pathParts = path.split('.');
@@ -95,6 +98,12 @@ function getNestedJSON(input, path) {
     }
     return current;
 }
+/**
+ * @param {any} input
+ * @param {string} path
+ * @param {Record<string, string | undefined>} mappings
+ * @returns {OutputShape}
+ */
 function convertJSON(input, path, mappings) {
     var output = __assign({}, outputShape);
     // Extract the required nested structure from the input JSON
@@ -131,19 +140,28 @@ function convertJSON(input, path, mappings) {
 // Function to start the conversion process
 function startConversion() {
     return __awaiter(this, void 0, void 0, function () {
-        var inputPath, inputData, inputJSON, jsonPath, mappings, fields, _i, fields_1, field, fieldType, promptMessage, key, convertedJSON, outputData, outputPath, fullOutputPath, error_1;
+        var inquirer, inputPath, inputData, inputJSON, jsonPath, mappings, fields, _i, fields_1, field, fieldType, promptMessage, key, convertedJSON, outputData, outputPath, fullOutputPath, error_1;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
                     _a.trys.push([0, 8, , 9]);
-                    return [4 /*yield*/, prompt('📁 Enter the path of the input JSON file: ')];
+                    inquirer = require('inquirer');
+                    return [4 /*yield*/, inquirer.prompt({
+                            type: 'input',
+                            name: 'inputPath',
+                            message: '📁 Enter the path of the input JSON file: ',
+                        })];
                 case 1:
-                    inputPath = _a.sent();
+                    inputPath = (_a.sent()).inputPath;
                     inputData = fs.readFileSync(inputPath, 'utf-8');
                     inputJSON = JSON.parse(inputData);
-                    return [4 /*yield*/, prompt('🔍 Enter the path in JSON (e.g., parent.child.data) where the data to be converted is located: ')];
+                    return [4 /*yield*/, inquirer.prompt({
+                            type: 'input',
+                            name: 'jsonPath',
+                            message: '🔍 Enter the path in JSON (e.g., parent.child.data) where the data to be converted is located: ',
+                        })];
                 case 2:
-                    jsonPath = _a.sent();
+                    jsonPath = (_a.sent()).jsonPath;
                     mappings = {};
                     fields = Object.keys(outputShape.gameObjects[0]);
                     _i = 0, fields_1 = fields;
@@ -153,9 +171,13 @@ function startConversion() {
                     field = fields_1[_i];
                     fieldType = typeof outputShape.gameObjects[0][field];
                     promptMessage = "\u2B50\uFE0F Which key in your JSON corresponds to \"".concat(field, "\" with value type \"").concat(fieldType, "\"?") + '\n' + " \uD83D\uDC49 Enter \"none\" if none exists.";
-                    return [4 /*yield*/, prompt(promptMessage)];
+                    return [4 /*yield*/, inquirer.prompt({
+                            type: 'input',
+                            name: 'key',
+                            message: promptMessage,
+                        })];
                 case 4:
-                    key = _a.sent();
+                    key = (_a.sent()).key;
                     mappings[field] = key === 'none' ? undefined : key;
                     _a.label = 5;
                 case 5:
@@ -164,19 +186,21 @@ function startConversion() {
                 case 6:
                     convertedJSON = convertJSON(inputJSON, jsonPath, mappings);
                     outputData = JSON.stringify(convertedJSON, null, 2);
-                    return [4 /*yield*/, prompt('📁 Enter the path where you want to save the output JSON file (e.g., /your/path/name/): ')];
+                    return [4 /*yield*/, inquirer.prompt({
+                            type: 'input',
+                            name: 'outputPath',
+                            message: '📁 Enter the path where you want to save the output JSON file (e.g., /your/path/name/): ',
+                        })];
                 case 7:
-                    outputPath = _a.sent();
+                    outputPath = (_a.sent()).outputPath;
                     fullOutputPath = path.join(outputPath, 'ready-for-upload.json');
                     // Write the output JSON file
                     fs.writeFileSync(fullOutputPath, outputData, 'utf-8');
                     console.log('✅ Output JSON file saved successfully! ✅');
-                    rl.close();
                     return [3 /*break*/, 9];
                 case 8:
                     error_1 = _a.sent();
                     console.error('❌ An error occurred:', error_1);
-                    rl.close();
                     return [3 /*break*/, 9];
                 case 9: return [2 /*return*/];
             }
