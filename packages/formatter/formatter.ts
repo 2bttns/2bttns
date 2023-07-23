@@ -118,67 +118,107 @@ function convertJSON(input, path, mappings) {
 // Function to start the conversion process
 async function startConversion() {
   try {
-    // Ask for the path of the input JSON file
-    const inputPathPrompt = new Input({
-      name: 'inputPath',
-      message: '📁 Enter the path of the input JSON file: ',
+    // Initial prompt
+    const initialPrompt = new Select({
+      name: 'initialChoice',
+      message: 'What do you want to do?',
+      choices: ['Format data for 2bttns Console', 'Get ready-to-upload json data'],
     });
 
-    const inputPath = await inputPathPrompt.run();
+    const initialChoice = await initialPrompt.run();
 
-    // Read the input JSON file
-    const inputData = fs.readFileSync(inputPath, 'utf-8');
-    const inputJSON = JSON.parse(inputData);
-
-    // Get first level keys in JSON
-    const keys = getFirstLevelKeys(inputJSON);
-
-    // Ask for the path in JSON
-    const jsonPathPrompt = new Select({
-      name: 'jsonPath',
-      message: '🔍 Select the path in JSON where the data to be converted is located: ',
-      choices: keys,
-    });
-
-    const jsonPath = await jsonPathPrompt.run();
-
-    // Get the nested JSON data and extract unique keys
-    const nestedInput = getNestedJSON(inputJSON, jsonPath);
-    const uniqueKeys = getUniqueKeys(nestedInput);
-
-    // Collect user mappings
-    const mappings = {};
-    const fields = Object.keys(outputShape.gameObjects[0]);
-    for (const field of fields) {
-      const fieldType = typeof outputShape.gameObjects[0][field];
-      const promptMessage = `⭐️ Which key in your JSON corresponds to "${field}" with value type "${fieldType}"?` + '\n' + ` 👉 Enter "none" if none exists.`;
-      const keyPrompt = new Select({
-        name: 'key',
-        message: promptMessage,
-        choices: [...uniqueKeys, 'none'],
+    if (initialChoice === 'Format data for 2bttns Console') {
+      // Ask for the path of the input JSON file
+      const inputPathPrompt = new Input({
+        name: 'inputPath',
+        message: '📁 Enter the path of the input JSON file: ',
       });
-      const key = await keyPrompt.run();
-      mappings[field] = key === 'none' ? undefined : key;
+
+      const inputPath = await inputPathPrompt.run();
+
+      // Read the input JSON file
+      const inputData = fs.readFileSync(inputPath, 'utf-8');
+      const inputJSON = JSON.parse(inputData);
+
+      // Get first level keys in JSON
+      const keys = getFirstLevelKeys(inputJSON);
+
+      // Ask for the path in JSON
+      const jsonPathPrompt = new Select({
+        name: 'jsonPath',
+        message: '🔍 Select the path in JSON where the data to be converted is located: ',
+        choices: keys,
+      });
+
+      const jsonPath = await jsonPathPrompt.run();
+
+      // Get the nested JSON data and extract unique keys
+      const nestedInput = getNestedJSON(inputJSON, jsonPath);
+      const uniqueKeys = getUniqueKeys(nestedInput);
+
+      // Collect user mappings
+      const mappings = {};
+      const fields = Object.keys(outputShape.gameObjects[0]);
+      for (const field of fields) {
+        const fieldType = typeof outputShape.gameObjects[0][field];
+        const promptMessage = `⭐️ Which key in your JSON corresponds to "${field}" with value type "${fieldType}"?` + '\n' + ` 👉 Enter "none" if none exists.`;
+        const keyPrompt = new Select({
+          name: 'key',
+          message: promptMessage,
+          choices: [...uniqueKeys, 'none'],
+        });
+        const key = await keyPrompt.run();
+        mappings[field] = key === 'none' ? undefined : key;
+      }
+
+      // Convert the input JSON based on user mappings
+      const convertedJSON = convertJSON(inputJSON, jsonPath, mappings);
+      const outputData = JSON.stringify(convertedJSON, null, 2);
+
+      // Ask for the output path
+      const outputPathPrompt = new Input({
+        name: 'outputPath',
+        message: '📁 Enter the path where you want to save the output JSON file (e.g., /your/path/name/): ',
+      });
+
+      const outputPath = await outputPathPrompt.run();
+
+      // Concatenate the output path with the output file name
+      const fullOutputPath = path.join(outputPath, 'ready-for-upload.json');
+
+      // Write the output JSON file
+      fs.writeFileSync(fullOutputPath, outputData, 'utf-8');
+      console.log('✅ Output JSON file saved successfully! ✅');
+    } else if (initialChoice === 'Get ready-to-upload json data') {
+      // Code for getting ready-to-upload json data goes here
+
+      // Get the list of JSON files in the /formatted-data folder
+      const files = fs.readdirSync(path.join(__dirname, '/formatted-data')).filter(file => file.endsWith('.json'));
+
+      // Ask the user to select a JSON file
+      const filePrompt = new Select({
+        name: 'selectedFile',
+        message: 'Select the JSON file you want to output from the /formatted-data folder:',
+        choices: files,
+      });
+
+      const selectedFile = await filePrompt.run();
+
+      // Ask for the output path
+      const outputPathPrompt = new Input({
+        name: 'outputPath',
+        message: '📁 Enter the path where you want to save the output JSON file (e.g., /your/path/name/): ',
+      });
+
+      const outputPath = await outputPathPrompt.run();
+
+      // Concatenate the output path with the output file name
+      const fullOutputPath = path.join(outputPath, selectedFile);
+
+      // Copy the selected JSON file to the output path
+      fs.copyFileSync(path.join(__dirname, '/formatted-data', selectedFile), fullOutputPath);
+      console.log('✅ Output JSON file saved successfully! ✅');
     }
-
-    // Convert the input JSON based on user mappings
-    const convertedJSON = convertJSON(inputJSON, jsonPath, mappings);
-    const outputData = JSON.stringify(convertedJSON, null, 2);
-
-    // Ask for the output path
-    const outputPathPrompt = new Input({
-      name: 'outputPath',
-      message: '📁 Enter the path where you want to save the output JSON file (e.g., /your/path/name/): ',
-    });
-
-    const outputPath = await outputPathPrompt.run();
-
-    // Concatenate the output path with the output file name
-    const fullOutputPath = path.join(outputPath, 'ready-for-upload.json');
-
-    // Write the output JSON file
-    fs.writeFileSync(fullOutputPath, outputData, 'utf-8');
-    console.log('✅ Output JSON file saved successfully! ✅');
 
     // Exit the process
     process.exit(0);
