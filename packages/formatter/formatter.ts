@@ -51,6 +51,15 @@ function getFirstLevelKeys(obj) {
   return Object.keys(obj);
 }
 
+// Function to get all unique keys in an array of objects
+function getUniqueKeys(arr) {
+  const keys = new Set();
+  arr.forEach(obj => {
+    Object.keys(obj).forEach(key => keys.add(key));
+  });
+  return Array.from(keys);
+}
+
 // Function to get nested JSON by path
 function getNestedJSON(input, path) {
   const pathParts = path.split('.');
@@ -133,15 +142,20 @@ async function startConversion() {
 
     const jsonPath = await jsonPathPrompt.run();
 
+    // Get the nested JSON data and extract unique keys
+    const nestedInput = getNestedJSON(inputJSON, jsonPath);
+    const uniqueKeys = getUniqueKeys(nestedInput);
+
     // Collect user mappings
     const mappings = {};
     const fields = Object.keys(outputShape.gameObjects[0]);
     for (const field of fields) {
       const fieldType = typeof outputShape.gameObjects[0][field];
       const promptMessage = `⭐️ Which key in your JSON corresponds to "${field}" with value type "${fieldType}"?` + '\n' + ` 👉 Enter "none" if none exists.`;
-      const keyPrompt = new Input({
+      const keyPrompt = new Select({
         name: 'key',
         message: promptMessage,
+        choices: [...uniqueKeys, 'none'],
       });
       const key = await keyPrompt.run();
       mappings[field] = key === 'none' ? undefined : key;
@@ -165,6 +179,10 @@ async function startConversion() {
     // Write the output JSON file
     fs.writeFileSync(fullOutputPath, outputData, 'utf-8');
     console.log('✅ Output JSON file saved successfully! ✅');
+
+    // Exit the process
+    process.exit(0);
+    
   } catch (error) {
     console.error('❌ An error occurred:', error);
   }

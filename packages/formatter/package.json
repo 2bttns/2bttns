@@ -5,7 +5,7 @@
   "main": "./formatter.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node ./formatter.js completion:install && node ./formatter.js",
+    "start": "node ./formatter.js completion:install",
     "build": "tsc formatter.ts"
   },
   "bin": {
