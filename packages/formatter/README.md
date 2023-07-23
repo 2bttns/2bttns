@@ -7,28 +7,25 @@ Convert JSON data into a format readable by the 2bttns Console.
    npx @2bttns/formatter
    ```
 
-   ```
-    📁 Enter the path of the input JSON file: 
-    test-data/genres.json
-    🔍 Enter the path in JSON (e.g., parent.child.data) where the data to be converted is located: 
-    genres
-    ⭐️ Which key in your JSON corresponds to "id" with value type "string"?
-    👉 Enter "none" if none exists.
-    id
-    ⭐️ Which key in your JSON corresponds to "name" with value type "string"?
-    👉 Enter "none" if none exists.
-    name
-    ⭐️ Which key in your JSON corresponds to "description" with value type "string"?
-    👉 Enter "none" if none exists.
-    none
-    ⭐️ Which key in your JSON corresponds to "tagIds" with value type "object"?
-    👉 Enter "none" if none exists.
-    none
-    📁 Enter the path where you want to save the output JSON file: 
-    /Users/user/Downloads/
-    ✅ Output JSON file saved successfully! ✅
-   ```
+```bash
+? What do you want to do? … 
+❯ Format data for 2bttns Console
+  Get ready-to-upload json data
+```
 
+```Format data for 2bttns Console``` will guide you through mapping your JSON and generating a ready to upload file.
+
+```Get ready-to-upload json data``` will download already formatted Game Objects available in the formatter.
+
+```bash
+# Ready to upload json data
+? Select the JSON file you want to output from the /formatted-data folder: … 
+❯ ready-car-considerations.json
+  ready-chords.json
+  ready-indoorActivities.json
+  ready-outdoorActivities.json
+
+```
 
 ## Table of Contents
 1. [Data Model](#game-objects-model)
