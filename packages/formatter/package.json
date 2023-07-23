@@ -2,14 +2,14 @@
   "name": "@2bttns/formatter",
   "version": "1.1.8",
   "description": "Convert JSON data into a format readable by the 2bttns Console.",
-  "main": "./format-game-objects.js",
+  "main": "./formatter.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node ./format-game-objects.js completion:install && node ./format-game-objects.js",
-    "build": "tsc format-game-objects.ts"
+    "start": "node ./formatter.js completion:install && node ./formatter.js",
+    "build": "tsc formatter.ts"
   },
   "bin": {
-    "game-objects-converter": "./format-game-objects.js"
+    "game-objects-converter": "./formatter.js"
   },
   "author": "2bttns Company",
   "license": "MIT",
