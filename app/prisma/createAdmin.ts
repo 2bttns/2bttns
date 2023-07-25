@@ -18,8 +18,8 @@ async function main() {
   const { option } = await inquirer.prompt({
     type: "list",
     choices: [
-      { value: 0, name: "Create Admin Credentials using Username/Password" },
-      { value: 1, name: "Add Admin OAuth Email to Allow List" },
+      { value: 0, name: "Create Admin using Username/Password" },
+      { value: 1, name: "Create Admin using Github OAuth" },
     ],
     message: "Select an option",
     name: "option",
