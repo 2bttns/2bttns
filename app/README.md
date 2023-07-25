@@ -4,7 +4,7 @@
 
 ### Environment Variables
 
-First, set up the environment variables folder by copying `.env.template` to a new `.env` file. Follow the instructions in the `.env.template` file to set up your environment variables.
+First, set up the environment variables folder by copying `.env.example` to a new `.env` file. Follow the instructions in the `.env.example` file to set up your environment variables.
 
 ### Docker Compose
 
