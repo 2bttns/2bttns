@@ -88,6 +88,8 @@ async function main() {
       strip: 2,
       filter: (p) => p.includes(`2bttns-${targetBranch}/app`),
     });
+    copyEnvFromExampleTemplate(targetDir);
+
     console.log("Successfully initialized 2bttns app!");
   } catch (error) {
     console.error("Failed to initialize 2bttns app. Aborting.");
@@ -104,4 +106,17 @@ export async function downloadTar(url: string) {
   const tempFile = join(tmpdir(), `2bttns.c2a.temp-${Date.now()}`);
   await pipeline(got.stream(url), createWriteStream(tempFile));
   return tempFile;
+}
+
+function copyEnvFromExampleTemplate(targetDir: string) {
+  const envTemplatePath = join(targetDir, ".env.example");
+  const envPath = join(targetDir, ".env");
+
+  if (existsSync(envTemplatePath)) {
+    fs.copyFileSync(envTemplatePath, envPath);
+  } else {
+    console.warn(
+      `No .env.example file found at ${envTemplatePath}; skipping default creation of .env file.`
+    );
+  }
 }
