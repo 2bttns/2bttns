@@ -60,25 +60,6 @@ var path = require('path');
 var cuid = require('cuid');
 var _a = require('enquirer'), AutoComplete = _a.AutoComplete, Input = _a.Input, Select = _a.Select;
 var glob = require('glob');
-/**
- * @typedef {Object} GameObject
- * @property {string} id
- * @property {string} name
- * @property {string} description
- * @property {string[]} tagIds
- * @property {Object} [key]
- */
-/**
- * @typedef {Object} Tag
- * @property {string} id
- * @property {string} name
- * @property {string} description
- */
-/**
- * @typedef {Object} OutputShape
- * @property {GameObject[]} gameObjects
- * @property {Tag[]} tags
- */
 var outputShape = {
     gameObjects: [
         {
@@ -96,11 +77,9 @@ var outputShape = {
         }
     ]
 };
-// Function to get first level keys in JSON object
 function getFirstLevelKeys(obj) {
     return Object.keys(obj);
 }
-// Function to get all unique keys in an array of objects
 function getUniqueKeys(arr) {
     var keys = new Set();
     arr.forEach(function (obj) {
@@ -108,7 +87,6 @@ function getUniqueKeys(arr) {
     });
     return Array.from(keys);
 }
-// Function to get nested JSON by path
 function getNestedJSON(input, path) {
     var pathParts = path.split('.');
     var current = input;
@@ -121,17 +99,9 @@ function getNestedJSON(input, path) {
     }
     return current;
 }
-/**
- * @param {any} input
- * @param {string} path
- * @param {Record<string, string | undefined>} mappings
- * @returns {OutputShape}
- */
 function convertJSON(input, path, mappings) {
     var output = __assign({}, outputShape);
-    // Extract the required nested structure from the input JSON
     var nestedInput = getNestedJSON(input, path);
-    // Map the gameObjects based on user mappings
     if (Array.isArray(nestedInput)) {
         output.gameObjects = nestedInput.map(function (item) {
             var gameObject = __assign({}, outputShape.gameObjects[0]);
@@ -142,12 +112,10 @@ function convertJSON(input, path, mappings) {
                     if (inputKey !== undefined) {
                         var inputValue = item[inputKey];
                         if (key === 'tagIds') {
-                            if (Array.isArray(inputValue)) {
-                                gameObject[key] = inputValue;
+                            if (!Array.isArray(inputValue)) {
+                                throw new Error('The value for "tagIds" should be an array.');
                             }
-                            else {
-                                gameObject[key] = inputValue !== undefined ? inputValue : gameObject[key];
-                            }
+                            gameObject[key] = inputValue;
                         }
                         else {
                             gameObject[key] = inputValue !== undefined ? inputValue : gameObject[key];
@@ -160,14 +128,13 @@ function convertJSON(input, path, mappings) {
     }
     return output;
 }
-// Function to start the conversion process
 function startConversion() {
     return __awaiter(this, void 0, void 0, function () {
-        var initialPrompt, initialChoice, inputPathPrompt, inputPath, inputData, inputJSON, keys, jsonPathPrompt, jsonPath, nestedInput, uniqueKeys, mappings, fields, _i, fields_1, field, fieldType, promptMessage, keyPrompt, key, convertedJSON, outputData, outputPathPrompt, outputPath, fullOutputPath, files, filePrompt, selectedFile, outputPathPrompt, outputPath, fullOutputPath, error_1;
+        var initialPrompt, initialChoice, inputPathPrompt, inputPath, inputData, inputJSON, keys, jsonPathPrompt, jsonPath, nestedInput, uniqueKeys, mappings, fields, _i, fields_1, field, fieldType, promptMessage, keyPrompt, key, convertedJSON, outputData, outputPathPrompt, outputPath, outputFileNamePrompt, outputFileName, fullOutputPath, files, filePrompt, selectedFile, outputPathPrompt, outputPath, fullOutputPath, error_1;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    _a.trys.push([0, 13, , 14]);
+                    _a.trys.push([0, 14, , 15]);
                     initialPrompt = new Select({
                         name: 'initialChoice',
                         message: 'What do you want to do?',
@@ -176,7 +143,7 @@ function startConversion() {
                     return [4 /*yield*/, initialPrompt.run()];
                 case 1:
                     initialChoice = _a.sent();
-                    if (!(initialChoice === 'Format data for 2bttns Console')) return [3 /*break*/, 9];
+                    if (!(initialChoice === 'Format data for 2bttns Console')) return [3 /*break*/, 10];
                     inputPathPrompt = new Input({
                         name: 'inputPath',
                         message: '📁 Enter the path of the input JSON file: ',
@@ -229,13 +196,19 @@ function startConversion() {
                     return [4 /*yield*/, outputPathPrompt.run()];
                 case 8:
                     outputPath = _a.sent();
-                    fullOutputPath = path.join(outputPath, 'ready-for-upload.json');
-                    // Write the output JSON file
+                    outputFileNamePrompt = new Input({
+                        name: 'outputFileName',
+                        message: '📁 Enter the output file name (e.g., my-output.json): ',
+                    });
+                    return [4 /*yield*/, outputFileNamePrompt.run()];
+                case 9:
+                    outputFileName = _a.sent();
+                    fullOutputPath = path.join(outputPath, outputFileName);
                     fs.writeFileSync(fullOutputPath, outputData, 'utf-8');
                     console.log('✅ Output JSON file saved successfully! ✅');
-                    return [3 /*break*/, 12];
-                case 9:
-                    if (!(initialChoice === 'Get ready-to-upload json data')) return [3 /*break*/, 12];
+                    return [3 /*break*/, 13];
+                case 10:
+                    if (!(initialChoice === 'Get ready-to-upload json data')) return [3 /*break*/, 13];
                     files = fs.readdirSync(path.join(__dirname, '/formatted-data')).filter(function (file) { return file.endsWith('.json'); });
                     filePrompt = new Select({
                         name: 'selectedFile',
@@ -243,32 +216,29 @@ function startConversion() {
                         choices: files,
                     });
                     return [4 /*yield*/, filePrompt.run()];
-                case 10:
+                case 11:
                     selectedFile = _a.sent();
                     outputPathPrompt = new Input({
                         name: 'outputPath',
                         message: '📁 Enter the path where you want to save the output JSON file (e.g., /your/path/name/): ',
                     });
                     return [4 /*yield*/, outputPathPrompt.run()];
-                case 11:
+                case 12:
                     outputPath = _a.sent();
                     fullOutputPath = path.join(outputPath, selectedFile);
-                    // Copy the selected JSON file to the output path
                     fs.copyFileSync(path.join(__dirname, '/formatted-data', selectedFile), fullOutputPath);
                     console.log('✅ Output JSON file saved successfully! ✅');
-                    _a.label = 12;
-                case 12:
-                    // Exit the process
-                    process.exit(0);
-                    return [3 /*break*/, 14];
+                    _a.label = 13;
                 case 13:
+                    process.exit(0);
+                    return [3 /*break*/, 15];
+                case 14:
                     error_1 = _a.sent();
                     console.error('❌ An error occurred:', error_1);
-                    return [3 /*break*/, 14];
-                case 14: return [2 /*return*/];
+                    return [3 /*break*/, 15];
+                case 15: return [2 /*return*/];
             }
         });
     });
 }
-// Start the conversion process
 startConversion();
