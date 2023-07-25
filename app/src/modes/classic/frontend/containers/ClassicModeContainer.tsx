@@ -17,11 +17,12 @@ export type ClassicModeContainerProps = ModeUIProps<{
   itemPolicy?: ItemPolicyType;
   replacePolicy?: ReplacePolicy;
   question?: ClassicModeViewProps<Item>["question"];
+  showColorBarOnButtons?: ClassicModeViewProps<Item>["showButtonColorBars"];
 }>;
 
 export default function ClassicModeContainer(props: ClassicModeContainerProps) {
   const {
-    config: { itemPolicy, replacePolicy, question },
+    config: { itemPolicy, replacePolicy, question, showColorBarOnButtons },
     gameData,
   } = props;
 
@@ -82,6 +83,7 @@ export default function ClassicModeContainer(props: ClassicModeContainerProps) {
         loadItemsCallback={loadItemsCallback}
         renderItem={(item) => item.name}
         question={question}
+        showButtonColorBars={showColorBarOnButtons}
       />
       {gameData.callbackUrl && isRedirecting && (
         <Box textAlign="center" maxWidth="500px" marginX="auto">

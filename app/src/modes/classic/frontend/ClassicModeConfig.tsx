@@ -2,7 +2,9 @@ import {
   Box,
   Code,
   Heading,
+  HStack,
   Select,
+  Switch,
   Table,
   TableContainer,
   Tbody,
@@ -13,7 +15,7 @@ import {
   Tr,
   VStack,
 } from "@chakra-ui/react";
-import { Dispatch, SetStateAction, useState } from "react";
+import { ChangeEvent, Dispatch, SetStateAction, useState } from "react";
 import CustomEditable from "../../../features/shared/components/CustomEditable";
 import UnderlinedTextTooltip from "../../../features/shared/components/UnderlinedTextTooltip";
 import { ConfigComponentProps } from "../../types";
@@ -64,6 +66,11 @@ export default function ClassicModeConfig(props: ClassicModeConfigProps) {
               setConfig={setConfig}
             />
             <ConfigReplacePolicy
+              modeProps={props}
+              config={config}
+              setConfig={setConfig}
+            />
+            <ConfigShowColorBarOnButtons
               modeProps={props}
               config={config}
               setConfig={setConfig}
@@ -266,6 +273,62 @@ function ConfigQuestion({ modeProps, config, setConfig }: BaseConfigMenuProps) {
           handleSave={handleSaveQuestion}
           isEditable
         />
+      </Td>
+    </Tr>
+  );
+}
+
+function ConfigShowColorBarOnButtons({
+  modeProps,
+  config,
+  setConfig,
+}: BaseConfigMenuProps) {
+  const handleChange = async (e: ChangeEvent<HTMLInputElement>) => {
+    setConfig((prev) => {
+      const updatedConfig: ClassicModeContainerProps["config"] = {
+        ...prev,
+        showColorBarOnButtons: e.target.checked,
+      };
+      modeProps.onConfigChange(updatedConfig);
+      return updatedConfig;
+    });
+  };
+
+  return (
+    <Tr>
+      <Td>
+        <UnderlinedTextTooltip
+          tooltipProps={{
+            label: (
+              <VStack
+                spacing={2}
+                alignItems="start"
+                fontSize="12px"
+                padding="1rem"
+              >
+                <Text fontWeight="bold">CLASSIC MODE - QUESTION</Text>
+                <Text>
+                  Set to <Code>true</Code> to show a color bar on the buttons
+                  players will see during the game. The color is a Hex color
+                  code automatically generated based on the item name the button
+                  displays.
+                </Text>
+              </VStack>
+            ),
+          }}
+        >
+          Show Color Bar on Buttons
+        </UnderlinedTextTooltip>
+      </Td>
+      <Td>
+        <HStack justifyContent="space-between">
+          <Text>{config.showColorBarOnButtons ? "True" : "False"}</Text>
+          <Switch
+            size="md"
+            isChecked={config.showColorBarOnButtons}
+            onChange={handleChange}
+          />
+        </HStack>
       </Td>
     </Tr>
   );

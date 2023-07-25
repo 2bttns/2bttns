@@ -6,10 +6,11 @@ const colorHash = new ColorHash();
 export type ClassicButtonProps = ButtonProps & {
   children: string;
   hotkey?: string;
+  showColorBar?: boolean;
 };
 
 export default function ClassicButton(props: ClassicButtonProps) {
-  const { children, hotkey, ...rest } = props;
+  const { children, hotkey, showColorBar, ...rest } = props;
 
   return (
     <Button
@@ -28,16 +29,18 @@ export default function ClassicButton(props: ClassicButtonProps) {
         ...rest.sx,
       }}
     >
-      <Box
-        sx={{
-          position: "absolute",
-          left: 0,
-          top: 0,
-          bottom: 0,
-          width: "32px",
-          backgroundColor: colorHash.hex(children),
-        }}
-      />
+      {showColorBar && (
+        <Box
+          sx={{
+            position: "absolute",
+            left: 0,
+            top: 0,
+            bottom: 0,
+            width: "32px",
+            backgroundColor: colorHash.hex(children),
+          }}
+        />
+      )}
       <Box
         sx={{
           width: "100%",

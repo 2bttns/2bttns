@@ -12,6 +12,7 @@ export type ClassicModeViewProps<I extends Item> = {
   onFinish: ClassicModeProps<I>["onFinish"];
   renderItem: ClassicModeProps<I>["renderItem"];
   question?: string;
+  showButtonColorBars?: boolean;
 };
 
 export default function ClassicModeView<I extends Item>(
@@ -26,6 +27,7 @@ export default function ClassicModeView<I extends Item>(
     loadItemsCallback,
     renderItem,
     question,
+    showButtonColorBars,
   } = props;
 
   return (
@@ -49,6 +51,7 @@ export default function ClassicModeView<I extends Item>(
           first: ["w", "ArrowUp"],
           second: ["s", "ArrowDown"],
         }}
+        showButtonColorBars={showButtonColorBars}
         onFinish={onFinish}
         replace={replacePolicy}
       >
