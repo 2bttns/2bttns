@@ -132,7 +132,7 @@ async function startConversion() {
 
       const outputPathPrompt = new Input({
         name: 'outputPath',
-        message: '📁 Enter the path where you want to save the output JSON file (e.g., /your/path/name/): ',
+        message: '📁 Enter the path where you want to save the output JSON file (e.g., /your/path/name/): \n press ENTER for current directory',
       });
 
       const outputPath = await outputPathPrompt.run();
@@ -161,7 +161,7 @@ async function startConversion() {
 
       const outputPathPrompt = new Input({
         name: 'outputPath',
-        message: '📁 Enter the path where you want to save the output JSON file (e.g., /your/path/name/): ',
+        message: '📁 Enter the path where you want to save the output JSON file (e.g., /your/path/name/ ): \n press ENTER for current directory',
       });
 
       const outputPath = await outputPathPrompt.run();
