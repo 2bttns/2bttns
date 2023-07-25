@@ -3,7 +3,7 @@ import { GameObject } from "@prisma/client";
 import Link from "next/link";
 import { api, apiClient } from "../../../../utils/api";
 import { ModeUIProps } from "../../../types";
-import { ItemPolicyType, ReplacePolicy } from "../ClassicMode/types";
+import { Item, ItemPolicyType, ReplacePolicy } from "../ClassicMode/types";
 import { Use2bttnsMachineConfig } from "../ClassicMode/use2bttnsMachine";
 import { useGameCallbackRedirect } from "../hooks/useGameCallbackRedirect";
 import ClassicModeView, {
@@ -16,11 +16,12 @@ export const defaultReplacePolicy: ReplacePolicy = "keep-picked";
 export type ClassicModeContainerProps = ModeUIProps<{
   itemPolicy?: ItemPolicyType;
   replacePolicy?: ReplacePolicy;
+  question?: ClassicModeViewProps<Item>["question"];
 }>;
 
 export default function ClassicModeContainer(props: ClassicModeContainerProps) {
   const {
-    config: { itemPolicy, replacePolicy },
+    config: { itemPolicy, replacePolicy, question },
     gameData,
   } = props;
 
@@ -80,6 +81,7 @@ export default function ClassicModeContainer(props: ClassicModeContainerProps) {
         onFinish={handleFinish}
         loadItemsCallback={loadItemsCallback}
         renderItem={(item) => item.name}
+        question={question}
       />
       {gameData.callbackUrl && isRedirecting && (
         <Box textAlign="center" maxWidth="500px" marginX="auto">

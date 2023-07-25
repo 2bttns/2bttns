@@ -11,6 +11,7 @@ export type ClassicModeViewProps<I extends Item> = {
   replacePolicy: ClassicModeProps<I>["replace"];
   onFinish: ClassicModeProps<I>["onFinish"];
   renderItem: ClassicModeProps<I>["renderItem"];
+  question?: string;
 };
 
 export default function ClassicModeView<I extends Item>(
@@ -24,6 +25,7 @@ export default function ClassicModeView<I extends Item>(
     replacePolicy,
     loadItemsCallback,
     renderItem,
+    question,
   } = props;
 
   return (
@@ -75,7 +77,7 @@ export default function ClassicModeView<I extends Item>(
                   marginTop: "2rem",
                 }}
               >
-                {isFinished ? "Round over!" : "Which is more fun?"}
+                {isFinished ? "Round over!" : question}
               </Text>
               {!isFinished && (
                 <>

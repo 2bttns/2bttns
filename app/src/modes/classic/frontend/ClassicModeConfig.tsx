@@ -14,6 +14,7 @@ import {
   VStack,
 } from "@chakra-ui/react";
 import { Dispatch, SetStateAction, useState } from "react";
+import CustomEditable from "../../../features/shared/components/CustomEditable";
 import UnderlinedTextTooltip from "../../../features/shared/components/UnderlinedTextTooltip";
 import { ConfigComponentProps } from "../../types";
 import { ItemPolicyType, ReplacePolicy } from "./ClassicMode/types";
@@ -52,6 +53,11 @@ export default function ClassicModeConfig(props: ClassicModeConfigProps) {
             </Tr>
           </Thead>
           <Tbody>
+            <ConfigQuestion
+              modeProps={props}
+              config={config}
+              setConfig={setConfig}
+            />
             <ConfigItemPolicy
               modeProps={props}
               config={config}
@@ -210,6 +216,56 @@ function ConfigReplacePolicy({
             </option>
           ))}
         </Select>
+      </Td>
+    </Tr>
+  );
+}
+
+function ConfigQuestion({ modeProps, config, setConfig }: BaseConfigMenuProps) {
+  const handleSaveQuestion = async (nextValue: string) => {
+    setConfig((prev) => {
+      const updatedConfig: ClassicModeContainerProps["config"] = {
+        ...prev,
+        question: nextValue,
+      };
+      modeProps.onConfigChange(updatedConfig);
+      return updatedConfig;
+    });
+  };
+
+  return (
+    <Tr>
+      <Td>
+        <UnderlinedTextTooltip
+          tooltipProps={{
+            label: (
+              <VStack
+                spacing={2}
+                alignItems="start"
+                fontSize="12px"
+                padding="1rem"
+              >
+                <Text fontWeight="bold">CLASSIC MODE - QUESTION</Text>
+                <Text>
+                  Optional question prompt the player will see as they play the
+                  game.
+                </Text>
+                <Text>For example, &quot;Which is more fun?&quot;</Text>
+              </VStack>
+            ),
+          }}
+        >
+          Question
+        </UnderlinedTextTooltip>
+      </Td>
+      <Td>
+        <CustomEditable
+          isTextarea
+          value={config.question ?? ""}
+          placeholder="Enter a question prompt (optional)"
+          handleSave={handleSaveQuestion}
+          isEditable
+        />
       </Td>
     </Tr>
   );
