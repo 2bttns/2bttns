@@ -8,6 +8,7 @@ export type RenderPropParams = {
   context: ReturnType<typeof use2bttnsMachine>["context"];
   isFinished: ReturnType<typeof use2bttnsMachine>["isFinished"];
   choicesRemaining: ReturnType<typeof use2bttnsMachine>["choicesRemaining"];
+  totalChoices: ReturnType<typeof use2bttnsMachine>["totalChoices"];
   state: ReturnType<typeof use2bttnsMachine>["state"];
 };
 
@@ -47,6 +48,7 @@ export default function ClassicMode<I extends Item>(
 
   const {
     choicesRemaining,
+    totalChoices,
     context,
     current_options,
     isFinished,
@@ -91,6 +93,7 @@ export default function ClassicMode<I extends Item>(
     context,
     isFinished,
     choicesRemaining,
+    totalChoices,
     state,
   });
 }

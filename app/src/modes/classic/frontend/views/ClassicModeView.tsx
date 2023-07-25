@@ -1,4 +1,4 @@
-import { Heading, Stack, Text } from "@chakra-ui/react";
+import { Box, Heading, Progress, Stack, Text } from "@chakra-ui/react";
 import { ModeUIProps } from "../../../types";
 import ClassicMode, { ClassicModeProps } from "../ClassicMode";
 import { Item } from "../ClassicMode/types";
@@ -62,16 +62,18 @@ export default function ClassicModeView<I extends Item>(
           context,
           state,
           choicesRemaining,
+          totalChoices,
         }) => {
           return (
             <Stack direction="column" alignItems="center">
-              {!isFinished &&
-                (choicesRemaining > 0 ? (
-                  <Text>{choicesRemaining} Choice(s) Remaining</Text>
-                ) : (
-                  <Text>Final Choice</Text>
-                ))}
-
+              {totalChoices && (
+                <Box width="512px">
+                  <ChoicesRemainingProgressBar
+                    choicesRemaining={choicesRemaining}
+                    totalChoices={totalChoices}
+                  />
+                </Box>
+              )}
               <Text
                 as="h1"
                 sx={{
@@ -101,5 +103,41 @@ export default function ClassicModeView<I extends Item>(
         }}
       </ClassicMode>
     </>
+  );
+}
+
+export type ChoicesRemainingProgressBarProps = {
+  choicesRemaining: number;
+  totalChoices: number;
+};
+
+function ChoicesRemainingProgressBar({
+  choicesRemaining,
+  totalChoices,
+}: ChoicesRemainingProgressBarProps) {
+  return (
+    <Box width="100%" position="relative">
+      <Text
+        position="absolute"
+        zIndex={99}
+        top="50%"
+        left="50%"
+        transform="translate(-50%, -50%)"
+        color="twobttns.lighttext"
+        fontStyle="italic"
+        fontSize="14px"
+        backgroundColor="rgba(0,0,0,0.5)"
+        paddingX="1rem"
+      >
+        {choicesRemaining} / {totalChoices} choices remaining
+      </Text>
+      <Box position="relative">
+        <Progress
+          value={totalChoices - choicesRemaining}
+          max={totalChoices}
+          height="20px"
+        />
+      </Box>
+    </Box>
   );
 }
