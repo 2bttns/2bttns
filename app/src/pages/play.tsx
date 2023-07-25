@@ -1,5 +1,6 @@
 import {
   Badge,
+  Box,
   Button,
   Modal,
   ModalBody,
@@ -8,6 +9,7 @@ import {
   ModalFooter,
   ModalHeader,
   ModalOverlay,
+  Text,
   useDisclosure,
   VStack,
 } from "@chakra-ui/react";
@@ -25,8 +27,8 @@ import { AvailableModes } from "../modes/availableModes";
 import { getModeUI } from "../modes/modesUIRegistry";
 import { ModeUIProps } from "../modes/types";
 import { prisma } from "../server/db";
-import { logger } from "../utils/logger";
 import { api, setPlayerToken } from "../utils/api";
+import { logger } from "../utils/logger";
 import { NextPageWithLayout } from "./_app";
 
 const jwtSchema = z.object({
@@ -233,12 +235,11 @@ function Layout(props: LayoutProps) {
   }
 
   return (
-    <PlayerLayout
-      navbarProps={{
-        additionalContentEnd: <h1>Playing 2bttns | Player ID: {playerId}</h1>,
-      }}
-    >
-      {children}
+    <PlayerLayout>
+      <Box m="1rem">
+        <Text textAlign="right">Playing 2bttns | Player ID: {playerId}</Text>
+        {children}
+      </Box>
     </PlayerLayout>
   );
 }
