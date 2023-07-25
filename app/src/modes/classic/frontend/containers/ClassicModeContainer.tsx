@@ -75,7 +75,7 @@ export default function ClassicModeContainer(props: ClassicModeContainerProps) {
   return (
     <>
       <ClassicModeView
-        game={gameData.game}
+        gameData={gameData}
         itemPolicy={itemPolicy ?? defaultItemPolicy}
         numRoundItems={gameData.numRoundItems}
         replacePolicy={replacePolicy ?? defaultReplacePolicy}

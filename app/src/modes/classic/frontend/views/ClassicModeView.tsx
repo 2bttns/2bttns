@@ -1,10 +1,10 @@
 import { Heading, Stack, Text } from "@chakra-ui/react";
-import { Game } from "@prisma/client";
+import { ModeUIProps } from "../../../types";
 import ClassicMode, { ClassicModeProps } from "../ClassicMode";
 import { Item } from "../ClassicMode/types";
 
 export type ClassicModeViewProps<I extends Item> = {
-  game: Game;
+  gameData: ModeUIProps<I>["gameData"];
   itemPolicy: ClassicModeProps<I>["itemPolicy"];
   numRoundItems: ClassicModeProps<I>["numRoundItems"];
   loadItemsCallback: ClassicModeProps<I>["loadItemsCallback"];
@@ -19,7 +19,7 @@ export default function ClassicModeView<I extends Item>(
   props: ClassicModeViewProps<I>
 ) {
   const {
-    game,
+    gameData: { game },
     itemPolicy,
     numRoundItems,
     onFinish,

@@ -1,6 +1,5 @@
 import {
   Badge,
-  Box,
   Button,
   Modal,
   ModalBody,
@@ -236,10 +235,10 @@ function Layout(props: LayoutProps) {
 
   return (
     <PlayerLayout>
-      <Box m="1rem">
-        <Text textAlign="right">Playing 2bttns | Player ID: {playerId}</Text>
-        {children}
-      </Box>
+      <Text textAlign="right" padding="1rem">
+        Playing 2bttns | Player ID: {playerId}
+      </Text>
+      {children}
     </PlayerLayout>
   );
 }
@@ -274,8 +273,6 @@ function ScoresModal({ gameId, playerId }: ScoresModalProps) {
 
   return (
     <>
-      <Button onClick={handleOpen}>My Scores [Debug]</Button>
-
       <Modal isOpen={isOpen} onClose={onClose}>
         <ModalOverlay />
         <ModalContent maxHeight={"500px"} overflowY="auto">
