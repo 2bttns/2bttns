@@ -18,8 +18,8 @@ async function main() {
   const { option } = await inquirer.prompt({
     type: "list",
     choices: [
-      { value: 0, name: "Add Admin OAuth Email to Allow List" },
-      { value: 1, name: "Create Admin Credentials using Username/Password" },
+      { value: 0, name: "Create Admin Credentials using Username/Password" },
+      { value: 1, name: "Add Admin OAuth Email to Allow List" },
     ],
     message: "Select an option",
     name: "option",
@@ -27,10 +27,10 @@ async function main() {
 
   switch (option) {
     case 0:
-      await addOAuthEmailToAdminAllowList();
+      await createAdminWithCredentials();
       break;
     case 1:
-      await createAdminWithCredentials();
+      await addOAuthEmailToAdminAllowList();
       break;
     default:
       throw new Error("Invalid option");
