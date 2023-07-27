@@ -8,6 +8,7 @@ export type RenderPropParams = {
   context: ReturnType<typeof use2bttnsMachine>["context"];
   isFinished: ReturnType<typeof use2bttnsMachine>["isFinished"];
   choicesRemaining: ReturnType<typeof use2bttnsMachine>["choicesRemaining"];
+  totalChoices: ReturnType<typeof use2bttnsMachine>["totalChoices"];
   state: ReturnType<typeof use2bttnsMachine>["state"];
 };
 
@@ -16,6 +17,7 @@ export type ClassicModeProps<I extends Item> = {
   hotkeys?: Use2bttnsMachineConfig<I>["hotkeys"];
   button1Props?: Partial<ClassicButtonProps>;
   button2Props?: Partial<ClassicButtonProps>;
+  showButtonColorBars?: boolean;
 
   // TODO: Allow for custom ReactNode rendering of items
   renderItem?: (item: I) => string;
@@ -35,6 +37,7 @@ export default function ClassicMode<I extends Item>(
     button2Props,
     children,
     hotkeys,
+    showButtonColorBars,
     itemPolicy,
     loadItemsCallback,
     numRoundItems,
@@ -45,6 +48,7 @@ export default function ClassicMode<I extends Item>(
 
   const {
     choicesRemaining,
+    totalChoices,
     context,
     current_options,
     isFinished,
@@ -63,7 +67,11 @@ export default function ClassicMode<I extends Item>(
     button1: registerButton({
       button: "first",
       buttonComponent: (
-        <ClassicButton hotkey={hotkeys?.first[0]} {...button1Props}>
+        <ClassicButton
+          hotkey={hotkeys?.first[0]}
+          showColorBar={showButtonColorBars}
+          {...button1Props}
+        >
           {current_options.first ? renderItem(current_options.first as I) : ""}
         </ClassicButton>
       ),
@@ -71,7 +79,11 @@ export default function ClassicMode<I extends Item>(
     button2: registerButton({
       button: "second",
       buttonComponent: (
-        <ClassicButton hotkey={hotkeys?.second[0]} {...button2Props}>
+        <ClassicButton
+          hotkey={hotkeys?.second[0]}
+          showColorBar={showButtonColorBars}
+          {...button2Props}
+        >
           {current_options.second
             ? renderItem(current_options.second as I)
             : ""}
@@ -81,6 +93,7 @@ export default function ClassicMode<I extends Item>(
     context,
     isFinished,
     choicesRemaining,
+    totalChoices,
     state,
   });
 }

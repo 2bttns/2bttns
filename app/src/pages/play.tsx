@@ -8,6 +8,7 @@ import {
   ModalFooter,
   ModalHeader,
   ModalOverlay,
+  Text,
   useDisclosure,
   VStack,
 } from "@chakra-ui/react";
@@ -25,8 +26,8 @@ import { AvailableModes } from "../modes/availableModes";
 import { getModeUI } from "../modes/modesUIRegistry";
 import { ModeUIProps } from "../modes/types";
 import { prisma } from "../server/db";
-import { logger } from "../utils/logger";
 import { api, setPlayerToken } from "../utils/api";
+import { logger } from "../utils/logger";
 import { NextPageWithLayout } from "./_app";
 
 const jwtSchema = z.object({
@@ -233,11 +234,10 @@ function Layout(props: LayoutProps) {
   }
 
   return (
-    <PlayerLayout
-      navbarProps={{
-        additionalContentEnd: <h1>Playing 2bttns | Player ID: {playerId}</h1>,
-      }}
-    >
+    <PlayerLayout>
+      <Text textAlign="right" padding="1rem">
+        Playing 2bttns | Player ID: {playerId}
+      </Text>
       {children}
     </PlayerLayout>
   );
@@ -273,8 +273,6 @@ function ScoresModal({ gameId, playerId }: ScoresModalProps) {
 
   return (
     <>
-      <Button onClick={handleOpen}>My Scores [Debug]</Button>
-
       <Modal isOpen={isOpen} onClose={onClose}>
         <ModalOverlay />
         <ModalContent maxHeight={"500px"} overflowY="auto">

@@ -240,12 +240,21 @@ export default function use2bttnsMachine<I extends Item>({
     return getChoicesRemaining(current.context);
   }, [current.context]);
 
+  const [totalChoices, setTotalChoices] = useState<number | null>(null);
+  useEffect(() => {
+    // Initialize totalChoices to the first value of choicesRemaining
+    if (totalChoices != null) return;
+    if (!canPick) return;
+    setTotalChoices(choicesRemaining);
+  }, [choicesRemaining, canPick]);
+
   return {
     registerButton,
     current_options: current.context.current_options,
     isFinished,
     context: current.context,
     choicesRemaining,
+    totalChoices,
     state: current.value,
   };
 }

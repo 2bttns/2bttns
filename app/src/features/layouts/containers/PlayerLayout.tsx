@@ -3,11 +3,12 @@ import Navbar, { NavbarProps } from "../../navbar/views/Navbar";
 
 export type PlayerLayoutProps = {
   children: React.ReactNode;
+  showNavbar?: boolean;
   navbarProps?: NavbarProps;
 };
 
 export default function PlayerLayout(props: PlayerLayoutProps) {
-  const { children, navbarProps } = props;
+  const { children, showNavbar = false, navbarProps } = props;
 
   return (
     <Box
@@ -18,7 +19,7 @@ export default function PlayerLayout(props: PlayerLayoutProps) {
       overflow="hidden"
     >
       <Box position="sticky" top="0" zIndex="99">
-        <Navbar {...navbarProps} />
+        {showNavbar && <Navbar {...navbarProps} />}
       </Box>
       <Box width="100%" height="100%">
         {children}
