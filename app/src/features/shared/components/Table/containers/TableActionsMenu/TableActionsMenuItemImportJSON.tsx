@@ -4,15 +4,15 @@ import {
   Divider,
   FormControl,
   FormLabel,
+  Heading,
   MenuItem,
   Switch,
   Text,
-  useDisclosure,
   VStack,
 } from "@chakra-ui/react";
 import { useCallback, useEffect, useState } from "react";
 import Dropzone from "react-dropzone";
-import { api, apiClient } from "../../../../../../utils/api";
+import { api, apiClient, RouterOutputs } from "../../../../../../utils/api";
 import ConfirmAlert from "../../../ConfirmAlert";
 import UnderlinedTextTooltip from "../../../UnderlinedTextTooltip";
 import { TableActionMenuContext } from "./index";
@@ -24,15 +24,27 @@ export type TableActionsMenuItemImportJSON<T extends object> = {
  * Add this to the `actionItems` prop of a `TableActionMenu` to add an "Import JSON" button for bulk importing 2bttns data from JSON
  */
 
+export enum ImportStatus {
+  CLOSED = "HIDDEN",
+  READY_FOR_IMPORT = "READY_FOR_IMPORT",
+  IMPORTING = "IMPORTING",
+  IMPORT_COMPLETE = "IMPORT_COMPLETE",
+}
+
 export default function TableActionsMenuItemImportJSON<T extends object>(
   props: TableActionsMenuItemImportJSON<T>
 ) {
   const { context } = props;
 
-  const { isOpen, onOpen, onClose } = useDisclosure();
-
   const [file, setFile] = useState<File | null>(null);
-  const [isImporting, setImporting] = useState<boolean>(false);
+
+  const [importStatus, setImportStatus] = useState<ImportStatus>(
+    ImportStatus.CLOSED
+  );
+
+  const [importResponse, setImportResponse] = useState<
+    RouterOutputs["importData"]["importData"] | null
+  >(null);
 
   const [allOrNothing, setAllOrNothing] = useState<boolean>(false);
   const [generateNewIds, setGenerateNewIds] = useState<boolean>(false);
@@ -49,55 +61,31 @@ export default function TableActionsMenuItemImportJSON<T extends object>(
   const handleConfirm = async () => {
     try {
       if (!file) return;
-      if (isImporting) return;
+      if (importStatus != ImportStatus.READY_FOR_IMPORT) return;
       if (typeof window === "undefined") return;
 
       const fileText = await file.text();
       const base64 = window.btoa(fileText);
 
-      setImporting(true);
+      setImportStatus(ImportStatus.IMPORTING);
       await utils.importData.invalidate();
       const response = await apiClient.importData.importData.mutate({
         jsonBase64: base64,
         allOrNothing,
         generateNewIds,
       });
+      setImportResponse(response);
+
       await Promise.all([
         utils.tags.invalidate(),
         utils.gameObjects.invalidate(),
         utils.games.invalidate(),
       ]);
-
-      window.alert(
-        `Imported ${response.results.tags.successes} / ${response.results.tags.failures} tags, ${response.results.gameObjects.successes} /
-${response.results.gameObjects.failures} game objects, and ${response.results.games.successes} / ${response.results.games.failures} games.`
-      );
-
-      const errorMessages = response.errorMessages
-        ? `
-=======================================
-${response.errorMessages.join("\n---------------------------------------")}
-=======================================`
-        : "";
-
-      if (allOrNothing && response.allOrNothingFailed) {
-        throw new Error(`
-All or nothing import failed.
-${errorMessages}`);
-      }
-
-      if (response.errorMessages && response.errorMessages.length > 0) {
-        throw new Error(
-          `
-Some objects failed to import. ${response.errorMessages} errors:
-${errorMessages}`
-        );
-      }
     } catch (error) {
       console.error(error);
       window.alert("Error importing data. See console for details.");
     } finally {
-      setImporting(false);
+      setImportStatus(ImportStatus.IMPORT_COMPLETE);
     }
   };
 
@@ -113,12 +101,22 @@ ${errorMessages}`
       <ConfirmAlert
         alertTitle={`Import from JSON`}
         handleConfirm={handleConfirm}
-        isOpen={isOpen}
-        onClose={onClose}
+        isOpen={
+          importStatus === ImportStatus.READY_FOR_IMPORT ||
+          importStatus === ImportStatus.IMPORTING
+        }
+        onClose={() => {
+          setImportStatus((prev) => {
+            if (prev === ImportStatus.IMPORT_COMPLETE) {
+              return prev;
+            }
+            return ImportStatus.CLOSED;
+          });
+        }}
         performingConfirmActionText="Importing..."
         confirmButtonProps={{
           colorScheme: "blue",
-          isDisabled: !file || isImporting,
+          isDisabled: !file || importStatus !== ImportStatus.READY_FOR_IMPORT,
         }}
       >
         <Dropzone
@@ -222,7 +220,107 @@ ${errorMessages}`
           </FormControl>
         </VStack>
       </ConfirmAlert>
-      <MenuItem onClick={onOpen}>Import from JSON</MenuItem>
+
+      <ImportResults
+        isOpen={importStatus === ImportStatus.IMPORT_COMPLETE}
+        onClose={() => {
+          setImportStatus(ImportStatus.CLOSED);
+          setImportResponse(null);
+        }}
+        importResponse={importResponse}
+      />
+      <MenuItem
+        onClick={() => {
+          setImportStatus(ImportStatus.READY_FOR_IMPORT);
+        }}
+      >
+        Import from JSON
+      </MenuItem>
     </>
+  );
+}
+
+type ImportResultsProps = {
+  isOpen: boolean;
+  onClose: () => void;
+  importResponse: RouterOutputs["importData"]["importData"] | null;
+};
+function ImportResults(props: ImportResultsProps) {
+  const { isOpen, onClose, importResponse } = props;
+
+  const tagSuccesses = importResponse?.results.tags.successes ?? 0;
+  const tagFails = importResponse?.results.tags.failures ?? 0;
+  const tagTotal = tagSuccesses + tagFails;
+
+  const gameObjectSuccesses =
+    importResponse?.results.gameObjects.successes ?? 0;
+  const gameObjectFails = importResponse?.results.gameObjects.failures ?? 0;
+  const gameObjectTotal = gameObjectSuccesses + gameObjectFails;
+
+  const gameSuccesses = importResponse?.results.games.successes ?? 0;
+  const gameFails = importResponse?.results.games.failures ?? 0;
+  const gameTotal = gameSuccesses + gameFails;
+
+  return (
+    <ConfirmAlert
+      isOpen={isOpen}
+      onClose={onClose}
+      alertTitle=""
+      handleConfirm={async () => {}}
+      confirmText="Close"
+      confirmButtonProps={{
+        colorScheme: "blue",
+      }}
+      cancelButtonProps={{
+        display: "none",
+      }}
+    >
+      {importResponse && (
+        <>
+          <Heading size="md">Import Results</Heading>
+          <Box>
+            <Text as="span" fontWeight="bold">
+              Tags:
+            </Text>{" "}
+            <Text as="span">
+              {" "}
+              {tagSuccesses} / {tagTotal} imported
+            </Text>
+          </Box>
+          <Box>
+            <Text as="span" fontWeight="bold">
+              Game Objects:
+            </Text>{" "}
+            <Text as="span">
+              {" "}
+              {gameObjectSuccesses} / {gameObjectTotal} imported
+            </Text>
+          </Box>
+          <Box>
+            <Text as="span" fontWeight="bold">
+              Games:
+            </Text>{" "}
+            <Text as="span">
+              {" "}
+              {gameSuccesses} / {gameTotal} imported
+            </Text>
+          </Box>
+
+          <Heading size="sm" marginTop="1rem">
+            Errors
+          </Heading>
+          {importResponse.errorMessages &&
+          importResponse.errorMessages.length > 0 ? (
+            <Code maxHeight="200px" overflowY="scroll" color="red.500">
+              {importResponse.errorMessages?.join(
+                "\n\n====================\n\n"
+              )}
+            </Code>
+          ) : (
+            <Text>No errors</Text>
+          )}
+        </>
+      )}
+    </ConfirmAlert>
   );
 }
