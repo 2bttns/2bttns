@@ -19,10 +19,11 @@ export interface TagOption extends Option {
 export type TagBadgesProps = {
   selectedTags: { id: Tag["id"]; name: Tag["name"] }[];
   collapseLetterLimit?: number | "disabled";
+  minNonCollapsed?: number;
 };
 
 export default function TagBadges(props: TagBadgesProps) {
-  const { selectedTags, collapseLetterLimit = 32 } = props;
+  const { selectedTags, collapseLetterLimit = 32, minNonCollapsed = 1 } = props;
 
   const shouldCollapse =
     collapseLetterLimit !== "disabled" &&
@@ -33,7 +34,7 @@ export default function TagBadges(props: TagBadgesProps) {
     if (!shouldCollapse) return selectedTags.length;
 
     let remainingLetters = collapseLetterLimit;
-    let numTags = 0;
+    let numTags = minNonCollapsed;
     selectedTags.forEach(({ name }) => {
       remainingLetters -= name.length;
       if (remainingLetters > 0) {
@@ -41,7 +42,7 @@ export default function TagBadges(props: TagBadgesProps) {
       }
     });
     return numTags;
-  }, [shouldCollapse, selectedTags]);
+  }, [shouldCollapse, selectedTags, minNonCollapsed]);
 
   const numTagBadgesCollapsed = selectedTags.length - numTagBadgesNonCollapsed;
 
@@ -73,7 +74,7 @@ export default function TagBadges(props: TagBadgesProps) {
         {tagBadges.slice(0, numTagBadgesNonCollapsed)}
         {!isCollapsed && tagBadges.slice(numTagBadgesNonCollapsed)}
       </Flex>
-      {shouldCollapse && (
+      {shouldCollapse && numTagBadgesCollapsed > 0 && (
         <Box alignSelf="end">
           <ChakraLink onClick={toggleCollapse} color="blue.500">
             {isCollapsed ? `Show ${numTagBadgesCollapsed} More` : "Collapse"}
