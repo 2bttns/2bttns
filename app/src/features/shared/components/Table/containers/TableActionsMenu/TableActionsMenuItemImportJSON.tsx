@@ -311,7 +311,12 @@ function ImportResults(props: ImportResultsProps) {
           </Heading>
           {importResponse.errorMessages &&
           importResponse.errorMessages.length > 0 ? (
-            <Code maxHeight="200px" overflowY="scroll" color="red.500">
+            <Code
+              maxHeight="200px"
+              maxWidth="100%"
+              overflow="scroll"
+              color="red.500"
+            >
               {importResponse.errorMessages?.join(
                 "\n\n====================\n\n"
               )}
