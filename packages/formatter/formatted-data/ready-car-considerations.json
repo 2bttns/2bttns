@@ -1,0 +1,131 @@
+{
+  "gameObjects": [
+    {
+      "id": "clkew1xh10000qi6mf1n7c6iw",
+      "name": "Fuel efficiency",
+      "description": "",
+      "tagIds": []
+    },
+    {
+      "id": "clkew1xh20001qi6m169b3j45",
+      "name": "Safety features",
+      "description": "",
+      "tagIds": []
+    },
+    {
+      "id": "clkew1xh20002qi6mdlvfhpda",
+      "name": "Reliability and durability",
+      "description": "",
+      "tagIds": []
+    },
+    {
+      "id": "clkew1xh20003qi6m4bsafgck",
+      "name": "Cargo space and storage",
+      "description": "",
+      "tagIds": []
+    },
+    {
+      "id": "clkew1xh20004qi6m5kougyv7",
+      "name": "Comfort and interior features",
+      "description": "",
+      "tagIds": []
+    },
+    {
+      "id": "clkew1xh20005qi6mbdaz68l0",
+      "name": "Technology and connectivity",
+      "description": "",
+      "tagIds": []
+    },
+    {
+      "id": "clkew1xh20006qi6m7r4dan5g",
+      "name": "Performance and handling",
+      "description": "",
+      "tagIds": []
+    },
+    {
+      "id": "clkew1xh20007qi6m6xcy7wp2",
+      "name": "Maintenance and repair costs",
+      "description": "",
+      "tagIds": []
+    },
+    {
+      "id": "clkew1xh20008qi6mdokuhwqi",
+      "name": "Resale value",
+      "description": "",
+      "tagIds": []
+    },
+    {
+      "id": "clkew1xh30009qi6m5cf146zd",
+      "name": "Environmental impact",
+      "description": "",
+      "tagIds": []
+    },
+    {
+      "id": "clkew1xh3000aqi6m0uiie2xe",
+      "name": "Price and affordability",
+      "description": "",
+      "tagIds": []
+    },
+    {
+      "id": "clkew1xh3000bqi6mcb8l2vbf",
+      "name": "Brand reputation",
+      "description": "",
+      "tagIds": []
+    },
+    {
+      "id": "clkew1xh3000cqi6mfzwyaagd",
+      "name": "Transmission type (manual or automatic)",
+      "description": "",
+      "tagIds": []
+    },
+    {
+      "id": "clkew1xh3000dqi6mekde8d9i",
+      "name": "Seating capacity and passenger room",
+      "description": "",
+      "tagIds": []
+    },
+    {
+      "id": "clkew1xh3000eqi6m257s94mg",
+      "name": "Car condition (new or used)",
+      "description": "",
+      "tagIds": []
+    },
+    {
+      "id": "clkew1xh3000fqi6mf2gl2c9l",
+      "name": "Suitability for specific activities (e.g., off-roading, towing)",
+      "description": "",
+      "tagIds": []
+    },
+    {
+      "id": "clkew1xh3000gqi6m5c0qdjem",
+      "name": "Fuel type (gasoline, diesel, hybrid, electric)",
+      "description": "",
+      "tagIds": []
+    },
+    {
+      "id": "clkew1xh3000hqi6m91ybbvcy",
+      "name": "Insurance rates",
+      "description": "",
+      "tagIds": []
+    },
+    {
+      "id": "clkew1xh3000iqi6mhl664w9r",
+      "name": "Driver assistance and safety technology",
+      "description": "",
+      "tagIds": []
+    },
+    {
+      "id": "clkew1xh3000jqi6mcgsx1ml6",
+      "name": "Customization options",
+      "description": "",
+      "tagIds": []
+    }
+  ],
+  "tags": [
+    {
+      "id": "",
+      "name": "",
+      "description": ""
+    }
+  ]
+}

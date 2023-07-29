@@ -1,0 +1,33 @@
+{
+  "outdoor_activities": [
+    { "name": "parasailing" },
+    { "name": "rock climbing in a gym" },
+    { "name": "river rafting" },
+    { "name": "backcountry skiing" },
+    { "name": "cycling tour" },
+    { "name": "mountain boarding" },
+    { "name": "horseback riding" },
+    { "name": "sailing regatta" },
+    { "name": "kite landboarding" },
+    { "name": "zip-lining" },
+    { "name": "outdoor concert" },
+    { "name": "surf fishing" },
+    { "name": "mountain trail biking" },
+    { "name": "canopy tour" },
+    { "name": "whitewater kayaking" },
+    { "name": "wildlife safari" },
+    { "name": "geocaching adventure" },
+    { "name": "parkour training" },
+    { "name": "outdoor archery" },
+    { "name": "cliff jumping" },
+    { "name": "coasteering" },
+    { "name": "sunset paddleboarding" },
+    { "name": "outdoor boot camp" },
+    { "name": "sandboarding" },
+    { "name": "kayak surfing" },
+    { "name": "rock scrambling" },
+    { "name": "bungee jumping" },
+    { "name": "cultural walking tour" },
+    { "name": "river tubing" }
+  ]
+}

@@ -1,0 +1,95 @@
+{
+  "gameObjects": [
+    {
+      "id": "clkew3yna0000ty6m38vd5hs9",
+      "name": "C Major",
+      "description": "",
+      "tagIds": []
+    },
+    {
+      "id": "clkew3yna0001ty6m25wpaxk2",
+      "name": "C Minor",
+      "description": "",
+      "tagIds": []
+    },
+    {
+      "id": "clkew3yna0002ty6marn88o36",
+      "name": "D Major",
+      "description": "",
+      "tagIds": []
+    },
+    {
+      "id": "clkew3yna0003ty6m5n769qa3",
+      "name": "D Minor",
+      "description": "",
+      "tagIds": []
+    },
+    {
+      "id": "clkew3yna0004ty6m1pcnfbox",
+      "name": "E Major",
+      "description": "",
+      "tagIds": []
+    },
+    {
+      "id": "clkew3yna0005ty6m9yf9bk9h",
+      "name": "E Minor",
+      "description": "",
+      "tagIds": []
+    },
+    {
+      "id": "clkew3ynb0006ty6m2lot9o1c",
+      "name": "F Major",
+      "description": "",
+      "tagIds": []
+    },
+    {
+      "id": "clkew3ynb0007ty6m30tb32jz",
+      "name": "F Minor",
+      "description": "",
+      "tagIds": []
+    },
+    {
+      "id": "clkew3ynb0008ty6mbjvk0ebh",
+      "name": "G Major",
+      "description": "",
+      "tagIds": []
+    },
+    {
+      "id": "clkew3ynb0009ty6me31w5uem",
+      "name": "G Minor",
+      "description": "",
+      "tagIds": []
+    },
+    {
+      "id": "clkew3ynb000aty6mbhkd5x03",
+      "name": "A Major",
+      "description": "",
+      "tagIds": []
+    },
+    {
+      "id": "clkew3ynb000bty6meb40es1h",
+      "name": "A Minor",
+      "description": "",
+      "tagIds": []
+    },
+    {
+      "id": "clkew3ynb000cty6md4k691sr",
+      "name": "B Major",
+      "description": "",
+      "tagIds": []
+    },
+    {
+      "id": "clkew3ynb000dty6m2o8v98ci",
+      "name": "B Minor",
+      "description": "",
+      "tagIds": []
+    }
+  ],
+  "tags": [
+    {
+      "id": "",
+      "name": "",
+      "description": ""
+    }
+  ]
+}

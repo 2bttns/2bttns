@@ -1,0 +1,215 @@
+{
+  "gameObjects": [
+    {
+      "id": "clkew5pdx0000z46m1q3scfya",
+      "name": "board game night",
+      "description": "",
+      "tagIds": []
+    },
+    {
+      "id": "clkew5pdx0001z46m2amx4his",
+      "name": "movie marathon",
+      "description": "",
+      "tagIds": []
+    },
+    {
+      "id": "clkew5pdx0002z46mdsjrb2u2",
+      "name": "karaoke party",
+      "description": "",
+      "tagIds": []
+    },
+    {
+      "id": "clkew5pdx0003z46mh4u53g65",
+      "name": "escape room challenge",
+      "description": "",
+      "tagIds": []
+    },
+    {
+      "id": "clkew5pdx0004z46m3qvo6f87",
+      "name": "cooking class",
+      "description": "",
+      "tagIds": []
+    },
+    {
+      "id": "clkew5pdx0005z46mfq110c70",
+      "name": "paint and sip",
+      "description": "",
+      "tagIds": []
+    },
+    {
+      "id": "clkew5pdx0006z46m38t8h00m",
+      "name": "video game tournament",
+      "description": "",
+      "tagIds": []
+    },
+    {
+      "id": "clkew5pdx0007z46m6pqn2fe8",
+      "name": "indoor rock climbing",
+      "description": "",
+      "tagIds": []
+    },
+    {
+      "id": "clkew5pdx0008z46m0onocrhd",
+      "name": "trampoline park visit",
+      "description": "",
+      "tagIds": []
+    },
+    {
+      "id": "clkew5pdx0009z46meiql6xqk",
+      "name": "puzzle solving",
+      "description": "",
+      "tagIds": []
+    },
+    {
+      "id": "clkew5pdy000az46m6sg4f70u",
+      "name": "board game cafe visit",
+      "description": "",
+      "tagIds": []
+    },
+    {
+      "id": "clkew5pdy000bz46mf00chzpl",
+      "name": "virtual reality gaming",
+      "description": "",
+      "tagIds": []
+    },
+    {
+      "id": "clkew5pdy000cz46m2bq2fz46",
+      "name": "pottery painting",
+      "description": "",
+      "tagIds": []
+    },
+    {
+      "id": "clkew5pdy000dz46mfwas68ty",
+      "name": "DIY craft session",
+      "description": "",
+      "tagIds": []
+    },
+    {
+      "id": "clkew5pdy000ez46m64ak5ypi",
+      "name": "mystery dinner party",
+      "description": "",
+      "tagIds": []
+    },
+    {
+      "id": "clkew5pdy000fz46ma9765pei",
+      "name": "scavenger hunt",
+      "description": "",
+      "tagIds": []
+    },
+    {
+      "id": "clkew5pdy000gz46m97igfxax",
+      "name": "wine tasting event",
+      "description": "",
+      "tagIds": []
+    },
+    {
+      "id": "clkew5pdy000hz46m2ejzftzf",
+      "name": "arcade game tournament",
+      "description": "",
+      "tagIds": []
+    },
+    {
+      "id": "clkew5pdy000iz46mhibi31mz",
+      "name": "book club gathering",
+      "description": "",
+      "tagIds": []
+    },
+    {
+      "id": "clkew5pdy000jz46m7bys336i",
+      "name": "cooking competition",
+      "description": "",
+      "tagIds": []
+    },
+    {
+      "id": "clkew5pdy000kz46mde37beeo",
+      "name": "indoor mini-golf",
+      "description": "",
+      "tagIds": []
+    },
+    {
+      "id": "clkew5pdy000lz46mhsz42mga",
+      "name": "art jamming session",
+      "description": "",
+      "tagIds": []
+    },
+    {
+      "id": "clkew5pdy000mz46mcufm8kyx",
+      "name": "musical karaoke night",
+      "description": "",
+      "tagIds": []
+    },
+    {
+      "id": "clkew5pdy000nz46m090m4hwh",
+      "name": "indoor treasure hunt",
+      "description": "",
+      "tagIds": []
+    },
+    {
+      "id": "clkew5pdy000oz46mbc830bbl",
+      "name": "baking and decorating cupcakes",
+      "description": "",
+      "tagIds": []
+    },
+    {
+      "id": "clkew5pdy000pz46m5odkgw8r",
+      "name": "virtual museum tour",
+      "description": "",
+      "tagIds": []
+    },
+    {
+      "id": "clkew5pdy000qz46mftz95dps",
+      "name": "spa day at home",
+      "description": "",
+      "tagIds": []
+    },
+    {
+      "id": "clkew5pdy000rz46m8n30085d",
+      "name": "DIY home improvement project",
+      "description": "",
+      "tagIds": []
+    },
+    {
+      "id": "clkew5pdy000sz46m9emmh8mn",
+      "name": "indoor gardening and plant care",
+      "description": "",
+      "tagIds": []
+    },
+    {
+      "id": "clkew5pdy000tz46md8h16wv6",
+      "name": "painting or drawing workshop",
+      "description": "",
+      "tagIds": []
+    },
+    {
+      "id": "clkew5pdy000uz46m9e137saf",
+      "name": "martial arts or fitness class",
+      "description": "",
+      "tagIds": []
+    },
+    {
+      "id": "clkew5pdy000vz46m5lmmdgtk",
+      "name": "karaoke night at home",
+      "description": "",
+      "tagIds": []
+    },
+    {
+      "id": "clkew5pdy000wz46m1w9m2utz",
+      "name": "online dance or workout session",
+      "description": "",
+      "tagIds": []
+    },
+    {
+      "id": "clkew5pdy000xz46mamjb57el",
+      "name": "crafting and DIY workshop",
+      "description": "",
+      "tagIds": []
+    }
+  ],
+  "tags": [
+    {
+      "id": "",
+      "name": "",
+      "description": ""
+    }
+  ]
+}

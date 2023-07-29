@@ -1,0 +1,28 @@
+{
+  "name": "@2bttns/formatter",
+  "version": "1.2.4",
+  "description": "Convert JSON data into a format readable by the 2bttns Console.",
+  "main": "./formatter.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node ./formatter.js completion:install",
+    "build": "tsc formatter.ts"
+  },
+  "bin": {
+    "game-objects-converter": "./formatter.js"
+  },
+  "author": "2bttns Company",
+  "license": "MIT",
+  "dependencies": {
+    "@types/node": "^20.3.2",
+    "cuid": "^3.0.0",
+    "enquirer": "^2.3.6",
+    "glob": "^10.3.3",
+    "omelette": "^0.4.17",
+    "typescript": "^5.1.6"
+  },
+  "devDependencies": {
+    "ts-node": "^10.9.1",
+    "ts-node-dev": "^2.0.0"
+  }
+}
