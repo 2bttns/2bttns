@@ -6,6 +6,7 @@ import {
   FormLabel,
   Heading,
   MenuItem,
+  Progress,
   Switch,
   Text,
   VStack,
@@ -120,6 +121,9 @@ export default function TableActionsMenuItemImportJSON<T extends object>(
           isDisabled: !file || importStatus !== ImportStatus.READY_FOR_IMPORT,
         }}
       >
+        {importStatus === ImportStatus.IMPORTING && (
+          <Progress size="xs" isIndeterminate />
+        )}
         <Dropzone
           onDrop={onDrop}
           accept={{
