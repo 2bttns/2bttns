@@ -1,5 +1,6 @@
 import { createId } from "@paralleldrive/cuid2";
 import { Game, GameObject, Prisma, Tag } from "@prisma/client";
+import { PrismaClientKnownRequestError } from "@prisma/client/runtime";
 import { TRPCError } from "@trpc/server";
 import { output, z } from "zod";
 import { defaultMode } from "../../../../modes/availableModes";
@@ -84,6 +85,8 @@ export const importData = adminOrApiKeyProtectedProcedure
         games: {},
       };
 
+      const logMessages: z.infer<typeof output>["logMessages"] = [];
+
       type QueryWithLogMessages = {
         failMessage?: string;
         successMessage?: string;
@@ -102,6 +105,7 @@ export const importData = adminOrApiKeyProtectedProcedure
         if (generateNewIds) {
           validated.tags.forEach((tag) => {
             const newId = createId();
+            if (!tag.id) tag.id = newId;
             remappedIdsOldToNew.tags[tag.id] = newId;
             remappedIdsNewToOld.tags[newId] = tag.id;
           });
@@ -112,7 +116,7 @@ export const importData = adminOrApiKeyProtectedProcedure
           return {
             query: ctx.prisma.tag.create({
               data: {
-                id: generateNewIds ? remappedIdsOldToNew.tags[tag.id] : tag.id,
+                id: generateNewIds ? remappedIdsOldToNew.tags[tag.id!] : tag.id,
                 name: `${
                   tag.name
                 } (Imported ${importTimestamp.toLocaleString()})`,
@@ -132,6 +136,7 @@ export const importData = adminOrApiKeyProtectedProcedure
         if (generateNewIds) {
           validated.gameObjects.forEach((gameObject) => {
             const newId = createId();
+            if (!gameObject.id) gameObject.id = newId;
             remappedIdsOldToNew.gameObjects[gameObject.id] = newId;
             remappedIdsNewToOld.gameObjects[newId] = gameObject.id;
           });
@@ -146,9 +151,9 @@ export const importData = adminOrApiKeyProtectedProcedure
               query: ctx.prisma.gameObject.create({
                 data: {
                   id: generateNewIds
-                    ? remappedIdsOldToNew.gameObjects[gameObject.id]
+                    ? remappedIdsOldToNew.gameObjects[gameObject.id!]
                     : gameObject.id,
-                  name: gameObject.name,
+                  name: gameObject.name ?? "Untitled Game Object",
                   description: gameObject.description,
                 },
               }),
@@ -179,7 +184,7 @@ export const importData = adminOrApiKeyProtectedProcedure
                 query: ctx.prisma.gameObject.update({
                   where: {
                     id: generateNewIds
-                      ? remappedIdsOldToNew.gameObjects[gameObject.id]
+                      ? remappedIdsOldToNew.gameObjects[gameObject.id!]
                       : gameObject.id,
                   },
                   data: {
@@ -212,6 +217,7 @@ export const importData = adminOrApiKeyProtectedProcedure
         if (generateNewIds) {
           validated.games.forEach((game) => {
             const newId = createId();
+            if (!game.id) game.id = newId;
             remappedIdsOldToNew.games[game.id] = newId;
             remappedIdsNewToOld.games[newId] = game.id;
           });
@@ -225,9 +231,9 @@ export const importData = adminOrApiKeyProtectedProcedure
             query: ctx.prisma.game.create({
               data: {
                 id: generateNewIds
-                  ? remappedIdsOldToNew.games[game.id]
+                  ? remappedIdsOldToNew.games[game.id!]
                   : game.id,
-                name: game.name,
+                name: game.name ?? "Untitled Game",
                 description: game.description,
                 mode: defaultMode,
               },
@@ -253,7 +259,7 @@ export const importData = adminOrApiKeyProtectedProcedure
               query: ctx.prisma.game.update({
                 where: {
                   id: generateNewIds
-                    ? remappedIdsOldToNew.games[game.id]
+                    ? remappedIdsOldToNew.games[game.id!]
                     : game.id,
                 },
                 data: {
@@ -275,17 +281,31 @@ export const importData = adminOrApiKeyProtectedProcedure
       }
 
       // Execute the queries
-      const logMessages: z.infer<typeof output>["logMessages"] = [];
       let allOrNothingFailed = undefined;
       if (allOrNothing) {
         // If allOrNothing=true, execute all queries in a transaction
         try {
           await ctx.prisma.$transaction(transactionQueries.map((q) => q.query));
+          transactionQueries.forEach((q) => {
+            if (q.successMessage) {
+              logMessages.push({ type: "info", message: q.successMessage });
+            }
+          });
           allOrNothingFailed = false;
         } catch (e) {
           allOrNothingFailed = true;
-          if (e instanceof Error) {
-            logMessages.push({ type: "error", message: e.message });
+          logMessages.push({
+            type: "error",
+            message:
+              "All or Nothing Import Failed -- no changes have been applied. See below for details.",
+          });
+          if (e instanceof PrismaClientKnownRequestError) {
+            logMessages.push({ type: "error", message: String(e.stack) });
+            logMessages.push({
+              type: "error",
+              message:
+                "This indicates the error may have been caused by an imported ID that conflicts with an existing ID.",
+            });
           }
         }
       } else {
@@ -325,7 +345,7 @@ export const importData = adminOrApiKeyProtectedProcedure
         where: {
           id: {
             in: validated.tags?.map((tag) =>
-              generateNewIds ? remappedIdsOldToNew.tags[tag.id]! : tag.id
+              generateNewIds ? remappedIdsOldToNew.tags[tag.id!]! : tag.id!
             ),
           },
           createdAt: {
@@ -339,8 +359,8 @@ export const importData = adminOrApiKeyProtectedProcedure
           id: {
             in: validated.gameObjects?.map((gameObject) =>
               generateNewIds
-                ? remappedIdsOldToNew.gameObjects[gameObject.id]!
-                : gameObject.id
+                ? remappedIdsOldToNew.gameObjects[gameObject.id!]!
+                : gameObject.id!
             ),
           },
           createdAt: {
@@ -353,7 +373,7 @@ export const importData = adminOrApiKeyProtectedProcedure
         where: {
           id: {
             in: validated.games?.map((game) =>
-              generateNewIds ? remappedIdsOldToNew.games[game.id]! : game.id
+              generateNewIds ? remappedIdsOldToNew.games[game.id!]! : game.id!
             ),
           },
           createdAt: {

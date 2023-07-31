@@ -73,9 +73,9 @@ export const output = z.object({
   games: z
     .array(
       z.object({
-        id: z.string(),
-        name: z.string(),
-        description: z.string(),
+        id: z.string().optional(),
+        name: z.string().optional(),
+        description: z.string().optional(),
         inputTagIds: z.array(z.string()).optional(),
       })
     )
@@ -83,9 +83,9 @@ export const output = z.object({
   gameObjects: z
     .array(
       z.object({
-        id: z.string(),
-        name: z.string(),
-        description: z.string(),
+        id: z.string().optional(),
+        name: z.string().optional(),
+        description: z.string().optional(),
         tagIds: z.array(z.string()).optional(),
       })
     )
@@ -93,9 +93,9 @@ export const output = z.object({
   tags: z
     .array(
       z.object({
-        id: z.string(),
-        name: z.string(),
-        description: z.string(),
+        id: z.string().optional(),
+        name: z.string().optional(),
+        description: z.string().optional(),
       })
     )
     .optional(),

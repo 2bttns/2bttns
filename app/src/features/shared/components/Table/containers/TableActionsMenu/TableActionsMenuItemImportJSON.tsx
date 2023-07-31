@@ -198,7 +198,8 @@ export default function TableActionsMenuItemImportJSON<T extends object>(
                       <Text>
                         When set to <Code>True</Code> : All imported objects
                         will have a new ID generated for them. This is useful if
-                        you want to import data without risk of ID collisions.
+                        you want to import data without risk of ID collisions or
+                        if you want to import data that lacks ID fields.
                       </Text>
                       <br />
                       <Text>
