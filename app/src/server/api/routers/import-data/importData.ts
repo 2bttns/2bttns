@@ -310,23 +310,23 @@ export const importData = adminOrApiKeyProtectedProcedure
         }
       } else {
         // Execute all queries, but continue even if there are errors for allOrNothing=false
-        const takeErrorMessage = (q: QueryWithLogMessages) => {
-          if (q.failMessage) {
-            logMessages.push({ type: "error", message: q.failMessage });
-          }
-        };
-
-        const takeInfoMessage = (q: QueryWithLogMessages) => {
-          if (q.successMessage) {
-            logMessages.push({ type: "info", message: q.successMessage });
-          }
-        };
-
         const handleLogs = (q: QueryWithLogMessages) => {
           if (!q) return null;
           return q.query
-            .then(() => takeInfoMessage(q))
-            .catch(() => takeErrorMessage(q));
+            .then(() => {
+              if (q.successMessage) {
+                logMessages.push({ type: "info", message: q.successMessage });
+              }
+            })
+            .catch((e) => {
+              if (q.failMessage) {
+                let message = q.failMessage;
+                if (e instanceof Error) {
+                  message += `: ${e.message}`;
+                }
+                logMessages.push({ type: "error", message });
+              }
+            });
         };
 
         if (createTagQueries)
