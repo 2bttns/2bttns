@@ -368,7 +368,7 @@ function ImportResults(props: ImportResultsProps) {
                 })}
             </Code>
           ) : (
-            <Text>No errors</Text>
+            <></>
           )}
         </>
       )}
