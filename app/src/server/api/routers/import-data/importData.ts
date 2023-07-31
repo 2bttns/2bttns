@@ -1,5 +1,5 @@
 import { createId } from "@paralleldrive/cuid2";
-import { Game, GameObject, Prisma, PrismaPromise } from "@prisma/client";
+import { Game, GameObject, Prisma, Tag } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 import { output, z } from "zod";
 import { defaultMode } from "../../../../modes/availableModes";
@@ -34,7 +34,14 @@ const output = z.object({
     games: resultCounts,
   }),
   allOrNothingFailed: z.boolean().optional(),
-  errorMessages: z.array(z.string()).optional(),
+  logMessages: z
+    .array(
+      z.object({
+        type: z.enum(["info", "error"]),
+        message: z.string(),
+      })
+    )
+    .optional(),
 });
 
 export const importData = adminOrApiKeyProtectedProcedure
@@ -77,14 +84,20 @@ export const importData = adminOrApiKeyProtectedProcedure
         games: {},
       };
 
-      const transactionQueries: (
-        | PrismaPromise<Prisma.BatchPayload>
-        | Prisma.Prisma__GameObjectClient<GameObject, never>
-        | Prisma.Prisma__GameClient<Game, never>
-      )[] = [];
+      type QueryWithLogMessages = {
+        failMessage?: string;
+        successMessage?: string;
+      } & {
+        query:
+          | Prisma.Prisma__TagClient<Tag, never>
+          | Prisma.Prisma__GameObjectClient<GameObject, never>
+          | Prisma.Prisma__GameClient<Game, never>;
+      };
+
+      const transactionQueries: QueryWithLogMessages[] = [];
 
       // Create tags
-      let createTagsQuery: PrismaPromise<Prisma.BatchPayload> | undefined;
+      let createTagQueries: QueryWithLogMessages[] | undefined;
       if (validated.tags && validated.tags.length > 0) {
         if (generateNewIds) {
           validated.tags.forEach((tag) => {
@@ -94,22 +107,27 @@ export const importData = adminOrApiKeyProtectedProcedure
           });
         }
 
-        createTagsQuery = ctx.prisma.tag.createMany({
-          data: validated.tags?.map((tag) => ({
-            id: generateNewIds ? remappedIdsOldToNew.tags[tag.id] : tag.id,
-            name: `${tag.name} (Imported ${importTimestamp.toLocaleString()})`,
-          })),
+        createTagQueries = validated.tags?.map((tag, index) => {
+          const tagNumStr = `(Tag ${index + 1}/${validated.tags!.length})`;
+          return {
+            query: ctx.prisma.tag.create({
+              data: {
+                id: generateNewIds ? remappedIdsOldToNew.tags[tag.id] : tag.id,
+                name: `${
+                  tag.name
+                } (Imported ${importTimestamp.toLocaleString()})`,
+              },
+            }),
+            failMessage: `Failed to create Tag (id="${tag.id}" name="${tag.name}") ${tagNumStr}`,
+            successMessage: `Created Tag (id="${tag.id}" name="${tag.name}") ${tagNumStr}`,
+          };
         });
-        transactionQueries.push(createTagsQuery);
+        transactionQueries.push(...createTagQueries);
       }
 
       // Create game objects
-      let createGameObjectsQuery:
-        | PrismaPromise<Prisma.BatchPayload>
-        | undefined;
-      let applyTagsToGameObjectsQueries:
-        | Prisma.Prisma__GameObjectClient<GameObject, never>[]
-        | undefined;
+      let createGameObjectQueries: QueryWithLogMessages[] | undefined;
+      let applyTagsToGameObjectsQueries: QueryWithLogMessages[] | undefined;
       if (validated.gameObjects && validated.gameObjects.length > 0) {
         if (generateNewIds) {
           validated.gameObjects.forEach((gameObject) => {
@@ -119,35 +137,68 @@ export const importData = adminOrApiKeyProtectedProcedure
           });
         }
 
-        createGameObjectsQuery = ctx.prisma.gameObject.createMany({
-          data: validated.gameObjects?.map((gameObject) => ({
-            id: generateNewIds
-              ? remappedIdsOldToNew.gameObjects[gameObject.id]
-              : gameObject.id,
-            name: gameObject.name,
-            description: gameObject.description,
-          })),
-        });
-        transactionQueries.push(createGameObjectsQuery);
+        createGameObjectQueries = validated.gameObjects.map(
+          (gameObject, index) => {
+            const gameObjectNumStr = `(Game Object ${index + 1}/${
+              validated.gameObjects!.length
+            })`;
+            return {
+              query: ctx.prisma.gameObject.create({
+                data: {
+                  id: generateNewIds
+                    ? remappedIdsOldToNew.gameObjects[gameObject.id]
+                    : gameObject.id,
+                  name: gameObject.name,
+                  description: gameObject.description,
+                },
+              }),
+              failMessage: `Failed to create Game Object (id="${gameObject.id}" name="${gameObject.name}") ${gameObjectNumStr}`,
+              successMessage: `Created Game Object (id="${gameObject.id}" name="${gameObject.name}") ${gameObjectNumStr}`,
+            };
+          }
+        );
+        transactionQueries.push(...createGameObjectQueries);
 
         // Apply imported tags to corresponding game objects
         if (validated.tags && validated.tags.length > 0) {
           applyTagsToGameObjectsQueries = validated.gameObjects.map(
-            (gameObject) => {
-              return ctx.prisma.gameObject.update({
-                where: {
-                  id: generateNewIds
-                    ? remappedIdsOldToNew.gameObjects[gameObject.id]
-                    : gameObject.id,
-                },
-                data: {
-                  tags: {
-                    connect: gameObject.tagIds?.map((id) => ({
-                      id: generateNewIds ? remappedIdsOldToNew.tags[id] : id,
-                    })),
+            (gameObject, index) => {
+              const gameObjectNumStr = `(Game Object ${index + 1}/${
+                validated.gameObjects!.length
+              })`;
+
+              const tagsToApply = gameObject.tagIds?.map((id) => ({
+                id: generateNewIds ? remappedIdsOldToNew.tags[id] : id,
+              }));
+
+              const tagsToApplyStr = tagsToApply
+                ?.map((tag) => `id="${tag.id ?? "undefined"}"`)
+                .join(", ");
+
+              return {
+                query: ctx.prisma.gameObject.update({
+                  where: {
+                    id: generateNewIds
+                      ? remappedIdsOldToNew.gameObjects[gameObject.id]
+                      : gameObject.id,
                   },
-                },
-              });
+                  data: {
+                    tags: {
+                      connect: tagsToApply,
+                    },
+                  },
+                }),
+                failMessage: `Failed to apply Tag(s) (${
+                  tagsToApplyStr ?? "[]"
+                }) to Game Object (id="${gameObject.id}" name="${
+                  gameObject.name
+                }") ${gameObjectNumStr}`,
+                successMessage: `Applied Tag(s) (${
+                  tagsToApplyStr ?? "[]"
+                }) to Game Object (id="${gameObject.id}" name="${
+                  gameObject.name
+                }") ${gameObjectNumStr}`,
+              };
             }
           );
           transactionQueries.push(...applyTagsToGameObjectsQueries);
@@ -155,10 +206,8 @@ export const importData = adminOrApiKeyProtectedProcedure
       }
 
       // Create games
-      let createGamesQuery: PrismaPromise<Prisma.BatchPayload> | undefined;
-      let applyTagsToGamesQueries:
-        | Prisma.Prisma__GameClient<Game, never>[]
-        | undefined;
+      let createGameQueries: QueryWithLogMessages[] | undefined;
+      let applyTagsToGamesQueries: QueryWithLogMessages[] | undefined;
       if (validated.games && validated.games.length > 0) {
         if (generateNewIds) {
           validated.games.forEach((game) => {
@@ -169,74 +218,107 @@ export const importData = adminOrApiKeyProtectedProcedure
         }
 
         // Create games
-        createGamesQuery = ctx.prisma.game.createMany({
-          data: validated.games?.map((game) => ({
-            id: generateNewIds ? remappedIdsOldToNew.games[game.id] : game.id,
-            name: game.name,
-            description: game.description,
-            mode: defaultMode,
-          })),
+        createGameQueries = validated.games?.map((game, index) => {
+          const gameIndexStr = `(Game ${index + 1}/${validated.games!.length})`;
+
+          return {
+            query: ctx.prisma.game.create({
+              data: {
+                id: generateNewIds
+                  ? remappedIdsOldToNew.games[game.id]
+                  : game.id,
+                name: game.name,
+                description: game.description,
+                mode: defaultMode,
+              },
+            }),
+            failMessage: `Failed to create Game (id="${game.id}" name="${game.name}") ${gameIndexStr}`,
+            successMessage: `Created Game (id="${game.id}" name="${game.name}") ${gameIndexStr}`,
+          };
         });
-        transactionQueries.push(createGamesQuery);
+        transactionQueries.push(...createGameQueries);
 
         // Apply imported input tags to corresponding games
         if (validated.tags && validated.tags.length > 0) {
           applyTagsToGamesQueries = validated.games?.map((game) => {
-            return ctx.prisma.game.update({
-              where: {
-                id: generateNewIds
-                  ? remappedIdsOldToNew.games[game.id]
-                  : game.id,
-              },
-              data: {
-                inputTags: {
-                  connect: game.inputTagIds?.map((id) => ({
-                    id: generateNewIds ? remappedIdsOldToNew.tags[id] : id,
-                  })),
+            const tagsToApply = game.inputTagIds?.map((id) => ({
+              id: generateNewIds ? remappedIdsOldToNew.tags[id] : id,
+            }));
+
+            const tagsToApplyStr = tagsToApply
+              ?.map((tag) => `id="${tag.id ?? "undefined"}"`)
+              .join(", ");
+
+            return {
+              query: ctx.prisma.game.update({
+                where: {
+                  id: generateNewIds
+                    ? remappedIdsOldToNew.games[game.id]
+                    : game.id,
                 },
-              },
-            });
+                data: {
+                  inputTags: {
+                    connect: tagsToApply,
+                  },
+                },
+              }),
+              failMessage: `Failed to apply input Tag(s) (${
+                tagsToApplyStr ?? "[]"
+              }) to Game (id="${game.id}" name="${game.name}")`,
+              successMessage: `Applied input Tag(s) (${
+                tagsToApplyStr ?? "[]"
+              }) to Game (id="${game.id}" name="${game.name}")`,
+            };
           });
           transactionQueries.push(...applyTagsToGamesQueries);
         }
       }
 
       // Execute the queries
-      const errorMessages: z.infer<typeof output>["errorMessages"] = [];
+      const logMessages: z.infer<typeof output>["logMessages"] = [];
       let allOrNothingFailed = undefined;
       if (allOrNothing) {
         // If allOrNothing=true, execute all queries in a transaction
         try {
-          await ctx.prisma.$transaction(transactionQueries);
+          await ctx.prisma.$transaction(transactionQueries.map((q) => q.query));
           allOrNothingFailed = false;
         } catch (e) {
           allOrNothingFailed = true;
           if (e instanceof Error) {
-            errorMessages.push(e.message);
+            logMessages.push({ type: "error", message: e.message });
           }
         }
       } else {
         // Execute all queries, but continue even if there are errors for allOrNothing=false
-        const takeErrorMessages = (e: Error) => {
-          errorMessages.push(e.message);
+        const takeErrorMessage = (q: QueryWithLogMessages) => {
+          if (q.failMessage) {
+            logMessages.push({ type: "error", message: q.failMessage });
+          }
         };
-        await Promise.all(
-          [createTagsQuery].map((q) => q?.catch(takeErrorMessages))
-        );
-        await Promise.all(
-          [createGameObjectsQuery].map((q) => q?.catch(takeErrorMessages))
-        );
-        await Promise.all(
-          [createGamesQuery].map((q) => q?.catch(takeErrorMessages))
-        );
+
+        const takeInfoMessage = (q: QueryWithLogMessages) => {
+          if (q.successMessage) {
+            logMessages.push({ type: "info", message: q.successMessage });
+          }
+        };
+
+        const handleLogs = (q: QueryWithLogMessages) => {
+          if (!q) return null;
+          return q.query
+            .then(() => takeInfoMessage(q))
+            .catch(() => takeErrorMessage(q));
+        };
+
+        if (createTagQueries)
+          await Promise.all(createTagQueries.map(handleLogs));
+        if (createGameObjectQueries)
+          await Promise.all(createGameObjectQueries.map(handleLogs));
+        if (createGameQueries)
+          await Promise.all(createGameQueries.map(handleLogs));
         if (applyTagsToGameObjectsQueries)
-          await Promise.all(
-            applyTagsToGameObjectsQueries.map((q) => q.catch(takeErrorMessages))
-          );
+          await Promise.all(applyTagsToGameObjectsQueries.map(handleLogs));
         if (applyTagsToGamesQueries)
-          await Promise.all(
-            applyTagsToGamesQueries.map((q) => q.catch(takeErrorMessages))
-          );
+          await Promise.all(applyTagsToGamesQueries.map(handleLogs));
       }
 
       const importedTags = await ctx.prisma.tag.findMany({
@@ -304,7 +386,7 @@ export const importData = adminOrApiKeyProtectedProcedure
       return {
         results,
         allOrNothingFailed,
-        errorMessages,
+        logMessages,
       };
     } catch (error) {
       throw new TRPCError({

@@ -14,6 +14,7 @@ import { useCallback, useEffect, useState } from "react";
 import Dropzone from "react-dropzone";
 import { api, apiClient, RouterOutputs } from "../../../../../../utils/api";
 import ConfirmAlert from "../../../ConfirmAlert";
+import RadioCardGroup from "../../../RadioCardGroup";
 import UnderlinedTextTooltip from "../../../UnderlinedTextTooltip";
 import { TableActionMenuContext } from "./index";
 
@@ -248,6 +249,10 @@ type ImportResultsProps = {
 function ImportResults(props: ImportResultsProps) {
   const { isOpen, onClose, importResponse } = props;
 
+  type LogFilter = "All" | "Error" | "Info";
+  const logFilters: LogFilter[] = ["All", "Error", "Info"];
+  const [logFilter, setLogFilter] = useState<LogFilter>("All");
+
   const tagSuccesses = importResponse?.results.tags.successes ?? 0;
   const tagFails = importResponse?.results.tags.failures ?? 0;
   const tagTotal = tagSuccesses + tagFails;
@@ -309,17 +314,58 @@ function ImportResults(props: ImportResultsProps) {
           <Heading size="sm" marginTop="1rem">
             Errors
           </Heading>
-          {importResponse.errorMessages &&
-          importResponse.errorMessages.length > 0 ? (
-            <Code
-              maxHeight="200px"
-              maxWidth="100%"
-              overflow="scroll"
-              color="red.500"
-            >
-              {importResponse.errorMessages?.join(
-                "\n\n====================\n\n"
-              )}
+          <Box my="4px">
+            <RadioCardGroup
+              options={logFilters}
+              optionNameOverrides={{
+                All: importResponse.logMessages
+                  ? `All (${importResponse.logMessages.length})`
+                  : "All",
+                Error: importResponse.logMessages
+                  ? `Error (${
+                      importResponse.logMessages.filter(
+                        (m) => m.type === "error"
+                      ).length
+                    })`
+                  : "Error",
+                Info: importResponse.logMessages
+                  ? `Info (${
+                      importResponse.logMessages.filter(
+                        (m) => m.type === "info"
+                      ).length
+                    })`
+                  : "Info",
+              }}
+              useRadioGroupProps={{
+                defaultValue: logFilter[0],
+                onChange: (next) => setLogFilter(next as LogFilter),
+                value: logFilter,
+              }}
+            />
+          </Box>
+          {importResponse.logMessages &&
+          importResponse.logMessages.length > 0 ? (
+            <Code maxHeight="200px" maxWidth="100%" overflow="scroll">
+              {importResponse.logMessages
+                ?.filter((m) => {
+                  if (logFilter === "All") return true;
+                  if (logFilter === "Error") return m.type === "error";
+                  if (logFilter === "Info") return m.type === "info";
+                  return false;
+                })
+                .map((m, index) => {
+                  return (
+                    <>
+                      <Text
+                        key={index}
+                        color={m.type === "error" ? "red.500" : "green.500"}
+                        marginTop="4px"
+                      >
+                        {m.message}
+                      </Text>
+                    </>
+                  );
+                })}
             </Code>
           ) : (
             <Text>No errors</Text>
