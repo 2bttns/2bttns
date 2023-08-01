@@ -87,10 +87,11 @@ export default function TagFilterToggles(props: TagFilterTogglesProps) {
           return (
             <Button
               key={tagId}
+              minW="auto"
               colorScheme={colorScheme}
               onClick={handleClick}
               size="sm"
-              rightIcon={<CheckboxIcon on={on} />}
+              leftIcon={<CheckboxIcon on={on} />}
             >
               {tagName}
             </Button>

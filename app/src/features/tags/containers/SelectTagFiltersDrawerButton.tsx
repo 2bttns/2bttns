@@ -52,13 +52,13 @@ export function SelectTagFiltersDrawerButton(
       >
         Filters{countString}
       </Button>
-      <Drawer isOpen={isOpen} placement="right" onClose={onClose}>
+      <Drawer isOpen={isOpen} placement="right" onClose={onClose} size="lg">
         <DrawerOverlay />
         <DrawerContent>
           <DrawerCloseButton />
           <DrawerHeader>{drawerTitle}</DrawerHeader>
 
-          <DrawerBody>
+          <DrawerBody overflow="scroll">
             <TagFilterToggles
               filter={tagFilter}
               setFilter={setTagFilter}
