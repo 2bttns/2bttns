@@ -42,9 +42,9 @@ import TableActionMenu from "../../features/shared/components/Table/containers/T
 import UnderlinedTextTooltip from "../../features/shared/components/UnderlinedTextTooltip";
 import DeleteTagButton from "../../features/tags/containers/DeleteTagButton";
 import ToggleTagForSelectedGameObjects from "../../features/tags/containers/TableActionsMenu/ToggleTagForSelectedGameObjects";
-import ToggleTagButton, {
-  ToggleTagButtonProps,
-} from "../../features/tags/containers/ToggleTagButton";
+import ToggleTagForGameObjectsButton, {
+  ToggleTagForGameObjectsButtonProps,
+} from "../../features/tags/containers/ToggleTagForGameObjectsButton";
 import { api, RouterInputs } from "../../utils/api";
 import getSessionWithSignInRedirect from "../../utils/getSessionWithSignInRedirect";
 import wait from "../../utils/wait";
@@ -482,7 +482,7 @@ function AdditionalTopBarContent(props: AdditionalTopBarContentProps) {
 
 function getAdditionalColumns(params: {
   tagId: Tag["id"];
-  operation?: ToggleTagButtonProps["operation"];
+  operation?: ToggleTagForGameObjectsButtonProps["operation"];
 }): AdditionalColumns<GameObjectData> {
   const { tagId, operation } = params;
   return {
@@ -491,7 +491,7 @@ function getAdditionalColumns(params: {
         cell: ({ id }) => {
           return (
             <ButtonGroup width="100%" justifyContent="start">
-              <ToggleTagButton
+              <ToggleTagForGameObjectsButton
                 gameObjectIds={[id]}
                 tagId={tagId}
                 operation={operation}

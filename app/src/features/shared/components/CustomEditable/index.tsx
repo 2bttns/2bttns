@@ -106,7 +106,8 @@ export default function CustomEditable(props: CustomEditableProps) {
                 maxHeight: "64px",
                 overflowY: "auto",
                 flex: 1,
-                color: value === "" ? "#777" : "twobttns.darktext",
+                color: value === "" ? "gray.500" : "twobttns.darktext",
+                fontStyle: value === "" ? "italic" : "normal",
               }}
             />
             {isTextarea ? (

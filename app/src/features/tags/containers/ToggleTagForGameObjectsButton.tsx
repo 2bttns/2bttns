@@ -7,14 +7,16 @@ import {
   UseToggleTagForGameObjectsParams,
 } from "../hooks/useToggleTagForGameObjects";
 
-export type ToggleTagButtonProps = {
+export type ToggleTagForGameObjectsButtonProps = {
   tagId: Tag["id"];
   gameObjectIds: GameObject["id"][];
   loadingDelayMs?: number;
   operation?: UseToggleTagForGameObjectsParams["operation"];
 };
 
-export default function ToggleTagButton(props: ToggleTagButtonProps) {
+export default function ToggleTagForGameObjectsButton(
+  props: ToggleTagForGameObjectsButtonProps
+) {
   const { tagId, gameObjectIds, loadingDelayMs = 250, operation } = props;
 
   const {
