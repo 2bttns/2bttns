@@ -42,7 +42,9 @@ import TableActionMenu from "../../features/shared/components/Table/containers/T
 import UnderlinedTextTooltip from "../../features/shared/components/UnderlinedTextTooltip";
 import DeleteTagButton from "../../features/tags/containers/DeleteTagButton";
 import ToggleTagForSelectedGameObjects from "../../features/tags/containers/TableActionsMenu/ToggleTagForSelectedGameObjects";
-import ToggleTagButton from "../../features/tags/containers/ToggleTagButton";
+import ToggleTagButton, {
+  ToggleTagButtonProps,
+} from "../../features/tags/containers/ToggleTagButton";
 import { api, RouterInputs } from "../../utils/api";
 import getSessionWithSignInRedirect from "../../utils/getSessionWithSignInRedirect";
 import wait from "../../utils/wait";
@@ -182,7 +184,10 @@ const TagByIdPage: NextPage<TagByIdPageProps> = (props) => {
                             tagId={tagId}
                           />
                         )}
-                        additionalColumns={getAdditionalColumns(tagId)}
+                        additionalColumns={getAdditionalColumns({
+                          tagId,
+                          operation: "add",
+                        })}
                         editable={false}
                         allowCreate={false}
                         omitColumns={["TAGS", "UPDATED_AT"]}
@@ -208,7 +213,10 @@ const TagByIdPage: NextPage<TagByIdPageProps> = (props) => {
                             tagId={tagId}
                           />
                         )}
-                        additionalColumns={getAdditionalColumns(tagId)}
+                        additionalColumns={getAdditionalColumns({
+                          tagId,
+                          operation: "remove",
+                        })}
                         editable={false}
                         allowCreate={false}
                         omitColumns={["TAGS", "UPDATED_AT"]}
@@ -472,16 +480,22 @@ function AdditionalTopBarContent(props: AdditionalTopBarContentProps) {
   );
 }
 
-function getAdditionalColumns(
-  tagId: Tag["id"]
-): AdditionalColumns<GameObjectData> {
+function getAdditionalColumns(params: {
+  tagId: Tag["id"];
+  operation?: ToggleTagButtonProps["operation"];
+}): AdditionalColumns<GameObjectData> {
+  const { tagId, operation } = params;
   return {
     columns: [
       {
         cell: ({ id }) => {
           return (
             <ButtonGroup width="100%" justifyContent="start">
-              <ToggleTagButton gameObjectIds={[id]} tagId={tagId} />
+              <ToggleTagButton
+                gameObjectIds={[id]}
+                tagId={tagId}
+                operation={operation}
+              />
               {/* <ManageGameObjectButton gameObjectId={id} /> */}
             </ButtonGroup>
           );

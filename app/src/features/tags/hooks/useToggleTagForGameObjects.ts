@@ -3,14 +3,15 @@ import { GameObject, Tag } from "@prisma/client";
 import { useMemo, useState } from "react";
 import { api } from "../../../utils/api";
 
-type UseToggleTagForGameObjectsParams = {
+export type UseToggleTagForGameObjectsParams = {
   tagId: Tag["id"];
   gameObjectIds: GameObject["id"][];
+  operation?: "add" | "remove" | "toggle";
 };
 export function useToggleTagForGameObjects(
   params: UseToggleTagForGameObjectsParams
 ) {
-  const { tagId, gameObjectIds } = params;
+  const { tagId, gameObjectIds, operation = "toggle" } = params;
   const toast = useToast();
 
   const [isApplyingChanges, setApplyingChanges] = useState(false);
@@ -68,11 +69,19 @@ export function useToggleTagForGameObjects(
 
     setApplyingChanges(true);
     try {
+      let doAdd = operation === "add";
+      let doRemove = operation === "remove";
+
+      if (operation === "toggle") {
+        doAdd = !isTagAppliedToAll;
+        doRemove = isTagAppliedToAll;
+      }
+
       await updateTagMutation.mutateAsync({
         id: tagId,
         data: {
-          addGameObjects: isTagAppliedToAll ? undefined : gameObjectIds,
-          removeGameObjects: isTagAppliedToAll ? gameObjectIds : undefined,
+          addGameObjects: doAdd ? gameObjectIds : undefined,
+          removeGameObjects: doRemove ? gameObjectIds : undefined,
         },
       });
       await utils.gameObjects.invalidate();
@@ -108,5 +117,6 @@ export function useToggleTagForGameObjects(
     isTagAppliedToAll,
     handleApplyTag,
     areQueriesLoading,
+    isApplyingChanges,
   };
 }

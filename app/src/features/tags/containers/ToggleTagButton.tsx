@@ -1,26 +1,28 @@
 import { LinkIcon } from "@chakra-ui/icons";
-import {
-  ButtonProps,
-  IconButton,
-  Spinner,
-  Tooltip,
-  useToast,
-} from "@chakra-ui/react";
+import { ButtonProps, IconButton, Spinner, Tooltip } from "@chakra-ui/react";
 import { GameObject, Tag } from "@prisma/client";
 import { useEffect, useMemo, useState } from "react";
-import { useToggleTagForGameObjects } from "../hooks/useToggleTagForGameObjects";
+import {
+  useToggleTagForGameObjects,
+  UseToggleTagForGameObjectsParams,
+} from "../hooks/useToggleTagForGameObjects";
 
 export type ToggleTagButtonProps = {
   tagId: Tag["id"];
   gameObjectIds: GameObject["id"][];
   loadingDelayMs?: number;
+  operation?: UseToggleTagForGameObjectsParams["operation"];
 };
 
 export default function ToggleTagButton(props: ToggleTagButtonProps) {
-  const { tagId, gameObjectIds, loadingDelayMs = 250 } = props;
+  const { tagId, gameObjectIds, loadingDelayMs = 250, operation } = props;
 
-  const { isTagAppliedToAll, handleApplyTag, areQueriesLoading } =
-    useToggleTagForGameObjects({ tagId, gameObjectIds });
+  const {
+    isTagAppliedToAll,
+    handleApplyTag,
+    areQueriesLoading,
+    isApplyingChanges,
+  } = useToggleTagForGameObjects({ tagId, gameObjectIds, operation });
 
   const [isWaitingForLoadDelay, setIsWaitingForLoadDelay] = useState(false);
   useEffect(() => {
@@ -36,19 +38,26 @@ export default function ToggleTagButton(props: ToggleTagButtonProps) {
   }, [areQueriesLoading, loadingDelayMs]);
 
   const isLoading = useMemo(() => {
-    return areQueriesLoading || isWaitingForLoadDelay;
-  }, [areQueriesLoading, isWaitingForLoadDelay]);
+    if (isApplyingChanges) return true;
+
+    // Only show initial loading state when the operation is "toggle", which determines if we're applying or removing the tag based on selected game objects
+    // This won't show  for "add" or "remove" operations, which won't need to wait since the operation is known
+    return (
+      operation === "toggle" && (areQueriesLoading || isWaitingForLoadDelay)
+    );
+  }, [isApplyingChanges, operation, areQueriesLoading, isWaitingForLoadDelay]);
 
   const label = useMemo(() => {
     if (gameObjectIds.length > 1) {
       if (isLoading) return `Loading`;
-      if (isTagAppliedToAll) return `Remove tag from all`;
+      if (operation === "add" || isTagAppliedToAll)
+        return `Remove tag from all`;
       return `Apply tag to all`;
     }
     if (isLoading) return undefined;
-    if (isTagAppliedToAll) return "Remove tag";
+    if (operation === "add" || isTagAppliedToAll) return "Remove tag";
     return "Apply tag";
-  }, [isTagAppliedToAll, isLoading]);
+  }, [gameObjectIds.length, isLoading, operation, isTagAppliedToAll]);
 
   const ariaLabel = useMemo(() => {
     if (isLoading) return `Loading`;
