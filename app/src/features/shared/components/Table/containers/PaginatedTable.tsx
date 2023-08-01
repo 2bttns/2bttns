@@ -95,6 +95,7 @@ export default function PaginatedTable<T>(props: PaginatedTableProps<T>) {
   return (
     <Box height="100%" width="100%" overflow="scroll">
       <DataTable
+        keyField={itemIdField as string}
         columns={controlledColumns}
         data={data}
         sortServer
