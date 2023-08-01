@@ -5,6 +5,7 @@ import {
   FormControl,
   FormLabel,
   Heading,
+  HStack,
   MenuItem,
   Progress,
   Switch,
@@ -180,11 +181,14 @@ export default function TableActionsMenuItemImportJSON<T extends object>(
                 All or Nothing:
               </UnderlinedTextTooltip>
             </FormLabel>
-            <Switch
-              id="allOrNothing"
-              isChecked={allOrNothing}
-              onChange={(e) => setAllOrNothing(e.target.checked)}
-            />
+            <HStack>
+              <Text>{allOrNothing ? "True" : "False"}</Text>
+              <Switch
+                id="allOrNothing"
+                isChecked={allOrNothing}
+                onChange={(e) => setAllOrNothing(e.target.checked)}
+              />
+            </HStack>
           </FormControl>
 
           <FormControl
@@ -218,11 +222,14 @@ export default function TableActionsMenuItemImportJSON<T extends object>(
                 Generate New IDs:
               </UnderlinedTextTooltip>
             </FormLabel>
-            <Switch
-              id="generateNewIds"
-              isChecked={generateNewIds}
-              onChange={(e) => setGenerateNewIds(e.target.checked)}
-            />
+            <HStack>
+              <Text>{generateNewIds ? "True" : "False"}</Text>
+              <Switch
+                id="generateNewIds"
+                isChecked={generateNewIds}
+                onChange={(e) => setGenerateNewIds(e.target.checked)}
+              />
+            </HStack>
           </FormControl>
         </VStack>
       </ConfirmAlert>
