@@ -69,7 +69,7 @@ export const importData = adminOrApiKeyProtectedProcedure
 
       const importTimestamp = new Date();
 
-      const remappedIdsOldToNew: {
+      const remappings: {
         tags: { [id: string]: string };
         gameObjects: { [id: string]: string };
         games: { [id: string]: string };
@@ -79,11 +79,27 @@ export const importData = adminOrApiKeyProtectedProcedure
         games: {},
       };
 
-      const remappedIdsNewToOld: typeof remappedIdsOldToNew = {
-        tags: {},
-        gameObjects: {},
-        games: {},
-      };
+      validated.tags?.forEach((tag) => {
+        if (generateNewIds || !tag.id) {
+          const newId = createId();
+          if (!tag.id) tag.id = newId;
+          remappings.tags[tag.id] = newId;
+        }
+      });
+      validated.gameObjects?.forEach((gameObject) => {
+        if (generateNewIds || !gameObject.id) {
+          const newId = createId();
+          if (!gameObject.id) gameObject.id = newId;
+          remappings.gameObjects[gameObject.id] = newId;
+        }
+      });
+      validated.games?.forEach((game) => {
+        if (generateNewIds || !game.id) {
+          const newId = createId();
+          if (!game.id) game.id = newId;
+          remappings.games[game.id] = newId;
+        }
+      });
 
       const logMessages: z.infer<typeof output>["logMessages"] = [];
 
@@ -102,21 +118,12 @@ export const importData = adminOrApiKeyProtectedProcedure
       // Create tags
       let createTagQueries: QueryWithLogMessages[] | undefined;
       if (validated.tags && validated.tags.length > 0) {
-        if (generateNewIds) {
-          validated.tags.forEach((tag) => {
-            const newId = createId();
-            if (!tag.id) tag.id = newId;
-            remappedIdsOldToNew.tags[tag.id] = newId;
-            remappedIdsNewToOld.tags[newId] = tag.id;
-          });
-        }
-
         createTagQueries = validated.tags?.map((tag, index) => {
           const tagNumStr = `(Tag ${index + 1}/${validated.tags!.length})`;
           return {
             query: ctx.prisma.tag.create({
               data: {
-                id: generateNewIds ? remappedIdsOldToNew.tags[tag.id!] : tag.id,
+                id: remappings.tags[tag.id!] ?? tag.id,
                 name: `${
                   tag.name
                 } (Imported ${importTimestamp.toLocaleString()})`,
@@ -133,15 +140,6 @@ export const importData = adminOrApiKeyProtectedProcedure
       let createGameObjectQueries: QueryWithLogMessages[] | undefined;
       let applyTagsToGameObjectsQueries: QueryWithLogMessages[] | undefined;
       if (validated.gameObjects && validated.gameObjects.length > 0) {
-        if (generateNewIds) {
-          validated.gameObjects.forEach((gameObject) => {
-            const newId = createId();
-            if (!gameObject.id) gameObject.id = newId;
-            remappedIdsOldToNew.gameObjects[gameObject.id] = newId;
-            remappedIdsNewToOld.gameObjects[newId] = gameObject.id;
-          });
-        }
-
         createGameObjectQueries = validated.gameObjects.map(
           (gameObject, index) => {
             const gameObjectNumStr = `(Game Object ${index + 1}/${
@@ -150,9 +148,7 @@ export const importData = adminOrApiKeyProtectedProcedure
             return {
               query: ctx.prisma.gameObject.create({
                 data: {
-                  id: generateNewIds
-                    ? remappedIdsOldToNew.gameObjects[gameObject.id!]
-                    : gameObject.id,
+                  id: remappings.gameObjects[gameObject.id!] ?? gameObject.id,
                   name: gameObject.name ?? "Untitled Game Object",
                   description: gameObject.description,
                 },
@@ -173,7 +169,7 @@ export const importData = adminOrApiKeyProtectedProcedure
               })`;
 
               const tagsToApply = gameObject.tagIds?.map((id) => ({
-                id: generateNewIds ? remappedIdsOldToNew.tags[id] : id,
+                id: remappings.tags[id] ?? id,
               }));
 
               const tagsToApplyStr = tagsToApply
@@ -183,9 +179,7 @@ export const importData = adminOrApiKeyProtectedProcedure
               return {
                 query: ctx.prisma.gameObject.update({
                   where: {
-                    id: generateNewIds
-                      ? remappedIdsOldToNew.gameObjects[gameObject.id!]
-                      : gameObject.id,
+                    id: remappings.gameObjects[gameObject.id!] ?? gameObject.id,
                   },
                   data: {
                     tags: {
@@ -214,25 +208,13 @@ export const importData = adminOrApiKeyProtectedProcedure
       let createGameQueries: QueryWithLogMessages[] | undefined;
       let applyTagsToGamesQueries: QueryWithLogMessages[] | undefined;
       if (validated.games && validated.games.length > 0) {
-        if (generateNewIds) {
-          validated.games.forEach((game) => {
-            const newId = createId();
-            if (!game.id) game.id = newId;
-            remappedIdsOldToNew.games[game.id] = newId;
-            remappedIdsNewToOld.games[newId] = game.id;
-          });
-        }
-
-        // Create games
         createGameQueries = validated.games?.map((game, index) => {
           const gameIndexStr = `(Game ${index + 1}/${validated.games!.length})`;
 
           return {
             query: ctx.prisma.game.create({
               data: {
-                id: generateNewIds
-                  ? remappedIdsOldToNew.games[game.id!]
-                  : game.id,
+                id: remappings.games[game.id!] ?? game.id,
                 name: game.name ?? "Untitled Game",
                 description: game.description,
                 mode: defaultMode,
@@ -248,7 +230,7 @@ export const importData = adminOrApiKeyProtectedProcedure
         if (validated.tags && validated.tags.length > 0) {
           applyTagsToGamesQueries = validated.games?.map((game) => {
             const tagsToApply = game.inputTagIds?.map((id) => ({
-              id: generateNewIds ? remappedIdsOldToNew.tags[id] : id,
+              id: remappings.tags[id] ?? id,
             }));
 
             const tagsToApplyStr = tagsToApply
@@ -258,9 +240,7 @@ export const importData = adminOrApiKeyProtectedProcedure
             return {
               query: ctx.prisma.game.update({
                 where: {
-                  id: generateNewIds
-                    ? remappedIdsOldToNew.games[game.id!]
-                    : game.id,
+                  id: remappings.games[game.id!] ?? game.id,
                 },
                 data: {
                   inputTags: {
@@ -344,8 +324,8 @@ export const importData = adminOrApiKeyProtectedProcedure
       const importedTags = await ctx.prisma.tag.findMany({
         where: {
           id: {
-            in: validated.tags?.map((tag) =>
-              generateNewIds ? remappedIdsOldToNew.tags[tag.id!]! : tag.id!
+            in: validated.tags?.map(
+              (tag) => remappings.tags[tag.id!]! ?? tag.id!
             ),
           },
           createdAt: {
@@ -357,10 +337,9 @@ export const importData = adminOrApiKeyProtectedProcedure
       const importedGameObjects = await ctx.prisma.gameObject.findMany({
         where: {
           id: {
-            in: validated.gameObjects?.map((gameObject) =>
-              generateNewIds
-                ? remappedIdsOldToNew.gameObjects[gameObject.id!]!
-                : gameObject.id!
+            in: validated.gameObjects?.map(
+              (gameObject) =>
+                remappings.gameObjects[gameObject.id!]! ?? gameObject.id!
             ),
           },
           createdAt: {
@@ -372,8 +351,8 @@ export const importData = adminOrApiKeyProtectedProcedure
       const importedGames = await ctx.prisma.game.findMany({
         where: {
           id: {
-            in: validated.games?.map((game) =>
-              generateNewIds ? remappedIdsOldToNew.games[game.id!]! : game.id!
+            in: validated.games?.map(
+              (game) => remappings.games[game.id!]! ?? game.id!
             ),
           },
           createdAt: {
