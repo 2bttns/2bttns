@@ -282,9 +282,7 @@ function GameObjectDetails(props: GameObjectDetailsProps) {
     }
   };
 
-  const [inputTags, setInputTags] = useState<
-    TagMultiSelectProps["value"] | null
-  >(null);
+  const [tags, setTags] = useState<TagMultiSelectProps["value"] | null>(null);
 
   useEffect(() => {
     if (!gameObject) return;
@@ -292,7 +290,7 @@ function GameObjectDetails(props: GameObjectDetailsProps) {
       value: t.id,
       label: t.name,
     }));
-    setInputTags(data);
+    setTags(data);
   }, [gameObject]);
 
   if (!gameObject) return null;
@@ -442,26 +440,26 @@ function GameObjectDetails(props: GameObjectDetailsProps) {
                             fontSize="12px"
                             padding="1rem"
                           >
-                            <Text fontWeight="bold">INPUT TAGS</Text>
+                            <Text fontWeight="bold">TAGS</Text>
                             <Text>
-                              Choose the tag(s) corresponding to the collection
-                              of Game Objects that players should see when they
-                              play the Game.
+                              Group Game Objects together by assigning them one
+                              or more Tag(s). Games take Tags as inputs to
+                              determine which Game Objects to show to players.
                             </Text>
                           </VStack>
                         ),
                       }}
                     >
-                      Input Tags
+                      Tags
                     </UnderlinedTextTooltip>
                   </Td>
                   <Td>
-                    {!inputTags && <Skeleton height="24px" width="100%" />}
-                    {inputTags && (
+                    {!tags && <Skeleton height="24px" width="100%" />}
+                    {tags && (
                       <TagMultiSelect
-                        value={inputTags}
+                        value={tags}
                         onChange={async (nextValue) => {
-                          setInputTags(nextValue);
+                          setTags(nextValue);
                           await handleUpdateGameObject({
                             id: gameObjectId,
                             data: {
