@@ -1,6 +1,6 @@
 {
   "name": "@2bttns/objects",
-  "version": "1.2.4",
+  "version": "1.2.5",
   "description": "Convert JSON data into a format readable by the 2bttns Console.",
   "main": "./formatter.js",
   "scripts": {
