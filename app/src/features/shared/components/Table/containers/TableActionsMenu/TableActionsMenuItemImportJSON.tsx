@@ -9,7 +9,12 @@ import {
   MenuItem,
   Progress,
   Switch,
+  Table,
+  TableContainer,
+  Tbody,
+  Td,
   Text,
+  Tr,
   VStack,
 } from "@chakra-ui/react";
 import { useCallback, useEffect, useState } from "react";
@@ -291,6 +296,7 @@ function ImportResults(props: ImportResultsProps) {
       cancelButtonProps={{
         display: "none",
       }}
+      size="6xl"
     >
       {importResponse && (
         <>
@@ -357,28 +363,41 @@ function ImportResults(props: ImportResultsProps) {
           </Box>
           {importResponse.logMessages &&
           importResponse.logMessages.length > 0 ? (
-            <Code maxHeight="200px" maxWidth="100%" overflow="scroll">
-              {importResponse.logMessages
-                ?.filter((m) => {
-                  if (logFilter === "All") return true;
-                  if (logFilter === "Error") return m.type === "error";
-                  if (logFilter === "Info") return m.type === "info";
-                  return false;
-                })
-                .map((m, index) => {
-                  return (
-                    <>
-                      <Text
-                        key={index}
-                        color={m.type === "error" ? "red.500" : "green.500"}
-                        marginTop="4px"
-                      >
-                        {m.message}
-                      </Text>
-                    </>
-                  );
-                })}
-            </Code>
+            <TableContainer
+              maxHeight="200px"
+              maxWidth="100%"
+              overflowY="scroll"
+              overflowX="scroll"
+            >
+              <Table variant="striped">
+                <Tbody>
+                  {importResponse.logMessages
+                    ?.filter((m) => {
+                      if (logFilter === "All") return true;
+                      if (logFilter === "Error") return m.type === "error";
+                      if (logFilter === "Info") return m.type === "info";
+                      return false;
+                    })
+                    .map((m, index) => {
+                      return (
+                        <Tr key={index}>
+                          <Td>
+                            <Text
+                              key={index}
+                              color={
+                                m.type === "error" ? "red.500" : "green.500"
+                              }
+                              fontSize="sm"
+                            >
+                              {m.message}
+                            </Text>
+                          </Td>
+                        </Tr>
+                      );
+                    })}
+                </Tbody>
+              </Table>
+            </TableContainer>
           ) : (
             <></>
           )}
