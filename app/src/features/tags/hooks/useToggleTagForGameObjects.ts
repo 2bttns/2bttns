@@ -59,6 +59,7 @@ export function useToggleTagForGameObjects(
 
     const tagOperation = gameObjectIds.length > 1 ? "Bulk Tag" : "Tag";
 
+    toast.closeAll();
     const applyTagToast = toast({
       title: `Performing ${tagOperation} operation...`,
       status: "loading",
@@ -77,10 +78,7 @@ export function useToggleTagForGameObjects(
       await utils.gameObjects.invalidate();
 
       toast.update(applyTagToast, {
-        title: `Success: ${tagOperation} operation`,
-        description: `Tag "${tagName}" ${
-          isTagAppliedToAll ? "removed from" : "applied to"
-        } ${gameObjectIds.length} GameObjects`,
+        title: `Saved`,
         status: "success",
       });
     } catch (error) {
