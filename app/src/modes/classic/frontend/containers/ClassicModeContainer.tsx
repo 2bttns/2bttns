@@ -1,4 +1,4 @@
-import { Box, Text } from "@chakra-ui/react";
+import { Box, Code, Text } from "@chakra-ui/react";
 import { GameObject } from "@prisma/client";
 import Link from "next/link";
 import { api, apiClient } from "../../../../utils/api";
@@ -73,7 +73,7 @@ export default function ClassicModeContainer(props: ClassicModeContainerProps) {
     };
 
   return (
-    <>
+    <Box height="100%" bgColor="white">
       <ClassicModeView
         gameData={gameData}
         itemPolicy={itemPolicy ?? defaultItemPolicy}
@@ -86,8 +86,16 @@ export default function ClassicModeContainer(props: ClassicModeContainerProps) {
         showButtonColorBars={showColorBarOnButtons}
       />
       {gameData.callbackUrl && isRedirecting && (
-        <Box textAlign="center" maxWidth="500px" marginX="auto">
-          <Text display="inline">Returning to {gameData.callbackUrl}. </Text>
+        <Box
+          textAlign="center"
+          maxWidth="500px"
+          marginX="auto"
+          marginTop="1remw"
+          color="twobttns.darktext"
+        >
+          <Text display="inline">
+            Returning to <Code>{gameData.callbackUrl}</Code>.{" "}
+          </Text>
           <Text display="inline">If you are not redirected, </Text>
           <Link href={gameData.callbackUrl}>
             <Text color="blue.500" fontWeight="bold" display="inline">
@@ -97,6 +105,6 @@ export default function ClassicModeContainer(props: ClassicModeContainerProps) {
           <Text display="inline">to return immediately.</Text>
         </Box>
       )}
-    </>
+    </Box>
   );
 }

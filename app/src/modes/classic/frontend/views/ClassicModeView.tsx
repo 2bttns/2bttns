@@ -70,13 +70,7 @@ export default function ClassicModeView<I extends Item>(
           totalChoices,
         }) => {
           return (
-            <Stack
-              direction="column"
-              alignItems="center"
-              paddingTop="4rem"
-              height="100%"
-              bgColor="white"
-            >
+            <Stack direction="column" alignItems="center" paddingTop="4rem">
               <Image
                 src="/2btnns-webgif-compressed.gif"
                 width={64}

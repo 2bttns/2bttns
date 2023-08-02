@@ -8,6 +8,7 @@ export interface ModeUIProps<ConfigProps> {
     };
     numRoundItems: number;
     callbackUrl: string | null;
+    isAdmin: boolean;
   };
   config: ConfigProps;
 }

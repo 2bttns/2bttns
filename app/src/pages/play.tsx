@@ -38,7 +38,6 @@ const jwtSchema = z.object({
 
 type ReturnType = {
   gameId: string;
-  isAdmin: boolean; // Admins are the users who are actually signed into the admin app
   playerToken: string | null; // If the user is a player, this is the JWT they will use to authenticate with the API
   gameModeData: {
     mode: AvailableModes;
@@ -71,9 +70,7 @@ export const getServerSideProps: GetServerSideProps<ReturnType> = async (
     const appId = urlSearchParams.get(PLAY_URL_SEARCH_PARAMS.APP_ID);
     const incomingJwt = urlSearchParams.get(PLAY_URL_SEARCH_PARAMS.JWT);
     const numItems = urlSearchParams.get(PLAY_URL_SEARCH_PARAMS.NUM_ITEMS);
-    const callbackUrl = urlSearchParams.get(
-      PLAY_URL_SEARCH_PARAMS.CALLBACK_URL
-    );
+    let callbackUrl = urlSearchParams.get(PLAY_URL_SEARCH_PARAMS.CALLBACK_URL);
     let overrideToPlayerViewAsAdmin: ReturnType["overrideToPlayerViewAsAdmin"] =
       null;
 
@@ -94,6 +91,10 @@ export const getServerSideProps: GetServerSideProps<ReturnType> = async (
       overrideToPlayerViewAsAdmin =
         urlSearchParams.get(PLAY_URL_SEARCH_PARAMS.ADMIN_VIEW) ===
         ADMIN_VIEW.PLAYER;
+
+      // If it's not defined, set the callbackUrl to the game's management page on the admin console
+      // This is for cases where the admin is testing the game from the admin console. This will redirect them back to the game's management page.
+      if (!callbackUrl) callbackUrl = `/games/${gameId}`;
     }
 
     if (incomingJwt) {
@@ -160,7 +161,6 @@ export const getServerSideProps: GetServerSideProps<ReturnType> = async (
     return {
       props: {
         gameId: gameId ?? "",
-        isAdmin: !!session?.user,
         playerToken: incomingJwt,
         gameModeData: {
           mode: game.mode as AvailableModes,
@@ -171,6 +171,7 @@ export const getServerSideProps: GetServerSideProps<ReturnType> = async (
           game: JSON.parse(JSON.stringify(game)),
           numRoundItems: numItemsToGet,
           callbackUrl,
+          isAdmin: !!session?.user,
         },
         overrideToPlayerViewAsAdmin,
       },
@@ -191,7 +192,6 @@ export const getServerSideProps: GetServerSideProps<ReturnType> = async (
 const Play: NextPageWithLayout<ReturnType> = (props) => {
   const {
     gameId,
-    isAdmin,
     playerToken,
     gameModeData,
     gameData,
@@ -206,8 +206,8 @@ const Play: NextPageWithLayout<ReturnType> = (props) => {
     // If the admin is overriding to the player view, they should not see the admin layout
     if (overrideToPlayerViewAsAdmin) return false;
 
-    return isAdmin;
-  }, [playerToken, isAdmin, overrideToPlayerViewAsAdmin]);
+    return gameData.isAdmin;
+  }, [playerToken, gameData.isAdmin, overrideToPlayerViewAsAdmin]);
 
   useEffect(() => {
     // This hook should only run on the client; not on the server
