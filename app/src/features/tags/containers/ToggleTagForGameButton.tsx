@@ -19,46 +19,78 @@ export default function ToggleTagForGameButton(
   props: ToggleTagForGameButtonProps
 ) {
   const { gameId, tagId } = props;
+  const toast = useToast();
   const gameQuery = api.games.getById.useQuery({ id: gameId });
   const tagQuery = api.tags.getById.useQuery({ id: tagId });
-  const updateGameMutation = api.games.updateById.useMutation();
   const utils = api.useContext();
-
-  const toast = useToast();
 
   const hasTag = useMemo(() => {
     if (!gameQuery.data?.game.inputTags) return false;
     return gameQuery.data.game.inputTags.findIndex((t) => t.id === tagId) > -1;
   }, [gameQuery.data?.game?.inputTags, tagId]);
 
-  const areQueriesFetching = useMemo(() => {
-    return (
-      gameQuery.isLoading ||
-      gameQuery.isFetching ||
-      tagQuery.isLoading ||
-      tagQuery.isFetching
-    );
-  }, [
-    gameQuery.isLoading,
-    gameQuery.isFetching,
-    tagQuery.isLoading,
-    tagQuery.isFetching,
-  ]);
+  const updateGameMutation = api.games.updateById.useMutation({
+    onMutate: async (next) => {
+      // Cancel any outgoing refetches
+      // (so they don't overwrite our optimistic update)
+      await utils.games.getById.cancel({ id: gameId });
+
+      // Snapshot the previous value
+      const previous = utils.games.getById.getData({ id: gameId });
+      const updatedInputTags = hasTag
+        ? previous?.game?.inputTags?.filter((t) => t.id !== tagId) // Remove tag
+        : [
+            ...(previous?.game?.inputTags ?? []),
+            ...(tagQuery.data?.tag ? [tagQuery.data.tag] : []),
+          ]; // Add tag
+
+      // Optimistically update to the new value
+      if (previous?.game) {
+        utils.games.getById.setData(
+          {
+            id: gameId,
+          },
+          {
+            game: {
+              ...previous.game,
+              inputTags:
+                updatedInputTags?.map((t) => ({
+                  ...t,
+                  gameObjects: [],
+                })) ?? [],
+            },
+          }
+        );
+      }
+
+      // Return a context object with the snapshotted value
+      return { previous };
+    },
+    // If the mutation fails,
+    // use the context returned from onMutate to roll back
+    onError: (err, next, context) => {
+      if (!context?.previous?.game) return;
+      utils.games.getById.setData(
+        {
+          id: gameId,
+        },
+        {
+          game: context?.previous?.game,
+        }
+      );
+    },
+    // Always refetch after error or success:
+    onSettled: async () => {
+      await utils.games.getById.refetch({ id: gameId });
+    },
+  });
+
+  const areQueriesLoading = useMemo(() => {
+    return gameQuery.isLoading || tagQuery.isLoading;
+  }, [gameQuery.isLoading, tagQuery.isLoading]);
 
   const handleClick = async () => {
     if (!gameQuery.data?.game) return;
-
-    // Use the latest cached data for the game
-    // This way, we can update the UI immediately and prevent tags from returning to previous states when rapidly clicking multiple of these toggles for different tags
-    const latest = utils.games.getById.getData({ id: gameId });
-    const updatedInputTags = hasTag
-      ? (latest?.game.inputTags ?? gameQuery.data.game.inputTags).filter(
-          (t) => t.id !== tagId
-        ) // Remove tag
-      : [
-          ...(latest?.game.inputTags ?? gameQuery.data.game.inputTags),
-          ...(tagQuery.data?.tag ? [tagQuery.data.tag] : []),
-        ]; // Add tag
 
     toast.closeAll();
     const updateGameToast = toast({
@@ -67,26 +99,17 @@ export default function ToggleTagForGameButton(
     });
 
     try {
-      // Update the game in the cache before the mutation
-      utils.games.getById.setData(
-        {
-          id: gameId,
-        },
-        {
-          game: {
-            ...(latest?.game ?? gameQuery.data?.game),
-            inputTags: updatedInputTags.map((t) => ({
-              ...t,
-              gameObjects: [],
-            })),
-          },
-        }
-      );
+      const previous = utils.games.getById.getData({ id: gameId });
+      const updatedInputTags = hasTag
+        ? previous?.game?.inputTags?.filter((t) => t.id !== tagId) // Remove tag
+        : [
+            ...(previous?.game?.inputTags ?? []),
+            ...(tagQuery.data?.tag ? [tagQuery.data.tag] : []),
+          ]; // Add tag
 
-      // Then update the game in the database
       await updateGameMutation.mutateAsync({
         id: gameId,
-        data: { inputTags: updatedInputTags.map((t) => t.id) },
+        data: { inputTags: updatedInputTags?.map((t) => t.id) ?? [] },
       });
 
       toast.update(updateGameToast, {
@@ -94,14 +117,6 @@ export default function ToggleTagForGameButton(
         title: "Saved!",
       });
     } catch (error) {
-      try {
-        // Invalidate the game cache to prevent it from being out of sync with the database after an error
-        await utils.games.getById.invalidate({ id: gameId });
-      } catch (error) {
-        console.error("Failed to invalidate game cache after error");
-        console.error(error);
-      }
-
       console.error(error);
       toast.update(updateGameToast, {
         title: `Error`,
@@ -112,8 +127,8 @@ export default function ToggleTagForGameButton(
   };
 
   const isLoading = useMemo(() => {
-    return areQueriesFetching;
-  }, [areQueriesFetching]);
+    return areQueriesLoading;
+  }, [areQueriesLoading]);
 
   const icon = useMemo(() => {
     if (isLoading) return <Spinner size="sm" />;
