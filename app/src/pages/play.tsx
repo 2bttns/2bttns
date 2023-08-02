@@ -45,6 +45,20 @@ type ReturnType = {
     config: ModeUIProps<any>["config"];
   };
   gameData: ModeUIProps<any>["gameData"];
+  overrideToPlayerViewAsAdmin: boolean | null;
+};
+
+export const PLAY_URL_SEARCH_PARAMS = {
+  GAME_ID: "game_id",
+  APP_ID: "app_id",
+  JWT: "jwt",
+  NUM_ITEMS: "num_items",
+  CALLBACK_URL: "callback_url",
+  ADMIN_VIEW: "admin_view",
+};
+
+export const ADMIN_VIEW = {
+  PLAYER: "player",
 };
 
 export const getServerSideProps: GetServerSideProps<ReturnType> = async (
@@ -53,11 +67,15 @@ export const getServerSideProps: GetServerSideProps<ReturnType> = async (
   try {
     const urlSearchParamsString = context.req.url?.split("?")[1];
     const urlSearchParams = new URLSearchParams(urlSearchParamsString);
-    const gameId = urlSearchParams.get("game_id");
-    const appId = urlSearchParams.get("app_id");
-    const incomingJwt = urlSearchParams.get("jwt");
-    const numItems = urlSearchParams.get("num_items");
-    const callbackUrl = urlSearchParams.get("callback_url");
+    const gameId = urlSearchParams.get(PLAY_URL_SEARCH_PARAMS.GAME_ID);
+    const appId = urlSearchParams.get(PLAY_URL_SEARCH_PARAMS.APP_ID);
+    const incomingJwt = urlSearchParams.get(PLAY_URL_SEARCH_PARAMS.JWT);
+    const numItems = urlSearchParams.get(PLAY_URL_SEARCH_PARAMS.NUM_ITEMS);
+    const callbackUrl = urlSearchParams.get(
+      PLAY_URL_SEARCH_PARAMS.CALLBACK_URL
+    );
+    let overrideToPlayerViewAsAdmin: ReturnType["overrideToPlayerViewAsAdmin"] =
+      null;
 
     if (!gameId) {
       throw new Error("No game id provided");
@@ -70,6 +88,12 @@ export const getServerSideProps: GetServerSideProps<ReturnType> = async (
       // The user is an admin signed into this 2bttns admin app
       // Note that users playing the game would never be signed into the admin app
       playerId = session.user.id;
+
+      // If the user is an admin, they can optionally use the player view of the game by setting the admin_view query param to "player"
+      // Otherwise, they will see the game embedded in the admin console layout
+      overrideToPlayerViewAsAdmin =
+        urlSearchParams.get(PLAY_URL_SEARCH_PARAMS.ADMIN_VIEW) ===
+        ADMIN_VIEW.PLAYER;
     }
 
     if (incomingJwt) {
@@ -77,7 +101,7 @@ export const getServerSideProps: GetServerSideProps<ReturnType> = async (
       // Get the playerId from that JWT
 
       // This can override the admin user id if the JWT is valid, indicating that the logged in admin was redirected here with a player token
-      //  (this allows admins to test the game as if they are a player)
+      //  (this use useful if you're locally developing an app that uses 2bttns, and you want to test the player experience without going into incognito mode in your browser)
 
       // Ensure the app id was provided, so it can be used to verify the JWT against its corresponding secret
       if (!appId) {
@@ -148,6 +172,7 @@ export const getServerSideProps: GetServerSideProps<ReturnType> = async (
           numRoundItems: numItemsToGet,
           callbackUrl,
         },
+        overrideToPlayerViewAsAdmin,
       },
     };
   } catch (error) {
@@ -164,16 +189,25 @@ export const getServerSideProps: GetServerSideProps<ReturnType> = async (
 };
 
 const Play: NextPageWithLayout<ReturnType> = (props) => {
-  const { gameId, isAdmin, playerToken, gameModeData, gameData } = props;
+  const {
+    gameId,
+    isAdmin,
+    playerToken,
+    gameModeData,
+    gameData,
+    overrideToPlayerViewAsAdmin,
+  } = props;
 
   const showAdminLayout = useMemo(() => {
     // If the user is a player, they should not see the admin layout
     // Even if the admiin is logged in, they should not see the admin layout if they were redirected here with a player token
-    if (playerToken) {
-      return false;
-    }
+    if (playerToken) return false;
+
+    // If the admin is overriding to the player view, they should not see the admin layout
+    if (overrideToPlayerViewAsAdmin) return false;
+
     return isAdmin;
-  }, [playerToken, isAdmin]);
+  }, [playerToken, isAdmin, overrideToPlayerViewAsAdmin]);
 
   useEffect(() => {
     // This hook should only run on the client; not on the server

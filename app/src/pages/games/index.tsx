@@ -8,7 +8,7 @@ import GamesTable, {
   GameData,
 } from "../../features/games/containers/GamesTable";
 import ManageGameButton from "../../features/games/containers/ManageGameButton";
-import PlayGameButton from "../../features/games/containers/PlayGameButton";
+import TestPlayGameButton from "../../features/games/containers/TestPlayGameButton";
 import ExportAllGamesJSON from "../../features/games/containers/TableActionsMenu/ExportAllGamesJSON";
 import ExportSelectedGamesJSON from "../../features/games/containers/TableActionsMenu/ExportSelectedGamesJSON";
 import useDeleteGames from "../../features/games/hooks/useDeleteGames";
