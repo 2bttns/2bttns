@@ -2,6 +2,7 @@ import { DeleteIcon, RepeatIcon } from "@chakra-ui/icons";
 import {
   Box,
   ButtonGroup,
+  Heading,
   IconButton,
   Tab,
   TabList,
@@ -48,12 +49,14 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 const SettingsPage: NextPage<SettingsPageProps> = (props) => {
   const [tabIndex, setTabIndex] = useState(-1);
   const [isTabRendering, setTabRendering] = useState(true);
+
   const handleTabChange = async (index: number) => {
-    setTabIndex(index);
     setTabRendering(true);
+    setTabIndex(index);
     await wait(0.25);
     setTabRendering(false);
   };
+
   useEffect(() => {
     handleTabChange(0);
   }, []);
@@ -66,15 +69,20 @@ const SettingsPage: NextPage<SettingsPageProps> = (props) => {
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <Box>
+      <Box padding="4rem">
+        <Heading>Settings</Heading>
         <Tabs tabIndex={tabIndex} onChange={handleTabChange}>
           <TabList>
-            <Tab>Secrets</Tab>
+            <Tab>Apps</Tab>
             <Tab>Administrators</Tab>
           </TabList>
 
           <TabPanels>
-            <TabPanel sx={{ display: isTabRendering ? "none" : "block" }}>
+            <TabPanel
+              sx={{
+                display: isTabRendering ? "none" : "block",
+              }}
+            >
               {/* Render only when tab is active -- otherwise the tables may not render properly when hidden and not appear properly when changing to its tab */}
               {tabIndex === 0 && (
                 <SecretsTable
@@ -85,7 +93,7 @@ const SettingsPage: NextPage<SettingsPageProps> = (props) => {
                     dependencies: [],
                   }}
                   constrainToRemainingSpaceProps={{
-                    bottomOffset: 120,
+                    bottomOffset: isTabRendering ? 0 : 250,
                   }}
                 />
               )}
@@ -95,7 +103,7 @@ const SettingsPage: NextPage<SettingsPageProps> = (props) => {
               {tabIndex === 1 && (
                 <AdministratorsTable
                   constrainToRemainingSpaceProps={{
-                    bottomOffset: 120,
+                    bottomOffset: isTabRendering ? 0 : 250,
                   }}
                 />
               )}
