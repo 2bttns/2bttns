@@ -15,8 +15,11 @@ export type RenderPropParams = {
 export type ClassicModeProps<I extends Item> = {
   children: (params: RenderPropParams) => JSX.Element;
   hotkeys?: Use2bttnsMachineConfig<I>["hotkeys"];
-  button1Props?: Partial<ClassicButtonProps>;
-  button2Props?: Partial<ClassicButtonProps>;
+  buttonProps?: {
+    shared?: Partial<ClassicButtonProps>;
+    button1?: Partial<ClassicButtonProps>;
+    button2?: Partial<ClassicButtonProps>;
+  };
   showButtonColorBars?: boolean;
 
   // TODO: Allow for custom ReactNode rendering of items
@@ -33,8 +36,6 @@ export default function ClassicMode<I extends Item>(
   props: ClassicModeProps<I>
 ) {
   const {
-    button1Props,
-    button2Props,
     children,
     hotkeys,
     showButtonColorBars,
@@ -44,6 +45,7 @@ export default function ClassicMode<I extends Item>(
     onFinish,
     renderItem = (item) => item.id,
     replace,
+    buttonProps,
   } = props;
 
   const {
@@ -70,7 +72,8 @@ export default function ClassicMode<I extends Item>(
         <ClassicButton
           hotkey={hotkeys?.first[0]}
           showColorBar={showButtonColorBars}
-          {...button1Props}
+          {...buttonProps?.shared}
+          {...buttonProps?.button1}
         >
           {current_options.first ? renderItem(current_options.first as I) : ""}
         </ClassicButton>
@@ -82,7 +85,8 @@ export default function ClassicMode<I extends Item>(
         <ClassicButton
           hotkey={hotkeys?.second[0]}
           showColorBar={showButtonColorBars}
-          {...button2Props}
+          {...buttonProps?.shared}
+          {...buttonProps?.button2}
         >
           {current_options.second
             ? renderItem(current_options.second as I)

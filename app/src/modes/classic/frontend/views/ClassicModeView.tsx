@@ -1,4 +1,5 @@
-import { Box, Heading, Progress, Stack, Text } from "@chakra-ui/react";
+import { Box, Progress, Stack, Text, Tooltip } from "@chakra-ui/react";
+import Image from "next/image";
 import { ModeUIProps } from "../../../types";
 import ClassicMode, { ClassicModeProps } from "../ClassicMode";
 import { Item } from "../ClassicMode/types";
@@ -32,16 +33,6 @@ export default function ClassicModeView<I extends Item>(
 
   return (
     <>
-      <Heading
-        as="h1"
-        sx={{
-          fontSize: "48px",
-          marginTop: "2rem",
-          textAlign: "center",
-        }}
-      >
-        {game.name ?? "Untitled Game"}
-      </Heading>
       <ClassicMode
         itemPolicy={itemPolicy}
         numRoundItems={numRoundItems}
@@ -54,6 +45,20 @@ export default function ClassicModeView<I extends Item>(
         showButtonColorBars={showButtonColorBars}
         onFinish={onFinish}
         replace={replacePolicy}
+        buttonProps={{
+          shared: {
+            sx: {
+              borderRadius: "16px",
+              border: "none",
+              boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.25)",
+              bgColor: "white",
+              _hover: {
+                bgColor: "#f2f2f2",
+              },
+              width: { base: "200px", sm: "250px", md: "512px" },
+            },
+          },
+        }}
       >
         {({
           button1,
@@ -65,38 +70,59 @@ export default function ClassicModeView<I extends Item>(
           totalChoices,
         }) => {
           return (
-            <Stack direction="column" alignItems="center">
-              {totalChoices && (
-                <Box width="512px">
-                  <ChoicesRemainingProgressBar
-                    choicesRemaining={choicesRemaining}
-                    totalChoices={totalChoices}
-                  />
-                </Box>
-              )}
+            <Stack
+              direction="column"
+              alignItems="center"
+              paddingTop="4rem"
+              height="100%"
+              bgColor="white"
+            >
+              <Image
+                src="/2btnns-webgif-compressed.gif"
+                width={64}
+                height={64}
+                alt="2bttns"
+              />
               <Text
                 as="h1"
                 sx={{
                   fontSize: "32px",
                   marginBottom: "2rem",
                   marginTop: "2rem",
+                  textAlign: "center",
                 }}
               >
-                {isFinished ? "Round over!" : question}
+                {isFinished ? "Round 🎉 over!" : question}
               </Text>
-              {!isFinished && (
-                <>
-                  {button1}
-                  <Text
-                    sx={{
-                      textTransform: "uppercase",
-                      padding: "1rem",
-                    }}
+              <Box>
+                {!isFinished && (
+                  <>
+                    {button1}
+                    <Text
+                      sx={{
+                        textTransform: "uppercase",
+                        padding: "1rem",
+                        textAlign: "center",
+                      }}
+                    >
+                      or
+                    </Text>
+                    {button2}
+                  </>
+                )}
+              </Box>
+              {totalChoices && (
+                <Box width="100%" paddingTop={isFinished ? "0px" : "5rem"}>
+                  <Box
+                    width={{ base: "100%", sm: "350px", md: "450px" }}
+                    mx="auto"
                   >
-                    or
-                  </Text>
-                  {button2}
-                </>
+                    <ChoicesRemainingProgressBar
+                      choicesRemaining={choicesRemaining}
+                      totalChoices={totalChoices}
+                    />
+                  </Box>
+                </Box>
               )}
             </Stack>
           );
@@ -115,29 +141,47 @@ function ChoicesRemainingProgressBar({
   choicesRemaining,
   totalChoices,
 }: ChoicesRemainingProgressBarProps) {
+  const current = totalChoices - choicesRemaining;
+  const max = totalChoices;
+  const percentage = Math.round((current / max) * 100);
+
   return (
-    <Box width="100%" position="relative">
-      <Text
-        position="absolute"
-        zIndex={99}
-        top="50%"
-        left="50%"
-        transform="translate(-50%, -50%)"
-        color="twobttns.lighttext"
-        fontStyle="italic"
-        fontSize="14px"
-        backgroundColor="rgba(0,0,0,0.5)"
-        paddingX="1rem"
+    <>
+      <Tooltip
+        label={
+          <>
+            {choicesRemaining} / {totalChoices} choices remaining
+          </>
+        }
+        placement="top"
       >
-        {choicesRemaining} / {totalChoices} choices remaining
-      </Text>
-      <Box position="relative">
-        <Progress
-          value={totalChoices - choicesRemaining}
-          max={totalChoices}
-          height="20px"
-        />
-      </Box>
-    </Box>
+        <Box position="relative">
+          <Text
+            position="absolute"
+            zIndex={99}
+            right={0}
+            top="50%"
+            transform="translateY(-50%)"
+            textShadow="0px 2px 0px white"
+          >
+            {percentage}%
+          </Text>
+          <Progress
+            value={current}
+            max={max}
+            height="8px"
+            borderRadius="16px"
+            colorScheme="green"
+            sx={{
+              "& > div:first-child": {
+                transitionProperty: "width",
+
+                transitionTimingFunction: "cubic-bezier(0.175, 0.75, 0.5, 1.2)",
+              },
+            }}
+          />
+        </Box>
+      </Tooltip>
+    </>
   );
 }
