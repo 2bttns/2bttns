@@ -9,6 +9,7 @@ import { ChakraProvider } from "@chakra-ui/react";
 import type { NextPage } from "next";
 import { ReactElement, ReactNode } from "react";
 import AdminLayout from "../features/layouts/containers/AdminLayout";
+import { PageLoadingIndicator } from "../features/shared/PageLoadingIndicator";
 import theme from "../style/theme";
 
 export type NextPageWithLayout<P = {}, IP = P> = NextPage<P, IP> & {
@@ -38,7 +39,10 @@ const MyApp = ({
           },
         }}
       >
-        {getLayout(<Component {...pageProps} />)}
+        <>
+          {getLayout(<Component {...pageProps} />)}
+          <PageLoadingIndicator />
+        </>
       </ChakraProvider>
     </SessionProvider>
   );
