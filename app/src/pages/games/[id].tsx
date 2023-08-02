@@ -29,9 +29,9 @@ import EditGameMode from "../../features/games/containers/EditGameMode";
 import PlayGameButton from "../../features/games/containers/PlayGameButton";
 import CustomEditable from "../../features/shared/components/CustomEditable";
 import UnderlinedTextTooltip from "../../features/shared/components/UnderlinedTextTooltip";
-import TagMultiSelect, {
-  TagMultiSelectProps,
-} from "../../features/tags/containers/TagMultiSelect";
+import { EditTagsForGameButtonDrawer } from "../../features/tags/containers/EditTagsForGameButtonDrawer";
+import TagBadges from "../../features/tags/containers/TagBadges";
+import { TagMultiSelectProps } from "../../features/tags/containers/TagMultiSelect";
 import { prisma } from "../../server/db";
 import { api, RouterInputs } from "../../utils/api";
 import getSessionWithSignInRedirect from "../../utils/getSessionWithSignInRedirect";
@@ -121,7 +121,6 @@ function GameDetails(props: GameDetailsProps) {
         });
         await wait(1);
         await router.replace(`/games/${id}`);
-        await utils.games.getById.invalidate({ id: input.id });
       }
 
       updateDescription = ``;
@@ -142,6 +141,13 @@ function GameDetails(props: GameDetailsProps) {
       // it will revert the value to the previous value when it receives an error
       console.error(error);
       throw error;
+    } finally {
+      try {
+        await utils.games.getById.invalidate({ id: input.id });
+      } catch (error) {
+        console.error("Failed to invalidate game cache");
+        console.error(error);
+      }
     }
   };
 
@@ -357,23 +363,35 @@ function GameDetails(props: GameDetailsProps) {
                     </UnderlinedTextTooltip>
                   </Td>
                   <Td>
-                    {!inputTags && <Skeleton height="24px" width="100%" />}
-                    {inputTags && (
-                      <TagMultiSelect
-                        value={inputTags}
-                        onChange={async (nextValue) => {
-                          setInputTags(nextValue);
-                          await handleUpdateGame({
-                            id: gameId,
-                            data: {
-                              inputTags: nextValue.map(
-                                (t) => t.value as Tag["id"]
-                              ),
-                            },
-                          });
-                        }}
-                      />
-                    )}
+                    <HStack justifyContent="space-between">
+                      {!inputTags && <Skeleton height="24px" width="100%" />}
+                      {inputTags && (
+                        <>
+                          <Box width="340px" alignItems="start">
+                            {inputTags.length > 0 && (
+                              <TagBadges
+                                selectedTags={inputTags.map((v) => {
+                                  return {
+                                    id: v.value as Tag["id"],
+                                    name: v.label,
+                                  };
+                                })}
+                              />
+                            )}
+                            {inputTags.length === 0 && (
+                              <Text
+                                color="gray.500"
+                                fontStyle="italic"
+                                alignSelf="center"
+                              >
+                                &lt;No tags selected&gt;
+                              </Text>
+                            )}
+                          </Box>
+                          <EditTagsForGameButtonDrawer gameId={gameId} />
+                        </>
+                      )}
+                    </HStack>
                   </Td>
                 </Tr>
               </Tbody>

@@ -31,7 +31,7 @@ import { api } from "../../../utils/api";
 import { GameObjectData } from "../../gameobjects/containers/GameObjectsTable";
 import ManageTagButton from "./ManageTagButton";
 import TagsTable, { columnIds } from "./TagsTable";
-import ToggleTagButton from "./ToggleTagButton";
+import ToggleTagForGameObjectsButton from "./ToggleTagForGameObjectsButton";
 
 export type EditTagsForGameObjectsButtonDrawerProps = {
   gameObjectIds: GameObjectData["id"][];
@@ -111,7 +111,7 @@ export function EditTagsForGameObjectsDrawer(
                       return (
                         <>
                           <ButtonGroup>
-                            <ToggleTagButton
+                            <ToggleTagForGameObjectsButton
                               gameObjectIds={gameObjectIds}
                               tagId={row.id}
                             />
