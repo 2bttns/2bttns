@@ -1,28 +1,12 @@
-# Game Object Formatter
+# Format & Get Ready Data
 Convert JSON data into a format readable by the 2bttns Console.
 
 ## Usage 
 
    ```bash
-   npx @2bttns/formatter
+   npx @2bttns/objects
    ```
-
-```bash
-✔ What do you want to do? · Format data for 2bttns Console
-✔ 📁 Enter the path of the input JSON file:  · unformatted-data/genres.json
-✔ 🔍 Select the path in JSON where the data to be converted is located:  · genres
-✔ ⭐️ Which key in your JSON corresponds to "id" with value type "string"?
- 👉 Enter "none" if none exists. · id
-✔ ⭐️ Which key in your JSON corresponds to "name" with value type "string"?
- 👉 Enter "none" if none exists. · name
-✔ ⭐️ Which key in your JSON corresponds to "description" with value type "string"?
- 👉 Enter "none" if none exists. · none
-✔ ⭐️ Which key in your JSON corresponds to "tagIds" with value type "object"?
- 👉 Enter "none" if none exists. · none
-✔ 📁 Enter the path where you want to save the output JSON file (e.g., /your/path/name/):  · /Users/admin/Desktop/2bttns Company
-✅ Output JSON file saved successfully! ✅
-```
-
+  
 ```Format data for 2bttns Console``` will guide you through mapping your JSON and generating a ready to upload file.
 
 ```Get ready-to-upload json data``` will download already formatted Game Objects available in the formatter.
@@ -153,9 +137,9 @@ And here's the resulting output JSON:
 
 Now your new json is ready to be uploaded.
 
-1. Locate your converted data inside `output`.
+1. Locate your converted data.
 2. Open your Console
-3. Navigate to Game Objects
+3. Navigate to Objects
 4. Click Actions then Import from JSON
 5. Upload the `ready-for-upload.json` file and click Confirm.
 
