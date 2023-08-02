@@ -1,4 +1,4 @@
-import { Box, Progress, Stack, Text, Tooltip } from "@chakra-ui/react";
+import { Box, HStack, Progress, Stack, Text, Tooltip } from "@chakra-ui/react";
 import Image from "next/image";
 import { ModeUIProps } from "../../../types";
 import ClassicMode, { ClassicModeProps } from "../ClassicMode";
@@ -155,32 +155,23 @@ function ChoicesRemainingProgressBar({
         }
         placement="top"
       >
-        <Box position="relative">
-          <Text
-            position="absolute"
-            zIndex={99}
-            right={0}
-            top="50%"
-            transform="translateY(-50%)"
-            textShadow="0px 2px 0px white"
-          >
-            {percentage}%
-          </Text>
+        <HStack width="100%">
           <Progress
             value={current}
             max={max}
+            width="100%"
             height="8px"
             borderRadius="16px"
             colorScheme="green"
             sx={{
               "& > div:first-child": {
                 transitionProperty: "width",
-
                 transitionTimingFunction: "cubic-bezier(0.175, 0.75, 0.5, 1.2)",
               },
             }}
           />
-        </Box>
+          <Text>{percentage}%</Text>
+        </HStack>
       </Tooltip>
     </>
   );
