@@ -81,7 +81,7 @@ export default function ToggleTagForGameButton(
     },
     // Always refetch after error or success:
     onSettled: async () => {
-      await utils.games.getById.refetch({ id: gameId });
+      await utils.games.getById.invalidate({ id: gameId });
     },
   });
 
