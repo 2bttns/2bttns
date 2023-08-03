@@ -92,6 +92,7 @@ export default function ClassicModeContainer(props: ClassicModeContainerProps) {
           marginX="auto"
           marginTop="1remw"
           color="twobttns.darktext"
+          paddingX="1rem"
         >
           <Text display="inline">
             Returning to <Code>{gameData.callbackUrl}</Code>.{" "}
