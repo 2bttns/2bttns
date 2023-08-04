@@ -1,4 +1,11 @@
-import { Box, IconButton, Stack, Tooltip, VStack } from "@chakra-ui/react";
+import {
+  Box,
+  IconButton,
+  Stack,
+  Text,
+  Tooltip,
+  VStack,
+} from "@chakra-ui/react";
 import { GetServerSideProps, type NextPage } from "next";
 import { Session } from "next-auth";
 import dynamic from "next/dynamic";
@@ -49,13 +56,110 @@ const Home: NextPage<HomePageProps> = (props) => {
     run: false,
     steps: [
       {
+        target: "#home-tutorial-button",
+        content:
+          "Welcome to your 2bttns admin console! This is a quick tutorial to help you get started.",
+        disableBeacon: true,
+      },
+      {
         target: "#manage-games-card",
-        content: "This is my awesome feature!",
+        styles: {
+          options: {
+            width: "600px",
+          },
+        },
+        content: (
+          <>
+            <Text>Click here to navigate to the Games management page.</Text>
+            <br />
+            <Text>
+              &quot;Games&quot; are interactive user interfaces you can create
+              and customize through this admin console. From the app you want to
+              integrate 2bttns with, you can send end users
+              (&quot;Players&quot;) to play these games, helping them build
+              personalized content feeds and make decisions based on their
+              interactions.
+            </Text>
+          </>
+        ),
+        disableBeacon: true,
+      },
+      {
+        target: "#manage-tags-card",
+        styles: {
+          options: {
+            width: "600px",
+          },
+        },
+        content: (
+          <>
+            <Text>Click here to navigate to the Tags management page.</Text>
+            <br />
+            <Text>
+              &quot;Tags&quot; are used to organize your &quot;Game
+              Objects.&quot; In order for Players to see these Game Objects when
+              they play, you can assign Tags to an &quot;Input Tags&quot; field
+              in your individual Games&apos; config pages.
+            </Text>
+          </>
+        ),
         disableBeacon: true,
       },
       {
         target: "#manage-game-objects-card",
-        content: "This another awesome feature!",
+        styles: {
+          options: {
+            width: "600px",
+          },
+        },
+        content: (
+          <>
+            <Text>
+              Click here to navigate to the Games Objects management page.
+            </Text>
+            <br />
+            <Text>
+              &quot;Game Objects&quot; are the items that Players will interact
+              with in your Games. You can group Game Objects using one or more
+              Tag(s).
+            </Text>
+          </>
+        ),
+        disableBeacon: true,
+      },
+      {
+        target: "#manage-api-keys-card",
+        content: (
+          <>
+            <Text>
+              Click here to navigate to the Settings page, which includes
+              App/API Key management for integrating your app with 2bttns.
+            </Text>
+          </>
+        ),
+        disableBeacon: true,
+      },
+      {
+        target: "#documentation-card",
+        content: (
+          <>
+            <Text>
+              ...and finally, click here to navigate to our official
+              documentation.
+            </Text>
+          </>
+        ),
+        disableBeacon: true,
+      },
+      {
+        target: "#home-tutorial-button",
+        content:
+          "If you see this button on any page, you can click it to view a tutorial for that page.",
+        disableBeacon: true,
+      },
+      {
+        target: "#home-tutorial-button",
+        content: "That's all for now. Happy building!",
         disableBeacon: true,
       },
     ],
@@ -91,7 +195,12 @@ const Home: NextPage<HomePageProps> = (props) => {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <Box height="100%">
-        <Box position="fixed" bottom="1rem" right="1rem">
+        <Box
+          position="fixed"
+          bottom="1rem"
+          right="1rem"
+          id="home-tutorial-button"
+        >
           <Tooltip label="View tutorial for this page" placement="left">
             <IconButton
               onClick={() => {
@@ -112,6 +221,11 @@ const Home: NextPage<HomePageProps> = (props) => {
           disableOverlayClose
           disableCloseOnEsc
           hideCloseButton
+          styles={{
+            options: {
+              primaryColor: "#415DB7",
+            },
+          }}
         />
         <VStack
           alignItems="center"
@@ -130,20 +244,20 @@ const Home: NextPage<HomePageProps> = (props) => {
                 link="/games"
               />
             </Box>
-            <Box id="manage-game-objects-card">
-              <PreviewLinkCard
-                title="Manage Game Objects"
-                description="Manage game objects used across custom games"
-                icon={<FaShapes />}
-                link="/game-objects"
-              />
-            </Box>
             <Box id="manage-tags-card">
               <PreviewLinkCard
                 title="Manage Tags"
                 description="Manage tags that organize your game objects"
                 icon={<FaTags />}
                 link="/tags"
+              />
+            </Box>
+            <Box id="manage-game-objects-card">
+              <PreviewLinkCard
+                title="Manage Game Objects"
+                description="Manage game objects used across custom games"
+                icon={<FaShapes />}
+                link="/game-objects"
               />
             </Box>
             <Box id="manage-api-keys-card">
