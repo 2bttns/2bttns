@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>API Request Example</title>
+</head>
+<body>
+    <h1>API Request Example</h1>
+    <button id="getResultsButton">Get Results</button>
+    <button id="redirectButton">Redirect</button>
+    <pre id="responseContainer"></pre>
+
+    <script>
+        document.getElementById('getResultsButton').addEventListener('click', () => {
+            fetch('http://localhost:3002/get-results')
+                .then(response => response.json())
+                .then(data => {
+                    // Convert the JSON data to a formatted string and display it in the pre tag
+                    document.getElementById('responseContainer').textContent = JSON.stringify(data, null, 2);
+                })
+                .catch(error => {
+                    console.error('Error fetching game objects:', error);
+                });
+        });
+
+        document.getElementById('redirectButton').addEventListener('click', () => {
+            fetch('http://localhost:3002/get-url')
+                .then(response => response.json())
+                .then(data => {
+                    // Extract the URL value from the response
+                    const url = data.url;
+                    // Open the URL in a new tab
+                    window.open(url, '_blank');
+                })
+                .catch(error => {
+                    console.error('Error fetching URL:', error);
+                });
+        });
+    </script>
+</body>
+</html>
