@@ -34,20 +34,6 @@ export const homePageTutorial: TwobttnsTutorial = {
       disableBeacon: true,
     },
     {
-      target: `#games-table`,
-      styles: {
-        options: {
-          width: "600px",
-        },
-      },
-      content: (
-        <>
-          <Text>FOO</Text>
-        </>
-      ),
-      disableBeacon: true,
-    },
-    {
       target: `#${HOME_PAGE_TUTORIAL_IDS.manageTagsCard}`,
       styles: {
         options: {

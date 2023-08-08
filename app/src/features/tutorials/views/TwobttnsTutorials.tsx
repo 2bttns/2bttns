@@ -9,6 +9,7 @@ import ReactJoyride, {
   EVENTS as JOYRIDE_EVENTS,
   STATUS as JOYRIDE_STATUS,
 } from "react-joyride";
+import { useTwoBttnsTutorialsContext } from "../TwobttnsTutorialsContextProvider";
 
 const ReactJoyrideComponent = dynamic(() => import("react-joyride"), {
   ssr: false,
@@ -24,6 +25,7 @@ export type TwobttnsTutorialsProps = {
       setState: React.Dispatch<React.SetStateAction<ReactJoyride["props"]>>;
     };
     router: ReturnType<typeof useRouter>;
+    context: ReturnType<typeof useTwoBttnsTutorialsContext>;
   }) => void;
 } & ReactJoyride["props"];
 
@@ -37,6 +39,7 @@ export default function TwobttnsTutorials(props: TwobttnsTutorialsProps) {
     ...rest
   } = props;
   const { steps, stepIndex = 0 } = rest;
+  const context = useTwoBttnsTutorialsContext();
 
   const [joyride, setJoyride] = useState<ReactJoyride["props"]>({
     run: false,
@@ -74,6 +77,7 @@ export default function TwobttnsTutorials(props: TwobttnsTutorialsProps) {
           data,
           joyrideState: { state: joyride, setState: setJoyride },
           router,
+          context,
         });
       }
     },
@@ -122,7 +126,6 @@ export default function TwobttnsTutorials(props: TwobttnsTutorialsProps) {
         continuous
         showSkipButton
         disableScrolling
-        disableOverlayClose
         disableCloseOnEsc
         hideCloseButton
         styles={{

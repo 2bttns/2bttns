@@ -3,8 +3,10 @@ import { GetServerSideProps, type NextPage } from "next";
 import { Session } from "next-auth";
 import dynamic from "next/dynamic";
 import Head from "next/head";
+import { useEffect } from "react";
 import { FaBookOpen, FaGamepad, FaKey, FaShapes, FaTags } from "react-icons/fa";
 import PreviewLinkCard from "../features/shared/components/PreviewLinkCard";
+import { useTwoBttnsTutorialsContext } from "../features/tutorials/TwobttnsTutorialsContextProvider";
 import getSessionWithSignInRedirect from "../utils/getSessionWithSignInRedirect";
 const ReactJoyrideComponent = dynamic(() => import("react-joyride"), {
   ssr: false,
@@ -39,6 +41,19 @@ export const TUTORIAL_IDS = {
 };
 
 const Home: NextPage<HomePageProps> = (props) => {
+  const tutorialContext = useTwoBttnsTutorialsContext();
+  useEffect(() => {
+    import("../features/tutorials/views/steps/homePageTutorial")
+      .then(({ homePageTutorial }) => {
+        tutorialContext.setTutorial(homePageTutorial);
+      })
+      .catch(console.error);
+
+    return () => {
+      tutorialContext.clearTutorial();
+    };
+  }, []);
+
   return (
     <>
       <Head>

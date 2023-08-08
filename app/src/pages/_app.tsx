@@ -11,6 +11,7 @@ import { ReactElement, ReactNode } from "react";
 import AdminLayout from "../features/layouts/containers/AdminLayout";
 import { PageLoadingIndicator } from "../features/shared/PageLoadingIndicator";
 import TwobttnsTutorialsContainer from "../features/tutorials/TwobttnsTutorialsContainer";
+import TwobttnsTutorialsContextProvider from "../features/tutorials/TwobttnsTutorialsContextProvider";
 import theme from "../style/theme";
 
 export type NextPageWithLayout<P = {}, IP = P> = NextPage<P, IP> & {
@@ -40,11 +41,13 @@ const MyApp = ({
           },
         }}
       >
-        <>
-          {getLayout(<Component {...pageProps} />)}
-          <PageLoadingIndicator />
-          <TwobttnsTutorialsContainer />
-        </>
+        <TwobttnsTutorialsContextProvider>
+          <>
+            {getLayout(<Component {...pageProps} />)}
+            <PageLoadingIndicator />
+            <TwobttnsTutorialsContainer />
+          </>
+        </TwobttnsTutorialsContextProvider>
       </ChakraProvider>
     </SessionProvider>
   );

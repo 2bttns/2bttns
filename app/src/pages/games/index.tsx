@@ -47,7 +47,7 @@ const GamesPage: NextPage<GamesPageProps> = (props) => {
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <Box padding="1rem" id="games-table">
+      <Box padding="1rem">
         <GamesTable
           additionalColumns={getAdditionalColumns()}
           additionalTopBarContent={(selectedRows) => (
