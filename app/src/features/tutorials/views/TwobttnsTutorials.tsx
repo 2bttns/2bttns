@@ -129,6 +129,7 @@ export default function TwobttnsTutorials(props: TwobttnsTutorialsProps) {
         disableCloseOnEsc
         disableOverlayClose
         hideCloseButton
+        spotlightClicks
         styles={{
           options: {
             primaryColor: "#415DB7",

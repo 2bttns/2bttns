@@ -1,16 +1,13 @@
 import { Box, Stack, VStack } from "@chakra-ui/react";
 import { GetServerSideProps, type NextPage } from "next";
 import { Session } from "next-auth";
-import dynamic from "next/dynamic";
 import Head from "next/head";
 import { useEffect } from "react";
 import { FaBookOpen, FaGamepad, FaKey, FaShapes, FaTags } from "react-icons/fa";
 import PreviewLinkCard from "../features/shared/components/PreviewLinkCard";
 import { useTwoBttnsTutorialsContext } from "../features/tutorials/TwobttnsTutorialsContextProvider";
+import { TwobttnsTutorial } from "../features/tutorials/views/steps/tutorial";
 import getSessionWithSignInRedirect from "../utils/getSessionWithSignInRedirect";
-const ReactJoyrideComponent = dynamic(() => import("react-joyride"), {
-  ssr: false,
-});
 
 export type HomePageProps = {
   session: Session;
@@ -43,16 +40,20 @@ export const TUTORIAL_IDS = {
 const Home: NextPage<HomePageProps> = (props) => {
   const tutorialContext = useTwoBttnsTutorialsContext();
   useEffect(() => {
+    let homePageTutorial: TwobttnsTutorial | null = null;
     import("../features/tutorials/views/steps/homePageTutorial")
-      .then(({ homePageTutorial }) => {
+      .then((mod) => {
+        homePageTutorial = mod.homePageTutorial;
         tutorialContext.setTutorial(homePageTutorial);
       })
       .catch(console.error);
 
     return () => {
-      tutorialContext.clearTutorial();
+      if (tutorialContext.tutorial === homePageTutorial) {
+        tutorialContext.clearTutorial();
+      }
     };
-  }, []);
+  }, [tutorialContext]);
 
   return (
     <>
