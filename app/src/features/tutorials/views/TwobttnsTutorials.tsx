@@ -127,6 +127,7 @@ export default function TwobttnsTutorials(props: TwobttnsTutorialsProps) {
         showSkipButton
         disableScrolling
         disableCloseOnEsc
+        disableOverlayClose
         hideCloseButton
         styles={{
           options: {
