@@ -2,7 +2,7 @@ import { Box, Stack, VStack } from "@chakra-ui/react";
 import { GetServerSideProps, type NextPage } from "next";
 import { Session } from "next-auth";
 import Head from "next/head";
-import { useEffect } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { FaBookOpen, FaGamepad, FaKey, FaShapes, FaTags } from "react-icons/fa";
 import PreviewLinkCard from "../features/shared/components/PreviewLinkCard";
 import { useTwoBttnsTutorialsContext } from "../features/tutorials/TwobttnsTutorialsContextProvider";
@@ -39,21 +39,30 @@ export const TUTORIAL_IDS = {
 
 const Home: NextPage<HomePageProps> = (props) => {
   const tutorialContext = useTwoBttnsTutorialsContext();
+  const [homePageTutorial, setHomePageTutorial] =
+    useState<TwobttnsTutorial | null>(null);
   useEffect(() => {
-    let homePageTutorial: TwobttnsTutorial | null = null;
-    import("../features/tutorials/views/steps/homePageTutorial")
+    import("../features/tutorials/views/steps/tutorialsRegistry")
       .then((mod) => {
-        homePageTutorial = mod.homePageTutorial;
-        tutorialContext.setTutorial(homePageTutorial);
+        setHomePageTutorial(mod.tutorialsRegistry.homePageTutorial);
       })
       .catch(console.error);
-
+  }, []);
+  useEffect(() => {
+    tutorialContext.setTutorial(homePageTutorial);
     return () => {
       if (tutorialContext.tutorial === homePageTutorial) {
         tutorialContext.clearTutorial();
       }
     };
-  }, [tutorialContext]);
+  }, [tutorialContext, homePageTutorial]);
+
+  const isTutorialActive = useMemo(() => {
+    return (
+      tutorialContext.currentJoyrideState?.run &&
+      tutorialContext.tutorial === homePageTutorial
+    );
+  }, [tutorialContext, homePageTutorial]);
 
   return (
     <>
@@ -77,7 +86,7 @@ const Home: NextPage<HomePageProps> = (props) => {
                 title="Manage Games"
                 description="Manage custom games that your users can play"
                 icon={<FaGamepad />}
-                link="/games"
+                link={isTutorialActive ? "/games?tutorial=true" : "/games"}
               />
             </Box>
             <Box id={TUTORIAL_IDS.manageTagsCard}>
@@ -85,7 +94,7 @@ const Home: NextPage<HomePageProps> = (props) => {
                 title="Manage Tags"
                 description="Manage tags that organize your game objects"
                 icon={<FaTags />}
-                link="/tags"
+                link={isTutorialActive ? "/tags?tutorial=true" : "/tags"}
               />
             </Box>
             <Box id={TUTORIAL_IDS.manageGameObjectsCard}>
@@ -93,7 +102,11 @@ const Home: NextPage<HomePageProps> = (props) => {
                 title="Manage Game Objects"
                 description="Manage game objects used across custom games"
                 icon={<FaShapes />}
-                link="/game-objects"
+                link={
+                  isTutorialActive
+                    ? "/game-objects?tutorial=true"
+                    : "/game-objects"
+                }
               />
             </Box>
             <Box id={TUTORIAL_IDS.manageAPIKeysCard}>
@@ -101,7 +114,9 @@ const Home: NextPage<HomePageProps> = (props) => {
                 title="Manage API Keys"
                 description="Integrate your app with 2bttns"
                 icon={<FaKey />}
-                link="/settings"
+                link={
+                  isTutorialActive ? "/settings?tutorial=true" : "/settings"
+                }
               />
             </Box>
             <Box id={TUTORIAL_IDS.documentationCard}>

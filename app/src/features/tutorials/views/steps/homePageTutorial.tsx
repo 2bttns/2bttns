@@ -4,6 +4,7 @@ import { TUTORIAL_BUTTON_ID } from "../TwobttnsTutorials";
 import { TwobttnsTutorial } from "./tutorial";
 
 export const homePageTutorial: TwobttnsTutorial = {
+  id: "homePageTutorial",
   steps: [
     {
       target: `#${TUTORIAL_BUTTON_ID}`,

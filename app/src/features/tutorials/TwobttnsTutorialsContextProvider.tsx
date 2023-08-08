@@ -5,12 +5,17 @@ import {
   useContext,
   useState,
 } from "react";
+import ReactJoyride from "react-joyride";
 import type { TwobttnsTutorial } from "./views/steps/tutorial";
 
 const TwobttnsTutorialsContext = createContext<{
   tutorial: TwobttnsTutorial | null;
   setTutorial: Dispatch<SetStateAction<TwobttnsTutorial | null>>;
   clearTutorial: () => void;
+  currentJoyrideState: ReactJoyride["props"] | null;
+  setCurrentJoyrideState: Dispatch<
+    SetStateAction<Readonly<ReactJoyride["props"]> | null>
+  >;
 } | null>(null);
 
 export const useTwoBttnsTutorialsContext = () => {
@@ -33,9 +38,19 @@ const TwobttnsTutorialsContextProvider = (props: {
   const [tutorial, setTutorial] = useState<TwobttnsTutorial | null>(null);
   const clearTutorial = () => setTutorial(null);
 
+  const [currentJoyrideState, setCurrentJoyrideState] = useState<
+    ReactJoyride["props"] | null
+  >(null);
+
   return (
     <TwobttnsTutorialsContext.Provider
-      value={{ tutorial, setTutorial, clearTutorial }}
+      value={{
+        tutorial,
+        setTutorial,
+        clearTutorial,
+        currentJoyrideState,
+        setCurrentJoyrideState,
+      }}
     >
       {children}
     </TwobttnsTutorialsContext.Provider>
