@@ -19,8 +19,8 @@ export const gamesPageTutorialFromHome: TwobttnsTutorial = {
   ],
   async onJoyrideCallback({ data, router }) {
     const { action, index, status, type } = data;
-    // After index 0, let's redirect back to the home page tutorial that we came from
-    console.log(action);
+
+    // After the 2nd (last) step, redirect to the home page tutorial
     if (
       action === JOYRIDE_ACTIONS.NEXT &&
       type === "step:after" &&
