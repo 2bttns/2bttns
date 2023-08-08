@@ -34,6 +34,7 @@ export function PageLoadingIndicator() {
       right="4px"
       pointerEvents="none"
       userSelect="none"
+      zIndex={99}
     >
       {loading && (
         <Box>

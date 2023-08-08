@@ -3,12 +3,10 @@ import { GetServerSideProps, NextPage } from "next";
 import { Session } from "next-auth";
 import Head from "next/head";
 import { useRouter } from "next/router";
-import DeleteGameButton from "../../features/games/containers/DeleteGameButton";
 import GamesTable, {
   GameData,
 } from "../../features/games/containers/GamesTable";
 import ManageGameButton from "../../features/games/containers/ManageGameButton";
-import TestPlayGameButton from "../../features/games/containers/TestPlayGameButton";
 import ExportAllGamesJSON from "../../features/games/containers/TableActionsMenu/ExportAllGamesJSON";
 import ExportSelectedGamesJSON from "../../features/games/containers/TableActionsMenu/ExportSelectedGamesJSON";
 import useDeleteGames from "../../features/games/hooks/useDeleteGames";
@@ -49,7 +47,7 @@ const GamesPage: NextPage<GamesPageProps> = (props) => {
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <Box padding="1rem">
+      <Box padding="1rem" id="games-table">
         <GamesTable
           additionalColumns={getAdditionalColumns()}
           additionalTopBarContent={(selectedRows) => (
