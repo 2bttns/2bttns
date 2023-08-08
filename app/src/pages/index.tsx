@@ -46,11 +46,14 @@ const Home: NextPage<HomePageProps> = (props) => {
 
   useEffect(() => {
     const searchParamsDict = Object.fromEntries(searchParams.entries());
+    if (searchParamsDict.tutorial === tutorialsRegistry.homePageTutorial.id) {
+      return;
+    }
     searchParamsDict.tutorial = tutorialsRegistry.homePageTutorial.id;
     void router.replace({
       query: searchParamsDict,
     });
-  }, []);
+  }, [searchParams]);
 
   const isTutorialActive = useMemo(() => {
     return (
