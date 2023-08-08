@@ -56,9 +56,8 @@ export default function TwobttnsTutorials(props: TwobttnsTutorialsProps) {
   }, [context, joyride]);
 
   const clearTutorialQueryParams = () => {
-    // Clears tutorial & step query params from URL
+    // Clears step query params from URL
     const searchParamsDict = Object.fromEntries(searchParams.entries());
-    delete searchParamsDict["tutorial"];
     delete searchParamsDict["step"];
     void router.push({
       pathname: router.pathname,
@@ -70,7 +69,7 @@ export default function TwobttnsTutorials(props: TwobttnsTutorialsProps) {
     // Updates query params to match current step index & tutorial
     // Keeps additional query params intact, if any exist
     if (
-      !context.tutorial ||
+      context.tutorialId === null ||
       joyride.stepIndex === undefined ||
       joyride.stepIndex < 0 ||
       joyride.stepIndex >= joyride.steps.length
@@ -79,13 +78,12 @@ export default function TwobttnsTutorials(props: TwobttnsTutorialsProps) {
       return;
     }
     const searchParamsDict = Object.fromEntries(searchParams.entries());
-    searchParamsDict["tutorial"] = context.tutorial.id;
     searchParamsDict["step"] = (joyride.stepIndex + 1).toString();
     void router.push({
       pathname: router.pathname,
       query: searchParamsDict,
     });
-  }, [context.tutorial?.id, joyride.stepIndex]);
+  }, [context.tutorialId, joyride.stepIndex]);
 
   useEffect(() => {
     // Update query params when step index state changes
@@ -116,7 +114,7 @@ export default function TwobttnsTutorials(props: TwobttnsTutorialsProps) {
       stepIndex: queryStepIndex,
       run: true,
     }));
-  }, [router.query]);
+  }, [searchParams]);
 
   const handleJoyrideCallback = useCallback(
     async (data: JoyrideCallBackProps) => {

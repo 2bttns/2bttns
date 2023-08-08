@@ -2,11 +2,13 @@ import { Box, Stack, VStack } from "@chakra-ui/react";
 import { GetServerSideProps, type NextPage } from "next";
 import { Session } from "next-auth";
 import Head from "next/head";
-import { useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "next/navigation";
+import { useRouter } from "next/router";
+import { useEffect, useMemo } from "react";
 import { FaBookOpen, FaGamepad, FaKey, FaShapes, FaTags } from "react-icons/fa";
 import PreviewLinkCard from "../features/shared/components/PreviewLinkCard";
 import { useTwoBttnsTutorialsContext } from "../features/tutorials/TwobttnsTutorialsContextProvider";
-import { TwobttnsTutorial } from "../features/tutorials/views/steps/tutorial";
+import { tutorialsRegistry } from "../features/tutorials/views/steps/tutorialsRegistry";
 import getSessionWithSignInRedirect from "../utils/getSessionWithSignInRedirect";
 
 export type HomePageProps = {
@@ -39,30 +41,23 @@ export const TUTORIAL_IDS = {
 
 const Home: NextPage<HomePageProps> = (props) => {
   const tutorialContext = useTwoBttnsTutorialsContext();
-  const [homePageTutorial, setHomePageTutorial] =
-    useState<TwobttnsTutorial | null>(null);
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
   useEffect(() => {
-    import("../features/tutorials/views/steps/tutorialsRegistry")
-      .then((mod) => {
-        setHomePageTutorial(mod.tutorialsRegistry.homePageTutorial);
-      })
-      .catch(console.error);
+    const searchParamsDict = Object.fromEntries(searchParams.entries());
+    searchParamsDict.tutorial = tutorialsRegistry.homePageTutorial.id;
+    void router.replace({
+      query: searchParamsDict,
+    });
   }, []);
-  useEffect(() => {
-    tutorialContext.setTutorial(homePageTutorial);
-    return () => {
-      if (tutorialContext.tutorial === homePageTutorial) {
-        tutorialContext.clearTutorial();
-      }
-    };
-  }, [tutorialContext, homePageTutorial]);
 
   const isTutorialActive = useMemo(() => {
     return (
       tutorialContext.currentJoyrideState?.run &&
-      tutorialContext.tutorial === homePageTutorial
+      tutorialContext.tutorialId === tutorialsRegistry.homePageTutorial.id
     );
-  }, [tutorialContext, homePageTutorial]);
+  }, [tutorialContext]);
 
   return (
     <>
@@ -86,7 +81,11 @@ const Home: NextPage<HomePageProps> = (props) => {
                 title="Manage Games"
                 description="Manage custom games that your users can play"
                 icon={<FaGamepad />}
-                link={isTutorialActive ? "/games?tutorial=true" : "/games"}
+                link={
+                  isTutorialActive
+                    ? `/games?tutorial=${tutorialsRegistry.gamesPageTutorialFromHome.id}&step=1`
+                    : "/games"
+                }
               />
             </Box>
             <Box id={TUTORIAL_IDS.manageTagsCard}>

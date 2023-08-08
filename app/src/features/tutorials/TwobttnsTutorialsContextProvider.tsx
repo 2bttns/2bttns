@@ -6,11 +6,13 @@ import {
   useState,
 } from "react";
 import ReactJoyride from "react-joyride";
-import type { TwobttnsTutorial } from "./views/steps/tutorial";
+import { tutorialsRegistry } from "./views/steps/tutorialsRegistry";
+
+export type TwobttnsTutorialId = keyof typeof tutorialsRegistry;
 
 const TwobttnsTutorialsContext = createContext<{
-  tutorial: TwobttnsTutorial | null;
-  setTutorial: Dispatch<SetStateAction<TwobttnsTutorial | null>>;
+  tutorialId: TwobttnsTutorialId | null;
+  setTutorialId: Dispatch<SetStateAction<TwobttnsTutorialId | null>>;
   clearTutorial: () => void;
   currentJoyrideState: ReactJoyride["props"] | null;
   setCurrentJoyrideState: Dispatch<
@@ -35,8 +37,8 @@ const TwobttnsTutorialsContextProvider = (props: {
 }) => {
   const { children } = props;
 
-  const [tutorial, setTutorial] = useState<TwobttnsTutorial | null>(null);
-  const clearTutorial = () => setTutorial(null);
+  const [tutorialId, setTutorialId] = useState<TwobttnsTutorialId | null>(null);
+  const clearTutorial = () => setTutorialId(null);
 
   const [currentJoyrideState, setCurrentJoyrideState] = useState<
     ReactJoyride["props"] | null
@@ -45,8 +47,8 @@ const TwobttnsTutorialsContextProvider = (props: {
   return (
     <TwobttnsTutorialsContext.Provider
       value={{
-        tutorial,
-        setTutorial,
+        tutorialId,
+        setTutorialId,
         clearTutorial,
         currentJoyrideState,
         setCurrentJoyrideState,
