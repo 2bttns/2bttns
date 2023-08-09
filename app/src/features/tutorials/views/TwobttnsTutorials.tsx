@@ -187,6 +187,25 @@ export default function TwobttnsTutorials(props: TwobttnsTutorialsProps) {
     setJoyride((prev) => ({ ...prev, stepIndex: 0, run: true }));
   }, [toggleRestartState]);
 
+  const [isRedirecting, setRedirecting] = useState(false);
+  useEffect(() => {
+    const onStart = () => {
+      setRedirecting(true);
+    };
+    const onEnd = () => {
+      setRedirecting(false);
+    };
+
+    router.events.on("routeChangeStart", onStart);
+    router.events.on("routeChangeComplete", onEnd);
+    router.events.on("routeChangeError", onEnd);
+    return () => {
+      router.events.off("routeChangeStart", onStart);
+      router.events.off("routeChangeComplete", onEnd);
+      router.events.off("routeChangeError", onEnd);
+    };
+  }, [router]);
+
   return (
     <>
       {steps.length > 0 && (
@@ -206,24 +225,27 @@ export default function TwobttnsTutorials(props: TwobttnsTutorialsProps) {
           </Tooltip>
         </Box>
       )}
-      <ReactJoyrideComponent
-        {...joyride}
-        callback={handleJoyrideCallback}
-        showProgress
-        continuous
-        showSkipButton
-        disableScrolling
-        disableCloseOnEsc
-        disableOverlayClose
-        hideCloseButton
-        spotlightClicks
-        styles={{
-          options: {
-            primaryColor: "#415DB7",
-          },
-        }}
-        {...rest}
-      />
+      {!isRedirecting && (
+        <ReactJoyrideComponent
+          {...joyride}
+          callback={handleJoyrideCallback}
+          showProgress
+          continuous
+          showSkipButton
+          disableScrolling
+          disableScrollParentFix
+          disableCloseOnEsc
+          disableOverlayClose
+          hideCloseButton
+          spotlightClicks
+          styles={{
+            options: {
+              primaryColor: "#415DB7",
+            },
+          }}
+          {...rest}
+        />
+      )}
     </>
   );
 }
