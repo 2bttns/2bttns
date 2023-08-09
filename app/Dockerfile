@@ -91,4 +91,4 @@ EXPOSE 3262
 
 # The output: "standalone" config in next.config.mjs allows us to run the app with node directly instead of using next start
 # https://nextjs.org/docs/pages/api-reference/next-config-js/output
-CMD echo "Starting Next.js server..."; node server.js
+CMD ["node", "server.js"]
