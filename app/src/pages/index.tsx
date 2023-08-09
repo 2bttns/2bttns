@@ -96,7 +96,11 @@ const Home: NextPage<HomePageProps> = (props) => {
                 title="Manage Tags"
                 description="Manage tags that organize your game objects"
                 icon={<FaTags />}
-                link={isTutorialActive ? "/tags?tutorial=true" : "/tags"}
+                link={
+                  isTutorialActive
+                    ? `/tags?tutorial=${tutorialsRegistry.tagsPageTutorialFromHome.id}&step=1`
+                    : "/tags"
+                }
               />
             </Box>
             <Box id={TUTORIAL_IDS.manageGameObjectsCard}>
@@ -117,7 +121,9 @@ const Home: NextPage<HomePageProps> = (props) => {
                 description="Integrate your app with 2bttns"
                 icon={<FaKey />}
                 link={
-                  isTutorialActive ? "/settings?tutorial=true" : "/settings"
+                  isTutorialActive
+                    ? `/settings?tutorial=${tutorialsRegistry.apiKeyPageTutorialFromHome.id}&step=1`
+                    : "/settings"
                 }
               />
             </Box>

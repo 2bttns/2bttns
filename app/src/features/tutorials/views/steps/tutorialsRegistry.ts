@@ -1,6 +1,8 @@
+import { apiKeyPageTutorialFromHome } from "./apiKeyPageTutorialFromHome";
 import { gameObjectsPageTutorialFromHome } from "./gameObjectsPageTutorialFromHome";
 import { gamesPageTutorialFromHome } from "./gamesPageTutorialFromHome";
 import { homePageTutorial } from "./homePageTutorial";
+import { tagsPageTutorialFromHome } from "./tagsPageTutorialFromHome";
 
 // Unified place to register tutorials
 // Keys for tutorials added here must match the tutorial's ID field
@@ -9,5 +11,7 @@ import { homePageTutorial } from "./homePageTutorial";
 export const tutorialsRegistry = {
   homePageTutorial,
   gamesPageTutorialFromHome,
+  tagsPageTutorialFromHome,
   gameObjectsPageTutorialFromHome,
+  apiKeyPageTutorialFromHome,
 };
