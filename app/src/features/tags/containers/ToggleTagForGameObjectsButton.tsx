@@ -19,12 +19,8 @@ export default function ToggleTagForGameObjectsButton(
 ) {
   const { tagId, gameObjectIds, loadingDelayMs = 250, operation } = props;
 
-  const {
-    isTagAppliedToAll,
-    handleApplyTag,
-    areQueriesLoading,
-    isApplyingChanges,
-  } = useToggleTagForGameObjects({ tagId, gameObjectIds, operation });
+  const { isTagAppliedToAll, handleApplyTag, areQueriesLoading } =
+    useToggleTagForGameObjects({ tagId, gameObjectIds, operation });
 
   const [isWaitingForLoadDelay, setIsWaitingForLoadDelay] = useState(false);
   useEffect(() => {
@@ -40,14 +36,12 @@ export default function ToggleTagForGameObjectsButton(
   }, [areQueriesLoading, loadingDelayMs]);
 
   const isLoading = useMemo(() => {
-    if (isApplyingChanges) return true;
-
     // Only show initial loading state when the operation is "toggle", which determines if we're applying or removing the tag based on selected game objects
     // This won't show  for "add" or "remove" operations, which won't need to wait since the operation is known
     return (
       operation === "toggle" && (areQueriesLoading || isWaitingForLoadDelay)
     );
-  }, [isApplyingChanges, operation, areQueriesLoading, isWaitingForLoadDelay]);
+  }, [operation, areQueriesLoading, isWaitingForLoadDelay]);
 
   const label = useMemo(() => {
     if (gameObjectIds.length > 1) {

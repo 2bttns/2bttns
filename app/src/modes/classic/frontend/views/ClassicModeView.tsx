@@ -55,7 +55,7 @@ export default function ClassicModeView<I extends Item>(
               _hover: {
                 bgColor: "#f2f2f2",
               },
-              width: { base: "200px", sm: "250px", md: "512px" },
+              width: { base: "100%", sm: "250px", md: "512px" },
             },
           },
         }}
@@ -70,13 +70,7 @@ export default function ClassicModeView<I extends Item>(
           totalChoices,
         }) => {
           return (
-            <Stack
-              direction="column"
-              alignItems="center"
-              paddingTop="4rem"
-              height="100%"
-              bgColor="white"
-            >
+            <Stack direction="column" alignItems="center" paddingTop="4rem">
               <Image
                 src="/2btnns-webgif-compressed.gif"
                 width={64}
@@ -112,7 +106,11 @@ export default function ClassicModeView<I extends Item>(
                 )}
               </Box>
               {totalChoices && (
-                <Box width="100%" paddingTop={isFinished ? "0px" : "5rem"}>
+                <Box
+                  width="100%"
+                  paddingTop={isFinished ? "0px" : "5rem"}
+                  paddingX="2rem"
+                >
                   <Box
                     width={{ base: "100%", sm: "350px", md: "450px" }}
                     mx="auto"

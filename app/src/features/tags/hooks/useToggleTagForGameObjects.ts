@@ -1,6 +1,6 @@
 import { useToast } from "@chakra-ui/react";
 import { GameObject, Tag } from "@prisma/client";
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { api } from "../../../utils/api";
 
 export type UseToggleTagForGameObjectsParams = {
@@ -13,8 +13,6 @@ export function useToggleTagForGameObjects(
 ) {
   const { tagId, gameObjectIds, operation = "toggle" } = params;
   const toast = useToast();
-
-  const [isApplyingChanges, setApplyingChanges] = useState(false);
 
   const utils = api.useContext();
 
@@ -54,10 +52,66 @@ export function useToggleTagForGameObjects(
     });
   }, [getGameObjectsQuery.data, tagId, gameObjectIds]);
 
-  const updateTagMutation = api.tags.updateById.useMutation();
-  const handleApplyTag = async () => {
-    if (isApplyingChanges) return;
+  const updateTagMutation = api.tags.updateById.useMutation({
+    onMutate: async (next) => {
+      // Cancel any outgoing refetches
+      // (so they don't overwrite our optimistic update)
+      await utils.gameObjects.getAll.cancel();
 
+      // Snapshot the previous value
+      const previous = utils.gameObjects.getAll.getData({
+        idFilter: gameObjectIds.join(","),
+        take: getGameObjectsCountQuery.data?.count ?? 0,
+      });
+
+      const updatedGameObjects = previous?.gameObjects?.map((gameObject) => {
+        const hasTag = gameObject.tags.includes(tagId);
+        const updatedTags = hasTag
+          ? gameObject.tags.filter((t) => t !== tagId) // Remove tag
+          : [...gameObject.tags, tagId]; // Add tag
+        return {
+          ...gameObject,
+          tags: updatedTags,
+        };
+      });
+
+      // Optimistically update to the new value
+      if (updatedGameObjects) {
+        utils.gameObjects.getAll.setData(
+          {
+            idFilter: gameObjectIds.join(","),
+            take: getGameObjectsCountQuery.data?.count ?? 0,
+          },
+          {
+            gameObjects: updatedGameObjects,
+          }
+        );
+      }
+
+      // Return a context object with the snapshotted value
+      return { previous };
+    },
+    // If the mutation fails,
+    // use the context returned from onMutate to roll back
+    onError: (err, next, context) => {
+      if (!context?.previous?.gameObjects) return;
+      utils.gameObjects.getAll.setData(
+        {
+          idFilter: gameObjectIds.join(","),
+          take: getGameObjectsCountQuery.data?.count ?? 0,
+        },
+        {
+          gameObjects: context.previous.gameObjects,
+        }
+      );
+    },
+    // Always refetch after error or success:
+    onSettled: async () => {
+      console.log("INVALIDATE ALL");
+      await utils.gameObjects.invalidate();
+    },
+  });
+  const handleApplyTag = async () => {
     const tagOperation = gameObjectIds.length > 1 ? "Bulk Tag" : "Tag";
 
     toast.closeAll();
@@ -67,7 +121,6 @@ export function useToggleTagForGameObjects(
       duration: null,
     });
 
-    setApplyingChanges(true);
     try {
       let doAdd = operation === "add";
       let doRemove = operation === "remove";
@@ -84,8 +137,6 @@ export function useToggleTagForGameObjects(
           removeGameObjects: doRemove ? gameObjectIds : undefined,
         },
       });
-      await utils.gameObjects.invalidate();
-
       toast.update(applyTagToast, {
         title: `Saved`,
         status: "success",
@@ -98,25 +149,15 @@ export function useToggleTagForGameObjects(
         status: "error",
       });
     }
-    setApplyingChanges(false);
   };
 
   const areQueriesLoading = useMemo(() => {
-    return (
-      getGameObjectsQuery.isLoading ||
-      updateTagMutation.isLoading ||
-      isApplyingChanges
-    );
-  }, [
-    getGameObjectsQuery.isLoading,
-    updateTagMutation.isLoading,
-    isApplyingChanges,
-  ]);
+    return getGameObjectsQuery.isLoading || updateTagMutation.isLoading;
+  }, [getGameObjectsQuery.isLoading, updateTagMutation.isLoading]);
 
   return {
     isTagAppliedToAll,
     handleApplyTag,
     areQueriesLoading,
-    isApplyingChanges,
   };
 }

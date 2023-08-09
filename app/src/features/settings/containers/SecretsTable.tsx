@@ -131,7 +131,7 @@ export default function SecretsTable(props: SecretsTableProps) {
   const handleCreateSecret = async (name: string) => {
     const createDescription = `Name=${name}`;
     const createToast = toast({
-      title: "Creating Tag",
+      title: "Creating App entry...",
       description: createDescription,
       status: "loading",
     });
@@ -140,7 +140,7 @@ export default function SecretsTable(props: SecretsTableProps) {
       if (onSecretCreated) await onSecretCreated(result.createdSecret);
       await utils.secrets.invalidate();
       toast.update(createToast, {
-        title: "Success: Tag Created",
+        title: "Success: App entry created",
         description: createDescription,
         status: "success",
       });
@@ -148,7 +148,7 @@ export default function SecretsTable(props: SecretsTableProps) {
       console.error(error);
       toast.update(createToast, {
         title: "Error",
-        description: `Failed to create Tag (Name=${name}). See console for details`,
+        description: `Failed to create App entry (Name=${name}). See console for details`,
         status: "error",
       });
     }

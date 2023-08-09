@@ -3,12 +3,10 @@ import { GetServerSideProps, NextPage } from "next";
 import { Session } from "next-auth";
 import Head from "next/head";
 import { useRouter } from "next/router";
-import DeleteGameButton from "../../features/games/containers/DeleteGameButton";
 import GamesTable, {
   GameData,
 } from "../../features/games/containers/GamesTable";
 import ManageGameButton from "../../features/games/containers/ManageGameButton";
-import PlayGameButton from "../../features/games/containers/PlayGameButton";
 import ExportAllGamesJSON from "../../features/games/containers/TableActionsMenu/ExportAllGamesJSON";
 import ExportSelectedGamesJSON from "../../features/games/containers/TableActionsMenu/ExportSelectedGamesJSON";
 import useDeleteGames from "../../features/games/hooks/useDeleteGames";

@@ -14,5 +14,8 @@ const config = {
     locales: ["en"],
     defaultLocale: "en",
   },
+  devIndicators: {
+    buildActivity: false,
+  },
 };
 export default config;
