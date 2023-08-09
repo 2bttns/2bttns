@@ -1,4 +1,7 @@
+#!/usr/bin/env node
+
 // CLI to create admin credentials in the database
+
 import { PrismaClient } from ".prisma/client";
 const prisma = new PrismaClient();
 

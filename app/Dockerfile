@@ -1,3 +1,13 @@
+# Based on https://create.t3.gg/en/deployment/docker#3-create-dockerfile
+
+ARG DATABASE_URL
+ARG NEXTAUTH_URL="http://localhost:3262"
+ARG NEXTAUTH_SECRET="placeholder-secret-remember-to-change"
+ARG GITHUB_ID
+ARG GITHUB_SECRET
+ARG SERVER_LOG_LEVEL="info"
+ARG SERVER_LOG_LOCALE="en-US"
+
 ##### DEPENDENCIES
 
 FROM --platform=linux/amd64 node:16-alpine3.17 AS deps
@@ -23,15 +33,6 @@ RUN \
 
 FROM --platform=linux/amd64 node:16-alpine3.17 AS builder
 
-# TODO: SKIP_ENV_VALIDATION=1 isn't working for some reason
-ARG DATABASE_URL=""
-ARG NEXTAUTH_URL="http://localhost:3262"
-ARG NEXTAUTH_SECRET="placeholder"
-ARG GITHUB_ID
-ARG GITHUB_SECRET
-ARG SERVER_LOG_LEVEL="info"
-ARG SERVER_LOG_LOCALE="en-US"
-
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
@@ -50,24 +51,44 @@ RUN \
 FROM --platform=linux/amd64 node:16-alpine3.17 AS runner
 WORKDIR /app
 
-ENV NODE_ENV production
-
-ENV NEXT_TELEMETRY_DISABLED 1
-
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
 COPY --from=builder /app/next.config.mjs ./
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/package.json ./package.json
+COPY --from=builder /app/package-lock.json ./package-lock.json
 
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
 COPY --from=builder /app/prisma ./prisma
+COPY --from=builder /app/src/utils ./src/utils
 
 USER nextjs
-EXPOSE 3262
-ENV PORT 3262
 
-CMD ["node", "server.js"]
+ARG DATABASE_URL
+ARG NEXTAUTH_URL
+ARG NEXTAUTH_SECRET
+ARG GITHUB_ID
+ARG GITHUB_SECRET
+ARG SERVER_LOG_LEVEL
+ARG SERVER_LOG_LOCALE
+
+ENV DATABASE_URL=$DATABASE_URL
+ENV NEXTAUTH_URL=$NEXTAUTH_URL
+ENV NEXTAUTH_SECRET=$NEXTAUTH_SECRET
+ENV GITHUB_ID=$GITHUB_ID
+ENV GITHUB_SECRET=$GITHUB_SECRET
+ENV SERVER_LOG_LEVEL=$SERVER_LOG_LEVEL
+ENV SERVER_LOG_LOCALE=$SERVER_LOG_LOCALE
+
+ENV NODE_ENV production
+ENV NEXT_TELEMETRY_DISABLED 1
+
+ENV PORT 3262
+EXPOSE 3262
+
+# The output: "standalone" config in next.config.mjs allows us to run the app with node directly instead of using next start
+# https://nextjs.org/docs/pages/api-reference/next-config-js/output
+CMD echo "Starting Next.js server..."; node server.js
