@@ -1,3 +1,4 @@
+import { gameObjectsPageTutorialFromHome } from "./gameObjectsPageTutorialFromHome";
 import { gamesPageTutorialFromHome } from "./gamesPageTutorialFromHome";
 import { homePageTutorial } from "./homePageTutorial";
 
@@ -8,4 +9,5 @@ import { homePageTutorial } from "./homePageTutorial";
 export const tutorialsRegistry = {
   homePageTutorial,
   gamesPageTutorialFromHome,
+  gameObjectsPageTutorialFromHome,
 };

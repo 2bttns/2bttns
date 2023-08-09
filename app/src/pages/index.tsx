@@ -106,7 +106,7 @@ const Home: NextPage<HomePageProps> = (props) => {
                 icon={<FaShapes />}
                 link={
                   isTutorialActive
-                    ? "/game-objects?tutorial=true"
+                    ? `/game-objects?tutorial=${tutorialsRegistry.gameObjectsPageTutorialFromHome.id}&step=1`
                     : "/game-objects"
                 }
               />

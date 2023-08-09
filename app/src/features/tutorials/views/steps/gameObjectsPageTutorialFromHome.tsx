@@ -3,12 +3,12 @@ import { TUTORIAL_BUTTON_ID } from "../TwobttnsTutorials";
 import { TwobttnsTutorial } from "./tutorial";
 import { tutorialsRegistry } from "./tutorialsRegistry";
 
-export const gamesPageTutorialFromHome: TwobttnsTutorial = {
-  id: "gamesPageTutorialFromHome",
+export const gameObjectsPageTutorialFromHome: TwobttnsTutorial = {
+  id: "gameObjectsPageTutorialFromHome",
   steps: [
     {
       target: `#${TUTORIAL_BUTTON_ID}`,
-      content: "This is the Games management page.",
+      content: "This is the Games Objects management page.",
       disableBeacon: true,
     },
     {
@@ -17,7 +17,7 @@ export const gamesPageTutorialFromHome: TwobttnsTutorial = {
       disableBeacon: true,
     },
   ],
-  async onJoyrideCallback({ data, router }) {
+  async onJoyrideCallback({ data, router, joyrideState }) {
     const { action, index, type } = data;
 
     // After the 2nd (last) step, redirect to the home page tutorial
@@ -30,7 +30,7 @@ export const gamesPageTutorialFromHome: TwobttnsTutorial = {
         pathname: "/",
         query: {
           tutorial: tutorialsRegistry.homePageTutorial.id,
-          step: 2,
+          step: 4,
         },
       });
     }

@@ -10,6 +10,7 @@ import ReactJoyride, {
   EVENTS as JOYRIDE_EVENTS,
   STATUS as JOYRIDE_STATUS,
 } from "react-joyride";
+import useIsRedirecting from "../../shared/hooks/useIsRedirecting";
 import { useTwoBttnsTutorialsContext } from "../TwobttnsTutorialsContextProvider";
 
 const ReactJoyrideComponent = dynamic(() => import("react-joyride"), {
@@ -43,6 +44,7 @@ export default function TwobttnsTutorials(props: TwobttnsTutorialsProps) {
   const context = useTwoBttnsTutorialsContext();
   const router = useRouter();
   const searchParams = useSearchParams();
+  const isRedirecting = useIsRedirecting();
 
   const [joyride, setJoyride] = useState<ReactJoyride["props"]>({
     run: false,
@@ -80,7 +82,7 @@ export default function TwobttnsTutorials(props: TwobttnsTutorialsProps) {
       context.tutorialId === null ||
       joyride.stepIndex === undefined ||
       joyride.stepIndex < 0 ||
-      joyride.stepIndex >= joyride.steps.length
+      joyride.stepIndex >= steps.length
     ) {
       clearTutorialQueryParams();
       return;
@@ -95,7 +97,7 @@ export default function TwobttnsTutorials(props: TwobttnsTutorialsProps) {
       undefined,
       { shallow: true }
     );
-  }, [context.tutorialId, joyride.stepIndex]);
+  }, [context.tutorialId, steps, joyride.stepIndex]);
 
   useEffect(() => {
     // Update query params when step index state changes
@@ -127,7 +129,7 @@ export default function TwobttnsTutorials(props: TwobttnsTutorialsProps) {
       stepIndex: queryStepIndex,
       run: true,
     }));
-  }, [searchParams]);
+  }, [searchParams, steps]);
 
   const handleJoyrideCallback = useCallback(
     async (data: JoyrideCallBackProps) => {
@@ -186,25 +188,6 @@ export default function TwobttnsTutorials(props: TwobttnsTutorialsProps) {
     if (joyride.run) return; // Don't restart if the tutorial is already running
     setJoyride((prev) => ({ ...prev, stepIndex: 0, run: true }));
   }, [toggleRestartState]);
-
-  const [isRedirecting, setRedirecting] = useState(false);
-  useEffect(() => {
-    const onStart = () => {
-      setRedirecting(true);
-    };
-    const onEnd = () => {
-      setRedirecting(false);
-    };
-
-    router.events.on("routeChangeStart", onStart);
-    router.events.on("routeChangeComplete", onEnd);
-    router.events.on("routeChangeError", onEnd);
-    return () => {
-      router.events.off("routeChangeStart", onStart);
-      router.events.off("routeChangeComplete", onEnd);
-      router.events.off("routeChangeError", onEnd);
-    };
-  }, [router]);
 
   return (
     <>
