@@ -17,6 +17,7 @@ export default function TwobttnsTutorialsContainer() {
   useEffect(() => {
     const searchParamsDict = Object.fromEntries(searchParams.entries());
     const tutorialQueryId = searchParamsDict["tutorial"];
+    if (tutorialQueryId === context.tutorialId) return;
     if (tutorialsRegistry[tutorialQueryId as TwobttnsTutorialId]) {
       context.setTutorialId(searchParamsDict["tutorial"] as TwobttnsTutorialId);
     } else {

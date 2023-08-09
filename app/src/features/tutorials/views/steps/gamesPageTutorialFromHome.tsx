@@ -17,7 +17,7 @@ export const gamesPageTutorialFromHome: TwobttnsTutorial = {
       disableBeacon: true,
     },
   ],
-  async onJoyrideCallback({ data, router }) {
+  onJoyrideCallback({ data, router }) {
     const { action, index, status, type } = data;
 
     // After the 2nd (last) step, redirect to the home page tutorial
@@ -26,7 +26,7 @@ export const gamesPageTutorialFromHome: TwobttnsTutorial = {
       type === "step:after" &&
       index === 1
     ) {
-      await router.push({
+      void router.push({
         pathname: "/",
         query: {
           tutorial: tutorialsRegistry.homePageTutorial.id,

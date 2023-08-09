@@ -51,6 +51,10 @@ export default function TwobttnsTutorials(props: TwobttnsTutorialsProps) {
   });
 
   useEffect(() => {
+    setJoyride((prev) => ({ ...prev, steps }));
+  }, [steps]);
+
+  useEffect(() => {
     // Update global context when joyride state changes, so components using the context can react to it
     context.setCurrentJoyrideState(joyride);
   }, [context, joyride]);
@@ -59,10 +63,14 @@ export default function TwobttnsTutorials(props: TwobttnsTutorialsProps) {
     // Clears step query params from URL
     const searchParamsDict = Object.fromEntries(searchParams.entries());
     delete searchParamsDict["step"];
-    void router.push({
-      pathname: router.pathname,
-      query: searchParamsDict,
-    });
+    void router.push(
+      {
+        pathname: router.pathname,
+        query: searchParamsDict,
+      },
+      undefined,
+      { shallow: true }
+    );
   };
 
   const updateQueryParams = useCallback(() => {
@@ -79,10 +87,14 @@ export default function TwobttnsTutorials(props: TwobttnsTutorialsProps) {
     }
     const searchParamsDict = Object.fromEntries(searchParams.entries());
     searchParamsDict["step"] = (joyride.stepIndex + 1).toString();
-    void router.push({
-      pathname: router.pathname,
-      query: searchParamsDict,
-    });
+    void router.push(
+      {
+        pathname: router.pathname,
+        query: searchParamsDict,
+      },
+      undefined,
+      { shallow: true }
+    );
   }, [context.tutorialId, joyride.stepIndex]);
 
   useEffect(() => {
@@ -97,7 +109,7 @@ export default function TwobttnsTutorials(props: TwobttnsTutorialsProps) {
       ? Number(searchParams.get("step")) - 1
       : null;
     if (
-      queryStepIndex &&
+      queryStepIndex !== null &&
       (queryStepIndex < 0 || queryStepIndex >= steps.length)
     ) {
       clearTutorialQueryParams();
@@ -109,6 +121,7 @@ export default function TwobttnsTutorials(props: TwobttnsTutorialsProps) {
       setJoyride((prev) => ({ ...prev, run: false, stepIndex: 0 }));
       return;
     }
+
     setJoyride((prev) => ({
       ...prev,
       stepIndex: queryStepIndex,
