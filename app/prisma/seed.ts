@@ -6,6 +6,8 @@ import { defaultMode } from "../src/modes/availableModes";
 import { logger } from "../src/utils/logger";
 const prisma = new PrismaClient();
 async function main() {
+  await prisma.$connect();
+
   // Seed initial admin allow list using adminAllowList.json
   // const adminAllowList = fs.readFileSync(path.resolve(process.cwd(), '')
   const pathToAdminAllowList = path.resolve(

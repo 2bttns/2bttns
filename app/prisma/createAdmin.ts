@@ -2,7 +2,7 @@
 
 // CLI to create admin credentials in the database
 
-import { PrismaClient } from ".prisma/client";
+import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
 import inquirer from "inquirer";
@@ -10,6 +10,7 @@ import { z } from "zod";
 import hashPassword from "../src/utils/hashPassword";
 import { logger } from "../src/utils/logger";
 
+// prisma check connection
 main().catch((e) => {
   if (e instanceof Error) {
     logger.error(e.message);
@@ -18,6 +19,8 @@ main().catch((e) => {
 });
 
 async function main() {
+  await prisma.$connect();
+
   const { option } = await inquirer.prompt({
     type: "list",
     choices: [
