@@ -23,17 +23,29 @@ services:
       POSTGRES_PASSWORD: test-pass
       POSTGRES_DB: test-db
   twobttns:
-    # TODO: Auto-apply DB migrations before starting the app (right now, need to manually run `npm run init-db:dev`)
-    # TODO: Depend on a local "production" db instead of the dev-db
+    # TODO: 2bttns CLI to apply migrations
+    # TODO: 2bttns CLI to create admins
     build: .
     restart: unless-stopped
     container_name: twobttns
     ports:
       - "3262:3262"
     depends_on:
-      - dev-db
+      - local-prod-db
     environment:
-      DATABASE_URL: postgresql://dev-user:dev-pass@host.docker.internal:5433/dev-db
-      NEXTAUTH_URL: http://localhost:3262
+      DATABASE_URL: postgresql://local-prod-user:local-prod-pass@host.docker.internal:5432/local-prod-db
+  local-prod-db:
+    image: postgres:13
+    restart: unless-stopped
+    container_name: integration-local-prod-db-postgres
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: local-prod-user
+      POSTGRES_PASSWORD: local-prod-pass
+      POSTGRES_DB: local-prod-db
+    volumes:
+      - postgres-data-local-prod:/var/lib/postgresql/data
 volumes:
   postgres-data-dev:
+  postgres-data-local-prod:
