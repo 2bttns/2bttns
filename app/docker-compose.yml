@@ -1,9 +1,8 @@
 version: "3.9"
-
 services:
   dev-db:
     image: postgres:13
-    restart: always
+    restart: unless-stopped
     container_name: integration-dev-db-postgres
     ports:
       - "5433:5432"
@@ -11,9 +10,11 @@ services:
       POSTGRES_USER: dev-user
       POSTGRES_PASSWORD: dev-pass
       POSTGRES_DB: dev-db
+    volumes:
+      - postgres-data-dev:/var/lib/postgresql/data
   test-db:
     image: postgres:13
-    restart: always
+    restart: unless-stopped
     container_name: integration-test-db-postgres
     ports:
       - "5434:5432"
@@ -21,3 +22,18 @@ services:
       POSTGRES_USER: test-user
       POSTGRES_PASSWORD: test-pass
       POSTGRES_DB: test-db
+  twobttns:
+    # TODO: Auto-apply DB migrations before starting the app (right now, need to manually run `npm run init-db:dev`)
+    # TODO: Depend on a local "production" db instead of the dev-db
+    build: .
+    restart: unless-stopped
+    container_name: twobttns
+    ports:
+      - "3262:3262"
+    depends_on:
+      - dev-db
+    environment:
+      DATABASE_URL: postgresql://dev-user:dev-pass@host.docker.internal:5433/dev-db
+      NEXTAUTH_URL: http://localhost:3262
+volumes:
+  postgres-data-dev:

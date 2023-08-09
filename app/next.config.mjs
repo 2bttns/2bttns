@@ -17,5 +17,6 @@ const config = {
   devIndicators: {
     buildActivity: false,
   },
+  output: "standalone",
 };
 export default config;
