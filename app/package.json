@@ -10,7 +10,6 @@
     "lint": "next lint --quiet",
     "test:nowatch": "dotenv -e .env.test -- npm run docker:up:test-db && sleep 1 && npm run migrate:test && npm run seed:test && vitest --run && npm run docker:rm:test-db",
     "test": "dotenv -e .env.test -- npm run docker:up:test-db && sleep 1 && npm run migrate:test && npm run seed:test && vitest && npm run docker:rm:test-db",
-    "create-admin": "tsx prisma/createAdmin.ts",
     "seed": "prisma db seed",
     "seed:test": "dotenv -e .env.test -- prisma db seed",
     "migrate": "prisma migrate deploy",
