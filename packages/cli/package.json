@@ -1,5 +1,5 @@
 {
-  "name": "@2bttns/cli",
+  "name": "@2bttns/2bttns-cli",
   "version": "0.0.1-alpha",
   "description": "Create your 2bttns app with a single command.",
   "repository": {
@@ -7,20 +7,19 @@
     "url": "https://github.com/2bttns/2bttns"
   },
   "bin": {
-    "@2bttns/cli": "./dist/index.js"
+    "@2bttns/2bttns-cli": "./dist/index.js"
   },
-  "type": "module",
   "files": [
     "dist"
   ],
   "scripts": {
     "dev": "npx tsx src/index.ts",
-    "prebuild": "npm run unlink && rm -rf dist",
+    "prebuild": "npm run unlink && rm -rf dist && npm run prisma:generate",
     "build": "ncc build src/index.ts -o dist",
-    "postbuild": "npm run link",
+    "postbuild": "mv dist/client/* dist && npm run link",
     "link": "npm link",
-    "unlink": "npm unlink @2bttns/cli && rm -rf \"$(npm root -g)/@2bttns/cli\"",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "unlink": "npm unlink @2bttns/cli && rm -rf dist/client && rm -rf \"$(npm root -g)/@2bttns/cli\"",
+    "prisma:generate": "cd ../../app/prisma/ && npx --yes prisma generate"
   },
   "keywords": [
     "2bttns"
@@ -28,12 +27,8 @@
   "author": "",
   "license": "MIT",
   "devDependencies": {
-    "@types/got": "^9.6.12",
     "@types/node": "^20.3.3",
-    "@types/tar": "^6.1.5",
     "@vercel/ncc": "^0.36.1",
-    "got": "^13.0.0",
-    "tar": "^6.1.15",
     "tsx": "^3.12.7",
     "typescript": "^5.1.6"
   },
