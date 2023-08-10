@@ -1,24 +1,10 @@
-#!/usr/bin/env node
-
-// CLI to create admin credentials in the database
-
-import { PrismaClient } from "@prisma/client";
-const prisma = new PrismaClient();
-
+// Interactive CLI to create admin credentials in the database
 import inquirer from "inquirer";
 import { z } from "zod";
-import hashPassword from "../src/utils/hashPassword";
-import { logger } from "../src/utils/logger";
+import { PrismaClient } from ".";
+import hashPassword from "../../../app/src/utils/hashPassword";
 
-// prisma check connection
-main().catch((e) => {
-  if (e instanceof Error) {
-    logger.error(e.message);
-  }
-  process.exit(1);
-});
-
-async function main() {
+export async function createAdmin(prisma: PrismaClient) {
   await prisma.$connect();
 
   const { option } = await inquirer.prompt({
@@ -33,22 +19,22 @@ async function main() {
 
   switch (option) {
     case 0:
-      await createAdminWithCredentials();
+      await createAdminWithCredentials(prisma);
       break;
     case 1:
-      await addOAuthEmailToAdminAllowList();
+      await addOAuthEmailToAdminAllowList(prisma);
       break;
     default:
       throw new Error("Invalid option");
   }
 }
 
-async function addOAuthEmailToAdminAllowList() {
+async function addOAuthEmailToAdminAllowList(prisma: PrismaClient) {
   const { email } = await inquirer.prompt({
     type: "input",
     name: "email",
   });
-  await validateEmail(email);
+  await validateEmail(prisma, email);
   await prisma.adminOAuthAllowList.create({
     data: {
       AdminUser: {
@@ -60,29 +46,31 @@ async function addOAuthEmailToAdminAllowList() {
     },
   });
 
-  logger.info(
+  console.info(
     `Successfully added admin email=${email} to the allow list in the database.`
   );
 }
 
-async function createAdminWithCredentials() {
-  const secret = process.env.NEXTAUTH_SECRET;
-  if (!secret)
-    throw new Error(
-      "NEXTAUTH_SECRET is undefined, and is required to for hashing your password. Please set this environment variable. Aborting."
-    );
-
+async function createAdminWithCredentials(prisma: PrismaClient) {
   const { username } = await inquirer.prompt({
     type: "input",
     name: "username",
   });
-  await validateUsername(username);
+  await validateUsername(prisma, username);
 
   const { password } = await inquirer.prompt({
     type: "password",
     name: "password",
   });
-  const hashedPassword = hashPassword(password, secret);
+  const { salt } = await inquirer.prompt({
+    type: "password",
+    name: "salt",
+    message:
+      "Password salt should match your NEXTAUTH_SECRET environment variable.",
+  });
+  if (!salt) throw new Error("Salt cannot be empty");
+
+  const hashedPassword = hashPassword(password, salt);
 
   await prisma.adminCredential.create({
     data: {
@@ -95,12 +83,12 @@ async function createAdminWithCredentials() {
       },
     },
   });
-  logger.info(
+  console.info(
     `Successfully added admin credentials for ${username} in the database.`
   );
 }
 
-async function validateEmail(email: string) {
+async function validateEmail(prisma: PrismaClient, email: string) {
   if (!email) throw new Error("Email cannot be empty");
   try {
     z.string().email().parse(email);
@@ -118,7 +106,7 @@ async function validateEmail(email: string) {
   return email;
 }
 
-async function validateUsername(username: string) {
+async function validateUsername(prisma: PrismaClient, username: string) {
   if (!username) throw new Error("Username cannot be empty");
 
   const existingAdmin = await prisma.adminCredential.findFirst({
