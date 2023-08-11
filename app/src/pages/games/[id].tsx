@@ -26,7 +26,7 @@ import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import DeleteGameButton from "../../features/games/containers/DeleteGameButton";
 import EditGameMode from "../../features/games/containers/EditGameMode";
-import PlayGameButton from "../../features/games/containers/PlayGameButton";
+import TestPlayGameButton from "../../features/games/containers/TestPlayGameButton";
 import CustomEditable from "../../features/shared/components/CustomEditable";
 import UnderlinedTextTooltip from "../../features/shared/components/UnderlinedTextTooltip";
 import { EditTagsForGameButtonDrawer } from "../../features/tags/containers/EditTagsForGameButtonDrawer";
@@ -200,7 +200,8 @@ function GameDetails(props: GameDetailsProps) {
         </Breadcrumb>
 
         <ButtonGroup>
-          <PlayGameButton gameId={gameId} />
+          <TestPlayGameButton gameId={gameId} view="admin" />
+          <TestPlayGameButton gameId={gameId} view="player" />
           <DeleteGameButton gameId={gameId} onDeleted={onDeleted} />
         </ButtonGroup>
       </HStack>
