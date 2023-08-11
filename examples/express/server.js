@@ -1,9 +1,10 @@
 const express = require('express');
-const cors = require('cors'); // Import the cors package
+const cors = require('cors'); 
 const { TwoBttnsApi } = require("@2bttns/sdk");
+const path = require('path');
 
 const app = express();
-const port = 3002; // Change this to your desired port number
+const port = 3002;
 
 const twobttns = new TwoBttnsApi({
   appId: "example-app",
@@ -14,9 +15,17 @@ const twobttns = new TwoBttnsApi({
 // Enable CORS for all routes
 app.use(cors());
 
+// Serve static files from the current directory
+app.use(express.static(path.join(__dirname)));
+
+// If you want to explicitly serve index.html for root route
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'index.html'));
+});
+
 app.get('/get-url', (req, res) => {
   const url = twobttns.generatePlayUrl({
-    gameId: "clktw0xb000006mnxvqbt2nwa",
+    gameId: "example-game-0",
     playerId: "some-player-id",
     numItems: 5,
     callbackUrl: "https://example.com/callback",
