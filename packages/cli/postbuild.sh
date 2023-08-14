@@ -20,6 +20,7 @@ cat << EOF > dist/config/local.json
     "nextAuthSecret": null
 }
 EOF
+cp dist/config/local.json dist/config/production.json
 
 
 
