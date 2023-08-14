@@ -1,5 +1,7 @@
 #!/usr/bin/env node
+import { execSync } from "child_process";
 import { Option, program } from "commander";
+import path from "path";
 import { PrismaClient } from "../../../app/node_modules/@prisma/client";
 import { createAdmin } from "./createAdmin";
 export type { PrismaClient };
@@ -27,7 +29,12 @@ db.command("migrate").action(async (name, options, command) => {
   const dbUrl = options.parent.parent._optionValues.dbUrl;
   if (!dbUrl) throw new Error("dbUrl is required (-d, --db-url <database>)");
   await dbConnect(dbUrl);
-  console.log("migrate DB");
+  const schemaPath = path.resolve(__dirname, "prisma/schema.prisma");
+  console.info("Applying migrations...");
+  execSync(`npx --yes prisma migrate deploy --schema ${schemaPath}`, {
+    cwd: __dirname,
+    stdio: "inherit",
+  });
 });
 db.command("seed").action(async (name, options, command) => {
   const dbUrl = options.parent.parent._optionValues.dbUrl;

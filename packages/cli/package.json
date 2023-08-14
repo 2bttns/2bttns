@@ -13,13 +13,16 @@
     "dist"
   ],
   "scripts": {
-    "dev": "npx tsx src/index.ts",
+    "start": "node dist/index.js",
     "prebuild": "npm run unlink && rm -rf dist && npm run prisma:generate",
     "build": "ncc build src/index.ts -o dist",
-    "postbuild": "mv dist/client/* dist && npm run link",
+    "postbuild": "mkdir dist/prisma && npm run prisma:move-schema && npm run prisma:move-binary-targets && npm run prisma:copy-migrations && npm run link",
     "link": "npm link",
     "unlink": "npm unlink @2bttns/cli && rm -rf dist/client && rm -rf \"$(npm root -g)/@2bttns/cli\"",
-    "prisma:generate": "cd ../../app/prisma/ && npx --yes prisma generate"
+    "prisma:generate": "cd ../../app/prisma/ && npx --yes prisma generate",
+    "prisma:copy-migrations": "cp -r ../../app/prisma/migrations dist/prisma",
+    "prisma:move-binary-targets": "mv dist/client/* dist/prisma && rm -rf dist/client",
+    "prisma:move-schema": "mv dist/schema.prisma dist/prisma"
   },
   "keywords": [
     "2bttns"
@@ -29,6 +32,7 @@
   "devDependencies": {
     "@types/inquirer": "^9.0.3",
     "@types/node": "^20.3.3",
+    "@types/tmp": "^0.2.3",
     "@vercel/ncc": "^0.36.1",
     "tsx": "^3.12.7",
     "typescript": "^5.1.6"
@@ -36,6 +40,7 @@
   "dependencies": {
     "commander": "^11.0.0",
     "inquirer": "^9.2.10",
+    "tmp": "^0.2.1",
     "zod": "^3.21.4"
   }
 }
