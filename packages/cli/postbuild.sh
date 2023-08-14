@@ -12,6 +12,17 @@ cp -r ../../app/prisma/migrations dist/
 # so we're keeping it at the root of dist/ unless we can figure out a way to make it work
 # mv dist/schema.prisma dist/prisma     
 
+# Config folder
+mkdir dist/config
+cat << EOF > dist/config/local.json
+{
+    "db": { "url" : null },
+    "nextAuthSecret": null
+}
+EOF
+
+
+
 # Link the build
 # This makes the `2bttns-cli` command available globally on your machine
 # To manually unlink it, you can run `npm run unlink` in this directory

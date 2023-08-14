@@ -1,8 +1,9 @@
 // Interactive CLI to create admin credentials in the database
 import inquirer from "inquirer";
 import { z } from "zod";
-import { PrismaClient } from ".";
+import { PrismaClient, config } from ".";
 import hashPassword from "../../../app/src/utils/hashPassword";
+import { CONFIG_KEYS } from "./updateConfig";
 
 export async function createAdmin(prisma: PrismaClient) {
   await prisma.$connect();
@@ -52,6 +53,17 @@ async function addOAuthEmailToAdminAllowList(prisma: PrismaClient) {
 }
 
 async function createAdminWithCredentials(prisma: PrismaClient) {
+  if (!config.get(CONFIG_KEYS.nextAuthSecret))
+    throw new Error(
+      `'${CONFIG_KEYS.nextAuthSecret}' config key is required to create an admin using credentials.\n\n Set it with '2bttns-cli config set ${CONFIG_KEYS.nextAuthSecret} <value>'\n\n IMPORTANT: The value should match the NEXTAUTH_SECRET you are using in your admin console's environment variables.`
+    );
+  const salt = config.get(CONFIG_KEYS.nextAuthSecret) as string;
+  if (!salt) {
+    throw new Error(
+      `Invalid ${CONFIG_KEYS.nextAuthSecret} config value. It cannot be empty.`
+    );
+  }
+
   const { username } = await inquirer.prompt({
     type: "input",
     name: "username",
@@ -62,14 +74,6 @@ async function createAdminWithCredentials(prisma: PrismaClient) {
     type: "password",
     name: "password",
   });
-  const { salt } = await inquirer.prompt({
-    type: "password",
-    name: "salt",
-    message:
-      "Password (Password salt should match your NEXTAUTH_SECRET environment variable):",
-  });
-  if (!salt) throw new Error("Salt cannot be empty");
-
   const hashedPassword = hashPassword(password, salt);
 
   await prisma.adminCredential.create({
@@ -84,7 +88,7 @@ async function createAdminWithCredentials(prisma: PrismaClient) {
     },
   });
   console.info(
-    `Successfully added admin credentials for ${username} in the database.`
+    `Successfully added admin credentials for username="${username}" in the database.`
   );
 }
 
@@ -93,14 +97,14 @@ async function validateEmail(prisma: PrismaClient, email: string) {
   try {
     z.string().email().parse(email);
   } catch {
-    throw new Error(`Invalid email: ${email}`);
+    throw new Error(`Invalid email: "${email}"`);
   }
   const existingAdmin = await prisma.adminOAuthAllowList.findFirst({
     where: { email },
   });
   if (existingAdmin) {
     throw new Error(
-      `Admin with email=${email} already exists in the database. Aborting.`
+      `Admin with email="${email}" already exists in the database. Aborting.`
     );
   }
   return email;
@@ -114,7 +118,7 @@ async function validateUsername(prisma: PrismaClient, username: string) {
   });
   if (existingAdmin) {
     throw new Error(
-      `Admin with username=${username} already exists in the database. Aborting.`
+      `Admin with username="${username}" already exists in the database. Aborting.`
     );
   }
   return username;
