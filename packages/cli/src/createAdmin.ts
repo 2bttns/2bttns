@@ -66,7 +66,7 @@ async function createAdminWithCredentials(prisma: PrismaClient) {
     type: "password",
     name: "salt",
     message:
-      "Password salt should match your NEXTAUTH_SECRET environment variable.",
+      "Password (Password salt should match your NEXTAUTH_SECRET environment variable):",
   });
   if (!salt) throw new Error("Salt cannot be empty");
 
