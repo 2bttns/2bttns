@@ -14,15 +14,11 @@
   ],
   "scripts": {
     "start": "node dist/index.js",
-    "prebuild": "npm run unlink && rm -rf dist && npm run prisma:generate",
+    "prebuild": "./prebuild.sh",
     "build": "ncc build src/index.ts -o dist",
-    "postbuild": "mkdir dist/prisma && npm run prisma:move-schema && npm run prisma:move-binary-targets && npm run prisma:copy-migrations && npm run link",
+    "postbuild": "./postbuild.sh",
     "link": "npm link",
-    "unlink": "npm unlink @2bttns/cli && rm -rf dist/client && rm -rf \"$(npm root -g)/@2bttns/cli\"",
-    "prisma:generate": "cd ../../app/prisma/ && npx --yes prisma generate",
-    "prisma:copy-migrations": "cp -r ../../app/prisma/migrations dist/prisma",
-    "prisma:move-binary-targets": "mv dist/client/* dist/prisma && rm -rf dist/client",
-    "prisma:move-schema": "mv dist/schema.prisma dist/prisma"
+    "unlink": "npm unlink @2bttns/cli && rm -rf \"$(npm root -g)/@2bttns/cli\""
   },
   "keywords": [
     "2bttns"
