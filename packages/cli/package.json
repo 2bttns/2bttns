@@ -18,7 +18,7 @@
     "build": "ncc build src/index.ts -o dist",
     "postbuild": "./postbuild.sh",
     "link": "npm link",
-    "unlink": "npm unlink @2bttns/cli && rm -rf \"$(npm root -g)/@2bttns/cli\""
+    "unlink": "npm unlink @2bttns/cli && rm -rf \"$(npm root -g)/@2bttns/2bttns-cli\""
   },
   "keywords": [
     "2bttns"
