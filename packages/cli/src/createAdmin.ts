@@ -81,7 +81,7 @@ async function createAdminWithCredentials(params: {
       
       1) Set the nextAuthSecret config value (\`2bttns-cli config set nextAuthSecret <value>\`)
       
-      2) Set the NEXTAUTH_URL environment variable
+      2) Set the NEXTAUTH_SECRET environment variable
       
       IMPORTANT: The value should match the NEXTAUTH_SECRET you are using in your admin console's environment variables.`
     );
