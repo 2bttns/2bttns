@@ -21,7 +21,7 @@
     "docker:up:test-db": "docker-compose up test-db -d",
     "gen:theme-typings": "chakra-cli tokens src/style/theme/typings-only.ts",
     "create-admin": "dotenv -e .env -- npx --yes @2bttns/2bttns-cli admin create --ignore-config",
-    "build:image": "docker build -t 2bttns/app ."
+    "build:image": "docker build -t 2bttns ."
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
