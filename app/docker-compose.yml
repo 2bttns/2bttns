@@ -32,6 +32,7 @@ services:
       - local-prod-db
     environment:
       DATABASE_URL: postgresql://local-prod-user:local-prod-pass@host.docker.internal:5432/local-prod-db
+      NEXTAUTH_SECRET: placeholder-secret-remember-to-change
   local-prod-db:
     image: postgres:13
     restart: unless-stopped
