@@ -36,6 +36,13 @@ $ 2bttns-cli db migrate -d postgresql://local-prod-user:local-prod-pass@localhos
 ## If you've set the db.url config value, you can omit the -d flag
 $ 2bttns-cli db migrate
 
+# Create example seed data (Games, Tags, GameObjects, and an example App Secret) in your database
+## Seed the specified database using the -d flag
+$ 2bttns-cli db seed -d postgresql://local-prod-user:local-prod-pass@localhost:5432/local-prod-db
+
+## If you've set the db.url config value, you can omit the -d flag
+$ 2bttns-cli db seed
+
 
 # Create a new 2bttns console administrator:
 $ 2bttns-cli admin create
