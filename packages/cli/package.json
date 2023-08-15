@@ -1,6 +1,6 @@
 {
   "name": "@2bttns/2bttns-cli",
-  "version": "0.0.3-alpha",
+  "version": "0.0.4-alpha",
   "description": "Create your 2bttns app with a single command.",
   "repository": {
     "type": "git",
