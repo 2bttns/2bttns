@@ -17,6 +17,7 @@ docker container run \
 ### Using Docker-Compose
 
 ```yaml
+# docker-compose.yml
 version: "3.9"
 services:
   twobttns:
@@ -44,6 +45,11 @@ services:
       - postgres-data-local-prod:/var/lib/postgresql/data
 volumes:
   postgres-data-local-prod:
+```
+
+```bash
+# In the same directory as your docker-compose.yml file:
+$ docker-compose up
 ```
 
 ## Environment Variables
@@ -127,6 +133,32 @@ $ npm i              # Install npm dependencies, if you haven't already
 $ npm run test       # Run tests
 ```
 
+### Testing the Docker Image Locally
+
+You can test the 2bttns Docker image locally by running the following commands inside the root `app` folder:
+
+```bash
+$ docker-compose up twobttns
+
+# Apply the necessary 2bttns Prisma migrations to the database & seed it with example data
+$ npx @2bttns/2bttns-cli db migrate -d postgresql://local-prod-user:local-prod-pass@localhost:5432/local-prod-db
+$ npx @2bttns/2bttns-cli db seed -d postgresql://local-prod-user:local-prod-pass@localhost:5432/local-prod-db
+
+# Create an admin user
+$ npx @2bttns/2bttns-cli admin create -d postgresql://local-prod-user:local-prod-pass@localhost:5432/local-prod-db -s placeholder-secret-remember-to-change
+
+# To stop the containers, run the following command:
+$ docker-compose down twobttns
+
+# The local-prod-db container uses a volume to store its data, so subsequent runs of the local-prod-db container will use the same data.
+# You can delete the volume with the following command:
+$ docker volume rm app_postgres-data-local-prod
+```
+
+````
+
+This will start the `twobttns` container and the `local-prod-db` containers. The `twobttns` container is built using the local Dockerfile. You can access the dockerized 2bttns app at `localhost:3262`.
+
 ### Managing the `dev-db` container
 
 The `dev-db` container will contain your local development database. It is created and managed by Docker Compose in the `docker-compose.yml` file.
@@ -136,7 +168,7 @@ Here are some useful commands to manage the `dev-db` container:
 ```bash
 # Stop all containers used by the app (e.g. dev-db and test-db containers)
 $ npm run docker:stop
-```
+````
 
 ```bash
 # Start the dev-db container, from scratch or if it was stopped
