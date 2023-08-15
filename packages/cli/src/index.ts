@@ -5,6 +5,7 @@ import type { IConfig } from "config";
 import path from "path";
 import { PrismaClient } from "../../../app/node_modules/@prisma/client";
 import { createAdmin } from "./createAdmin";
+import { seed } from "./seed";
 import { CONFIG_KEYS, listConfigKeys, updateConfig } from "./updateConfig";
 export type { PrismaClient };
 const { version } = require("../package.json");
@@ -88,17 +89,16 @@ dbCommand.command("migrate").action(async (name, options, command) => {
   }
 });
 
-// @TODO: Implement seed command
-// dbCommand.command("seed").action(async (name, options, command) => {
-//   try {
-//     const dbUrl = options.parent.parent._optionValues.dbUrl;
-//     await dbConnect(dbUrl);
-//     console.log("seed DB");
-//   } catch (e) {
-//     if (e instanceof Error) console.error(e.message);
-//     process.exit(1);
-//   }
-// });
+dbCommand.command("seed").action(async (name, options, command) => {
+  try {
+    const dbUrl = options.parent.parent._optionValues.dbUrl;
+    await dbConnect(dbUrl);
+    await seed(prisma);
+  } catch (e) {
+    if (e instanceof Error) console.error(e.message);
+    process.exit(1);
+  }
+});
 
 async function dbConnect(dbUrl: string) {
   try {
