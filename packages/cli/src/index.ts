@@ -87,16 +87,18 @@ dbCommand.command("migrate").action(async (name, options, command) => {
     process.exit(1);
   }
 });
-dbCommand.command("seed").action(async (name, options, command) => {
-  try {
-    const dbUrl = options.parent.parent._optionValues.dbUrl;
-    await dbConnect(dbUrl);
-    console.log("seed DB");
-  } catch (e) {
-    if (e instanceof Error) console.error(e.message);
-    process.exit(1);
-  }
-});
+
+// @TODO: Implement seed command
+// dbCommand.command("seed").action(async (name, options, command) => {
+//   try {
+//     const dbUrl = options.parent.parent._optionValues.dbUrl;
+//     await dbConnect(dbUrl);
+//     console.log("seed DB");
+//   } catch (e) {
+//     if (e instanceof Error) console.error(e.message);
+//     process.exit(1);
+//   }
+// });
 
 async function dbConnect(dbUrl: string) {
   try {
