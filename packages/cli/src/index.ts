@@ -22,7 +22,13 @@ program
   .description("The 2bttns command line utility")
   .version(version);
 program.addOption(
-  new Option("-d, --db-url <value>", "database connection url")
+  new Option("-d, --db-url <value>", "Database Connection URL")
+);
+program.addOption(
+  new Option(
+    "--ignore-config",
+    "Set this flag to ignore config values. This is useful if you want to use environment variables instead of config values."
+  )
 );
 
 const configCommand = program.command("config");
@@ -65,8 +71,10 @@ adminCommand.command("create").action(async (name, options, command) => {
   try {
     const dbUrl = options.parent.parent._optionValues.dbUrl;
     const secret = options.parent._optionValues.secret;
-    await dbConnect(dbUrl);
-    await createAdmin({ prisma, secret });
+    const ignoreConfig =
+      options.parent.parent._optionValues.ignoreConfig ?? false;
+    await dbConnect(dbUrl, ignoreConfig);
+    await createAdmin({ prisma, secret, ignoreConfig });
   } catch (e) {
     if (e instanceof Error) console.error(e.message);
     process.exit(1);
@@ -77,7 +85,9 @@ const dbCommand = program.command("db");
 dbCommand.command("migrate").action(async (name, options, command) => {
   try {
     const dbUrl = options.parent.parent._optionValues.dbUrl;
-    await dbConnect(dbUrl);
+    const ignoreConfig =
+      options.parent.parent._optionValues.ignoreConfig ?? false;
+    await dbConnect(dbUrl, ignoreConfig);
     console.info("Applying migrations...");
     execSync(`npx --yes prisma migrate deploy --schema ${schemaPath}`, {
       cwd: __dirname,
@@ -92,7 +102,9 @@ dbCommand.command("migrate").action(async (name, options, command) => {
 dbCommand.command("seed").action(async (name, options, command) => {
   try {
     const dbUrl = options.parent.parent._optionValues.dbUrl;
-    await dbConnect(dbUrl);
+    const ignoreConfig =
+      options.parent.parent._optionValues.ignoreConfig ?? false;
+    await dbConnect(dbUrl, ignoreConfig);
     await seed(prisma);
   } catch (e) {
     if (e instanceof Error) console.error(e.message);
@@ -100,13 +112,14 @@ dbCommand.command("seed").action(async (name, options, command) => {
   }
 });
 
-async function dbConnect(dbUrl: string) {
+async function dbConnect(dbUrl: string, ignoreConfig: boolean) {
   try {
     if (typeof dbUrl === "string" && dbUrl !== "") {
       // Check for dbUrl flag
       process.env.DATABASE_URL = dbUrl;
     } else if (
       // Check config for dbUrl
+      !ignoreConfig &&
       config.has(CONFIG_KEYS.db.url) &&
       config.get(CONFIG_KEYS.db.url) != null
     ) {
@@ -117,7 +130,7 @@ async function dbConnect(dbUrl: string) {
     } else {
       // No dbUrl found
       throw new Error(
-        "dbUrl is required (-d, --db-url <connection_url>). Alternatively, you can set the db.url config value (`2bttns-cli config set db.url <connection_url>`)"
+        "dbUrl is required (-d, --db-url <connection_url>). \n\nAlternatively, you can:\n\n 1) Set the db.url config value (`2bttns-cli config set db.url <connection_url>`)\n\n 2) Set a DATABASE_URL environment variable."
       );
     }
     prisma = new PrismaClient();

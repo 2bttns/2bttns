@@ -8,8 +8,9 @@ import { CONFIG_KEYS } from "./updateConfig";
 export async function createAdmin(params: {
   prisma: PrismaClient;
   secret: string;
+  ignoreConfig: boolean;
 }) {
-  const { prisma, secret } = params;
+  const { prisma, secret, ignoreConfig } = params;
   await prisma.$connect();
 
   const { option } = await inquirer.prompt({
@@ -24,7 +25,7 @@ export async function createAdmin(params: {
 
   switch (option) {
     case 0:
-      await createAdminWithCredentials({ prisma, secret });
+      await createAdminWithCredentials({ prisma, secret, ignoreConfig });
       break;
     case 1:
       await addOAuthEmailToAdminAllowList(prisma);
@@ -59,18 +60,28 @@ async function addOAuthEmailToAdminAllowList(prisma: PrismaClient) {
 async function createAdminWithCredentials(params: {
   prisma: PrismaClient;
   secret: string;
+  ignoreConfig: boolean;
 }) {
-  const { prisma, secret } = params;
+  const { prisma, secret, ignoreConfig } = params;
 
-  const salt =
-    secret ||
-    (config.get(CONFIG_KEYS.nextAuthSecret) as string) ||
-    process.env.NEXTAUTH_SECRET;
+  let salt: string | undefined = secret;
+  if (!salt) {
+    salt = ignoreConfig
+      ? process.env.NEXTAUTH_SECRET
+      : (config.get(CONFIG_KEYS.nextAuthSecret) as string);
+  }
+
   if (!salt)
     throw new Error(
       `A valid '${CONFIG_KEYS.nextAuthSecret}' config key is required to create an admin using credentials.
       
-      Secret is required (-s, --secret <value>). Alternatively, you can set the nextAuthSecret config value (\`2bttns-cli config set nextAuthSecret <value>\`) or set the NEXTAUTH_URL environment variable.
+      Secret is required (-s, --secret <value>). 
+      
+      Alternatively, you can:
+      
+      1) Set the nextAuthSecret config value (\`2bttns-cli config set nextAuthSecret <value>\`)
+      
+      2) Set the NEXTAUTH_URL environment variable
       
       IMPORTANT: The value should match the NEXTAUTH_SECRET you are using in your admin console's environment variables.`
     );

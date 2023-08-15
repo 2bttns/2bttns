@@ -22,22 +22,27 @@ $ npm i
 ```
 
 ```bash
-# This next NPM script does the following:
-#   1. Start the dev-db container
-#   2. Syncs the dev-db container to Prisma schema migrations
-#   3. Seeds the db with example data
-$ npm run init-db:dev
+# Start the dev-db Docker container (this is a local Postgres database)
+$ npm run docker:up:dev-db
+
+# Apply the necessary 2bttns Prisma migrations to the database
+# This uses the `DATABASE_URL` environment variable in `.env`
+$ npm run migrate
+
+# Seed the database with example data (optional)
+# This also uses the `DATABASE_URL` environment variable in `.env`
+$ npm run seed
 ```
 
 ```bash
-# Create an admin account before
-# using the 2bttns Console.
-#
-$ npm run create-admin:dev
+# Create an admin account in your dev db
+# Behind the scenes, this uses the 2bttns-cli
+# with your .env variables loaded
+$ npm run create-admin
 ```
 
 ```bash
- # Start the app
+ # Start the admin console app
 $ npm run dev
 ```
 

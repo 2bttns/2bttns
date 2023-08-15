@@ -51,3 +51,14 @@ $ 2bttns-cli admin create
 # Set a configuration value
 $ 2bttns-cli config set db.url postgresql://local-prod-user:local-prod-pass@localhost:5432/local-prod-db
 ```
+
+## Configuration Value Precedence
+
+The CLI takes configuration values from the following sources, in order of precedence:
+
+1. Command line arguments (The `--db-url` flag, for example)
+2. Config file (Set these via `2bttns config set <key> <value>`)
+
+   ⚠️ An exception to this is if you set the `--ignore-config` flag, which in this case the CLI will ignore config values. This is useful if you want to use environment variables instead of the existing config.
+
+3. Environment variables (`DATABASE_URL`, `NEXTAUTH_SECRET`)
