@@ -1,6 +1,72 @@
 # 2bttns
 
-## Setup for Local Development
+## Quickstart
+
+Integrate your app with 2bttns through our official 2bttns Docker image, which is available on Docker Hub at `2bttns/2bttns`.
+
+### Using Docker in the Command Line
+
+```bash
+docker container run \
+    --name 2bttns -p 3262:3262 \
+    -e DATABASE_URL="postgresql://local-prod-user:local-prod-pass@localhost:5432/local-prod-db" \
+    -e NEXTAUTH_SECRET="placeholder-secret-remember-to-change" \
+    2bttns/2bttns
+```
+
+### Using Docker-Compose
+
+```yaml
+version: "3.9"
+services:
+  twobttns:
+    image: 2bttns/2bttns
+    restart: unless-stopped
+    container_name: twobttns
+    ports:
+      - "3262:3262"
+    depends_on:
+      - local-prod-db
+    environment:
+      DATABASE_URL: postgresql://local-prod-user:local-prod-pass@host.docker.internal:5432/local-prod-db
+      NEXTAUTH_SECRET: placeholder-secret-remember-to-change
+  local-prod-db:
+    image: postgres:13
+    restart: unless-stopped
+    container_name: local-prod-db-postgres
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: local-prod-user
+      POSTGRES_PASSWORD: local-prod-pass
+      POSTGRES_DB: local-prod-db
+    volumes:
+      - postgres-data-local-prod:/var/lib/postgresql/data
+volumes:
+  postgres-data-local-prod:
+```
+
+## Environment Variables
+
+These are the environment variables you can configure for your 2bttns admin console.
+
+| Variable Name       | Description                                                                                                    | Example                                                                              |
+| ------------------- | -------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------ |
+| `DATABASE_URL`      | The URL of the Postgres database to connect to.                                                                | `postgresql://local-prod-user:local-prod-pass@localhost:5432/local-prod-db`          |
+| `NEXTAUTH_SECRET`   | The secret used by NextAuth. You can generate a new secret on the command line with: `openssl rand -base64 32` | `placeholder-secret-remember-to-change`                                              |
+| `NEXTAUTH_URL`      | The URL of the 2bttns app.                                                                                     | `http://localhost:3001`                                                              |
+| `GITHUB_ID`         | The GitHub OAuth app ID, if you want to allow admin users to sign in via GitHub.                               | `1234567890`                                                                         |
+| `GITHUB_SECRET`     | The GitHub OAuth app secret that corresponds to your `GITHUB_ID`.                                              | `placeholder-secret-remember-to-change`                                              |
+| `SERVER_LOG_LEVEL`  | The log level for the server.                                                                                  | `error` \| `warn` \| `info` _(default)_ \| `http` \| `verbose` \| `debug` \| `silly` |
+| `SERVER_LOG_LOCALE` | The log locale for the server.                                                                                 | `en-US`                                                                              |
+
+# Contributions
+
+We welcome contributions to the 2bttns project! Please read our contributing guidelines (TODO).
+
+## Local Development
+
+Here's a how-to for setting up your local development environment when working on the 2bttns app.
 
 ### Environment Variables
 
@@ -37,7 +103,7 @@ $ npm run seed
 ```bash
 # Create an admin account in your dev db
 # Behind the scenes, this uses the 2bttns-cli
-# with your .env variables loaded
+# with your .env environment variables loaded
 $ npm run create-admin
 ```
 
@@ -46,125 +112,22 @@ $ npm run create-admin
 $ npm run dev
 ```
 
----
+### Testing
 
-## Deploying 2bttns to Production
+#### Prerequisites
 
-### Building the App
+Be sure to have Node.js/NPM and Docker Compose available on the machine you're running the tests on.
 
-You can build the admin app with the following command:
+#### Running tests
 
-```bash
-$ npm run build
-```
-
-Then, you can run the production-ready build with the following command:
+Run the tests with the following command inside the root `app` folder:
 
 ```bash
-$ npm run start
+$ npm i              # Install npm dependencies, if you haven't already
+$ npm run test       # Run tests
 ```
 
-### Production Environment Variables
-
-You can create a `.env.production` file to set environment variables for the production build. `npm run build` will automatically use the `.env.production` file if it exists.
-
-If you plan to deploy the admin app to a production server via CI/CD or via services like Vercel, you should set the environment variables in their respective places instead.
-
-### 2bttns Docker Image
-
-@TODO Create a `2bttns/admin` Docker image. Should accept environment variables.
-
----
-
-## Admin Login
-
-### "Admin Users" vs "Players"
-
-Any reference to "Users" in the 2bttns admin app refers to dmin users logged in via GitHub OAuth. Admin users manage the 2bttns dashboard, managing various aspects of the app, such as games, gameobjects, and 2bttns API secret keys.
-
-Consumers who are sent to 2bttns to play games are referred to as "Players".
-
-### Credentials Login
-
-You can create admin users that can log in to the admin app with credentials (email and password) by running the `npm run create-admin:dev` command.
-
-Select the "Create Admin Credentials using Username/Password" prompt and enter the email and password you want the new admin user to use when logging in to the 2bttns admin console.
-
-Using these credentials, you can log in to the admin app at `/auth/signIn`. If you aren't logged in, you will be redirected to the login page automatically.
-
-In production, you can run the `npm run create-admin:prod` command. Be sure your `.env.production` environment variables are configured correctly.
-
-### GitHub OAuth (Optional)
-
-2bttns supports GitHub OAuth through NextAuth out of the box.
-
-To set up GitHub OAuth, set the following credentials in your `.env` file:
-
-```
-# Next Auth GitHub Provider
-GITHUB_ID="<YOUR_GITHUB_ID>"
-GITHUB_SECRET="<YOUR_GITHUB_SECRET>"
-```
-
-You can get these credentials by creating a new OAuth app via...
-
-- a) Your GitHub account - `https://github.com/settings/developers`
-- b) Your GitHub organization - `https://github.com/organizations/<your-organization>/settings/applications`
-
-For local development, when configuring the OAuth app, set the homepage URL to `http://localhost:3001` and set the callback url to `http://localhost:3001/api/auth/callback/github` (or use a custom port you've configured).
-
-If you do not set the `GITHUB_ID` and `GITHUB_SECRET` environment variables, the GitHub OAuth provider will not be enabled and will not appear on the login page.
-
-### Admin Allow List
-
-OAuth admins who are not in the 2bttns-managed `AdminOAuthAllowList` database table and attempt to log in to the admin panel will be denied access.
-
-You can add admin emails to the allow list in the following ways:
-
-#### 1. adminAllowLIst.json
-
-The 2bttns app uses an `adminAllowList.json` file to populate the `AdminOAuthAllowList` table with a list of emails associated with GitHub accounts allowed to log in to the admin app.
-
-To configure the initial admin allow list...
-
-1. Copy the `adminAllowList.json.example` file to a new `adminAllowList.json` file, if it doesn't already exist.
-
-2. Add the emails associated with the GitHub accounts you want to grant access to.
-
-Now, whenever you seed the database (e.g. `npm run db-seed:dev`), the `AdminOAuthAllowList` table will be updated with the emails in the `adminAllowList.json` file.
-
-#### 2. `npm run create-admin:dev`
-
-Similar to how you can create admins with username-password credentials, you can add admins to the `AdminOAuthAllowList` table by running the `npm run create-admin:dev` command.
-
-Select the "Add Admin OAuth Email to Allow List" prompt and enter the email associated with the GitHub account you want to grant access to.Ø
-
-#### 3. via Prisma Studio or a Database Client
-
-You can manually add allowed admin emails to the `AdminOAuthAllowList` table via the Prisma Studio UI (`npx prisma studio`) or manually through another database client of your choice.
-
-### 4. via the 2bttns Admin Panel
-
-@TODO - this feature is not yet implemented.
-
-<!-- When logged in as an admin user, you can add more admin users via the 2bttns Admin Panel at the `Settings > Admin Users` page. -->
-
-### Next Auth Secret
-
-2bttns uses Next Auth to authenticate users, and requires a `NEXTAUTH_SECRET` environment variable in the `.env` file:
-
-```
-# .env
-# Next Auth
-# You can generate a new secret on the command line with:
-# openssl rand -base64 32
-# https://next-auth.js.org/configuration/options#secret
-NEXTAUTH_SECRET="<secret>"
-```
-
----
-
-## Managing the `dev-db` container
+### Managing the `dev-db` container
 
 The `dev-db` container will contain your local development database. It is created and managed by Docker Compose in the `docker-compose.yml` file.
 
@@ -172,7 +135,6 @@ Here are some useful commands to manage the `dev-db` container:
 
 ```bash
 # Stop all containers used by the app (e.g. dev-db and test-db containers)
-# This is useful if you want to stop the dev-db container without deleting it's data
 $ npm run docker:stop
 ```
 
@@ -182,49 +144,21 @@ $ npm run docker:up:dev-db
 
 # Note that the previous command does not run Prisma
 # migrations or seed the db.
-# To do that, run the following command:
-$ npm run init-db:dev
+# To do that, run the following commands:
+$ npm run migrate
+$ npm run seed
 ```
 
 ```bash
 # Remove the dev-db container
-# CAUTION: this will delete the dev-db container's data
+# This will not delete the database's data because it is stored in a volume
 $ npm run docker:rm:dev-db
+
+# If you want to delete the dev-db database's data volume, run the following command:
+$ docker volume rm app_postgres-data-dev
 ```
 
 Note that these NPM scripts are just for convenience. You can manage the `dev-db` container manually using the docker/docker-compose CLI.
-
----
-
-## Testing
-
-### Prerequisites
-
-Be sure to have Node.js/NPM and Docker Compose available on the machine you're running the tests on.
-
-### Running tests
-
-Run the tests with the following command inside the root `app` folder:
-
-```bash
-$ npm i              # Install npm dependencies, if you haven't already
-$ npm run test       # Run tests
-
-# Behind the scenes, this npm script will run the following commands:
-# You do not need to run these commands manually
-
-# NPM script to stop existing db containers (e.g.
-# dev-db container; doesn't delete it), initialize test db container,
-# and runs Prisma migrations.
-$ npm run init-db:test
-
-# We use the `vitest` package to run our tests.
-# vitest runs in watch mode, so you can re-run tests using its watch interface
- \ && vitest
-
-# Finally, we remove the test db container when you exit vitest (CTRL+C)
- \ && npm run docker:rm:test-db
-```
 
 ### Troubleshooting
 
@@ -248,3 +182,78 @@ For example, you might see this error if you run `npm run dev` before starting t
 - `localhost:5433` - Postgres Docker dev db started via `npm run docker:up:dev-db`
 - `localhost:5434` - Postgres Docker test db started via `npm run docker:up:test-db`
 - `localhost:3262` - Production build started via `npm run build && npm run start`
+
+# Additional Information
+
+## Admin Users
+
+The 2bttns admin console is managed by admin users.
+
+You can create admin users using the `2bttns-cli` via NPM.
+
+```bash
+$ npx @2bttns/2bttns-cli admin create -d <database-url> -s <nextauth-secret>
+```
+
+The CLI will prompt you to create an admin user with credentials (username-password) or add emails to an OAuth allow list.
+
+## GitHub OAuth (Optional)
+
+2bttns supports GitHub OAuth through NextAuth out of the box.
+
+To set up GitHub OAuth, set the following credentials in your `.env` file:
+
+```
+
+# Next Auth GitHub Provider
+
+GITHUB_ID="<YOUR_GITHUB_ID>"
+GITHUB_SECRET="<YOUR_GITHUB_SECRET>"
+
+```
+
+You can get these credentials by creating a new OAuth app via...
+
+- a) Your GitHub account - `https://github.com/settings/developers`
+- b) Your GitHub organization - `https://github.com/organizations/<your-organization>/settings/applications`
+
+For local development, when configuring the OAuth app, set the homepage URL to `http://localhost:3001` and set the callback url to `http://localhost:3001/api/auth/callback/github` (or use a custom port you've configured).
+
+If you do not set the `GITHUB_ID` and `GITHUB_SECRET` environment variables, the GitHub OAuth provider will not be enabled and will not appear on the login page.
+
+### Admin Allow List
+
+OAuth admins who are not in the 2bttns-managed `AdminOAuthAllowList` database table and attempt to log in to the admin panel will be denied access.
+
+You can add admin emails to the allow list in the following ways:
+
+#### 1. `npm run create-admin`
+
+Similar to how you can create admins with username-password credentials, you can add admins to the `AdminOAuthAllowList` table by running the `npm run create-admin:dev` command.
+
+Select the "Add Admin OAuth Email to Allow List" prompt and enter the email associated with the GitHub account you want to grant access to.
+
+Behind the scenes, this uses the 2bttns-cli with your local `.env` environment variables loaded. In production environments, you should use the 2bttns-cli directly with the necessary parameters to connect to your production database.
+
+#### 2. via Prisma Studio or a Database Client
+
+You can manually add allowed admin emails to the `AdminOAuthAllowList` table via the Prisma Studio UI (`npx prisma studio`) or manually through another database client of your choice.
+
+### 3. via the 2bttns Admin Panel
+
+@TODO - this feature is not yet implemented.
+
+## Next Auth Secret
+
+2bttns uses Next Auth to authenticate users, which requires a `NEXTAUTH_SECRET` environment variable in the `.env` file:
+
+```
+# .env
+# Next Auth
+# You can generate a new secret on the command line with:
+# openssl rand -base64 32
+# https://next-auth.js.org/configuration/options#secret
+NEXTAUTH_SECRET="placeholder-secret-remember-to-change"
+```
+
+The `NEXTAUTH_SECRET` is also used to salt admin credential passwords when using the `npm run create-admin` command. Note that if the value does not match the salt used to hash the password, the admin user will not be able to log in.
