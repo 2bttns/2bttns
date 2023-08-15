@@ -4,17 +4,42 @@
 
 Integrate your app with 2bttns through our official 2bttns Docker image, which is available on Docker Hub at `2bttns/2bttns`.
 
-### Using Docker in the Command Line
+### via Docker in the Command Line
 
 ```bash
-docker container run \
-    --name 2bttns -p 3262:3262 \
-    -e DATABASE_URL="postgresql://local-prod-user:local-prod-pass@localhost:5432/local-prod-db" \
+# Create a local-prod-db Postgres Docker container
+# You can skip this step if you already have a Postgres database running somewhere else.
+# If so, be sure to update the DATABASE_URL environment variable below before running the 2bttns Docker container.
+$ docker network create 2bttns
+$ docker container run -d \
+    --name local-prod-db \
+    --network 2bttns \
+    -p 5432:5432 \
+    -e POSTGRES_USER="local-prod-user" \
+    -e POSTGRES_PASSWORD="local-prod-pass" \
+    -e POSTGRES_DB="local-prod-db" \
+    postgres:13
+
+# Create the 2bttns Docker container
+$ docker container run -d \
+    --name 2bttns \
+    --network 2bttns \
+    -p 3262:3262 \
+    -e DATABASE_URL="postgresql://local-prod-user:local-prod-pass@local-prod-db:5432/local-prod-db" \
     -e NEXTAUTH_SECRET="placeholder-secret-remember-to-change" \
     2bttns/2bttns
+
+# Apply the necessary 2bttns Prisma migrations to the database
+$ docker exec -it 2bttns npx --yes @2bttns/2bttns-cli db migrate
+
+# Seed the database with example data (optional)
+$ docker exec -it 2bttns npx --yes @2bttns/2bttns-cli db seed
+
+# Create an admin user
+$ docker exec -it 2bttns npx --yes @2bttns/2bttns-cli admin create
 ```
 
-### Using Docker-Compose
+### via Docker-Compose
 
 ```yaml
 # docker-compose.yml
@@ -41,16 +66,26 @@ services:
       POSTGRES_USER: local-prod-user
       POSTGRES_PASSWORD: local-prod-pass
       POSTGRES_DB: local-prod-db
-    volumes:
-      - postgres-data-local-prod:/var/lib/postgresql/data
-volumes:
-  postgres-data-local-prod:
 ```
 
 ```bash
 # In the same directory as your docker-compose.yml file:
+# Start your containers
 $ docker-compose up
+
+# Apply the necessary 2bttns Prisma migrations to the database
+$ docker exec -it 2bttns npx --yes @2bttns/2bttns-cli db migrate
+
+# Seed the database with example data (optional)
+$ docker exec -it 2bttns npx --yes @2bttns/2bttns-cli db seed
+
+# Create an admin user
+$ docker exec -it 2bttns npx --yes @2bttns/2bttns-cli admin create
 ```
+
+### View Your 2bttns Admin Console
+
+Navigate to [`http://localhost:3262`](http://localhost:3262) in your browser to view your 2bttns admin console.
 
 ## Environment Variables
 
