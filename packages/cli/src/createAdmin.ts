@@ -66,9 +66,10 @@ async function createAdminWithCredentials(params: {
 
   let salt: string | undefined = secret;
   if (!salt) {
-    salt = ignoreConfig
-      ? process.env.NEXTAUTH_SECRET
-      : (config.get(CONFIG_KEYS.nextAuthSecret) as string);
+    salt = config.get(CONFIG_KEYS.nextAuthSecret) as string;
+    if (ignoreConfig || !salt) {
+      salt = process.env.NEXTAUTH_SECRET;
+    }
   }
 
   if (!salt)
