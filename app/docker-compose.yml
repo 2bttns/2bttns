@@ -23,8 +23,6 @@ services:
       POSTGRES_PASSWORD: test-pass
       POSTGRES_DB: test-db
   twobttns:
-    # TODO: 2bttns CLI to apply migrations
-    # TODO: 2bttns CLI to create admins
     build: .
     restart: unless-stopped
     container_name: twobttns
