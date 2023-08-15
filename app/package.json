@@ -19,7 +19,8 @@
     "docker:stop": "docker-compose stop",
     "docker:up:dev-db": "docker-compose up dev-db -d",
     "docker:up:test-db": "docker-compose up test-db -d",
-    "gen:theme-typings": "chakra-cli tokens src/style/theme/typings-only.ts"
+    "gen:theme-typings": "chakra-cli tokens src/style/theme/typings-only.ts",
+    "create-admin": "dotenv -e .env -- npx --yes @2bttns/2bttns-cli admin create"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
