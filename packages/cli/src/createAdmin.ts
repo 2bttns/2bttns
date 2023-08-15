@@ -5,7 +5,11 @@ import { PrismaClient, config } from ".";
 import hashPassword from "../../../app/src/utils/hashPassword";
 import { CONFIG_KEYS } from "./updateConfig";
 
-export async function createAdmin(prisma: PrismaClient) {
+export async function createAdmin(params: {
+  prisma: PrismaClient;
+  secret: string;
+}) {
+  const { prisma, secret } = params;
   await prisma.$connect();
 
   const { option } = await inquirer.prompt({
@@ -20,7 +24,7 @@ export async function createAdmin(prisma: PrismaClient) {
 
   switch (option) {
     case 0:
-      await createAdminWithCredentials(prisma);
+      await createAdminWithCredentials({ prisma, secret });
       break;
     case 1:
       await addOAuthEmailToAdminAllowList(prisma);
@@ -52,17 +56,24 @@ async function addOAuthEmailToAdminAllowList(prisma: PrismaClient) {
   );
 }
 
-async function createAdminWithCredentials(prisma: PrismaClient) {
-  if (!config.get(CONFIG_KEYS.nextAuthSecret))
+async function createAdminWithCredentials(params: {
+  prisma: PrismaClient;
+  secret: string;
+}) {
+  const { prisma, secret } = params;
+
+  const salt =
+    secret ||
+    (config.get(CONFIG_KEYS.nextAuthSecret) as string) ||
+    process.env.NEXTAUTH_SECRET;
+  if (!salt)
     throw new Error(
-      `'${CONFIG_KEYS.nextAuthSecret}' config key is required to create an admin using credentials.\n\n Set it with '2bttns-cli config set ${CONFIG_KEYS.nextAuthSecret} <value>'\n\n IMPORTANT: The value should match the NEXTAUTH_SECRET you are using in your admin console's environment variables.`
+      `A valid '${CONFIG_KEYS.nextAuthSecret}' config key is required to create an admin using credentials.
+      
+      Secret is required (-s, --secret <value>). Alternatively, you can set the nextAuthSecret config value (\`2bttns-cli config set nextAuthSecret <value>\`) or set the NEXTAUTH_URL environment variable.
+      
+      IMPORTANT: The value should match the NEXTAUTH_SECRET you are using in your admin console's environment variables.`
     );
-  const salt = config.get(CONFIG_KEYS.nextAuthSecret) as string;
-  if (!salt) {
-    throw new Error(
-      `Invalid ${CONFIG_KEYS.nextAuthSecret} config value. It cannot be empty.`
-    );
-  }
 
   const { username } = await inquirer.prompt({
     type: "input",

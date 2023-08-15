@@ -10,7 +10,7 @@ export const CONFIG_KEYS = {
 
 export type UpdateKey = "db.url" | "nextAuthSecret";
 
-export async function updateConfig(key: UpdateKey, value: string) {
+export async function updateConfig(key: UpdateKey, value: string | null) {
   const pathToConfig = path.resolve(__dirname, "config", "local.json");
   const configJson = readFileSync(pathToConfig, "utf-8");
   try {
@@ -33,7 +33,7 @@ export async function updateConfig(key: UpdateKey, value: string) {
 function _updateConfigRecursively(
   config: Record<string, any>,
   key: string,
-  value: string
+  value: string | null
 ) {
   const [firstKey, ...rest] = key.split(".");
   if (rest.length === 0) {

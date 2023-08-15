@@ -21,17 +21,18 @@ program
   .description("The 2bttns command line utility")
   .version(version);
 program.addOption(
-  new Option("-d, --db-url <database>", "database connection url")
+  new Option("-d, --db-url <value>", "database connection url")
 );
 
 const configCommand = program.command("config");
 const configGetCommand = configCommand.command("get");
 const configSetCommand = configCommand.command("set");
+const configClearCommand = configCommand.command("clear");
 listConfigKeys().forEach((key) => {
   const getCmd = configGetCommand.command(key);
   getCmd.action(async (name, options, command) => {
     const value = config.get(key);
-    console.log(value);
+    console.info(value);
   });
 
   const setCmd = configSetCommand.command(`${key} <value>`);
@@ -42,15 +43,29 @@ listConfigKeys().forEach((key) => {
       process.exit(1);
     }
     updateConfig(key, value);
+    console.info(`Successfully updated config for key=${key}`);
+  });
+
+  const clearCmd = configClearCommand.command(key);
+  clearCmd.action(async (name, options, command) => {
+    updateConfig(key, null);
+    console.info(`Cleared config for key=${key}`);
   });
 });
 
 const adminCommand = program.command("admin");
+adminCommand.addOption(
+  new Option(
+    "-s, --secret <value>",
+    "Value used for salting passwords when creating admin users with credentials. Value must match your NEXTAUTH_SECRET in your 2bttns admin console's environment variables."
+  )
+);
 adminCommand.command("create").action(async (name, options, command) => {
   try {
     const dbUrl = options.parent.parent._optionValues.dbUrl;
+    const secret = options.parent._optionValues.secret;
     await dbConnect(dbUrl);
-    await createAdmin(prisma);
+    await createAdmin({ prisma, secret });
   } catch (e) {
     if (e instanceof Error) console.error(e.message);
     process.exit(1);
@@ -86,13 +101,19 @@ dbCommand.command("seed").action(async (name, options, command) => {
 async function dbConnect(dbUrl: string) {
   try {
     if (typeof dbUrl === "string" && dbUrl !== "") {
+      // Check for dbUrl flag
       process.env.DATABASE_URL = dbUrl;
     } else if (
+      // Check config for dbUrl
       config.has(CONFIG_KEYS.db.url) &&
       config.get(CONFIG_KEYS.db.url) != null
     ) {
       process.env.DATABASE_URL = config.get(CONFIG_KEYS.db.url);
+    } else if (process.env.DATABASE_URL) {
+      // Check env for dbUrl
+      // Do nothing, since it's already set
     } else {
+      // No dbUrl found
       throw new Error(
         "dbUrl is required (-d, --db-url <connection_url>). Alternatively, you can set the db.url config value (`2bttns-cli config set db.url <connection_url>`)"
       );
