@@ -2,7 +2,7 @@
 
 ## Quickstart
 
-Integrate your app with 2bttns through our official 2bttns Docker image, which is available on Docker Hub at `2bttns/2bttns`.
+Integrate your app with 2bttns through our official 2bttns Docker image, which is available on Docker Hub at [`2bttns/2bttns`](https://hub.docker.com/r/2bttns/2bttns).
 
 ### via Docker in the Command Line
 
