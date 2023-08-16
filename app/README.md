@@ -170,7 +170,7 @@ $ npm run test       # Run tests
 
 ### Testing the Docker Image Locally
 
-You can test the 2bttns Docker image locally by running the following commands inside the root `app` folder:
+You can test the 2bttns Docker image locally by running the following commands inside the root `app` folder. This uses the `docker-compose.yml`file in the root `app` folder.
 
 ```bash
 $ docker-compose up twobttns
@@ -190,8 +190,6 @@ $ docker-compose down twobttns
 $ docker volume rm app_postgres-data-local-prod
 ```
 
-````
-
 This will start the `twobttns` container and the `local-prod-db` containers. The `twobttns` container is built using the local Dockerfile. You can access the dockerized 2bttns app at `localhost:3262`.
 
 ### Managing the `dev-db` container
@@ -203,7 +201,7 @@ Here are some useful commands to manage the `dev-db` container:
 ```bash
 # Stop all containers used by the app (e.g. dev-db and test-db containers)
 $ npm run docker:stop
-````
+```
 
 ```bash
 # Start the dev-db container, from scratch or if it was stopped
