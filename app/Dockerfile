@@ -65,6 +65,8 @@ COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 COPY --from=builder /app/prisma ./prisma
 COPY --from=builder /app/src/utils ./src/utils
 
+RUN npm i -g @2bttns/2bttns-cli
+
 USER nextjs
 
 ARG DATABASE_URL

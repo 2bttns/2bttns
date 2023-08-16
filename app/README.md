@@ -30,13 +30,13 @@ $ docker container run -d \
     2bttns/2bttns
 
 # Apply the necessary 2bttns Prisma migrations to the database
-$ docker exec -it 2bttns npx --yes @2bttns/2bttns-cli db migrate
+$ docker exec -it 2bttns 2bttns-cli db migrate
 
 # Seed the database with example data (optional)
-$ docker exec -it 2bttns npx --yes @2bttns/2bttns-cli db seed
+$ docker exec -it 2bttns 2bttns-cli db seed
 
 # Create an admin user
-$ docker exec -it 2bttns npx --yes @2bttns/2bttns-cli admin create
+$ docker exec -it 2bttns 2bttns-cli admin create
 ```
 
 ### via Docker-Compose
@@ -74,13 +74,13 @@ services:
 $ docker-compose up
 
 # Apply the necessary 2bttns Prisma migrations to the database
-$ docker exec -it 2bttns npx --yes @2bttns/2bttns-cli db migrate
+$ docker exec -it 2bttns 2bttns-cli db migrate
 
 # Seed the database with example data (optional)
-$ docker exec -it 2bttns npx --yes @2bttns/2bttns-cli db seed
+$ docker exec -it 2bttns 2bttns-cli db seed
 
 # Create an admin user
-$ docker exec -it 2bttns npx --yes @2bttns/2bttns-cli admin create
+$ docker exec -it 2bttns 2bttns-cli admin create
 ```
 
 ### View Your 2bttns Admin Console
