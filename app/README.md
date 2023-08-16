@@ -48,7 +48,7 @@ services:
   twobttns:
     image: 2bttns/2bttns
     restart: unless-stopped
-    container_name: twobttns
+    container_name: 2bttns
     ports:
       - "3262:3262"
     depends_on:
