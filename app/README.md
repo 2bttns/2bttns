@@ -7,36 +7,8 @@ Integrate your app with 2bttns through our official 2bttns Docker image, which i
 ### via Docker in the Command Line
 
 ```bash
-# Create a local-prod-db Postgres Docker container
-# You can skip this step if you already have a Postgres database running somewhere else.
-# If so, be sure to update the DATABASE_URL environment variable below before running the 2bttns Docker container.
-$ docker network create 2bttns
-$ docker container run -d \
-    --name local-prod-db \
-    --network 2bttns \
-    -p 5432:5432 \
-    -e POSTGRES_USER="local-prod-user" \
-    -e POSTGRES_PASSWORD="local-prod-pass" \
-    -e POSTGRES_DB="local-prod-db" \
-    postgres:13
-
-# Create the 2bttns Docker container
-$ docker container run -d \
-    --name 2bttns \
-    --network 2bttns \
-    -p 3262:3262 \
-    -e DATABASE_URL="postgresql://local-prod-user:local-prod-pass@local-prod-db:5432/local-prod-db" \
-    -e NEXTAUTH_SECRET="placeholder-secret-remember-to-change" \
-    2bttns/2bttns
-
-# Apply the necessary 2bttns Prisma migrations to the database
-$ docker exec -it 2bttns 2bttns-cli db migrate
-
-# Seed the database with example data (optional)
-$ docker exec -it 2bttns 2bttns-cli db seed
-
-# Create an admin user
-$ docker exec -it 2bttns 2bttns-cli admin create
+# Execute the docker-run.sh script from https://github.com/2bttns/2bttns/blob/dockerize/install/docker-run/docker-run.sh
+$ curl -s https://raw.githubusercontent.com/2bttns/2bttns/dockerize/install/docker-run/docker-run.sh | bash -s
 ```
 
 ### via Docker-Compose

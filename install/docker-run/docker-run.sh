@@ -2,7 +2,7 @@
 NETWORK_NAME="2bttns-net"
 POSTGRES_CONTAINER_NAME="db-hostname"
 TWOBTTNS_CONTAINER_NAME="2bttns"
-TWOBTTNS_PORT=3262
+HOST_PORT=3262
 
 if [ "$(docker container ls -q -f name=$POSTGRES_CONTAINER_NAME)" ]; then
     echo "A Postgres Docker container instance is already running. Exiting..."
@@ -38,7 +38,7 @@ echo "Creating the 2bttns Docker container (container name=$TWOBTTNS_CONTAINER_N
 docker container run -d \
     --name $TWOBTTNS_CONTAINER_NAME \
     --network $NETWORK_NAME \
-    -p $TWOBTTNS_PORT:3262 \
+    -p $HOST_PORT:3262 \
     -e DATABASE_URL="postgresql://username:password@$POSTGRES_CONTAINER_NAME:5432/db-name" \
     -e NEXTAUTH_SECRET="placeholder-secret-remember-to-change" \
     2bttns/2bttns \
@@ -48,12 +48,12 @@ docker container run -d \
 # Apply the necessary 2bttns Prisma migrations to the database
 echo ""
 echo "Running \`2bttns-cli db migrate\`..."
-docker exec -it $TWOBTTNS_CONTAINER_NAME 2bttns-cli db migrate
+docker exec $TWOBTTNS_CONTAINER_NAME 2bttns-cli db migrate
 
 # Seed the database with example data (optional)
 echo ""
 echo "Running \`2bttns-cli db seed\`..."
-docker exec -it $TWOBTTNS_CONTAINER_NAME 2bttns-cli db seed
+docker exec $TWOBTTNS_CONTAINER_NAME 2bttns-cli db seed
 
 # Create an admin user
 echo ""
@@ -61,4 +61,4 @@ echo "Prompting for admin user creation..."
 docker exec -it $TWOBTTNS_CONTAINER_NAME 2bttns-cli admin create
 
 # Done!
-echo "2bttns is now running at http://localhost:$TWOBTTNS_PORT"
+echo "2bttns is now running at http://localhost:$HOST_PORT"
