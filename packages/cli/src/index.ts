@@ -5,8 +5,10 @@ import type { IConfig } from "config";
 import path from "path";
 import { PrismaClient } from "../../../app/node_modules/@prisma/client";
 import {
+  addOAuthEmailToAdminAllowList,
   createAdmin,
   createAdminWithCredentials,
+  validateEmail,
   validateUsername,
 } from "./createAdmin";
 import { seed } from "./seed";
@@ -125,6 +127,28 @@ adminCreateCommandCredentials.action(async (name, options, command) => {
       secret,
       ignoreConfig,
     });
+  } catch (e) {
+    if (e instanceof Error) console.error(e.message);
+    process.exit(1);
+  }
+});
+
+const adminCreateCommandOAuth = adminCreateCommand.command("oauth-allow");
+adminCreateCommandOAuth.addOption(new Option("-e, --email <value>"));
+adminCreateCommandOAuth.action(async (name, options, command) => {
+  try {
+    const dbUrl = options.parent.parent.parent._optionValues.dbUrl;
+    const ignoreConfig =
+      options.parent.parent.parent._optionValues.ignoreConfig ?? false;
+
+    const email = options._optionValues.email;
+    if (!email) {
+      throw new Error("Email is required (-e, --email <value>)");
+    }
+
+    await dbConnect(dbUrl, ignoreConfig);
+    await validateEmail(prisma, email);
+    await addOAuthEmailToAdminAllowList({ prisma, email });
   } catch (e) {
     if (e instanceof Error) console.error(e.message);
     process.exit(1);

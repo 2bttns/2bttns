@@ -43,19 +43,23 @@ export async function createAdmin(params: {
       });
       break;
     case 1:
-      await addOAuthEmailToAdminAllowList(prisma);
+      const { email } = await inquirer.prompt({
+        type: "input",
+        name: "email",
+      });
+      await validateEmail(prisma, email);
+      await addOAuthEmailToAdminAllowList({ prisma, email });
       break;
     default:
       throw new Error("Invalid option");
   }
 }
 
-async function addOAuthEmailToAdminAllowList(prisma: PrismaClient) {
-  const { email } = await inquirer.prompt({
-    type: "input",
-    name: "email",
-  });
-  await validateEmail(prisma, email);
+export async function addOAuthEmailToAdminAllowList(params: {
+  prisma: PrismaClient;
+  email: string;
+}) {
+  const { prisma, email } = params;
   await prisma.adminOAuthAllowList.create({
     data: {
       AdminUser: {
@@ -122,7 +126,7 @@ export async function createAdminWithCredentials(params: {
   );
 }
 
-async function validateEmail(prisma: PrismaClient, email: string) {
+export async function validateEmail(prisma: PrismaClient, email: string) {
   if (!email) throw new Error("Email cannot be empty");
   try {
     z.string().email().parse(email);
