@@ -47,11 +47,11 @@ This does not clean up the Docker Volume created by `docker-run.sh` -- you can d
 
 ### How can I create a new admin user for my 2bttns admin console?
 
-You can use the 2bttns CLI to create a new admin user:
+You can use the 2bttns CLI to create a new admin user.
 
 #### Directly on your 2bttns admin console container
 
-The 2bttns/2bttns Docker image comes with the 2bttns CLI pre-installed and uses the necessary environment variables to perform the following command.
+The 2bttns/2bttns Docker image comes with the 2bttns CLI pre-installed and uses the necessary environment variables to perform the following commands:
 
 ```bash
 # Create a new admin user via an interactive prompt
@@ -64,6 +64,8 @@ $ docker exec -it 2bttns 2bttns-cli admin create oauth-allow -e <email>
 
 #### From any terminal with the 2bttns CLI installed
 
+You can use the 2bttns CLI to create a new admin user from any terminal that has the 2bttns CLI installed.
+
 ```bash
 # Create a new admin user via an interactive prompt
 $ 2bttns-cli admin create -d <database-url> -s <nextauth-secret>
@@ -73,6 +75,6 @@ $ 2bttns-cli admin create credentials -d <database-url> -s <nextauth-secret> -u 
 $ 2bttns-cli admin create oauth-allow -d <database-url> -s <nextauth-secret> -e <email>
 ```
 
-#### Additional 2bttns-cli Information
+#### Additional `2bttns-cli` Information
 
 See the [2bttns-cli documentation](https://www.npmjs.com/package/@2bttns/2bttns-cli)

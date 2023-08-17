@@ -6,8 +6,9 @@ Integrate your app with 2bttns through our official 2bttns Docker image, which i
 
 ### via Docker in the Command Line
 
+Execute the `docker-run.sh` script from https://github.com/2bttns/2bttns/blob/dockerize/install/docker-run
+
 ```bash
-# Execute the docker-run.sh script from https://github.com/2bttns/2bttns/blob/dockerize/install/docker-run/docker-run.sh
 $ curl -s https://raw.githubusercontent.com/2bttns/2bttns/dockerize/install/docker-run/docker-run.sh | bash -s
 ```
 
