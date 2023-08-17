@@ -3,12 +3,12 @@ NETWORK_NAME="2bttns-net"
 POSTGRES_CONTAINER_NAME="db-hostname"
 TWOBTTNS_CONTAINER_NAME="2bttns"
 
-if [ "$(docker container ls -q -f name=$POSTGRES_CONTAINER_NAME)" ]; then
+if [ "$(docker container ls -aq -f name=$POSTGRES_CONTAINER_NAME)" ]; then
     echo "Removing 2bttns Docker container..."
     docker container rm -f $TWOBTTNS_CONTAINER_NAME > /dev/null
 fi
 
-if [ "$(docker container ls -q -f name=$POSTGRES_CONTAINER_NAME)" ]; then
+if [ "$(docker container ls -aq -f name=$POSTGRES_CONTAINER_NAME)" ]; then
     echo "Removing Postgres Docker container..."
     docker container rm -f $POSTGRES_CONTAINER_NAME > /dev/null
 fi
