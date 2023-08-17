@@ -58,8 +58,8 @@ The 2bttns/2bttns Docker image comes with the 2bttns CLI pre-installed and uses 
 $ docker exec -it 2bttns 2bttns-cli admin create
 
 # Create a new admin user via command line arguments
-$ docker exec -it 2bttns 2bttns-cli admin create credentials -u <username> -p <password>
-$ docker exec -it 2bttns 2bttns-cli admin create oauth-allow -e <email>
+$ docker exec 2bttns 2bttns-cli admin create credentials -u <username> -p <password>
+$ docker exec 2bttns 2bttns-cli admin create oauth-allow -e <email>
 ```
 
 #### From any terminal with the 2bttns CLI installed
