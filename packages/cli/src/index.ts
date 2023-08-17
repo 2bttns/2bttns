@@ -4,7 +4,11 @@ import { Option, program } from "commander";
 import type { IConfig } from "config";
 import path from "path";
 import { PrismaClient } from "../../../app/node_modules/@prisma/client";
-import { createAdmin } from "./createAdmin";
+import {
+  createAdmin,
+  createAdminWithCredentials,
+  validateUsername,
+} from "./createAdmin";
 import { seed } from "./seed";
 import { CONFIG_KEYS, listConfigKeys, updateConfig } from "./updateConfig";
 export type { PrismaClient };
@@ -67,14 +71,60 @@ adminCommand.addOption(
     "Value used for salting passwords when creating admin users with credentials. Value must match your NEXTAUTH_SECRET in your 2bttns admin console's environment variables."
   )
 );
-adminCommand.command("create").action(async (name, options, command) => {
+const adminCreateCommand = adminCommand
+  .command("create")
+  .action(async (name, options, command) => {
+    try {
+      const dbUrl = options.parent.parent._optionValues.dbUrl;
+      const secret = options.parent._optionValues.secret;
+      const ignoreConfig =
+        options.parent.parent._optionValues.ignoreConfig ?? false;
+      await dbConnect(dbUrl, ignoreConfig);
+      await createAdmin({ prisma, secret, ignoreConfig });
+    } catch (e) {
+      if (e instanceof Error) console.error(e.message);
+      process.exit(1);
+    }
+  });
+
+const adminCreateCommandCredentials = adminCreateCommand.command("credentials");
+adminCreateCommandCredentials.addOption(
+  new Option("-u, --username <value>", "Username of the admin user to create")
+);
+adminCreateCommandCredentials.addOption(
+  new Option(
+    "-p, --password <value>",
+    "Plain-text password of the admin user to create (will be hashed using the secret)"
+  )
+);
+adminCreateCommandCredentials.action(async (name, options, command) => {
   try {
-    const dbUrl = options.parent.parent._optionValues.dbUrl;
-    const secret = options.parent._optionValues.secret;
+    const dbUrl = options.parent.parent.parent._optionValues.dbUrl;
     const ignoreConfig =
-      options.parent.parent._optionValues.ignoreConfig ?? false;
+      options.parent.parent.parent._optionValues.ignoreConfig ?? false;
+    const secret = options.parent.parent._optionValues.secret;
+
+    const username = options._optionValues.username;
+    const password = options._optionValues.password;
+
+    if (!username) {
+      throw new Error("Username is required (-u, --username <value>)");
+    }
+
+    if (!password) {
+      throw new Error("Password is required (-p, --password <value>)");
+    }
+
     await dbConnect(dbUrl, ignoreConfig);
-    await createAdmin({ prisma, secret, ignoreConfig });
+    await validateUsername(prisma, username);
+
+    await createAdminWithCredentials({
+      prisma,
+      username,
+      password,
+      secret,
+      ignoreConfig,
+    });
   } catch (e) {
     if (e instanceof Error) console.error(e.message);
     process.exit(1);

@@ -25,7 +25,22 @@ export async function createAdmin(params: {
 
   switch (option) {
     case 0:
-      await createAdminWithCredentials({ prisma, secret, ignoreConfig });
+      const { username } = await inquirer.prompt({
+        type: "input",
+        name: "username",
+      });
+      await validateUsername(prisma, username);
+      const { password } = await inquirer.prompt({
+        type: "password",
+        name: "password",
+      });
+      await createAdminWithCredentials({
+        prisma,
+        username,
+        password,
+        secret,
+        ignoreConfig,
+      });
       break;
     case 1:
       await addOAuthEmailToAdminAllowList(prisma);
@@ -57,12 +72,14 @@ async function addOAuthEmailToAdminAllowList(prisma: PrismaClient) {
   );
 }
 
-async function createAdminWithCredentials(params: {
+export async function createAdminWithCredentials(params: {
   prisma: PrismaClient;
+  username: string;
+  password: string;
   secret: string;
   ignoreConfig: boolean;
 }) {
-  const { prisma, secret, ignoreConfig } = params;
+  const { prisma, username, password, secret, ignoreConfig } = params;
 
   let salt: string | undefined = secret;
   if (!salt) {
@@ -87,16 +104,6 @@ async function createAdminWithCredentials(params: {
       IMPORTANT: The value should match the NEXTAUTH_SECRET you are using in your admin console's environment variables.`
     );
 
-  const { username } = await inquirer.prompt({
-    type: "input",
-    name: "username",
-  });
-  await validateUsername(prisma, username);
-
-  const { password } = await inquirer.prompt({
-    type: "password",
-    name: "password",
-  });
   const hashedPassword = hashPassword(password, salt);
 
   await prisma.adminCredential.create({
@@ -133,7 +140,7 @@ async function validateEmail(prisma: PrismaClient, email: string) {
   return email;
 }
 
-async function validateUsername(prisma: PrismaClient, username: string) {
+export async function validateUsername(prisma: PrismaClient, username: string) {
   if (!username) throw new Error("Username cannot be empty");
 
   const existingAdmin = await prisma.adminCredential.findFirst({
