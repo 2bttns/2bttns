@@ -1,15 +1,26 @@
 # 2bttns
 
+Integrate your app with 2bttns through our official Docker image, available on Docker Hub: https://hub.docker.com/r/2bttns/2bttns
+
 ## Quickstart
 
-Integrate your app with 2bttns through our official 2bttns Docker image, which is available on Docker Hub at [`2bttns/2bttns`](https://hub.docker.com/r/2bttns/2bttns).
+We've provided a few ways for you to get started quickly with 2bttns. Feel free to customize these scripts to your needs.
 
 ### via Docker in the Command Line
 
 Execute the `docker-run.sh` script from https://github.com/2bttns/2bttns/blob/dockerize/install/docker-run
 
 ```bash
+# Creates a 2bttns admin console Docker container that uses a PostgreSQL database container
 $ curl -s https://raw.githubusercontent.com/2bttns/2bttns/dockerize/install/docker-run/docker-run.sh | bash -s
+
+# You can clean up the Docker containers created by docker-run.sh with the following command:
+$ curl -s https://raw.githubusercontent.com/2bttns/2bttns/dockerize/install/docker-run/cleanup.sh | bash -s
+
+# Your database data is stored in a Docker volume, which is not removed up by cleanup.sh.
+# This means subsequent runs of docker-run.sh will use the same database data.
+# If you want to delete the Docker volume, run the following command:
+$ docker volume rm db-hostname
 ```
 
 ### via Docker-Compose
