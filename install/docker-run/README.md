@@ -51,7 +51,7 @@ You can use the 2bttns CLI to create a new admin user.
 
 #### Directly on your 2bttns admin console container
 
-The 2bttns/2bttns Docker image comes with the 2bttns CLI pre-installed and uses the necessary environment variables to perform the following commands:
+The [2bttns/2bttns](https://hub.docker.com/r/2bttns/2bttns) Docker image comes with the 2bttns CLI pre-installed and uses the necessary environment variables to perform the following commands:
 
 ```bash
 # Create a new admin user via an interactive prompt
