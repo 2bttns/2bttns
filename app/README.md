@@ -278,9 +278,7 @@ You can add admin emails to the allow list in the following ways:
 
 #### 1. `npm run create-admin`
 
-Similar to how you can create admins with username-password credentials, you can add admins to the `AdminOAuthAllowList` table by running the `npm run create-admin:dev` command.
-
-Select the "Add Admin OAuth Email to Allow List" prompt and enter the email associated with the GitHub account you want to grant access to.
+Select the "Create Admin using Github OAuth" prompt and enter the email associated with the GitHub account you want to grant access to.
 
 Behind the scenes, this uses the 2bttns-cli with your local `.env` environment variables loaded. In production environments, you should use the 2bttns-cli directly with the necessary parameters to connect to your production database.
 
