@@ -23,11 +23,11 @@ $ npx @2bttns/2bttns-cli <command>
 ### Get Started
 
 ```bash
-# If you installed it globally:
+# If installed globally:
 $ 2bttns-cli --help
 
 
-# If you're calling it via npx:
+# If calling it via npx:
 $ npx @2bttns/2bttns-cli --help
 ```
 
@@ -38,14 +38,12 @@ $ npx @2bttns/2bttns-cli --help
 ## Migrate the specified database using the -d flag
 $ 2bttns-cli db migrate -d <database-url>
 
-## If you've set the db.url config value, you can omit the -d flag
-$ 2bttns-cli db migrate
-
 # Create example seed data (Games, Tags, GameObjects, and an example App Secret) in your database
 ## Seed the specified database using the -d flag
 $ 2bttns-cli db seed -d <database-url>
 
-## If you've set the db.url config value, you can omit the -d flag
+## If you have set the db.url config value, you can omit the -d flag
+$ 2bttns-cli db migrate
 $ 2bttns-cli db seed
 ```
 
@@ -56,15 +54,12 @@ $ 2bttns-cli db seed
 ## Create an administrator via interactive prompts
 $ 2bttns-cli admin create -d <database-url> -s <nextauth-secret>
 
-## If you've set the db.url and nextAuthSecret config values or have the proper environment variables set, you can omit the -d and -s flags
-$ 2bttns-cli admin create
-
-
 ## Create an administrator via command line arguments
 $ 2bttns-cli admin create credentials -u <username> -p <password> -d <database-url> -s <nextauth-secret>
 $ 2bttns-cli admin create oauth-allow -e <email> -d <database-url> -s <nextauth-secret>
 
-## If you've set the db.url and nextAuthSecret config values or have the proper environment variables set, you can omit the -d and -s flags
+## If you have set the db.url and nextAuthSecret config values or have the proper environment variables set, you can omit the -d and -s flags
+$ 2bttns-cli admin create
 $ 2bttns-cli admin create credentials -u <username> -p <password>
 $ 2bttns-cli admin create oauth-allow -e <email>
 ```
