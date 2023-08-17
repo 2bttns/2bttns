@@ -5,8 +5,9 @@ The 2bttns command line interface.
 ## Features
 
 - Apply the necessary 2bttns migrations to the database you intend to use with 2bttns (`2bttns db migrate`)
-- Interactive command to create 2bttns console administrators (`2bttns admin create`)
-- Set configuration values via the command line (e.g. `2bttns config set db.url <value>`)
+- Apply example data to the database you intend to use with 2bttns (`2bttns db seed`)
+- Interactive command to create 2bttns console administrators (`2bttns admin create`), with command-line-only alternatives (`2bttns admin create credentials`, `2bttns admin create oauth-allow`)
+- Set configuration values via the command line (e.g. `2bttns config set db.url <value>`) to avoid having to specify them every time you run a command
 
 ## Install
 
@@ -40,6 +41,7 @@ $ 2bttns-cli db migrate -d <database-url>
 
 # Create example seed data (Games, Tags, GameObjects, and an example App Secret) in your database
 ## Seed the specified database using the -d flag
+## IMPORTANT: The database must be migrated via `2bttns-cli db migrate` before seeding, or else the seed will fail.
 $ 2bttns-cli db seed -d <database-url>
 
 ## If you have set the db.url config value, you can omit the -d flag
@@ -96,5 +98,12 @@ The CLI takes configuration values from the following sources, in order of prece
 2. Config file (Set these via `2bttns config set <key> <value>`)
 
    ⚠️ An exception to this is if you set the `--ignore-config` flag, which in this case the CLI will ignore config values. This is useful if you want to use environment variables instead of the existing config.
+
+   ```bash
+      # Example:
+      # In this case, the CLI will use the necessary environment variables (DATABASE_URL, NEXTAUTH_SECRET) instead of the config file (if they exist)
+      # If you do not know which environment variables to use for certain commands, the command will warn you if you are missing any.
+      2bttns-cli admin create --ignore-config
+   ```
 
 3. Environment variables (`DATABASE_URL`, `NEXTAUTH_SECRET`)
