@@ -8,7 +8,7 @@ We've provided a few ways for you to get started quickly with 2bttns. Feel free 
 
 ### via Docker in the Command Line
 
-Execute the `docker-run.sh` script from https://github.com/2bttns/2bttns/blob/dockerize/install/docker-run
+For additional information, see https://github.com/2bttns/2bttns/blob/dockerize/install/docker-run
 
 ```bash
 # Creates a 2bttns admin console Docker container that uses a PostgreSQL database container
@@ -25,19 +25,15 @@ $ docker volume rm db-hostname
 
 ### via Docker-Compose
 
+For additional information, see https://github.com/2bttns/2bttns/blob/dockerize/install/docker-compose.
+
 ```bash
-# In the same directory as your docker-compose.yml file:
-# Start your containers
-$ docker-compose up
+# Download the docker-compose.yml file to your current working directory
+$ curl https://raw.githubusercontent.com/2bttns/2bttns/dockerize/install/docker-compose/docker-compose.yml -o docker-compose.yml
 
-# Apply the necessary 2bttns Prisma migrations to the database
-$ docker exec -it 2bttns 2bttns-cli db migrate
+# Run the `init.sh` script
+$ curl -s https://raw.githubusercontent.com/2bttns/2bttns/dockerize/install/docker-compose/init.sh | bash -s
 
-# Seed the database with example data (optional)
-$ docker exec -it 2bttns 2bttns-cli db seed
-
-# Create an admin user
-$ docker exec -it 2bttns 2bttns-cli admin create
 ```
 
 ### View Your 2bttns Admin Console
@@ -46,7 +42,7 @@ Navigate to [`http://localhost:3262`](http://localhost:3262) in your browser to 
 
 ### Create Admin Users
 
-You can use the 2bttns CLI to create a new admin user.
+You can use the [2bttns-cli](https://www.npmjs.com/package/@2bttns/2bttns-cli) to create a new admin user.
 
 #### From your 2bttns admin console container
 
@@ -58,6 +54,7 @@ $ docker exec -it 2bttns 2bttns-cli admin create
 
 # Create a new admin user via command line arguments
 $ docker exec 2bttns 2bttns-cli admin create credentials -u <username> -p <password>
+
 $ docker exec 2bttns 2bttns-cli admin create oauth-allow -e <email>
 ```
 
@@ -71,12 +68,9 @@ $ 2bttns-cli admin create -d <database-url> -s <nextauth-secret>
 
 # Create a new admin user via command line arguments
 $ 2bttns-cli admin create credentials -d <database-url> -s <nextauth-secret> -u <username> -p <password>
+
 $ 2bttns-cli admin create oauth-allow -d <database-url> -s <nextauth-secret> -e <email>
 ```
-
-#### Additional `2bttns-cli` Information
-
-See the [2bttns-cli documentation](https://www.npmjs.com/package/@2bttns/2bttns-cli)
 
 ## Environment Variables
 
