@@ -26,10 +26,10 @@ if [ -z "$(docker-compose ps -q $TWOBTTNS_SERVICE_NAME)" ]; then
 fi
 
 # Echo the port of the twobttns container
-# echo ""
-# output="$(docker-compose port $TWOBTTNS_SERVICE_NAME 3262)"
-# output="${output#*:}"
-# echo "Your 2bttns instance is now running at port :$output"
+echo ""
+output="$(docker-compose port $TWOBTTNS_SERVICE_NAME 3262)"
+output="${output#*:}"
+echo "Your 2bttns instance is now running at port :$output"
 
 echo ""
 echo "To log in to your 2bttns console, you'll need to create an admin user account."
