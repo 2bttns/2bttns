@@ -62,7 +62,6 @@ docker container run -d \
     > /dev/null
 
 # Ensure the containers are running
-# Rewrite to check if container is not running
 if [ -z "$(docker container ls -aq -f name=$POSTGRES_CONTAINER_NAME)" ]; then
     echo "Postgres Docker container failed to start. Exiting..."
     exit 1

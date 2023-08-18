@@ -1,4 +1,5 @@
 version: "3.9"
+name: 2bttns-docker-compose
 services:
   twobttns:
     image: 2bttns/2bttns

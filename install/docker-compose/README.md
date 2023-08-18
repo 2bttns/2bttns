@@ -52,5 +52,5 @@ $ docker-compose down
 This won't remove the Docker Volume (which persists your db data even after doing `docker-compose down`) created by the compose file -- you can do that manually by running the following:
 
 ```bash
-$ docker volume rm db-data
+$ docker volume rm 2bttns-docker-compose_db-data
 ```
