@@ -85,7 +85,7 @@ docker exec $TWOBTTNS_CONTAINER_NAME 2bttns-cli db seed
 
 # Done!
 echo ""
-echo "2bttns is now running at http://localhost:$HOST_PORT"
+echo "2bttns is now running at port :$HOST_PORT"
 
 echo ""
 echo "To log in to your 2bttns console, you'll need to create an admin user account."
