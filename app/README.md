@@ -13,17 +13,9 @@ For additional information, see https://github.com/2bttns/2bttns/blob/dockerize/
 ```bash
 # Creates a 2bttns admin console Docker container that uses a PostgreSQL database container
 $ curl -s https://raw.githubusercontent.com/2bttns/2bttns/dockerize/install/docker-run/docker-run.sh | bash -s
-
-# You can clean up the Docker containers created by docker-run.sh with the following command:
-$ curl -s https://raw.githubusercontent.com/2bttns/2bttns/dockerize/install/docker-run/cleanup.sh | bash -s
-
-# Your database data is stored in a Docker volume, which is not removed up by cleanup.sh.
-# This means subsequent runs of docker-run.sh will use the same database data.
-# If you want to delete the Docker volume, run the following command:
-$ docker volume rm db-hostname
 ```
 
-### via Docker-Compose
+### via Docker Compose
 
 For additional information, see https://github.com/2bttns/2bttns/blob/dockerize/install/docker-compose.
 

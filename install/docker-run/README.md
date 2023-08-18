@@ -19,7 +19,7 @@ This script will:
 1. Create a PostgreSQL database container attached with a Docker volume and a Docker network.
 2. Create a 2bttns admin console container in the same Docker network.
 3. Apply the necessary 2bttns admin console database migrations to the PostgreSQL database.
-4. Seed the PostgreSQL database with example data
+4. Seed the PostgreSQL database with example data.
 
 ### docker-run-minimal.sh
 

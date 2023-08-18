@@ -25,7 +25,7 @@ This script will:
    ii. Create a 2bttns admin console container that uses the PostgreSQL container as its database.
 
 2. Apply the necessary 2bttns admin console database migrations to the PostgreSQL database.
-3. Seed the PostgreSQL database with example data
+3. Seed the PostgreSQL database with example data.
 
 ### Manual Setup
 
@@ -36,9 +36,9 @@ First, copy the `docker-compose.yml` file to your current working directory from
 In the same directory, run the following commands:
 
 ```bash
-docker-compose up -d
-docker-compose exec twobttns 2bttns-cli migrate
-docker-compose exec twobttns 2bttns-cli seed
+$ docker-compose up -d
+$ docker-compose exec -T twobttns 2bttns-cli db migrate
+$ docker-compose exec -T twobttns 2bttns-cli db seed
 ```
 
 ### Cleanup
@@ -46,11 +46,11 @@ docker-compose exec twobttns 2bttns-cli seed
 You can take down the containers using the following command in the same directory as the `docker-compose.yml` file:
 
 ```bash
-docker-compose down
+$ docker-compose down
 ```
 
 This won't remove the Docker Volume (which persists your db data even after doing `docker-compose down`) created by the compose file -- you can do that manually by running the following:
 
 ```bash
-docker volume rm db-data
+$ docker volume rm db-data
 ```
