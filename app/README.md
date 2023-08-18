@@ -25,33 +25,6 @@ $ docker volume rm db-hostname
 
 ### via Docker-Compose
 
-```yaml
-# docker-compose.yml
-version: "3.9"
-services:
-  twobttns:
-    image: 2bttns/2bttns
-    restart: unless-stopped
-    container_name: 2bttns
-    ports:
-      - "3262:3262"
-    depends_on:
-      - local-prod-db
-    environment:
-      DATABASE_URL: postgresql://local-prod-user:local-prod-pass@host.docker.internal:5432/local-prod-db
-      NEXTAUTH_SECRET: placeholder-secret-remember-to-change
-  local-prod-db:
-    image: postgres:13
-    restart: unless-stopped
-    container_name: local-prod-db-postgres
-    ports:
-      - "5432:5432"
-    environment:
-      POSTGRES_USER: local-prod-user
-      POSTGRES_PASSWORD: local-prod-pass
-      POSTGRES_DB: local-prod-db
-```
-
 ```bash
 # In the same directory as your docker-compose.yml file:
 # Start your containers
@@ -70,6 +43,40 @@ $ docker exec -it 2bttns 2bttns-cli admin create
 ### View Your 2bttns Admin Console
 
 Navigate to [`http://localhost:3262`](http://localhost:3262) in your browser to view your 2bttns admin console.
+
+### Create Admin Users
+
+You can use the 2bttns CLI to create a new admin user.
+
+#### From your 2bttns admin console container
+
+The [2bttns/2bttns](https://hub.docker.com/r/2bttns/2bttns) Docker image comes with the 2bttns CLI pre-installed and uses the necessary environment variables to perform the following commands:
+
+```bash
+# Create a new admin user via an interactive prompt
+$ docker exec -it 2bttns 2bttns-cli admin create
+
+# Create a new admin user via command line arguments
+$ docker exec 2bttns 2bttns-cli admin create credentials -u <username> -p <password>
+$ docker exec 2bttns 2bttns-cli admin create oauth-allow -e <email>
+```
+
+#### From any terminal with the 2bttns CLI installed
+
+You can use the 2bttns CLI to create a new admin user from any terminal that has the 2bttns CLI installed.
+
+```bash
+# Create a new admin user via an interactive prompt
+$ 2bttns-cli admin create -d <database-url> -s <nextauth-secret>
+
+# Create a new admin user via command line arguments
+$ 2bttns-cli admin create credentials -d <database-url> -s <nextauth-secret> -u <username> -p <password>
+$ 2bttns-cli admin create oauth-allow -d <database-url> -s <nextauth-secret> -e <email>
+```
+
+#### Additional `2bttns-cli` Information
+
+See the [2bttns-cli documentation](https://www.npmjs.com/package/@2bttns/2bttns-cli)
 
 ## Environment Variables
 
