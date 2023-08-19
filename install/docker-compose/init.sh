@@ -7,7 +7,7 @@ POSTGRES_SERVICE_NAME=db
 docker-compose up -d 
 
 # # Apply the necessary 2bttns Prisma migrations to the database
-docker-compose exec -T $TWOBTTNS_SERVICE_NAME 2bttns-cli db migrate
+docker-compose exec -T $TWOBTTNS_SERVICE_NAME 2bttns-cli db migrate > 2>&1
 
 # # Seed the database with example data (optional)
 # docker-compose exec -T $TWOBTTNS_SERVICE_NAME 2bttns-cli db seed
