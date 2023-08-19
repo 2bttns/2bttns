@@ -3,6 +3,6 @@
 docker container run -d \
     --name 2bttns \
     -p 3262:3262 \
-    -e DATABASE_URL="postgresql://username:password@db-hostname:port/db-name" \
+    -e DATABASE_URL="postgresql://username:password@db-hostname:port/db" \
     -e NEXTAUTH_SECRET="placeholder-secret-remember-to-change" \
     2bttns/2bttns
