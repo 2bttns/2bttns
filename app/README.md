@@ -82,8 +82,6 @@ If the database Docker container properly maps the PostgreSQL port to the host m
 $ 2bttns-cli admin create -d postgresql://username:password@localhost:5432/db
 ```
 
-````
-
 ## Environment Variables
 
 These are the environment variables you can configure for your 2bttns admin console.
@@ -123,7 +121,7 @@ For local development, run the following commands inside the root `app` folder:
 ```bash
 # Install npm dependencies
 $ npm i
-````
+```
 
 ```bash
 # Start the dev-db Docker container (this is a local Postgres database)
