@@ -85,10 +85,10 @@ $ 2bttns-cli config clear <key>
 
 ### Available Configuration Values
 
-| Key              | Description                                                                                                                                                                                             | Default Value | Example Value                                             | Flag(s)          | Environment Variable |
-| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------- | --------------------------------------------------------- | ---------------- | -------------------- |
-| `db.url`         | The connection URL of the database you want to use with 2bttns.                                                                                                                                         | `null`        | `postgresql://username:password@db-hostname:port/db-name` | `-d`, `--db-url` | `DATABASE_URL`       |
-| `nextAuthSecret` | The `NEXTAUTH_SECRET` used by your 2bttns admin console. <br/><br/> This value is reused for hashing admin credential passwords, and is only required when creating a new admin user using credentials. | `null`        | `placeholder-secret-remember-to-change`                   | `-s`, `--secret` | `NEXTAUTH_SECRET`    |
+| Key              | Description                                                                                                                                                                                             | Default Value | Example Value                                        | Flag(s)          | Environment Variable |
+| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------- | ---------------------------------------------------- | ---------------- | -------------------- |
+| `db.url`         | The connection URL of the database you want to use with 2bttns.                                                                                                                                         | `null`        | `postgresql://username:password@db-hostname:port/db` | `-d`, `--db-url` | `DATABASE_URL`       |
+| `nextAuthSecret` | The `NEXTAUTH_SECRET` used by your 2bttns admin console. <br/><br/> This value is reused for hashing admin credential passwords, and is only required when creating a new admin user using credentials. | `null`        | `placeholder-secret-remember-to-change`              | `-s`, `--secret` | `NEXTAUTH_SECRET`    |
 
 #### Configuration Value Precedence
 
