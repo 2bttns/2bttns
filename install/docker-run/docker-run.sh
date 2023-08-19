@@ -37,7 +37,7 @@ else
 fi
 
 echo ""
-echo "Creating Postgres Docker container (container name=$POSTGRES_CONTAINER_NAME)..."
+echo "Creating Postgres Docker container (container name=$POSTGRES_CONTAINER_NAME, db name=$POSTGRES_DB_NAME)..."
 docker container run -d \
     --name $POSTGRES_CONTAINER_NAME \
     --network $NETWORK_NAME \
