@@ -25,6 +25,8 @@ if [ -z "$(docker-compose ps -q $TWOBTTNS_SERVICE_NAME)" ]; then
     exit 1
 fi
 
+sleep 1
+
 # Echo the port of the twobttns container
 echo ""
 output="$(docker-compose port $TWOBTTNS_SERVICE_NAME 3262)"
