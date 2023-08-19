@@ -1,4 +1,5 @@
 #!/bin/bash
+
 TWOBTTNS_SERVICE_NAME="twobttns"   # 2bttns docker-compose service name
 POSTGRES_SERVICE_NAME="db"         # postgresql docker-compose service name
 TWOBTTNS_CONTAINER_NAME="2bttns"   # 2bttns container name created by the 2bttns docker-compose service
