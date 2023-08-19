@@ -66,7 +66,7 @@ $ 2bttns-cli admin create oauth-allow -d <database-url> -s <nextauth-secret> -e 
 
 #### Why am I getting a "Can't reach database server at `db-hostname`:`5432`" error?
 
-This may happen when you use the [2bttns-cli](https://www.npmjs.com/package/@2bttns/2bttns-cli) outside of the 2bttns Docker container and give the CLI the incorrect database hostname, like this:
+This may happen when you use the 2bttns CLI outside of the 2bttns Docker container and give the CLI the incorrect database hostname, like this:
 
 ```bash
 # Incorrect hostname in database URL
