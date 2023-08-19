@@ -1,6 +1,7 @@
 #!/bin/bash
 NETWORK_NAME="2bttns-net"
 POSTGRES_CONTAINER_NAME="db-hostname"
+POSTGRES_DB_NAME="db"
 TWOBTTNS_CONTAINER_NAME="2bttns"
 HOST_PORT=3262
 
@@ -44,7 +45,7 @@ docker container run -d \
     -p 5432:5432 \
     -e POSTGRES_USER="username" \
     -e POSTGRES_PASSWORD="password" \
-    -e POSTGRES_DB="db-name" \
+    -e POSTGRES_DB="$POSTGRES_DB_NAME" \
     postgres:13 \
     > /dev/null
 
@@ -56,7 +57,7 @@ docker container run -d \
     --name $TWOBTTNS_CONTAINER_NAME \
     --network $NETWORK_NAME \
     -p $HOST_PORT:3262 \
-    -e DATABASE_URL="postgresql://username:password@$POSTGRES_CONTAINER_NAME:5432/db-name" \
+    -e DATABASE_URL="postgresql://username:password@$POSTGRES_CONTAINER_NAME:5432/$POSTGRES_DB_NAME" \
     -e NEXTAUTH_SECRET="placeholder-secret-remember-to-change" \
     2bttns/2bttns \
     > /dev/null
