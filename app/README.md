@@ -30,7 +30,7 @@ $ curl -s https://raw.githubusercontent.com/2bttns/2bttns/dockerize/install/dock
 
 ### View Your 2bttns Admin Console
 
-Navigate to [`http://localhost:3262`](http://localhost:3262) in your browser to view your 2bttns admin console.
+Navigate to [`http://localhost:3262`](http://localhost:3262) in your browser to view your 2bttns admin console, or to the proper host and port if you've configured them differently.
 
 ### Create Admin Users
 
@@ -63,6 +63,27 @@ $ 2bttns-cli admin create credentials -d <database-url> -s <nextauth-secret> -u 
 
 $ 2bttns-cli admin create oauth-allow -d <database-url> -s <nextauth-secret> -e <email>
 ```
+
+#### Why am I getting a "Can't reach database server at `db-hostname`:`5432`" error?
+
+This may happen when you use the [2bttns-cli](https://www.npmjs.com/package/@2bttns/2bttns-cli) outside of the 2bttns Docker container and give the CLI the incorrect database hostname, like this:
+
+```bash
+# Incorrect hostname in database URL
+$ 2bttns-cli admin create -d postgresql://username:password@db-hostname:5432/dbpostgresql://local-prod-user:local-prod-pass@localhost:5432/local-prod-db
+```
+
+The Docker scripts we provide create a PostgreSQL database container that a 2bttns container in the same Docker network connects to using the internal hostname -- for example, `postgresql://username:password@db-hostname:5432/db`.
+
+If the database Docker container properly maps the PostgreSQL port to the host machine, you can connect to the database using `localhost`, like this:
+
+# Correct hostname database URL
+
+```bash
+$ 2bttns-cli admin create -d postgresql://username:password@localhost:5432/db
+```
+
+````
 
 ## Environment Variables
 
@@ -103,7 +124,7 @@ For local development, run the following commands inside the root `app` folder:
 ```bash
 # Install npm dependencies
 $ npm i
-```
+````
 
 ```bash
 # Start the dev-db Docker container (this is a local Postgres database)
