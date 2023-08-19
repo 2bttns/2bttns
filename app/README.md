@@ -70,16 +70,15 @@ This may happen when you use the 2bttns CLI outside of the 2bttns Docker contain
 
 ```bash
 # Incorrect hostname in database URL
-$ 2bttns-cli admin create -d postgresql://username:password@db-hostname:5432/dbpostgresql://local-prod-user:local-prod-pass@localhost:5432/local-prod-db
+$ 2bttns-cli admin create -d postgresql://username:password@db-hostname:5432/db
 ```
 
 The Docker scripts we provide create a PostgreSQL database container that a 2bttns container in the same Docker network connects to using the internal hostname -- for example, `postgresql://username:password@db-hostname:5432/db`.
 
 If the database Docker container properly maps the PostgreSQL port to the host machine, you can connect to the database using `localhost`, like this:
 
-# Correct hostname database URL
-
 ```bash
+# Correct hostname database URL
 $ 2bttns-cli admin create -d postgresql://username:password@localhost:5432/db
 ```
 
