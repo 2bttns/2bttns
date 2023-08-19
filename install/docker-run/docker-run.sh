@@ -44,7 +44,7 @@ docker container run -d \
     -p 5432:5432 \
     -e POSTGRES_USER="username" \
     -e POSTGRES_PASSWORD="password" \
-    -e POSTGRES_DB="db" \
+    -e POSTGRES_DB="db-name" \
     postgres:13 \
     > /dev/null
 
@@ -56,7 +56,7 @@ docker container run -d \
     --name $TWOBTTNS_CONTAINER_NAME \
     --network $NETWORK_NAME \
     -p $HOST_PORT:3262 \
-    -e DATABASE_URL="postgresql://username:password@$POSTGRES_CONTAINER_NAME:5432/db" \
+    -e DATABASE_URL="postgresql://username:password@$POSTGRES_CONTAINER_NAME:5432/db-name" \
     -e NEXTAUTH_SECRET="placeholder-secret-remember-to-change" \
     2bttns/2bttns \
     > /dev/null
