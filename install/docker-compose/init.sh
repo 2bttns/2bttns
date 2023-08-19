@@ -12,17 +12,17 @@ docker-compose up -d
 # # Seed the database with example data (optional)
 # docker-compose exec -T $TWOBTTNS_SERVICE_NAME 2bttns-cli db seed
 
-# # Ensure the postgresql service is running
-# if [ -z "$(docker-compose ps -q $POSTGRES_SERVICE_NAME)" ]; then
-#     echo "'$POSTGRES_SERVICE_NAME' Docker service failed to start. Exiting..."
-#     exit 1
-# fi
+# Ensure the postgresql service is running
+if [ -z "$(docker-compose ps -q $POSTGRES_SERVICE_NAME)" ]; then
+    echo "'$POSTGRES_SERVICE_NAME' Docker service failed to start. Exiting..."
+    exit 1
+fi
 
-# # Ensure the twobttns service is running
-# if [ -z "$(docker-compose ps -q $TWOBTTNS_SERVICE_NAME)" ]; then
-#     echo "'$TWOBTTNS_SERVICE_NAME' Docker service failed to start. Exiting..."
-#     exit 1
-# fi
+# Ensure the twobttns service is running
+if [ -z "$(docker-compose ps -q $TWOBTTNS_SERVICE_NAME)" ]; then
+    echo "'$TWOBTTNS_SERVICE_NAME' Docker service failed to start. Exiting..."
+    exit 1
+fi
 
 # Echo the port of the twobttns container
 echo ""
