@@ -1,16 +1,16 @@
 #!/bin/bash
-# This value should match the docker-compose service name of your 2bttns container
-TWOBTTNS_SERVICE_NAME=twobttns
-POSTGRES_SERVICE_NAME=db
+TWOBTTNS_SERVICE_NAME="twobttns"   # 2bttns docker-compose service name
+POSTGRES_SERVICE_NAME="db"         # postgresql docker-compose service name
+TWOBTTNS_CONTAINER_NAME="2bttns"   # 2bttns container name created by the 2bttns docker-compose service
 
 # Start your containers via docker-compose
 docker-compose up -d 
 
 # # Apply the necessary 2bttns Prisma migrations to the database
-docker-compose exec -T $TWOBTTNS_SERVICE_NAME 2bttns-cli db migrate > 2>&1
+docker container exec $TWOBTTNS_CONTAINER_NAME 2bttns-cli db migrate
 
 # # Seed the database with example data (optional)
-# docker-compose exec -T $TWOBTTNS_SERVICE_NAME 2bttns-cli db seed
+docker container exec $TWOBTTNS_CONTAINER_NAME 2bttns-cli db seed
 
 # Ensure the postgresql service is running
 if [ -z "$(docker-compose ps -q $POSTGRES_SERVICE_NAME)" ]; then
