@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 # Organize copied Prisma files after the build
 # Prisma binary target files like linux-musl-openssl-3.0.x or darwin-arm64 need to be at the same level as the prisma.schema, or else PrismaClient can't find them

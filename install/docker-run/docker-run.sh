@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 NETWORK_NAME="2bttns-net"
 POSTGRES_CONTAINER_NAME="db-hostname"
 POSTGRES_DB_NAME="db"

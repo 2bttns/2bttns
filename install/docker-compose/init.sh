@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 TWOBTTNS_SERVICE_NAME="twobttns"   # 2bttns docker-compose service name
 POSTGRES_SERVICE_NAME="db"         # postgresql docker-compose service name
