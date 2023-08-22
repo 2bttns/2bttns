@@ -66,6 +66,7 @@ COPY --from=builder /app/prisma ./prisma
 COPY --from=builder /app/src/utils ./src/utils
 
 RUN npm i -g @2bttns/2bttns-cli
+RUN chown -R nextjs:nodejs /usr/local/lib/node_modules/@2bttns
 
 USER nextjs
 
