@@ -11,7 +11,7 @@
 
 > If you are on macOS or Linux, you can skip this step.
 
-In order to run the scripts on Windows, you will need to have Docker Desktop installed and configured with the WSL 2 backend.
+In order to run the following scripts on Windows, you will need to have Docker Desktop installed and configured with the WSL 2 backend.
 
 You can find the instructions to do so here: : https://docs.docker.com/desktop/wsl.
 
