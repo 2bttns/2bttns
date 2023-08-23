@@ -26,10 +26,6 @@ For additional information, see https://github.com/2bttns/2bttns/blob/dockerize/
 curl -s https://raw.githubusercontent.com/2bttns/2bttns/dockerize/install/docker-run/docker-run.sh | bash -s
 ```
 
-### View Your 2bttns Admin Console
-
-Navigate to [`http://localhost:3262`](http://localhost:3262) in your browser to view your 2bttns admin console, or to the proper host and port if you've configured them differently.
-
 ### Create Admin Users
 
 You can use the [2bttns-cli](https://www.npmjs.com/package/@2bttns/2bttns-cli) to create a new admin user.
@@ -79,6 +75,10 @@ If the database Docker container properly maps the PostgreSQL port to the host m
 # Correct hostname database URL
 2bttns-cli admin create -d postgresql://username:password@localhost:5432/db
 ```
+
+### View Your 2bttns Admin Console
+
+Navigate to [`http://localhost:3262`](http://localhost:3262) in your browser to view your 2bttns admin console, or to the proper host and port if you've configured them differently.
 
 ## Environment Variables
 
