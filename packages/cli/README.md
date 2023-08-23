@@ -11,7 +11,7 @@ The 2bttns command line interface.
 
 ## Install
 
-```bash
+```sh
 # You can install the 2bttns CLI globally via npm:
 npm i -g @2bttns/2bttns-cli
 
@@ -23,7 +23,7 @@ npx @2bttns/2bttns-cli <command>
 
 ### Get Started
 
-```bash
+```sh
 # If installed globally:
 2bttns-cli --help
 
@@ -34,7 +34,7 @@ npx @2bttns/2bttns-cli --help
 
 ### DB Migrations & Seeding
 
-```bash
+```sh
 # Apply migrations
 ## Migrate the specified database using the -d flag
 2bttns-cli db migrate -d <database-url>
@@ -51,7 +51,7 @@ npx @2bttns/2bttns-cli --help
 
 ### Create 2bttns Console Administrators
 
-```bash
+```sh
 # Create a new 2bttns console administrator:
 ## Create an administrator via interactive prompts
 2bttns-cli admin create -d <database-url> -s <nextauth-secret>
@@ -72,7 +72,7 @@ Set configuration values via the CLI using the `config` command. Values set this
 
 #### Commands
 
-```bash
+```sh
 # Set a configuration value
 2bttns-cli config set <key> <value>
 
@@ -99,7 +99,7 @@ The CLI takes configuration values from the following sources, in order of prece
 
    ⚠️ An exception to this is if you set the `--ignore-config` flag, which in this case the CLI will ignore config values. This is useful if you want to use environment variables instead of the existing config.
 
-   ```bash
+   ```sh
       # Example:
       # In this case, the CLI will use the necessary environment variables (DATABASE_URL, NEXTAUTH_SECRET) instead of the config file (if they exist)
       # If you do not know which environment variables to use for certain commands, the command will warn you if you are missing any.

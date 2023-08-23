@@ -13,7 +13,7 @@ For additional information, see https://github.com/2bttns/2bttns/blob/dockerize/
 curl https://raw.githubusercontent.com/2bttns/2bttns/dockerize/install/docker-compose/docker-compose.yml -o docker-compose.yml
 
 # Run the `init.sh` script
-curl -s https://raw.githubusercontent.com/2bttns/2bttns/dockerize/install/docker-compose/init.sh | bash -s
+curl -s https://raw.githubusercontent.com/2bttns/2bttns/dockerize/install/docker-compose/init.sh | sh -s
 
 ```
 
@@ -23,7 +23,7 @@ For additional information, see https://github.com/2bttns/2bttns/blob/dockerize/
 
 ```sh
 # Creates a 2bttns admin console Docker container that uses a PostgreSQL database container
-curl -s https://raw.githubusercontent.com/2bttns/2bttns/dockerize/install/docker-run/docker-run.sh | bash -s
+curl -s https://raw.githubusercontent.com/2bttns/2bttns/dockerize/install/docker-run/docker-run.sh | sh -s
 ```
 
 ### Create Admin Users
