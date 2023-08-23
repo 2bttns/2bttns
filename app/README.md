@@ -13,7 +13,7 @@
 
 In order to run the following scripts on Windows, you will need to have Docker Desktop installed and configured with the WSL 2 backend.
 
-You can find the instructions to do so here: : https://docs.docker.com/desktop/wsl.
+You can find the instructions to do so here: https://docs.docker.com/desktop/wsl.
 
 Be sure to run the following commands in a WSL terminal, which you can start by calling `wsl.exe` in your Windows Command Prompt / PowerShell.
 
