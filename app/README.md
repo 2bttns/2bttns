@@ -18,7 +18,7 @@ We've provided a few scripts to help you get started quickly with 2bttns. Feel f
 
 #### i. via Docker Compose
 
-For additional information, see https://github.com/2bttns/2bttns/blob/dockerize/install/docker-compose.
+> For additional information, see https://github.com/2bttns/2bttns/blob/dockerize/install/docker-compose.
 
 ```sh
 # Download the docker-compose.yml file to your current working directory
@@ -31,7 +31,7 @@ curl -s https://raw.githubusercontent.com/2bttns/2bttns/dockerize/install/docker
 
 #### ii. via Docker in the Command Line
 
-For additional information, see https://github.com/2bttns/2bttns/blob/dockerize/install/docker-run
+> For additional information, see https://github.com/2bttns/2bttns/blob/dockerize/install/docker-run
 
 ```sh
 # Creates a 2bttns admin console Docker container that uses a PostgreSQL database container
