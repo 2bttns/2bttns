@@ -1,7 +1,7 @@
 # 2bttns
 
-<a href="https://2bttns.com"><img src="https://img.shields.io/badge/official site-2bttns.com-white.svg?style=for-the-badge"></a>
-<a href="https://docs.2bttns.com"><img src="https://img.shields.io/badge/docs-v0.0.1_alpha-white.svg?style=for-the-badge"></a>
+<a href="https://2bttns.com"><img src="https://img.shields.io/badge/official site-2bttns.com-green.svg?style=for-the-badge"></a>
+<a href="https://docs.2bttns.com"><img src="https://img.shields.io/badge/docs-v0.0.1_alpha-green.svg?style=for-the-badge"></a>
 <a href="https://hub.docker.com/r/2bttns/2bttns"><img src="https://img.shields.io/badge/docker hub-2bttns/2bttns-blue.svg?logo=docker&style=for-the-badge"></a>
 <a href="https://discord.com/invite/YkjQNyhmsT"><img src="https://img.shields.io/badge/chat-discord-yellow.svg?logo=discord&style=for-the-badge"></a>
 
