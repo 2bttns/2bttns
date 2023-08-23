@@ -1,19 +1,8 @@
 # 2bttns
 
-Integrate your app with 2bttns through our official Docker image, available on Docker Hub: https://hub.docker.com/r/2bttns/2bttns
-
 ## Quickstart
 
 We've provided a few ways for you to get started quickly with 2bttns. Feel free to customize these scripts to your needs.
-
-### via Docker in the Command Line
-
-For additional information, see https://github.com/2bttns/2bttns/blob/dockerize/install/docker-run
-
-```sh
-# Creates a 2bttns admin console Docker container that uses a PostgreSQL database container
-curl -s https://raw.githubusercontent.com/2bttns/2bttns/dockerize/install/docker-run/docker-run.sh | bash -s
-```
 
 ### via Docker Compose
 
@@ -26,6 +15,15 @@ curl https://raw.githubusercontent.com/2bttns/2bttns/dockerize/install/docker-co
 # Run the `init.sh` script
 curl -s https://raw.githubusercontent.com/2bttns/2bttns/dockerize/install/docker-compose/init.sh | bash -s
 
+```
+
+### via Docker in the Command Line
+
+For additional information, see https://github.com/2bttns/2bttns/blob/dockerize/install/docker-run
+
+```sh
+# Creates a 2bttns admin console Docker container that uses a PostgreSQL database container
+curl -s https://raw.githubusercontent.com/2bttns/2bttns/dockerize/install/docker-run/docker-run.sh | bash -s
 ```
 
 ### View Your 2bttns Admin Console

@@ -22,7 +22,7 @@ This script will:
 
    i. Create a PostgreSQL database container attached with a Docker volume.
 
-   ii. Create a 2bttns admin console container that uses the PostgreSQL container as its database.
+   ii. Create a 2bttns admin console container from our [official Docker image](https://hub.docker.com/r/2bttns/2bttns). The admin console will use the PostgreSQL container as its database.
 
 2. Apply the necessary 2bttns admin console database migrations to the PostgreSQL database.
 3. Seed the PostgreSQL database with example data.
