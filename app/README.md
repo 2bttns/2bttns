@@ -2,9 +2,21 @@
 
 ## Quickstart
 
-We've provided a few ways for you to get started quickly with 2bttns. Feel free to customize these scripts to your needs.
+### For Windows Users:
 
-### via Docker Compose
+> If you are on macOS or Linux, you can skip this step.
+
+In order to run the scripts on Windows, you will need to have Docker Desktop installed and configured with the WSL 2 backend.
+
+You can find the instructions to do so here: : https://docs.docker.com/desktop/wsl.
+
+Be sure to run the following commands in a WSL terminal, which you can start by calling `wsl.exe` in your Windows Command Prompt / PowerShell.
+
+### Installation Scripts
+
+We've provided a few scripts to help you get started quickly with 2bttns. Feel free to customize them to your needs.
+
+#### i. via Docker Compose
 
 For additional information, see https://github.com/2bttns/2bttns/blob/dockerize/install/docker-compose.
 
@@ -17,7 +29,7 @@ curl -s https://raw.githubusercontent.com/2bttns/2bttns/dockerize/install/docker
 
 ```
 
-### via Docker in the Command Line
+#### ii. via Docker in the Command Line
 
 For additional information, see https://github.com/2bttns/2bttns/blob/dockerize/install/docker-run
 
@@ -79,6 +91,10 @@ If the database Docker container properly maps the PostgreSQL port to the host m
 ### View Your 2bttns Admin Console
 
 Navigate to [`http://localhost:3262`](http://localhost:3262) in your browser to view your 2bttns admin console, or to the proper host and port if you've configured them differently.
+
+### Next Steps
+
+...and that's it! You're ready to [manage games](https://docs.2bttns.com/docs/%F0%9F%9A%80%20Getting%20Started/quick-start#create-game) and [integrate your app with 2bttns](https://docs.2bttns.com/docs/%F0%9F%9A%80%20Getting%20Started/quick-start#bounce-users-to-game).
 
 ## Environment Variables
 
