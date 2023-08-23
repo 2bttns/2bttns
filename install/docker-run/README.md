@@ -11,7 +11,7 @@
 ### docker-run.sh
 
 ```bash
-$ ./docker-run.sh
+./docker-run.sh
 ```
 
 This script will:
@@ -28,7 +28,7 @@ A minimal version of `docker-run.sh` that only creates the 2bttns container.
 Use this if you already have a PostgreSQL database running somewhere -- be sure to update the `DATABASE_URL` environment variable in `docker-run-minimal.sh` to point to your database.
 
 ```bash
-$ ./docker-run-minimal.sh
+./docker-run-minimal.sh
 ```
 
 ### cleanup.sh
@@ -36,7 +36,7 @@ $ ./docker-run-minimal.sh
 This script cleans up most Docker objects created by `docker-run.sh` and `docker-run-minimal.sh`
 
 ```bash
-$ ./cleanup.sh
+./cleanup.sh
 ```
 
 This does not clean up the Docker Volume created by `docker-run.sh` -- you can do that manually by running `docker volume rm db-hostname`.

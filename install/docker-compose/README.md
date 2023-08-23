@@ -11,7 +11,7 @@
 ### `init.sh`
 
 ```bash
-$ ./init.sh
+./init.sh
 ```
 
 This script will:
@@ -36,9 +36,9 @@ First, copy the `docker-compose.yml` file to your current working directory from
 In the same directory, run the following commands:
 
 ```bash
-$ docker-compose up -d
-$ docker-compose exec -T twobttns 2bttns-cli db migrate
-$ docker-compose exec -T twobttns 2bttns-cli db seed
+docker-compose up -d
+docker-compose exec -T twobttns 2bttns-cli db migrate
+docker-compose exec -T twobttns 2bttns-cli db seed
 ```
 
 ### Cleanup
@@ -46,11 +46,11 @@ $ docker-compose exec -T twobttns 2bttns-cli db seed
 You can take down the containers using the following command in the same directory as the `docker-compose.yml` file:
 
 ```bash
-$ docker-compose down
+docker-compose down
 ```
 
 This won't remove the Docker Volume (which persists your db data even after doing `docker-compose down`) created by the compose file -- you can do that manually by running the following:
 
 ```bash
-$ docker volume rm 2bttns-docker-compose_db-data
+docker volume rm 2bttns-docker-compose_db-data
 ```

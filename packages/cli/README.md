@@ -13,10 +13,10 @@ The 2bttns command line interface.
 
 ```bash
 # You can install the 2bttns CLI globally via npm:
-$ npm i -g @2bttns/2bttns-cli
+npm i -g @2bttns/2bttns-cli
 
 # Alternatively, you can call it via npx without installing it globally.
-$ npx @2bttns/2bttns-cli <command>
+npx @2bttns/2bttns-cli <command>
 ```
 
 ## Usage
@@ -25,11 +25,11 @@ $ npx @2bttns/2bttns-cli <command>
 
 ```bash
 # If installed globally:
-$ 2bttns-cli --help
+2bttns-cli --help
 
 
 # If calling it via npx:
-$ npx @2bttns/2bttns-cli --help
+npx @2bttns/2bttns-cli --help
 ```
 
 ### DB Migrations & Seeding
@@ -37,16 +37,16 @@ $ npx @2bttns/2bttns-cli --help
 ```bash
 # Apply migrations
 ## Migrate the specified database using the -d flag
-$ 2bttns-cli db migrate -d <database-url>
+2bttns-cli db migrate -d <database-url>
 
 # Create example seed data (Games, Tags, GameObjects, and an example App Secret) in your database
 ## Seed the specified database using the -d flag
 ## IMPORTANT: The database must be migrated via `2bttns-cli db migrate` before seeding, or else the seed will fail.
-$ 2bttns-cli db seed -d <database-url>
+2bttns-cli db seed -d <database-url>
 
 ## If you have set the db.url config value, you can omit the -d flag
-$ 2bttns-cli db migrate
-$ 2bttns-cli db seed
+2bttns-cli db migrate
+2bttns-cli db seed
 ```
 
 ### Create 2bttns Console Administrators
@@ -54,16 +54,16 @@ $ 2bttns-cli db seed
 ```bash
 # Create a new 2bttns console administrator:
 ## Create an administrator via interactive prompts
-$ 2bttns-cli admin create -d <database-url> -s <nextauth-secret>
+2bttns-cli admin create -d <database-url> -s <nextauth-secret>
 
 ## Create an administrator via command line arguments
-$ 2bttns-cli admin create credentials -u <username> -p <password> -d <database-url> -s <nextauth-secret>
-$ 2bttns-cli admin create oauth-allow -e <email> -d <database-url> -s <nextauth-secret>
+2bttns-cli admin create credentials -u <username> -p <password> -d <database-url> -s <nextauth-secret>
+2bttns-cli admin create oauth-allow -e <email> -d <database-url> -s <nextauth-secret>
 
 ## If you have set the db.url and nextAuthSecret config values or have the proper environment variables set, you can omit the -d and -s flags
-$ 2bttns-cli admin create
-$ 2bttns-cli admin create credentials -u <username> -p <password>
-$ 2bttns-cli admin create oauth-allow -e <email>
+2bttns-cli admin create
+2bttns-cli admin create credentials -u <username> -p <password>
+2bttns-cli admin create oauth-allow -e <email>
 ```
 
 ### Configuration Values
@@ -74,13 +74,13 @@ Set configuration values via the CLI using the `config` command. Values set this
 
 ```bash
 # Set a configuration value
-$ 2bttns-cli config set <key> <value>
+2bttns-cli config set <key> <value>
 
 # Get the current value of a configuration value
-$ 2bttns-cli config get <key>
+2bttns-cli config get <key>
 
 # Clear a configuration value
-$ 2bttns-cli config clear <key>
+2bttns-cli config clear <key>
 ```
 
 ### Available Configuration Values
