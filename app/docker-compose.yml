@@ -1,23 +1,50 @@
 version: "3.9"
-
 services:
   dev-db:
     image: postgres:13
-    restart: always
-    container_name: integration-dev-db-postgres
+    restart: unless-stopped
+    container_name: dev-db-postgres
     ports:
       - "5433:5432"
     environment:
       POSTGRES_USER: dev-user
       POSTGRES_PASSWORD: dev-pass
       POSTGRES_DB: dev-db
+    volumes:
+      - postgres-data-dev:/var/lib/postgresql/data
   test-db:
     image: postgres:13
-    restart: always
-    container_name: integration-test-db-postgres
+    restart: unless-stopped
+    container_name: test-db-postgres
     ports:
       - "5434:5432"
     environment:
       POSTGRES_USER: test-user
       POSTGRES_PASSWORD: test-pass
       POSTGRES_DB: test-db
+  twobttns:
+    build: .
+    restart: unless-stopped
+    container_name: 2bttns
+    ports:
+      - "3262:3262"
+    depends_on:
+      - local-prod-db
+    environment:
+      DATABASE_URL: postgresql://local-prod-user:local-prod-pass@host.docker.internal:5432/local-prod-db
+      NEXTAUTH_SECRET: placeholder-secret-remember-to-change
+  local-prod-db:
+    image: postgres:13
+    restart: unless-stopped
+    container_name: local-prod-db-postgres
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: local-prod-user
+      POSTGRES_PASSWORD: local-prod-pass
+      POSTGRES_DB: local-prod-db
+    volumes:
+      - postgres-data-local-prod:/var/lib/postgresql/data
+volumes:
+  postgres-data-dev:
+  postgres-data-local-prod:

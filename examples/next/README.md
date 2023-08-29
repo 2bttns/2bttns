@@ -12,7 +12,7 @@ Set the following environment variables in a `.env.local` file in the root of th
 
 ### Run the development server
 
-```bash
+```sh
 npm run dev
 ```
 

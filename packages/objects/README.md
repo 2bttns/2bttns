@@ -1,19 +1,20 @@
 # Format & Get Ready Data
+
 Convert JSON data into a format readable by the 2bttns Console.
 
-## Usage 
+## Usage
 
-   ```bash
-   npx @2bttns/objects
-   ```
-  
-```Format data for 2bttns Console``` will guide you through mapping your JSON and generating a ready to upload file.
+```sh
+npx @2bttns/objects
+```
 
-```Get ready-to-upload json data``` will download already formatted Game Objects available in the formatter.
+`Format data for 2bttns Console` will guide you through mapping your JSON and generating a ready to upload file.
 
-```bash
+`Get ready-to-upload json data` will download already formatted Game Objects available in the formatter.
+
+```sh
 # Ready to upload json data
-? Select the JSON file you want to output from the /formatted-data folder: … 
+? Select the JSON file you want to output from the /formatted-data folder: …
 ❯ ready-car-considerations.json
   ready-chords.json
   ready-indoorActivities.json
@@ -22,22 +23,22 @@ Convert JSON data into a format readable by the 2bttns Console.
 ```
 
 ## Table of Contents
+
 1. [Data Model](#game-objects-model)
 2. [Usage](#usage)
 3. [Example](#example)
 4. [Upload to Console](#upload-to-console)
 5. [License](#license)
 
-
 ---
 
-
 #### Warnin
+
 > The Tags section at the bottom of the output JSON is currently set to have empty strings for `id`, `name`, and `description` fields. <br/> As a result, a new Tag object will be generated in the Console.
 
-
 ## Game Objects Model
-The script converts any size JSON into the data model below. 
+
+The script converts any size JSON into the data model below.
 
 > Your JSON must contain a `name` equivalent field. These values are loaded as choices within your Game buttons.
 >
@@ -47,23 +48,24 @@ The script converts any size JSON into the data model below.
 const outputShape: OutputShape = {
   gameObjects: [
     {
-      id: '',
-      name: '',
-      description: '',
-      tagIds: []
-    }
+      id: "",
+      name: "",
+      description: "",
+      tagIds: [],
+    },
   ],
   tags: [
     {
-      id: '',
-      name: '',
-      description: ''
-    }
-  ]
+      id: "",
+      name: "",
+      description: "",
+    },
+  ],
 };
 ```
 
 Interface Type
+
 ```typescript
 interface GameObject {
   id: string;

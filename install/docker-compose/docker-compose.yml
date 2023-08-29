@@ -1,0 +1,26 @@
+version: "3.9"
+name: 2bttns-docker-compose
+services:
+  twobttns:
+    image: 2bttns/2bttns
+    container_name: 2bttns
+    ports:
+      - "3262:3262"
+    depends_on:
+      - db
+    environment:
+      DATABASE_URL: postgresql://username:password@db-hostname:5432/db
+      NEXTAUTH_SECRET: placeholder-secret-remember-to-change
+  db:
+    image: postgres:13
+    container_name: db-hostname
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: username
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: db
+    volumes:
+      - db-data:/var/lib/postgresql/data
+volumes:
+  db-data:

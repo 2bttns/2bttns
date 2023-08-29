@@ -1,10 +1,131 @@
 # 2bttns
 
-## Setup for Local Development
+<a href="https://2bttns.com"><img src="https://img.shields.io/badge/official site-2bttns.com-green.svg?style=for-the-badge"></a>
+<a href="https://docs.2bttns.com/docs/intro"><img src="https://img.shields.io/badge/docs-v0.0.1_alpha-green.svg?style=for-the-badge"></a>
+<a href="https://hub.docker.com/r/2bttns/2bttns"><img src="https://img.shields.io/badge/docker hub-2bttns/2bttns-blue.svg?logo=docker&style=for-the-badge"></a>
+<a href="https://discord.com/invite/YkjQNyhmsT"><img src="https://img.shields.io/badge/chat-discord-yellow.svg?logo=discord&style=for-the-badge"></a>
+
+## Quickstart
+
+### For Windows Users:
+
+> If you are on macOS or Linux, you can skip this step.
+
+In order to run the following scripts on Windows, you will need to have Docker Desktop installed and configured with the WSL 2 backend.
+
+You can find the instructions to do so here: https://docs.docker.com/desktop/wsl.
+
+Be sure to run the following commands in a WSL terminal, which you can start by calling `wsl.exe` in your Windows Command Prompt / PowerShell.
+
+### Installation Scripts
+
+We've provided a few scripts to help you get started quickly with 2bttns. Feel free to customize them to your needs.
+
+#### i. via Docker Compose
+
+> For additional information, see https://github.com/2bttns/2bttns/blob/dockerize/install/docker-compose.
+
+```sh
+# Download the docker-compose.yml file to your current working directory
+curl https://raw.githubusercontent.com/2bttns/2bttns/dockerize/install/docker-compose/docker-compose.yml -o docker-compose.yml
+
+# Run the `init.sh` script
+curl -s https://raw.githubusercontent.com/2bttns/2bttns/dockerize/install/docker-compose/init.sh | sh -s
+
+```
+
+#### ii. via Docker in the Command Line
+
+> For additional information, see https://github.com/2bttns/2bttns/blob/dockerize/install/docker-run
+
+```sh
+# Creates a 2bttns admin console Docker container that uses a PostgreSQL database container
+curl -s https://raw.githubusercontent.com/2bttns/2bttns/dockerize/install/docker-run/docker-run.sh | sh -s
+```
+
+### Create Admin Users
+
+You can use the [2bttns-cli](https://www.npmjs.com/package/@2bttns/2bttns-cli) to create a new admin user.
+
+#### From your 2bttns admin console container
+
+The [2bttns/2bttns](https://hub.docker.com/r/2bttns/2bttns) Docker image comes with the 2bttns CLI pre-installed and uses the necessary environment variables to perform the following commands:
+
+```sh
+# Create a new admin user via an interactive prompt
+docker exec -it 2bttns 2bttns-cli admin create
+
+# Create a new admin user via command line arguments
+docker exec 2bttns 2bttns-cli admin create credentials -u <username> -p <password>
+
+docker exec 2bttns 2bttns-cli admin create oauth-allow -e <email>
+```
+
+#### From any terminal with the 2bttns CLI installed
+
+You can use the 2bttns CLI to create a new admin user from any terminal that has the 2bttns CLI installed.
+
+```sh
+# Create a new admin user via an interactive prompt
+2bttns-cli admin create -d <database-url> -s <nextauth-secret>
+
+# Create a new admin user via command line arguments
+2bttns-cli admin create credentials -d <database-url> -s <nextauth-secret> -u <username> -p <password>
+
+2bttns-cli admin create oauth-allow -d <database-url> -s <nextauth-secret> -e <email>
+```
+
+#### Why am I getting a "Can't reach database server at `db-hostname:5432`" error?
+
+This may happen when you use the 2bttns CLI outside of the 2bttns Docker container and give the CLI the incorrect database hostname, like this:
+
+```sh
+# Incorrect hostname in database URL
+2bttns-cli admin create -d postgresql://username:password@db-hostname:5432/db
+```
+
+The Docker scripts we provide create a PostgreSQL database container that a 2bttns container in the same Docker network connects to using the internal hostname -- for example, `postgresql://username:password@db-hostname:5432/db`.
+
+If the database Docker container properly maps the PostgreSQL port to the host machine, you can connect to the database using `localhost`, like this:
+
+```sh
+# Correct hostname database URL
+2bttns-cli admin create -d postgresql://username:password@localhost:5432/db
+```
+
+### View Your 2bttns Admin Console
+
+Navigate to [`http://localhost:3262`](http://localhost:3262) in your browser to view your 2bttns admin console, or to the proper host and port if you've configured them differently.
+
+### Next Steps
+
+...and that's it! You're ready to [manage games](https://docs.2bttns.com/docs/%F0%9F%9A%80%20Getting%20Started/quick-start#create-game) and [integrate your app with 2bttns](https://docs.2bttns.com/docs/%F0%9F%9A%80%20Getting%20Started/quick-start#bounce-users-to-game).
+
+## Environment Variables
+
+These are the environment variables you can configure for your 2bttns admin console.
+
+| Variable Name       | Description                                                                                                    | Example                                                                              |
+| ------------------- | -------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------ |
+| `DATABASE_URL`      | The URL of the Postgres database to connect to.                                                                | `postgresql://username:password@db-hostname:port/db`                                 |
+| `NEXTAUTH_SECRET`   | The secret used by NextAuth. You can generate a new secret on the command line with: `openssl rand -base64 32` | `placeholder-secret-remember-to-change`                                              |
+| `NEXTAUTH_URL`      | The URL of the 2bttns app.                                                                                     | `http://localhost:3262`                                                              |
+| `GITHUB_ID`         | The GitHub OAuth app ID, if you want to allow admin users to sign in via GitHub.                               | `1234567890`                                                                         |
+| `GITHUB_SECRET`     | The GitHub OAuth app secret that corresponds to your `GITHUB_ID`.                                              | `placeholder-secret-remember-to-change`                                              |
+| `SERVER_LOG_LEVEL`  | The log level for the server.                                                                                  | `error` \| `warn` \| `info` _(default)_ \| `http` \| `verbose` \| `debug` \| `silly` |
+| `SERVER_LOG_LOCALE` | The log locale for the server.                                                                                 | `en-US`                                                                              |
+
+# Contributions
+
+We welcome contributions to the 2bttns project! Please read our contributing guidelines (TODO).
+
+## Local Development
+
+Here's a how-to for setting up your local development environment when working on the 2bttns app.
 
 ### Environment Variables
 
-First, set up the environment variables folder by copying `.env.example` to a new `.env` file. Follow the instructions in the `.env.example` file to set up your environment variables.
+First, set up the environment variables folder by copying `.env.example` to a new `.env` file. The console app will work out of the box with the default environment variables, but you can customize them to your needs.
 
 ### Docker Compose
 
@@ -16,80 +137,162 @@ You can modify the Docker database configurations in `docker-compose.yml`.
 
 For local development, run the following commands inside the root `app` folder:
 
-```bash
+```sh
 # Install npm dependencies
-$ npm i
+npm i
 ```
 
-```bash
-# This next NPM script does the following:
-#   1. Start the dev-db container
-#   2. Syncs the dev-db container to Prisma schema migrations
-#   3. Seeds the db with example data
-$ npm run init-db:dev
+```sh
+# Start the dev-db Docker container (this is a local Postgres database)
+npm run docker:up:dev-db
+
+# Apply the necessary 2bttns Prisma migrations to the database
+# This uses the `DATABASE_URL` environment variable in `.env`
+npm run migrate
+
+# Seed the database with example data (optional)
+# This also uses the `DATABASE_URL` environment variable in `.env`
+npm run seed
 ```
 
-```bash
-# Create an admin account before
-# using the 2bttns Console.
-#
-$ npm run create-admin:dev
+```sh
+# Create an admin account in your dev db
+# Behind the scenes, this uses the 2bttns-cli
+# with your .env environment variables loaded
+npm run create-admin
 ```
 
-```bash
- # Start the app
-$ npm run dev
+```sh
+ # Start the admin console app
+npm run dev
 ```
 
----
+### Testing
 
-## Deploying 2bttns to Production
+#### Prerequisites
 
-### Building the App
+Be sure to have Node.js/NPM and Docker Compose available on the machine you're running the tests on.
 
-You can build the admin app with the following command:
+#### Running tests
 
-```bash
-$ npm run build
+Run the tests with the following command inside the root `app` folder:
+
+```sh
+npm i              # Install npm dependencies, if you haven't already
+npm run test       # Run tests
 ```
 
-Then, you can run the production-ready build with the following command:
+### Running the 2bttns Docker Image Locally
 
-```bash
-$ npm run start
+You can run the 2bttns Docker image locally with the following commands
+
+```sh
+# Start the Dockerized twobttns service based on `docker-compose.yml`
+# The 2bttns container will build locally based on the Dockerfile
+docker-compose up twobttns
+
+# Apply the necessary 2bttns Prisma migrations to the database & seed it with example data
+docker exec -it 2bttns 2bttns-cli db migrate
+docker exec -it 2bttns 2bttns-cli db seed
+
+# Create an admin user
+docker exec -it 2bttns 2bttns-cli admin create
+
+# To stop the twobttns service, run the following command:
+docker-compose down twobttns
+
+# The local-prod-db container uses a volume to store its data, so subsequent runs of the local-prod-db container will use the same data.
+# You can delete the volume with the following command:
+docker volume rm app_postgres-data-local-prod
 ```
 
-### Production Environment Variables
+This will start the `2bttns` container and the `local-prod-db` containers. The `2bttns` container is built using the local Dockerfile. You can access the dockerized 2bttns app at `localhost:3262`.
 
-You can create a `.env.production` file to set environment variables for the production build. `npm run build` will automatically use the `.env.production` file if it exists.
+### Managing the `dev-db` container
 
-If you plan to deploy the admin app to a production server via CI/CD or via services like Vercel, you should set the environment variables in their respective places instead.
+The `dev-db` container will contain your local development database. It is created and managed by Docker Compose in the `docker-compose.yml` file.
 
-### 2bttns Docker Image
+Here are some useful commands to manage the `dev-db` container:
 
-@TODO Create a `2bttns/admin` Docker image. Should accept environment variables.
+```sh
+# Stop all containers used by the app (e.g. dev-db and test-db containers)
+npm run docker:stop
+```
 
----
+```sh
+# Start the dev-db container, from scratch or if it was stopped
+npm run docker:up:dev-db
 
-## Admin Login
+# Apply migrations and seed the dev-db container
+# You only need to run this when you create your dev-db container for the first time
+npm run migrate
+npm run seed
+```
 
-### "Admin Users" vs "Players"
+```sh
+# Remove the dev-db container
+# This will not delete the database's data because it is stored in a volume
+npm run docker:rm:dev-db
 
-Any reference to "Users" in the 2bttns admin app refers to dmin users logged in via GitHub OAuth. Admin users manage the 2bttns dashboard, managing various aspects of the app, such as games, gameobjects, and 2bttns API secret keys.
+# If you want to delete the dev-db database's data volume, run the following command:
+docker volume rm app_postgres-data-dev
+```
 
-Consumers who are sent to 2bttns to play games are referred to as "Players".
+Note that these NPM scripts are just for convenience. You can manage the `dev-db` container manually using the docker/docker-compose CLI.
 
-### Credentials Login
+### Troubleshooting
 
-You can create admin users that can log in to the admin app with credentials (email and password) by running the `npm run create-admin:dev` command.
+#### Bind for 0.0.0.0:xxxx failed: port is already allocated
 
-Select the "Create Admin Credentials using Username/Password" prompt and enter the email and password you want the new admin user to use when logging in to the 2bttns admin console.
+This means you have another active container mapped to the specified port. To fix this, stop the container that is using the port.
 
-Using these credentials, you can log in to the admin app at `/auth/signIn`. If you aren't logged in, you will be redirected to the login page automatically.
+```sh
+# Find the container that is using the port
+docker ps
+docker stop <container-id>
+```
 
-In production, you can run the `npm run create-admin:prod` command. Be sure your `.env.production` environment variables are configured correctly.
+#### Can't reach database server at `localhost:xxxx`
 
-### GitHub OAuth (Optional)
+The database corresponding to the `DATABASE_URL` in `.env` you've configured might not be running.
+
+For example, you might see this error if you run `npm run dev` before starting the `dev-db` container.
+
+#### Default ports used by this project
+
+- `localhost:3001`
+
+  Local development server started via `npm run dev`
+
+- `localhost:5433`
+
+  Postgres Docker dev db started via `npm run docker:up:dev-db`
+
+- `localhost:5434`
+
+  Postgres Docker test db started via `npm run docker:up:test-db`
+
+- `localhost:3262`
+
+  Production build started via `npm run build && npm run start`.
+
+  This is also the default port used by the Docker build.
+
+# Additional Information
+
+## Admin Users
+
+The 2bttns admin console is managed by admin users.
+
+You can create admin users using the `2bttns-cli` via NPM.
+
+```sh
+npx @2bttns/2bttns-cli admin create -d <database-url> -s <nextauth-secret>
+```
+
+The CLI will prompt you to create an admin user with credentials (username-password) or add emails to an OAuth allow list.
+
+## GitHub OAuth (Optional)
 
 2bttns supports GitHub OAuth through NextAuth out of the box.
 
@@ -97,6 +300,7 @@ To set up GitHub OAuth, set the following credentials in your `.env` file:
 
 ```
 # Next Auth GitHub Provider
+
 GITHUB_ID="<YOUR_GITHUB_ID>"
 GITHUB_SECRET="<YOUR_GITHUB_SECRET>"
 ```
@@ -116,37 +320,23 @@ OAuth admins who are not in the 2bttns-managed `AdminOAuthAllowList` database ta
 
 You can add admin emails to the allow list in the following ways:
 
-#### 1. adminAllowLIst.json
+#### 1. `npm run create-admin`
 
-The 2bttns app uses an `adminAllowList.json` file to populate the `AdminOAuthAllowList` table with a list of emails associated with GitHub accounts allowed to log in to the admin app.
+Select the "Create Admin using Github OAuth" prompt and enter the email associated with the GitHub account you want to grant access to.
 
-To configure the initial admin allow list...
+Behind the scenes, this uses the 2bttns-cli with your local `.env` environment variables loaded. In production environments, you should use the 2bttns-cli directly with the necessary parameters to connect to your production database.
 
-1. Copy the `adminAllowList.json.example` file to a new `adminAllowList.json` file, if it doesn't already exist.
-
-2. Add the emails associated with the GitHub accounts you want to grant access to.
-
-Now, whenever you seed the database (e.g. `npm run db-seed:dev`), the `AdminOAuthAllowList` table will be updated with the emails in the `adminAllowList.json` file.
-
-#### 2. `npm run create-admin:dev`
-
-Similar to how you can create admins with username-password credentials, you can add admins to the `AdminOAuthAllowList` table by running the `npm run create-admin:dev` command.
-
-Select the "Add Admin OAuth Email to Allow List" prompt and enter the email associated with the GitHub account you want to grant access to.Ø
-
-#### 3. via Prisma Studio or a Database Client
+#### 2. via Prisma Studio or a Database Client
 
 You can manually add allowed admin emails to the `AdminOAuthAllowList` table via the Prisma Studio UI (`npx prisma studio`) or manually through another database client of your choice.
 
-### 4. via the 2bttns Admin Panel
+### 3. via the 2bttns Admin Panel
 
 @TODO - this feature is not yet implemented.
 
-<!-- When logged in as an admin user, you can add more admin users via the 2bttns Admin Panel at the `Settings > Admin Users` page. -->
+## Next Auth Secret
 
-### Next Auth Secret
-
-2bttns uses Next Auth to authenticate users, and requires a `NEXTAUTH_SECRET` environment variable in the `.env` file:
+2bttns uses Next Auth to authenticate users, which requires a `NEXTAUTH_SECRET` environment variable in the `.env` file:
 
 ```
 # .env
@@ -154,92 +344,7 @@ You can manually add allowed admin emails to the `AdminOAuthAllowList` table via
 # You can generate a new secret on the command line with:
 # openssl rand -base64 32
 # https://next-auth.js.org/configuration/options#secret
-NEXTAUTH_SECRET="<secret>"
+NEXTAUTH_SECRET="placeholder-secret-remember-to-change"
 ```
 
----
-
-## Managing the `dev-db` container
-
-The `dev-db` container will contain your local development database. It is created and managed by Docker Compose in the `docker-compose.yml` file.
-
-Here are some useful commands to manage the `dev-db` container:
-
-```bash
-# Stop all containers used by the app (e.g. dev-db and test-db containers)
-# This is useful if you want to stop the dev-db container without deleting it's data
-$ npm run docker:stop
-```
-
-```bash
-# Start the dev-db container, from scratch or if it was stopped
-$ npm run docker:up:dev-db
-
-# Note that the previous command does not run Prisma
-# migrations or seed the db.
-# To do that, run the following command:
-$ npm run init-db:dev
-```
-
-```bash
-# Remove the dev-db container
-# CAUTION: this will delete the dev-db container's data
-$ npm run docker:rm:dev-db
-```
-
-Note that these NPM scripts are just for convenience. You can manage the `dev-db` container manually using the docker/docker-compose CLI.
-
----
-
-## Testing
-
-### Prerequisites
-
-Be sure to have Node.js/NPM and Docker Compose available on the machine you're running the tests on.
-
-### Running tests
-
-Run the tests with the following command inside the root `app` folder:
-
-```bash
-$ npm i              # Install npm dependencies, if you haven't already
-$ npm run test       # Run tests
-
-# Behind the scenes, this npm script will run the following commands:
-# You do not need to run these commands manually
-
-# NPM script to stop existing db containers (e.g.
-# dev-db container; doesn't delete it), initialize test db container,
-# and runs Prisma migrations.
-$ npm run init-db:test
-
-# We use the `vitest` package to run our tests.
-# vitest runs in watch mode, so you can re-run tests using its watch interface
- \ && vitest
-
-# Finally, we remove the test db container when you exit vitest (CTRL+C)
- \ && npm run docker:rm:test-db
-```
-
-### Troubleshooting
-
-#### Bind for 0.0.0.0:xxxx failed: port is already allocated
-
-This means you have a db container on the specified port already running. You can stop it by running the following command inside the `app` folder:
-
-```bash
-$ npm run docker:stop
-```
-
-#### Can't reach database server at `localhost:xxxx`
-
-The database corresponding to the `DATABASE_URL` in `.env` you've configured might not be running.
-
-For example, you might see this error if you run `npm run dev` before starting the `dev-db` container.
-
-#### Default ports used by this project
-
-- `localhost:3001` - Dev app started via `npm run dev`
-- `localhost:5433` - Postgres Docker dev db started via `npm run docker:up:dev-db`
-- `localhost:5434` - Postgres Docker test db started via `npm run docker:up:test-db`
-- `localhost:3262` - Production build started via `npm run build && npm run start`
+The `NEXTAUTH_SECRET` is also used to salt admin credential passwords when using the `npm run create-admin` command. Note that if the value does not match the salt used to hash the password, the admin user will not be able to log in.

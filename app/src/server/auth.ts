@@ -8,7 +8,7 @@ import {
 } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import GitHubProvider from "next-auth/providers/github";
-import { env } from "../env/server.mjs";
+import { env } from "../env.mjs";
 import hashPassword from "../utils/hashPassword";
 import { logger } from "../utils/logger";
 import { prisma } from "./db";
@@ -153,6 +153,9 @@ export const authOptions: NextAuthOptions = {
      * ...add more providers here
      **/
   ],
+  pages: {
+    signIn: "/auth/signIn",
+  },
 };
 
 /**

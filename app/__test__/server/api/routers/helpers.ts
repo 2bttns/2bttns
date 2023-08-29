@@ -19,7 +19,10 @@ export const createInnerTRPCContextWithSessionForTest = async () => {
 
   return createInnerTRPCContext({
     session: {
-      user: { id: "123", name: "Test", email: testUserSessionEmail },
+      user: {
+        id: testUserSessionEmail,
+        email: testUserSessionEmail,
+      },
       expires: "1",
     },
   });

@@ -97,7 +97,9 @@ const SignInPage: NextPageWithLayout<SignInPageProps> = (props) => {
       try {
         await wait(0.25);
         const result = await signInMethod();
-        await router.push("/");
+        await router.push(
+          (router.query.callbackUrl as string | undefined) ?? "/"
+        );
         if (result?.error) {
           throw new Error(result.error);
         }

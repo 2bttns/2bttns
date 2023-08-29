@@ -2,6 +2,7 @@ import { Box, Link as ChakraLink, Text, VStack } from "@chakra-ui/react";
 import { signIn, signOut, useSession } from "next-auth/react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/router";
 import Navbar from "../views/Navbar";
 
 export type AdminNavbarProps = {};
@@ -32,6 +33,7 @@ export default function AdminNavbar(props: AdminNavbarProps) {
 
 function AdminLoginLogout() {
   const session = useSession();
+  const router = useRouter();
 
   if (session.status === "loading") {
     return null;
@@ -47,7 +49,14 @@ function AdminLoginLogout() {
               {session.data.user.displayName ?? session.data.user.id}
             </Text>
           </Text>
-          <ChakraLink onClick={() => signOut({ callbackUrl: "/auth/signIn" })}>
+          <ChakraLink
+            onClick={async () => {
+              // Ignore the default redirect behavior and just reload the page
+              // This prevents an issue in the Dockerized build where the user may be redirected to the internal NEXTAUTH_URL when they've mapped the port to something else
+              await signOut({ redirect: false });
+              router.reload();
+            }}
+          >
             <Text>Log out</Text>
           </ChakraLink>
         </VStack>
