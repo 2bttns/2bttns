@@ -1,6 +1,7 @@
-import { Box, HStack, StackProps, Text, useToast } from "@chakra-ui/react";
+import { Box, HStack, StackProps, useToast } from "@chakra-ui/react";
 import { useMemo } from "react";
 import { api, RouterInputs, RouterOutputs } from "../../../utils/api";
+import ClickToRevealText from "../../shared/components/ClickToRevealText";
 import ConstrainToRemainingSpace, {
   ConstrainToRemainingSpaceProps,
 } from "../../shared/components/ConstrainToRemainingSpace";
@@ -183,7 +184,7 @@ export default function SecretsTable(props: SecretsTableProps) {
         name: "Secret",
         cell: (row) => (
           <HStack justifyContent="space-between" width="100%">
-            <Text>{row.secret}</Text>
+            <ClickToRevealText text={row.secret} />
             <CopyTextButton textToCopy={row.secret} />
           </HStack>
         ),

@@ -45,7 +45,7 @@ export default function CopyTextButton(props: CopyTextButtonProps) {
   };
 
   return (
-    <Tooltip label={tooltipLabel} placement="top" {...tooltipProps}>
+    <Tooltip label={tooltipLabel} placement="top" hasArrow {...tooltipProps}>
       <IconButton
         aria-label="Copy to clipboard"
         icon={<FaCopy />}
