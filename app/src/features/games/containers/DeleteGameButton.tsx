@@ -78,7 +78,7 @@ export default function DeleteGameButton(props: DeleteGameButtonProps) {
           Warning: This action cannot be undone.
         </Text>
       </ConfirmAlert>
-      <Tooltip label={`Delete`} placement="top" hasArrow>
+      <Tooltip label={`Delete Game`} placement="top" hasArrow>
         <IconButton
           colorScheme="red"
           onClick={onOpen}
