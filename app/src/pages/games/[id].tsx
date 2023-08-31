@@ -218,7 +218,7 @@ function GameDetails(props: GameDetailsProps) {
               <Thead>
                 <Tr>
                   <Th>
-                    <Heading size="md">Game Setup</Heading>
+                    <Heading size="md">Game Details</Heading>
                   </Th>
                 </Tr>
               </Thead>
