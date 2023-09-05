@@ -27,6 +27,7 @@ import { useEffect, useState } from "react";
 import DeleteGameButton from "../../features/games/containers/DeleteGameButton";
 import EditGameMode from "../../features/games/containers/EditGameMode";
 import TestPlayGameButton from "../../features/games/containers/TestPlayGameButton";
+import useGetGameObjectsAssociatedWithGame from "../../features/games/hooks/useGetGameObjectsAssociatedWithGame";
 import CustomEditable from "../../features/shared/components/CustomEditable";
 import UnderlinedTextTooltip from "../../features/shared/components/UnderlinedTextTooltip";
 import { EditTagsForGameButtonDrawer } from "../../features/tags/containers/EditTagsForGameButtonDrawer";
@@ -167,6 +168,10 @@ function GameDetails(props: GameDetailsProps) {
     }));
     setInputTags(data);
   }, [gameQuery.data]);
+
+  const gameObjectsAssocatedWithGame = useGetGameObjectsAssociatedWithGame({
+    gameId,
+  });
 
   if (gameQuery.isLoading || !gameQuery.data) {
     return null;
@@ -391,6 +396,41 @@ function GameDetails(props: GameDetailsProps) {
                           </Box>
                           <EditTagsForGameButtonDrawer gameId={gameId} />
                         </>
+                      )}
+                    </HStack>
+                  </Td>
+                </Tr>
+                <Tr>
+                  <Td>
+                    <UnderlinedTextTooltip
+                      tooltipProps={{
+                        label: (
+                          <VStack
+                            spacing={1}
+                            alignItems="start"
+                            fontSize="12px"
+                            padding="1rem"
+                          >
+                            <Text fontWeight="bold"># OF GAME OBJECTS</Text>
+                            <Text>
+                              The number of Game Objects associated with this
+                              game, based on the Input Tags associated with this
+                              Game.
+                            </Text>
+                          </VStack>
+                        ),
+                      }}
+                    >
+                      # of Game Objects
+                    </UnderlinedTextTooltip>
+                  </Td>
+                  <Td>
+                    <HStack justifyContent="space-between">
+                      {gameObjectsAssocatedWithGame === null && (
+                        <Skeleton height="24px" width="100%" />
+                      )}
+                      {gameObjectsAssocatedWithGame !== null && (
+                        <>{gameObjectsAssocatedWithGame.length}</>
                       )}
                     </HStack>
                   </Td>
