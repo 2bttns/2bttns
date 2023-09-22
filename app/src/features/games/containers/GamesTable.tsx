@@ -17,6 +17,7 @@ import ConfirmAlert from "../../shared/components/ConfirmAlert";
 import ConstrainToRemainingSpace, {
   ConstrainToRemainingSpaceProps,
 } from "../../shared/components/ConstrainToRemainingSpace";
+import CopyTextButton from "../../shared/components/CopyTextButton";
 import CustomEditable from "../../shared/components/CustomEditable";
 import PaginatedTable, {
   PaginatedTableProps,
@@ -205,16 +206,19 @@ export default function GamesTable(props: GamesTableProps) {
       {
         name: "ID",
         cell: (row) => (
-          <CustomEditable
-            value={row.id}
-            placeholder="No ID"
-            handleSave={async (nextValue) =>
-              handleUpdateGame(row.id, {
-                id: nextValue,
-              })
-            }
-            isEditable={editable}
-          />
+          <HStack justifyContent="space-between" width="100%">
+            <CustomEditable
+              value={row.id}
+              placeholder="No ID"
+              handleSave={async (nextValue) =>
+                handleUpdateGame(row.id, {
+                  id: nextValue,
+                })
+              }
+              isEditable={editable}
+            />
+            <CopyTextButton textToCopy={row.id} />
+          </HStack>
         ),
         sortable: true,
         id: columnIds.ID,

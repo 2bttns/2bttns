@@ -1,9 +1,11 @@
 import { Box, HStack, StackProps, useToast } from "@chakra-ui/react";
 import { useMemo } from "react";
 import { api, RouterInputs, RouterOutputs } from "../../../utils/api";
+import ClickToRevealText from "../../shared/components/ClickToRevealText";
 import ConstrainToRemainingSpace, {
   ConstrainToRemainingSpaceProps,
 } from "../../shared/components/ConstrainToRemainingSpace";
+import CopyTextButton from "../../shared/components/CopyTextButton";
 import CustomEditable from "../../shared/components/CustomEditable";
 import PaginatedTable, {
   PaginatedTableProps,
@@ -159,21 +161,37 @@ export default function SecretsTable(props: SecretsTableProps) {
       {
         name: "ID",
         cell: (row) => (
-          <CustomEditable
-            value={row.id}
-            placeholder="No ID"
-            handleSave={async (nextValue) =>
-              handleUpdateSecret(row.id, {
-                id: nextValue,
-              })
-            }
-            isEditable={editable}
-          />
+          <HStack justifyContent="space-between" width="100%">
+            <CustomEditable
+              value={row.id}
+              placeholder="No ID"
+              handleSave={async (nextValue) =>
+                handleUpdateSecret(row.id, {
+                  id: nextValue,
+                })
+              }
+              isEditable={editable}
+            />
+            <CopyTextButton textToCopy={row.id} />
+          </HStack>
         ),
         sortable: true,
         id: columnIds.ID,
         sortField: columnIds.ID,
         minWidth: "256px",
+      },
+      {
+        name: "Secret",
+        cell: (row) => (
+          <HStack justifyContent="space-between" width="100%">
+            <ClickToRevealText text={row.secret} />
+            <CopyTextButton textToCopy={row.secret} />
+          </HStack>
+        ),
+        minWidth: "256px",
+        sortable: true,
+        id: columnIds.SECRET,
+        sortField: columnIds.SECRET,
       },
       {
         name: "Name",
@@ -213,14 +231,6 @@ export default function SecretsTable(props: SecretsTableProps) {
         id: columnIds.DESCRIPTION,
         sortField: columnIds.DESCRIPTION,
         minWidth: "512px",
-      },
-      {
-        name: "Secret",
-        cell: (row) => row.secret ?? "",
-        minWidth: "256px",
-        sortable: true,
-        id: columnIds.SECRET,
-        sortField: columnIds.SECRET,
       },
       {
         name: "Last Updated",

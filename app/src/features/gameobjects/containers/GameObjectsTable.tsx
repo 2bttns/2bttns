@@ -8,6 +8,7 @@ import { api, RouterInputs, RouterOutputs } from "../../../utils/api";
 import ConstrainToRemainingSpace, {
   ConstrainToRemainingSpaceProps,
 } from "../../shared/components/ConstrainToRemainingSpace";
+import CopyTextButton from "../../shared/components/CopyTextButton";
 import CustomEditable from "../../shared/components/CustomEditable";
 import PaginatedTable, {
   PaginatedTableProps,
@@ -198,16 +199,20 @@ export default function GameObjectsTable(props: GameObjectsTableProps) {
       {
         name: "ID",
         cell: (row) => (
-          <CustomEditable
-            value={row.id}
-            placeholder="No ID"
-            handleSave={async (nextValue) =>
-              handleUpdateGameObject(row.id, {
-                id: nextValue,
-              })
-            }
-            isEditable={editable}
-          />
+          <HStack justifyContent="space-between" width="100%">
+            <CustomEditable
+              value={row.id}
+              placeholder="No ID"
+              handleSave={async (nextValue) =>
+                handleUpdateGameObject(row.id, {
+                  id: nextValue,
+                })
+              }
+              isEditable={editable}
+            />
+
+            <CopyTextButton textToCopy={row.id} />
+          </HStack>
         ),
         sortable: true,
         id: columnIds.ID,

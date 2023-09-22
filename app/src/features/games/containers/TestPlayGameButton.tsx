@@ -1,4 +1,4 @@
-import { IconButton, Tooltip } from "@chakra-ui/react";
+import { Button, Tooltip } from "@chakra-ui/react";
 import { Game } from "@prisma/client";
 import { useRouter } from "next/router";
 import { FaFlask, FaGamepad } from "react-icons/fa";
@@ -28,19 +28,22 @@ export default function TestPlayGameButton(props: TestPlayGameButtonProps) {
 
   return (
     <Tooltip
-      label={`${
-        view === "admin" ? "Test Game (Admin View)" : "Test Game (Player View)"
-      }`}
+      label={`Click to play this game in ${
+        view === "admin" ? "admin" : "player"
+      } view`}
       placement="top"
+      hasArrow
     >
-      <IconButton
+      <Button
         colorScheme={view === "admin" ? "yellow" : "green"}
         onClick={handlePlayGame}
-        icon={view === "admin" ? <FaFlask /> : <FaGamepad />}
+        leftIcon={view === "admin" ? <FaFlask /> : <FaGamepad />}
         aria-label={`Test game ${view === "admin" ? "as admin" : "as player"}}`}
         size="sm"
         variant="solid"
-      />
+      >
+        {view === "admin" ? "Play (Admin View)" : "Play (Player View)"}
+      </Button>
     </Tooltip>
   );
 }
