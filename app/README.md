@@ -23,6 +23,17 @@ We've provided a few scripts to help you get started quickly with 2bttns. Feel f
 
 #### i. via Docker Compose
 
+<<<<<<< HEAD
+
+> For additional information, see https://github.com/2bttns/2bttns/blob/dockerize/install/docker-compose.
+
+````sh
+# Download the docker-compose.yml file to your current working directory
+curl https://raw.githubusercontent.com/2bttns/2bttns/dockerize/install/docker-compose/docker-compose.yml -o docker-compose.yml
+
+# Run the `init.sh` script
+curl -s https://raw.githubusercontent.com/2bttns/2bttns/dockerize/install/docker-compose/init.sh | sh -s
+=======
 > For additional information, see https://github.com/2bttns/2bttns/blob/main/install/docker-compose.
 
 ```sh
@@ -31,8 +42,9 @@ curl https://raw.githubusercontent.com/2bttns/2bttns/main/install/docker-compose
 
 # Run the `init.sh` script
 curl -s https://raw.githubusercontent.com/2bttns/2bttns/main/install/docker-compose/init.sh | sh -s
+>>>>>>> main
 
-```
+````
 
 #### ii. via Docker in the Command Line
 

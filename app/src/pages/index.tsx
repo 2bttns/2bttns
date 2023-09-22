@@ -11,6 +11,8 @@ import { useTwoBttnsTutorialsContext } from "../features/tutorials/TwobttnsTutor
 import { tutorialsRegistry } from "../features/tutorials/views/steps/tutorialsRegistry";
 import getSessionWithSignInRedirect from "../utils/getSessionWithSignInRedirect";
 
+const localStorageKeyHasSeenInitialTutorial = "hasSeenInitialTutorial";
+
 export type HomePageProps = {
   session: Session;
 };
@@ -45,14 +47,36 @@ const Home: NextPage<HomePageProps> = (props) => {
   const searchParams = useSearchParams();
 
   useEffect(() => {
+    // Add the home page tutorial ID to the URL query parameters if it is not already there
+    // This makes the tutorial button available here on the home page
     const searchParamsDict = Object.fromEntries(searchParams.entries());
     if (searchParamsDict.tutorial === tutorialsRegistry.homePageTutorial.id) {
       return;
     }
     searchParamsDict.tutorial = tutorialsRegistry.homePageTutorial.id;
+
     void router.replace({
       query: searchParamsDict,
     });
+  }, [searchParams]);
+
+  useEffect(() => {
+    // Automatically show the home page tutorial if the user has not seen it before
+    if (typeof window === "undefined") return;
+    const searchParamsDict = Object.fromEntries(searchParams.entries());
+    const hasSeenInitialTutorial =
+      window.localStorage.getItem(localStorageKeyHasSeenInitialTutorial) ===
+      "true";
+    const isTutorialActive =
+      searchParamsDict.tutorial === tutorialsRegistry.homePageTutorial.id;
+    if (!isTutorialActive) return;
+    if (hasSeenInitialTutorial) return;
+
+    searchParamsDict.step = "1";
+    void router.replace({
+      query: searchParamsDict,
+    });
+    window.localStorage.setItem(localStorageKeyHasSeenInitialTutorial, "true");
   }, [searchParams]);
 
   const isTutorialActive = useMemo(() => {
