@@ -117,21 +117,37 @@ These are the environment variables you can configure for your 2bttns admin cons
 
 # Contributions
 
-We welcome contributions to the 2bttns project! Please read our contributing guidelines (TODO).
+Contributions to the 2bttns project are welcome and greatly appreciated! Feel free to raise issues via GitHub or create PRs from a fork of this repository.
 
 ## Local Development
 
-Here's a how-to for setting up your local development environment when working on the 2bttns app.
+Here's a how-to for setting up your local development environment when developing new features for the 2bttns admin console.
 
-### Environment Variables
+### Prerequisites
 
-First, set up the environment variables folder by copying `.env.example` to a new `.env` file. The console app will work out of the box with the default environment variables, but you can customize them to your needs.
+- Node.js v16.x.x (w/ NPM v8.x.x)
+- Docker v20.x.x
+- Docker Compose v2.x.x
 
-### Docker Compose
+Be sure to have Node.js/NPM and Docker Compose available on the machine you're running the tests on. If you have NVM installed, you can run `nvm use` in the `app/` folder to use the proper version.
 
 We use Docker Compose to initialize `dev-db` and `test-db` PostgreSQL databases. Be sure to have Docker with Docker Compose installed and running before running tests.
 
-You can modify the Docker database configurations in `docker-compose.yml`.
+You can modify the local Docker database configurations in `docker-compose.yml`.
+
+### Getting Started with the Admin Console Source Code
+
+1. Clone the [2bttns/2bttns](https://github.com/2bttns/2bttns/tree/main) repository to your local machine.
+
+   ```sh
+   git clone https://github.com/2bttns/2bttns.git
+   ```
+
+2. Open your editor of choice in the `app/` folder. Most of your changes will be made here when contributing to the admin console.
+
+### Environment Variables
+
+Set up the environment variables in the `app/` folder by copying `.env.example` to a new `.env` file. The console app will work out of the box with the default environment variables, but you can customize them to your needs.
 
 ### Local Development
 
@@ -169,10 +185,6 @@ npm run dev
 
 ### Testing
 
-#### Prerequisites
-
-Be sure to have Node.js/NPM and Docker Compose available on the machine you're running the tests on.
-
 #### Running tests
 
 Run the tests with the following command inside the root `app` folder:
@@ -184,7 +196,7 @@ npm run test       # Run tests
 
 ### Running the 2bttns Docker Image Locally
 
-You can run the 2bttns Docker image locally with the following commands
+To preview how your changes might look in a production-ready 2bttns Docker image, you can run the 2bttns Docker image locally with the following commands:
 
 ```sh
 # Start the Dockerized twobttns service based on `docker-compose.yml`
@@ -212,7 +224,9 @@ This will start the `2bttns` container and the `local-prod-db` containers. The `
 
 The `dev-db` container will contain your local development database. It is created and managed by Docker Compose in the `docker-compose.yml` file.
 
-Here are some useful commands to manage the `dev-db` container:
+Here are some commands you might find useful when managing the `dev-db` container.
+
+_(Note that you can manage the `dev-db` container manually using the docker/docker-compose CLI. The commands listed here are just for quick reference.)_
 
 ```sh
 # Stop all containers used by the app (e.g. dev-db and test-db containers)
@@ -237,8 +251,6 @@ npm run docker:rm:dev-db
 # If you want to delete the dev-db database's data volume, run the following command:
 docker volume rm app_postgres-data-dev
 ```
-
-Note that these NPM scripts are just for convenience. You can manage the `dev-db` container manually using the docker/docker-compose CLI.
 
 ### Troubleshooting
 
@@ -282,15 +294,9 @@ For example, you might see this error if you run `npm run dev` before starting t
 
 ## Admin Users
 
-The 2bttns admin console is managed by admin users.
+The 2bttns admin console is managed by admin users who log in through the console web UI.
 
-You can create admin users using the `2bttns-cli` via NPM.
-
-```sh
-npx @2bttns/2bttns-cli admin create -d <database-url> -s <nextauth-secret>
-```
-
-The CLI will prompt you to create an admin user with credentials (username-password) or add emails to an OAuth allow list.
+You can create an admin user using username/password credentials by running `npm run create-admin`. An option to create admin users via OAuth is also supported, but requires additional setup (see below).
 
 ## GitHub OAuth (Optional)
 
