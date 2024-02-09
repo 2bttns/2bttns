@@ -1,4 +1,4 @@
-import { Heading, VStack } from "@chakra-ui/react";
+import { Heading, VStack, Button, Text } from "@chakra-ui/react";
 import { useSession } from "next-auth/react";
 import Head from "next/head";
 import AdminLayout from "../features/layouts/containers/AdminLayout";
@@ -34,7 +34,8 @@ const FourOhFourPage: NextPageWithLayout = () => {
 function Content() {
   return (
     <VStack alignItems="center" justifyContent="center" height="100%">
-      <Heading marginTop="-5rem">404 - Page Not Found</Heading>
+      <Heading marginTop="-5rem">Oops! Something isn&apos;t right here.</Heading>
+      <Text>Close this page and try again.</Text>
     </VStack>
   );
 }
