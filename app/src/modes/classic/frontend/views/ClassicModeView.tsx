@@ -85,6 +85,9 @@ export default function ClassicModeView<I extends Item>(
                   marginTop: "2rem",
                   textAlign: "center",
                 }}
+                className={`classicMode__h1 classicMode__h1--${
+                  isFinished ? "finished" : "not-finished"
+                }`}
               >
                 {isFinished ? "Round 🎉 over!" : question}
               </Text>
@@ -98,6 +101,7 @@ export default function ClassicModeView<I extends Item>(
                         padding: "1rem",
                         textAlign: "center",
                       }}
+                      className="classicMode__or-text"
                     >
                       or
                     </Text>
@@ -152,6 +156,7 @@ function ChoicesRemainingProgressBar({
           </>
         }
         placement="top"
+        className="classicMode__tooltip"
       >
         <HStack width="100%">
           <Progress
@@ -162,13 +167,14 @@ function ChoicesRemainingProgressBar({
             borderRadius="16px"
             colorScheme="green"
             sx={{
-              "& > div:first-child": {
+              "& > div:first-of-type": {
                 transitionProperty: "width",
                 transitionTimingFunction: "cubic-bezier(0.175, 0.75, 0.5, 1.2)",
               },
             }}
+            className="classicMode__progress"
           />
-          <Text>{percentage}%</Text>
+          <Text className="classicMode__progress__text">{percentage}%</Text>
         </HStack>
       </Tooltip>
     </>

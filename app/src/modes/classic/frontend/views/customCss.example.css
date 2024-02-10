@@ -1,0 +1,42 @@
+body {
+    background-color: black !important;
+}
+
+.classicMode__h1 {
+    background-color: red !important;
+}
+
+.classicMode__h1--finished {
+    color: yellow !important;
+}
+
+.classicMode__h1--not-finished {
+    color : green !important;
+}
+
+
+/* override the "or" text */
+.classicMode__or-text {
+    color: red !important;
+}
+
+/* override progress bar color */
+.classicMode__progress {
+    background-color: yellow !important;
+}
+
+/* override progress bar fill color */
+.classicMode__progress > div:first-of-type {
+    background-color: red !important;
+}
+
+/* override progress bar text color */
+.classicMode__progress__text {
+    color: red !important;
+}
+
+/* override progress bar tooltip */
+.classicMode__tooltip {
+    background-color: white !important;
+    color: black !important;
+}
