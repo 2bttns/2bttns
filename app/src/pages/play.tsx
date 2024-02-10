@@ -231,9 +231,19 @@ const Play: NextPageWithLayout<ReturnType> = (props) => {
     styleElement.innerHTML = gameData.game.customCss as string;
     document.head.appendChild(styleElement);
     console.log(
-      `%c[2bttns] [gameId=${gameId}] %ccustomCss found! Applied to page.`,
+      `%c
+-----------------------------------------------------------------
+
+%c[2bttns] [gameId=${gameId}] %ccustomCss found! Applied to page.
+
+%c${gameData.game.customCss as string}
+
+-----------------------------------------------------------------
+      `,
+      "color: gray",
       "color: yellow",
-      "color: white"
+      "color: white",
+      "color: gray"
     );
   }, []);
 
