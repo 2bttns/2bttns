@@ -223,6 +223,20 @@ const Play: NextPageWithLayout<ReturnType> = (props) => {
     return getModeUI(gameModeData.mode)?.FrontendComponent;
   }, [gameModeData.mode]);
 
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (gameData.game.customCss === null) return;
+
+    const styleElement = document.createElement("style");
+    styleElement.innerHTML = gameData.game.customCss as string;
+    document.head.appendChild(styleElement);
+    console.log(
+      `%c[2bttns] [gameId=${gameId}] %ccustomCss found! Applied to page.`,
+      "color: yellow",
+      "color: white"
+    );
+  }, []);
+
   return (
     <Layout showAdminLayout={showAdminLayout} playerId={gameData.playerId}>
       <Head>
