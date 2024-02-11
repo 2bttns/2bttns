@@ -83,11 +83,6 @@ export function EditCustomCssDrawer(props: EditCustomCssDrawerProps) {
   const handleSave = async () => {
     try {
       await onSave(customCss ?? "");
-      toast.closeAll();
-      toast({
-        title: `Saved`,
-        status: "success",
-      });
     } catch (error) {
       console.error(error);
       toast.closeAll();

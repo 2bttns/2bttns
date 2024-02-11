@@ -248,6 +248,10 @@ const Play: NextPageWithLayout<ReturnType> = (props) => {
       "color: white",
       "color: gray"
     );
+
+    return () => {
+      document.head.removeChild(styleElement);
+    };
   }, []);
 
   return (

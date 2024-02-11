@@ -147,6 +147,7 @@ function ChoicesRemainingProgressBar({
   const current = totalChoices - choicesRemaining;
   const max = totalChoices;
   const percentage = Math.round((current / max) * 100);
+  const isComplete = max === current;
 
   return (
     <>
@@ -159,7 +160,12 @@ function ChoicesRemainingProgressBar({
         placement="top"
         className="classicMode__progress-tooltip"
       >
-        <HStack width="100%" className="classicMode__progress-container">
+        <HStack
+          width="100%"
+          className={`classicMode__progress-container ${
+            isComplete ? "classicMode__progress-container--complete" : ""
+          }`}
+        >
           <Progress
             value={current}
             max={max}

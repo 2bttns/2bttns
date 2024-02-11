@@ -52,6 +52,7 @@ export default function AdminLayout(props: AdminLayoutProps) {
       backgroundColor="gray.300"
       position="relative"
       overflow="hidden"
+      className="twobttns__layout twobttns__layout__admin-container"
       {...rootBoxProps}
     >
       <Box position="sticky" top="0" zIndex="99">

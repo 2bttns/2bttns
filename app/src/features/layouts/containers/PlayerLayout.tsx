@@ -11,7 +11,13 @@ export default function PlayerLayout(props: PlayerLayoutProps) {
   const { children, showNavbar = false, navbarProps } = props;
 
   return (
-    <Box width="100vw" height="100vh" position="relative" overflow="hidden">
+    <Box
+      width="100vw"
+      height="100vh"
+      position="relative"
+      overflow="hidden"
+      className="twobttns__layout twobttns__layout__player-container"
+    >
       <Box position="sticky" top="0" zIndex="99">
         {showNavbar && <Navbar {...navbarProps} />}
       </Box>

@@ -1,9 +1,11 @@
-body {
+/* base layout */
+.twobttns__layout {
     background-color: #1c2127 !important;
     color: #ddd !important;
     font-family: Verdana, sans-serif !important;
 }
 
+/* player id text */
 .play__player-id-text {
     font-size: 14px !important;
 }
@@ -16,10 +18,12 @@ body {
 
 }
 
+/* content container */
 .classicMode__container {
     margin-top: 8rem !important;
 }
 
+/* question text */
 .classicMode__question {
     background: linear-gradient(90deg, hsla(152, 100%, 50%, 1) 0%, hsla(186, 100%, 69%, 1) 100%);
     padding: 0 2rem !important;
@@ -48,45 +52,49 @@ body {
 }
 
 
-/* override the "or" text */
+/* "or" text */
 .classicMode__or-text {
     color: #ddd !important;
 }
 
 
-/* override progress bar layout */
+/* progress bar layout */
 .classicMode__progress-container {
     flex-direction: row-reverse !important;
     gap: 0.5rem !important;
 }
 
-/* override progress bar background */
+.classicMode__progress-container--complete {
+    display: none !important;
+}
+
+/* progress bar background */
 .classicMode__progress-bar {
     background-color: #ddd !important;
 }
 
-/* override progress bar fill */
+/* progress bar fill */
 .classicMode__progress-bar > div:first-of-type {
     background-color: #45edc6 !important;
 }
 
-/* override progress bar text */
+/* progress bar text */
 .classicMode__progress-text {
     color: #ddd !important;
 }
 
-/* override progress bar tooltip */
+/* progress bar tooltip */
 .classicMode__progress-tooltip {
     background-color: #ddd !important;
     color: black !important;
 }
 
-/* override icon */
+/* 2bttns animated icon */
 .classicMode__icon {
     display: none !important;
 }
 
-/* override button styles */
+/* choice buttons */
 .classicMode__button {
     background-color: black !important;
     border-radius: 0px !important;
@@ -115,6 +123,12 @@ body {
     font-size: 18px !important;
 }
 
+/* redirect text */
+.classicMode__redirect-text {
+    color: #ddd !important;
+}
+
+/* media queries */
 @media screen and (max-width: 470px) {
     .classicMode__button-content-container {
         justify-content: left !important;

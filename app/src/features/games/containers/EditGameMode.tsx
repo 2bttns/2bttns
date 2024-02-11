@@ -83,6 +83,7 @@ export default function EditGameMode(props: EditGameModeProps) {
         title: "Saved",
         status: "success",
         description: updateDescription,
+        duration: 1000,
       });
     } catch (error) {
       updateDescription = `Failed to update (Game ID=${gameId}). See console for details`;
