@@ -88,6 +88,7 @@ const outputGame = z.object({
   updatedAt: z.string().describe("ISO date string"),
   inputTags: z.array(z.string()).describe("Input Tag IDs"),
   mode: z.string(),
+  customCss: z.string().nullable(),
 });
 
 export type OutputGameObject = z.infer<typeof outputGame>;

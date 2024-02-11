@@ -15,6 +15,7 @@ import {
   useDisclosure,
   useToast,
 } from "@chakra-ui/react";
+import { Game } from "@prisma/client";
 import { useState } from "react";
 import { FaPalette } from "react-icons/fa";
 import ConfirmAlert from "../../../shared/components/ConfirmAlert";
@@ -24,10 +25,12 @@ import CustomCssEditor from "./CustomCssEditor";
 export type CustomCssEditorDrawerProps = {
   gameId: EditCustomCssDrawerProps["gameId"];
   gameName: EditCustomCssDrawerProps["gameName"];
+  customCss: EditCustomCssDrawerProps["customCss"];
+  setCustomCss: EditCustomCssDrawerProps["setCustomCss"];
   onSave: EditCustomCssDrawerProps["onSave"];
 };
 export function CustomCssEditorDrawer(props: CustomCssEditorDrawerProps) {
-  const { gameId, gameName, onSave } = props;
+  const { gameId, gameName, customCss, setCustomCss, onSave } = props;
   const { isOpen, onOpen, onClose } = useDisclosure();
 
   return (
@@ -48,6 +51,8 @@ export function CustomCssEditorDrawer(props: CustomCssEditorDrawerProps) {
         onClose={onClose}
         gameId={gameId}
         gameName={gameName}
+        customCss={customCss}
+        setCustomCss={setCustomCss}
         onSave={onSave}
       />
     </>
@@ -59,59 +64,14 @@ export type EditCustomCssDrawerProps = {
   onClose: () => void;
   gameId: GameData["id"];
   gameName: GameData["name"];
+  customCss: Game["customCss"];
+  setCustomCss: (value: string) => void;
   onSave: (toSave: string) => Promise<void>;
 };
 
 export function EditCustomCssDrawer(props: EditCustomCssDrawerProps) {
-  const { isOpen, onClose, gameId, gameName, onSave } = props;
-
-  const foo = `
-body {
-    background-color: black !important;
-}
-
-.classicMode__h1 {
-    background-color: red !important;
-}
-
-.classicMode__h1--finished {
-    color: yellow !important;
-}
-
-.classicMode__h1--not-finished {
-    color : green !important;
-}
-
-
-/* override the "or" text */
-.classicMode__or-text {
-    color: red !important;
-}
-
-/* override progress bar color */
-.classicMode__progress {
-    background-color: yellow !important;
-}
-
-/* override progress bar fill color */
-.classicMode__progress > div:first-of-type {
-    background-color: red !important;
-}
-
-/* override progress bar text color */
-.classicMode__progress__text {
-    color: red !important;
-}
-
-/* override progress bar tooltip */
-.classicMode__tooltip {
-    background-color: white !important;
-    color: black !important;
-}  
-`;
-
-  const [value, setValue] = useState(foo);
-
+  const { isOpen, onClose, gameId, gameName, customCss, setCustomCss, onSave } =
+    props;
   const toast = useToast();
 
   const {
@@ -122,8 +82,8 @@ body {
 
   const handleSave = async () => {
     try {
-      throw "foo";
-      await onSave(value);
+      await onSave(customCss ?? "");
+      toast.closeAll();
       toast({
         title: `Saved`,
         status: "success",
@@ -165,9 +125,9 @@ body {
           </Box>
 
           <CustomCssEditor
-            value={value}
+            value={customCss ?? ""}
             onChange={(nextValue) => {
-              setValue(nextValue);
+              setCustomCss(nextValue);
             }}
           />
         </DrawerBody>

@@ -174,6 +174,12 @@ function GameDetails(props: GameDetailsProps) {
     gameId,
   });
 
+  const [customCss, setCustomCss] = useState<string>("");
+
+  useEffect(() => {
+    setCustomCss(gameQuery.data?.game?.customCss ?? "");
+  }, [gameQuery.data?.game]);
+
   if (gameQuery.isLoading || !gameQuery.data) {
     return null;
   }
@@ -466,8 +472,13 @@ function GameDetails(props: GameDetailsProps) {
                         gameId={gameId}
                         gameName={gameQuery.data.game.name}
                         onSave={async (toSave) => {
-                          console.log("toSave", toSave);
+                          await handleUpdateGame({
+                            id: gameId,
+                            data: { customCss: toSave },
+                          });
                         }}
+                        customCss={customCss}
+                        setCustomCss={setCustomCss}
                       />
                     </HStack>
                   </Td>
