@@ -98,7 +98,6 @@ export function EditCustomCssDrawer(props: EditCustomCssDrawerProps) {
         status: "error",
       });
     }
-    onClose();
   };
 
   return (

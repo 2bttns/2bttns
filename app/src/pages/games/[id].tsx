@@ -97,7 +97,15 @@ function GameDetails(props: GameDetailsProps) {
   const router = useRouter();
 
   const utils = api.useContext();
-  const gameQuery = api.games.getById.useQuery({ id: gameId });
+  const gameQuery = api.games.getById.useQuery(
+    { id: gameId },
+    {
+      refetchOnWindowFocus: false,
+      refetchOnMount: false,
+      refetchOnReconnect: false,
+      refetchInterval: false,
+    }
+  );
   const updateGameMutation = api.games.updateById.useMutation();
   const handleUpdateGame = async (
     input: RouterInputs["games"]["updateById"]
@@ -174,12 +182,16 @@ function GameDetails(props: GameDetailsProps) {
     gameId,
   });
 
+  const [gotInitialCustomCss, setGotInitialCustomCss] = useState(false);
   const [customCss, setCustomCss] = useState<string>("");
 
   useEffect(() => {
+    if (gotInitialCustomCss) return;
+    if (!gameQuery.data) return;
     const value = gameQuery.data?.game?.customCss ?? "";
     const valueWithLineBreaks = value.replace(/(\\n)/gm, "\n");
     setCustomCss(valueWithLineBreaks);
+    setGotInitialCustomCss(true);
   }, [gameQuery.data?.game]);
 
   if (gameQuery.isLoading || !gameQuery.data) {
