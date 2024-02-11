@@ -55,7 +55,7 @@ export default function ClassicModeView<I extends Item>(
               _hover: {
                 bgColor: "#f2f2f2",
               },
-              width: { base: "100%", sm: "250px", md: "512px" },
+              width: { base: "100%", sm: "512px" },
             },
           },
         }}
@@ -76,6 +76,7 @@ export default function ClassicModeView<I extends Item>(
                 width={64}
                 height={64}
                 alt="2bttns"
+                className="classicMode__icon"
               />
               <Text
                 as="h1"
@@ -85,7 +86,7 @@ export default function ClassicModeView<I extends Item>(
                   marginTop: "2rem",
                   textAlign: "center",
                 }}
-                className={`classicMode__h1 classicMode__h1--${
+                className={`classicMode__question classicMode__question--${
                   isFinished ? "finished" : "not-finished"
                 }`}
               >
@@ -156,9 +157,9 @@ function ChoicesRemainingProgressBar({
           </>
         }
         placement="top"
-        className="classicMode__tooltip"
+        className="classicMode__progress-tooltip"
       >
-        <HStack width="100%">
+        <HStack width="100%" className="classicMode__progress-container">
           <Progress
             value={current}
             max={max}
@@ -172,9 +173,9 @@ function ChoicesRemainingProgressBar({
                 transitionTimingFunction: "cubic-bezier(0.175, 0.75, 0.5, 1.2)",
               },
             }}
-            className="classicMode__progress"
+            className="classicMode__progress-bar"
           />
-          <Text className="classicMode__progress__text">{percentage}%</Text>
+          <Text className="classicMode__progress-text">{percentage}%</Text>
         </HStack>
       </Tooltip>
     </>

@@ -73,7 +73,7 @@ export default function ClassicModeContainer(props: ClassicModeContainerProps) {
     };
 
   return (
-    <Box height="100%" bgColor="white">
+    <Box height="100%" className="classicMode__container">
       <ClassicModeView
         gameData={gameData}
         itemPolicy={itemPolicy ?? defaultItemPolicy}

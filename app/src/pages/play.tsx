@@ -296,8 +296,8 @@ function Layout(props: LayoutProps) {
 
   return (
     <PlayerLayout>
-      <Text textAlign="right" padding="1rem">
-        Playing 2bttns | Player ID: {playerId}
+      <Text textAlign="right" padding="1rem" className="play__player-id-text">
+        Player ID: {playerId}
       </Text>
       {children}
     </PlayerLayout>
