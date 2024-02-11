@@ -111,7 +111,6 @@ export function EditCustomCssDrawer(props: EditCustomCssDrawerProps) {
     >
       <DrawerOverlay />
       <DrawerContent>
-        <DrawerCloseButton />
         <DrawerHeader borderBottomWidth="1px">
           Edit Custom CSS for Game
         </DrawerHeader>
@@ -138,24 +137,24 @@ export function EditCustomCssDrawer(props: EditCustomCssDrawerProps) {
                 <Text>Close the editor?</Text>
 
                 <Text fontSize="14px" fontWeight="400">
-                  Any changes you made will not be saved.
+                  Any unsaved changes will be lost.
                 </Text>
               </Box>
             }
-            cancelText="Cancel"
             handleConfirm={async () => {
               onClose();
             }}
+            confirmText="Close the editor"
             isOpen={cancelAlertOpen}
             onClose={onCloseCancelAlert}
           />
           <Button
-            variant="outline"
+            variant="ghost"
             mr={3}
             onClick={onOpenCancelAlert}
             colorScheme="red"
           >
-            Cancel
+            Exit
           </Button>
           <Button
             variant="outline"
