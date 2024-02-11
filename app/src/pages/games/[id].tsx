@@ -24,6 +24,7 @@ import type { GetServerSideProps, NextPage } from "next";
 import { Session } from "next-auth";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
+import { CustomCssEditorDrawer } from "../../features/games/containers/CustomCssEditor/CustomCssEditorDrawer";
 import DeleteGameButton from "../../features/games/containers/DeleteGameButton";
 import EditGameMode from "../../features/games/containers/EditGameMode";
 import TestPlayGameButton from "../../features/games/containers/TestPlayGameButton";
@@ -432,6 +433,42 @@ function GameDetails(props: GameDetailsProps) {
                       {gameObjectsAssocatedWithGame !== null && (
                         <>{gameObjectsAssocatedWithGame.length}</>
                       )}
+                    </HStack>
+                  </Td>
+                </Tr>
+                <Tr>
+                  <Td>
+                    <UnderlinedTextTooltip
+                      tooltipProps={{
+                        label: (
+                          <VStack
+                            spacing={1}
+                            alignItems="start"
+                            fontSize="12px"
+                            padding="1rem"
+                          >
+                            <Text fontWeight="bold">CUSTOM CSS</Text>
+                            <Text>
+                              Custom CSS stylesheet for overriding the Game UI
+                              elements. Different modes will expose different
+                              classes you can use to override their styles.
+                            </Text>
+                          </VStack>
+                        ),
+                      }}
+                    >
+                      Custom CSS
+                    </UnderlinedTextTooltip>
+                  </Td>
+                  <Td>
+                    <HStack justifyContent="end">
+                      <CustomCssEditorDrawer
+                        gameId={gameId}
+                        gameName={gameQuery.data.game.name}
+                        onSave={async (toSave) => {
+                          console.log("toSave", toSave);
+                        }}
+                      />
                     </HStack>
                   </Td>
                 </Tr>
