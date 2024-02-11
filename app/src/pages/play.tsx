@@ -228,7 +228,10 @@ const Play: NextPageWithLayout<ReturnType> = (props) => {
     if (gameData.game.customCss === null) return;
 
     const styleElement = document.createElement("style");
-    styleElement.innerHTML = gameData.game.customCss as string;
+
+    const customCssWithoutEscapedLineBreaks =
+      gameData.game.customCss.replaceAll("\\n", "\n");
+    styleElement.innerHTML = customCssWithoutEscapedLineBreaks;
     document.head.appendChild(styleElement);
     console.log(
       `%c

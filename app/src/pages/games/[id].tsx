@@ -177,7 +177,9 @@ function GameDetails(props: GameDetailsProps) {
   const [customCss, setCustomCss] = useState<string>("");
 
   useEffect(() => {
-    setCustomCss(gameQuery.data?.game?.customCss ?? "");
+    const value = gameQuery.data?.game?.customCss ?? "";
+    const valueWithLineBreaks = value.replace(/(\\n)/gm, "\n");
+    setCustomCss(valueWithLineBreaks);
   }, [gameQuery.data?.game]);
 
   if (gameQuery.isLoading || !gameQuery.data) {
@@ -472,9 +474,13 @@ function GameDetails(props: GameDetailsProps) {
                         gameId={gameId}
                         gameName={gameQuery.data.game.name}
                         onSave={async (toSave) => {
+                          const valueWithLineBreakEscaped = toSave.replaceAll(
+                            "\n",
+                            "\\n"
+                          );
                           await handleUpdateGame({
                             id: gameId,
-                            data: { customCss: toSave },
+                            data: { customCss: valueWithLineBreakEscaped },
                           });
                         }}
                         customCss={customCss}
