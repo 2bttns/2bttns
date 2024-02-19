@@ -45,7 +45,7 @@ export async function install({ dryRun = false }: InstallParams) {
     type: "input",
     message: `DATABASE_URL (optional)
     
-Must be a valid PostgreSQL URL in the following format: postgresql://dev-user:dev-pass@localhost:5433/dev-db
+Must be a valid PostgreSQL URL in the following format: postgresql://<user>:<pass>@<host>:<port>/<db_name>
     
 If empty, the Docker Compose file will be configured with a sample PostgreSQL container.",
 
