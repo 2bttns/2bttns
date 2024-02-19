@@ -1,4 +1,4 @@
-// Interactive CLI to create admin credentials in the database
+// Interactive CLI to initialize a 2bttns application using Docker
 import inquirer from "inquirer";
 import { z } from "zod";
 import { PrismaClient, config } from ".";
@@ -86,7 +86,6 @@ export async function createAdminWithCredentials(params: {
   const { prisma, username, password, secret, ignoreConfig } = params;
 
   let salt: string | undefined = secret;
-  console.log("SALT: ", salt);
   if (!salt) {
     salt = config.get(CONFIG_KEYS.nextAuthSecret) as string;
     if (ignoreConfig || !salt) {
