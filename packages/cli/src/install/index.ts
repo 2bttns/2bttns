@@ -15,7 +15,7 @@ type InstallParams = {
 export async function install({ dryRun = false }: InstallParams) {
   const defaultComposeFIleName = "docker-compose.yaml";
   const composeFilePath = path.join(process.cwd(), defaultComposeFIleName);
-  if (fs.existsSync(composeFilePath)) {
+  if (fs.existsSync(composeFilePath) && !dryRun) {
     throw new Error(`${composeFilePath} already exists. Aborting.`);
   }
 
