@@ -1,6 +1,6 @@
 import { createId } from "@paralleldrive/cuid2";
 import { Game, GameObject, Prisma, Tag } from "@prisma/client";
-import { PrismaClientKnownRequestError } from "@prisma/client/runtime";
+import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 import { TRPCError } from "@trpc/server";
 import { output, z } from "zod";
 import { defaultMode } from "../../../../modes/availableModes";

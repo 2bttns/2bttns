@@ -1009,21 +1009,21 @@ export interface operations {
               tags?: number;
             };
             games?: ({
-                id: string;
-                name: string;
-                description: string;
+                id?: string;
+                name?: string;
+                description?: string;
                 inputTagIds?: (string)[];
               })[];
             gameObjects?: ({
-                id: string;
-                name: string;
-                description: string;
+                id?: string;
+                name?: string;
+                description?: string;
                 tagIds?: (string)[];
               })[];
             tags?: ({
-                id: string;
-                name: string;
-                description: string;
+                id?: string;
+                name?: string;
+                description?: string;
               })[];
           };
         };
@@ -1041,6 +1041,20 @@ export interface operations {
         "application/json": {
           /** @description Base64 encoded JSON file to import */
           jsonBase64: string;
+          /**
+           * @description If true, the import will fail if any part of it fails. 
+           * 
+           * If false, the import will continue even if some parts fail. 
+           * @default false
+           */
+          allOrNothing?: boolean;
+          /**
+           * @description Generate new IDs for imported data and remap all references to them, instead of using existing IDs. 
+           * 
+           * This may result in duplicate entries with similar content but different IDs. 
+           * @default false
+           */
+          generateNewIds?: boolean;
         };
       };
     };
@@ -1049,7 +1063,26 @@ export interface operations {
       200: {
         content: {
           "application/json": {
-            message: string;
+            results: {
+              tags: {
+                successes: number;
+                failures: number;
+              };
+              gameObjects: {
+                successes: number;
+                failures: number;
+              };
+              games: {
+                successes: number;
+                failures: number;
+              };
+            };
+            allOrNothingFailed?: boolean;
+            logMessages?: ({
+                /** @enum {string} */
+                type: "info" | "error";
+                message: string;
+              })[];
           };
         };
       };

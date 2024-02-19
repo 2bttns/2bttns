@@ -1,4 +1,4 @@
-import type { Game, Tag } from "@prisma/client";
+import type { Game } from "@prisma/client";
 import { useMemo } from "react";
 import { api } from "../../../utils/api";
 
@@ -16,8 +16,7 @@ export default function useGetGameObjectsAssociatedWithGame(
     includeGameObjects: true,
   });
   const gameObjects = useMemo(() => {
-    const items =
-      data?.game?.inputTags?.flatMap((tag) => tag.gameObjects) ?? [];
+    const items = data?.game?.gameObjects ?? [];
     const uniqueItems = Array.from(new Set(items.map((item) => item.id)));
     return uniqueItems;
   }, [data?.game?.inputTags]);
