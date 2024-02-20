@@ -265,6 +265,7 @@ function GameObjectDetails(props: GameObjectDetailsProps) {
         title: "Saved",
         status: "success",
         description: updateDescription,
+        duration: 1000,
       });
       await utils.gameObjects.getById.invalidate({ id: gameObjectId });
     } catch (error) {

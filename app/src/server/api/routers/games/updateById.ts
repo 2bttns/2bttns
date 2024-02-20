@@ -12,6 +12,7 @@ const input = z.object({
     defaultNumItemsPerRound: z.number().nullable().optional(),
     mode: z.string().optional(),
     modeConfigJson: z.string().optional(),
+    customCss: z.string().optional(),
   }),
 });
 
@@ -33,6 +34,7 @@ export const updateById = adminOrApiKeyProtectedProcedure
         defaultNumItemsPerRound: input.data.defaultNumItemsPerRound,
         mode: input.data.mode,
         modeConfigJson: input.data.modeConfigJson,
+        customCss: input.data.customCss,
       },
     });
 

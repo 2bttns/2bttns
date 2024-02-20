@@ -64,6 +64,8 @@ model Game {
     modeConfigJson String?
 
     inputTags Tag[]
+
+    customCss String?
 }
 
 model GameObject {

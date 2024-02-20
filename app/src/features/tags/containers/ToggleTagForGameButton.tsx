@@ -115,6 +115,7 @@ export default function ToggleTagForGameButton(
       toast.update(updateGameToast, {
         status: "success",
         title: "Saved!",
+        duration: 1000,
       });
     } catch (error) {
       console.error(error);

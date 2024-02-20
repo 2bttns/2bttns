@@ -223,6 +223,37 @@ const Play: NextPageWithLayout<ReturnType> = (props) => {
     return getModeUI(gameModeData.mode)?.FrontendComponent;
   }, [gameModeData.mode]);
 
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (gameData.game.customCss === null) return;
+
+    const styleElement = document.createElement("style");
+
+    const customCssWithoutEscapedLineBreaks =
+      gameData.game.customCss.replaceAll("\\n", "\n");
+    styleElement.innerHTML = customCssWithoutEscapedLineBreaks;
+    document.head.appendChild(styleElement);
+    console.log(
+      `%c
+-----------------------------------------------------------------
+
+%c[2bttns] [gameId=${gameId}] %ccustomCss found! Applied to page.
+
+%c${gameData.game.customCss as string}
+
+-----------------------------------------------------------------
+      `,
+      "color: gray",
+      "color: yellow",
+      "color: white",
+      "color: gray"
+    );
+
+    return () => {
+      document.head.removeChild(styleElement);
+    };
+  }, []);
+
   return (
     <Layout showAdminLayout={showAdminLayout} playerId={gameData.playerId}>
       <Head>
@@ -269,8 +300,8 @@ function Layout(props: LayoutProps) {
 
   return (
     <PlayerLayout>
-      <Text textAlign="right" padding="1rem">
-        Playing 2bttns | Player ID: {playerId}
+      <Text textAlign="right" padding="1rem" className="play__player-id-text">
+        Player ID: {playerId}
       </Text>
       {children}
     </PlayerLayout>

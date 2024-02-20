@@ -296,6 +296,7 @@ function TagDetails(props: TagDetailsProps) {
         title: "Saved",
         status: "success",
         description: updateDescription,
+        duration: 1000,
       });
       await utils.tags.getById.invalidate({ id: tagId });
     } catch (error) {

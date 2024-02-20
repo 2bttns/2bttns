@@ -24,6 +24,7 @@ import type { GetServerSideProps, NextPage } from "next";
 import { Session } from "next-auth";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
+import { CustomCssEditorDrawer } from "../../features/games/containers/CustomCssEditor/CustomCssEditorDrawer";
 import DeleteGameButton from "../../features/games/containers/DeleteGameButton";
 import EditGameMode from "../../features/games/containers/EditGameMode";
 import TestPlayGameButton from "../../features/games/containers/TestPlayGameButton";
@@ -96,7 +97,15 @@ function GameDetails(props: GameDetailsProps) {
   const router = useRouter();
 
   const utils = api.useContext();
-  const gameQuery = api.games.getById.useQuery({ id: gameId });
+  const gameQuery = api.games.getById.useQuery(
+    { id: gameId },
+    {
+      refetchOnWindowFocus: false,
+      refetchOnMount: false,
+      refetchOnReconnect: false,
+      refetchInterval: false,
+    }
+  );
   const updateGameMutation = api.games.updateById.useMutation();
   const handleUpdateGame = async (
     input: RouterInputs["games"]["updateById"]
@@ -129,6 +138,7 @@ function GameDetails(props: GameDetailsProps) {
         title: "Saved",
         status: "success",
         description: updateDescription,
+        duration: 1000,
       });
     } catch (error) {
       updateDescription = `Failed to update (Game ID=${gameId}). See console for details`;
@@ -172,6 +182,18 @@ function GameDetails(props: GameDetailsProps) {
   const gameObjectsAssocatedWithGame = useGetGameObjectsAssociatedWithGame({
     gameId,
   });
+
+  const [gotInitialCustomCss, setGotInitialCustomCss] = useState(false);
+  const [customCss, setCustomCss] = useState<string>("");
+
+  useEffect(() => {
+    if (gotInitialCustomCss) return;
+    if (!gameQuery.data) return;
+    const value = gameQuery.data?.game?.customCss ?? "";
+    const valueWithLineBreaks = value.replace(/(\\n)/gm, "\n");
+    setCustomCss(valueWithLineBreaks);
+    setGotInitialCustomCss(true);
+  }, [gameQuery.data?.game]);
 
   if (gameQuery.isLoading || !gameQuery.data) {
     return null;
@@ -432,6 +454,51 @@ function GameDetails(props: GameDetailsProps) {
                       {gameObjectsAssocatedWithGame !== null && (
                         <>{gameObjectsAssocatedWithGame.length}</>
                       )}
+                    </HStack>
+                  </Td>
+                </Tr>
+                <Tr>
+                  <Td>
+                    <UnderlinedTextTooltip
+                      tooltipProps={{
+                        label: (
+                          <VStack
+                            spacing={1}
+                            alignItems="start"
+                            fontSize="12px"
+                            padding="1rem"
+                          >
+                            <Text fontWeight="bold">CUSTOM CSS</Text>
+                            <Text>
+                              Custom CSS stylesheet for overriding the Game UI
+                              elements. Different modes will expose different
+                              classes you can use to override their styles.
+                            </Text>
+                          </VStack>
+                        ),
+                      }}
+                    >
+                      Custom CSS
+                    </UnderlinedTextTooltip>
+                  </Td>
+                  <Td>
+                    <HStack justifyContent="end">
+                      <CustomCssEditorDrawer
+                        gameId={gameId}
+                        gameName={gameQuery.data.game.name}
+                        onSave={async (toSave) => {
+                          const valueWithLineBreakEscaped = toSave.replaceAll(
+                            "\n",
+                            "\\n"
+                          );
+                          await handleUpdateGame({
+                            id: gameId,
+                            data: { customCss: valueWithLineBreakEscaped },
+                          });
+                        }}
+                        customCss={customCss}
+                        setCustomCss={setCustomCss}
+                      />
                     </HStack>
                   </Td>
                 </Tr>

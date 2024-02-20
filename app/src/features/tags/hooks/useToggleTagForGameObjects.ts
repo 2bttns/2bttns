@@ -140,6 +140,7 @@ export function useToggleTagForGameObjects(
       toast.update(applyTagToast, {
         title: `Saved`,
         status: "success",
+        duration: 1000,
       });
     } catch (error) {
       console.error(error);

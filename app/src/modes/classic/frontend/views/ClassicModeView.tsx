@@ -55,7 +55,7 @@ export default function ClassicModeView<I extends Item>(
               _hover: {
                 bgColor: "#f2f2f2",
               },
-              width: { base: "100%", sm: "250px", md: "512px" },
+              width: { base: "100%", sm: "512px" },
             },
           },
         }}
@@ -76,6 +76,7 @@ export default function ClassicModeView<I extends Item>(
                 width={64}
                 height={64}
                 alt="2bttns"
+                className="classicMode__icon"
               />
               <Text
                 as="h1"
@@ -85,6 +86,9 @@ export default function ClassicModeView<I extends Item>(
                   marginTop: "2rem",
                   textAlign: "center",
                 }}
+                className={`classicMode__question classicMode__question--${
+                  isFinished ? "finished" : "not-finished"
+                }`}
               >
                 {isFinished ? "Round 🎉 over!" : question}
               </Text>
@@ -98,6 +102,7 @@ export default function ClassicModeView<I extends Item>(
                         padding: "1rem",
                         textAlign: "center",
                       }}
+                      className="classicMode__or-text"
                     >
                       or
                     </Text>
@@ -142,6 +147,7 @@ function ChoicesRemainingProgressBar({
   const current = totalChoices - choicesRemaining;
   const max = totalChoices;
   const percentage = Math.round((current / max) * 100);
+  const isComplete = max === current;
 
   return (
     <>
@@ -152,8 +158,14 @@ function ChoicesRemainingProgressBar({
           </>
         }
         placement="top"
+        className="classicMode__progress-tooltip"
       >
-        <HStack width="100%">
+        <HStack
+          width="100%"
+          className={`classicMode__progress-container ${
+            isComplete ? "classicMode__progress-container--complete" : ""
+          }`}
+        >
           <Progress
             value={current}
             max={max}
@@ -162,13 +174,14 @@ function ChoicesRemainingProgressBar({
             borderRadius="16px"
             colorScheme="green"
             sx={{
-              "& > div:first-child": {
+              "& > div:first-of-type": {
                 transitionProperty: "width",
                 transitionTimingFunction: "cubic-bezier(0.175, 0.75, 0.5, 1.2)",
               },
             }}
+            className="classicMode__progress-bar"
           />
-          <Text>{percentage}%</Text>
+          <Text className="classicMode__progress-text">{percentage}%</Text>
         </HStack>
       </Tooltip>
     </>

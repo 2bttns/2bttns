@@ -23,11 +23,15 @@ export default function ClassicButton(props: ClassicButtonProps) {
         padding: "2rem",
         height: "128px",
         width: { base: "90vw", md: "512px" },
-        maxWidth: "100vw",
-        overflow: "hidden",
+        maxWidth: "100%",
         border: "1px solid rgba(0,0,0,0.5)",
+        overflow: "visible",
+        wordWrap: "break-word",
+        overflowWrap: "break-word",
+        whiteSpace: "pre-wrap",
         ...rest.sx,
       }}
+      className="classicMode__button"
     >
       {showColorBar && (
         <Box
@@ -39,6 +43,7 @@ export default function ClassicButton(props: ClassicButtonProps) {
             width: "32px",
             backgroundColor: colorHash.hex(children),
           }}
+          className="classicMode__button-color-bar"
         />
       )}
       <Box
@@ -46,10 +51,11 @@ export default function ClassicButton(props: ClassicButtonProps) {
           width: "100%",
           display: "flex",
           flexDirection: "row",
-          justifyContent: "space-between",
+          justifyContent: { base: "center", sm: "space-between" },
           alignItems: "center",
           padding: "1rem",
         }}
+        className="classicMode__button-content-container"
       >
         <Box
           style={{
@@ -59,6 +65,7 @@ export default function ClassicButton(props: ClassicButtonProps) {
             overflow: "hidden",
             textOverflow: "ellipsis",
           }}
+          className="classicMode__button-content"
         >
           {children}
         </Box>
@@ -68,7 +75,11 @@ export default function ClassicButton(props: ClassicButtonProps) {
               padding: "0.25rem 0.5rem",
               boxShadow: "0 4px 2px 0 rgba(0,0,0,0.25)",
               borderRadius: "4px",
+              justifyContent: "center",
+              alignItems: "center",
+              display: { base: "none", sm: "flex" },
             }}
+            className="classicMode__button-hotkey"
           >
             {hotkey}
           </Code>
