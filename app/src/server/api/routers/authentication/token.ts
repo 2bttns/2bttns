@@ -1,8 +1,8 @@
+import { TRPCError } from "@trpc/server";
+import jwt from "jsonwebtoken";
 import { z } from "zod";
 import { OPENAPI_TAGS } from "../../openapi/openApiTags";
-import { anyAuthProtectedProcedure, publicProcedure } from "../../trpc";
-import jwt from "jsonwebtoken";
-import { TRPCError } from "@trpc/server";
+import { publicProcedure } from "../../trpc";
 
 const input = z.object({
   app_id: z.string(),
