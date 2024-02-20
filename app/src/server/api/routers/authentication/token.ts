@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { OPENAPI_TAGS } from "../../openapi/openApiTags";
-import { anyAuthProtectedProcedure } from "../../trpc";
+import { anyAuthProtectedProcedure, publicProcedure } from "../../trpc";
 import jwt from "jsonwebtoken";
 import { TRPCError } from "@trpc/server";
 
@@ -10,7 +10,7 @@ const input = z.object({
   expires_in: z.string().optional(),
 });
 
-export const getJWT = anyAuthProtectedProcedure
+export const getJWT = publicProcedure
   .meta({
     openapi: {
       summary: "Generate JWT",
