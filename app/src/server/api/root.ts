@@ -1,5 +1,5 @@
 import { administratorsRouter } from "./routers/administrators/_index";
-import { exampleRouter } from "./routers/example/_index";
+import { authRouter } from "./routers/authentication/_index";
 import { exportDataRouter } from "./routers/export-data/_index";
 import { gameObjectsRouter } from "./routers/gameobjects/_index";
 import { gamesRouter } from "./routers/games/_index";
@@ -17,7 +17,7 @@ import { createTRPCRouter } from "./trpc";
  * All routers added in /api/routers should be manually added here
  */
 export const appRouter = createTRPCRouter({
-  example: exampleRouter,
+  example: authRouter,
   games: gamesRouter,
   gameObjects: gameObjectsRouter,
   tags: tagsRouter,
