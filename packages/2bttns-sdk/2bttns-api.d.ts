@@ -5,33 +5,28 @@
 
 
 export interface paths {
-  "/example/hello": {
+  "/authentication/generatePlayURL": {
     /**
-     * Say hello 
-     * @description Say hello to the world
+     * Generate play URL 
+     * @description Returns a URL you can use to send a user to play a game in 2bttns.
      */
-    get: operations["query.example.hello"];
+    get: operations["query.example.generatePlayURL"];
   };
-  "/example/create": {
+  "/authentication/token": {
     /**
-     * Create example 
-     * @description Create an example object in the database
+     * Generate JWT 
+     * @description Returns a JSON Web Token (JWT) you can use to authenticate API calls to 2bttns.
+     *       
+     * You can get the `app_id` and `secret` from your 2bttns admin console, under Settings/Apps.
      */
-    post: operations["mutation.example.create"];
+    get: operations["query.example.getJWT"];
   };
-  "/example/getAll": {
+  "/authentication/checkAuthType": {
     /**
-     * Get all examples 
-     * @description Get all examples
+     * Check Auth Type 
+     * @description Returns a message that tells you what type of authentication you used to call this endpoint, if you are authenticated.
      */
-    get: operations["query.example.getAll"];
-  };
-  "/example/getSecretMessage": {
-    /**
-     * Get secret message 
-     * @description This endpoint will return a message that tells you what type of authentication you used, if you are authenticated.
-     */
-    get: operations["query.example.getSecretMessage"];
+    get: operations["query.example.checkAuthType"];
   };
   "/games": {
     /**
@@ -51,6 +46,13 @@ export interface paths {
      * @description Get Game Count
      */
     get: operations["query.games.getCount"];
+  };
+  "/games/{id}": {
+    /**
+     * Get Game by ID 
+     * @description Get a game by its ID
+     */
+    get: operations["query.games.getById"];
   };
   "/games/getPlayerScores": {
     /**
@@ -210,79 +212,65 @@ export type external = Record<string, never>;
 export interface operations {
 
   /**
-   * Say hello 
-   * @description Say hello to the world
+   * Generate play URL 
+   * @description Returns a URL you can use to send a user to play a game in 2bttns.
    */
-  "query.example.hello": {
+  "query.example.generatePlayURL": {
     parameters: {
-      query?: {
-        text?: string;
+      query: {
+        /** @description ID of the app you've created in 2bttns */
+        app_id: string;
+        /** @description Secret of the app you've created in 2bttns */
+        secret: string;
+        /** @description ID of the game you want to play in 2bttns */
+        game_id: string;
+        /** @description ID of the player you want to play in 2bttns. If the player doesn't already exist, it will be created. */
+        player_id: string;
+        /** @description Number of items that should appear in the game round */
+        num_items: string;
+        callback_url?: string;
+        expires_in?: string;
       };
     };
     responses: {
       /** @description Successful response */
       200: {
         content: {
-          "application/json": {
-            greeting: string;
-          };
+          "application/json": string;
         };
       };
       default: components["responses"]["error"];
     };
   };
   /**
-   * Create example 
-   * @description Create an example object in the database
+   * Generate JWT 
+   * @description Returns a JSON Web Token (JWT) you can use to authenticate API calls to 2bttns.
+   *       
+   * You can get the `app_id` and `secret` from your 2bttns admin console, under Settings/Apps.
    */
-  "mutation.example.create": {
-    requestBody?: {
-      content: {
-        "application/json": {
-          id?: string;
-        };
+  "query.example.getJWT": {
+    parameters: {
+      query: {
+        app_id: string;
+        secret: string;
+        expires_in?: string;
       };
     };
     responses: {
       /** @description Successful response */
       200: {
         content: {
-          "application/json": {
-            id: string;
-          };
+          "application/json": string;
         };
       };
       default: components["responses"]["error"];
     };
   };
   /**
-   * Get all examples 
-   * @description Get all examples
+   * Check Auth Type 
+   * @description Returns a message that tells you what type of authentication you used to call this endpoint, if you are authenticated.
    */
-  "query.example.getAll": {
-    responses: {
-      /** @description Successful response */
-      200: {
-        content: {
-          "application/json": {
-            examples: ({
-                id: string;
-                /** Format: date-time */
-                createdAt: string;
-                /** Format: date-time */
-                updatedAt: string;
-              })[];
-          };
-        };
-      };
-      default: components["responses"]["error"];
-    };
-  };
-  /**
-   * Get secret message 
-   * @description This endpoint will return a message that tells you what type of authentication you used, if you are authenticated.
-   */
-  "query.example.getSecretMessage": {
+  "query.example.checkAuthType": {
     responses: {
       /** @description Successful response */
       200: {
@@ -423,6 +411,60 @@ export interface operations {
         content: {
           "application/json": {
             count: number;
+          };
+        };
+      };
+      default: components["responses"]["error"];
+    };
+  };
+  /**
+   * Get Game by ID 
+   * @description Get a game by its ID
+   */
+  "query.games.getById": {
+    parameters: {
+      query?: {
+        includeGameObjects?: unknown;
+      };
+      path: {
+        /** @description ID value. Only alphanumeric, underscore, and hyphen are allowed. */
+        id: string;
+      };
+    };
+    responses: {
+      /** @description Successful response */
+      200: {
+        content: {
+          "application/json": {
+            game: {
+              id: string;
+              name: string;
+              description: string | null;
+              /** @description ISO date string */
+              createdAt: string;
+              /** @description ISO date string */
+              updatedAt: string;
+              /** @description Input Tag IDs */
+              inputTags: ({
+                  id: string;
+                  /** @description ISO date string */
+                  createdAt: string;
+                  /** @description ISO date string */
+                  updatedAt: string;
+                  name: string;
+                  description: string | null;
+                })[];
+              mode: string;
+              gameObjects?: ({
+                  id: string;
+                  name: string;
+                  description: string | null;
+                  /** @description ISO date string */
+                  createdAt: string;
+                  /** @description ISO date string */
+                  updatedAt: string;
+                })[];
+            };
           };
         };
       };
