@@ -26,8 +26,27 @@ You can get the \`app_id\` and \`secret\` from your 2bttns admin console, under 
   })
   .input(input)
   .output(z.string())
-  .query(({ ctx, input }) => {
+  .query(async ({ ctx, input }) => {
     const { app_id: appId, secret, expires_in: expiresIn } = input;
+
+    try {
+      const appSecret = await ctx.prisma.secret.findFirstOrThrow({
+        where: {
+          id: input.app_id,
+        },
+      });
+      if (appSecret.secret !== input.secret) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: `Invalid app_id or secret`,
+        });
+      }
+    } catch (e) {
+      throw new TRPCError({
+        code: "BAD_REQUEST",
+        message: `Invalid app_id or secret`,
+      });
+    }
 
     try {
       const token = jwt.sign({ type: "api_key_token", appId }, secret, {
