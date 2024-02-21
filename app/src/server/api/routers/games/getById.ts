@@ -47,7 +47,7 @@ export const getById = adminOrApiKeyProtectedProcedure
   .meta({
     openapi: {
       summary: "Get Game by ID",
-      description: "Get a game by its ID",
+      description: "Get a game by its ID.",
       tags: [OPENAPI_TAGS.GAMES],
       method: "GET",
       path: "/games/{id}",

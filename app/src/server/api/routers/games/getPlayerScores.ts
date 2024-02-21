@@ -39,7 +39,7 @@ export const getPlayerScores = anyAuthProtectedProcedure
   .meta({
     openapi: {
       summary: "Get Player Scores",
-      description: "Get a player's score data for a specific game",
+      description: "Get a Player's score data for a specific Game.",
       tags: [OPENAPI_TAGS.GAMES],
       method: "GET",
       path: "/games/getPlayerScores",
