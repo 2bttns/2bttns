@@ -54,10 +54,26 @@ export default function ToggleTagForGameButton(
             game: {
               ...previous.game,
               inputTags:
-                updatedInputTags?.map((t) => ({
-                  ...t,
-                  gameObjects: [],
-                })) ?? [],
+                updatedInputTags?.map((t) => {
+                  const createdAt =
+                    typeof t.createdAt === "string"
+                      ? t.createdAt
+                      : t.createdAt.toISOString();
+                  const updatedAt =
+                    typeof t.updatedAt === "string"
+                      ? t.updatedAt
+                      : t.updatedAt.toISOString();
+                  return {
+                    ...t,
+                    createdAt,
+                    updatedAt,
+                  };
+                }) ?? [],
+              // inputTags:
+              //   updatedInputTags?.map((t) => ({
+              //     ...t,
+              //     gameObjects: [],
+              //   })) ?? [],
             },
           }
         );

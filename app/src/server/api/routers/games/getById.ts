@@ -1,8 +1,7 @@
-import { Prisma } from "@prisma/client";
 import { z } from "zod";
 import { booleanEnum, idSchema } from "../../../shared/z";
-import { adminOrApiKeyProtectedProcedure } from "../../trpc";
 import { OPENAPI_TAGS } from "../../openapi/openApiTags";
+import { adminOrApiKeyProtectedProcedure } from "../../trpc";
 
 const input = z.object({
   id: idSchema,
@@ -27,7 +26,9 @@ const output = z.object({
         })
       )
       .describe("Input Tag IDs"),
+    defaultNumItemsPerRound: z.number().nullable(),
     mode: z.string(),
+    modeConfigJson: z.string().nullable(),
     gameObjects: z
       .array(
         z.object({
@@ -56,8 +57,6 @@ export const getById = adminOrApiKeyProtectedProcedure
   .input(input)
   .output(output)
   .query(async ({ ctx, input }) => {
-    console.log("INCLUED GO: ", input.includeGameObjects);
-
     const game = await ctx.prisma.game.findFirst({
       where: {
         id: input.id,
@@ -71,26 +70,14 @@ export const getById = adminOrApiKeyProtectedProcedure
       },
     });
 
-    console.log(game);
-
     if (!game) {
       throw new Error(`Game with id ${input.id} not found`);
     }
     const outputGame: z.infer<typeof output> = {
       game: {
         createdAt: game.createdAt.toISOString(),
-        updatedAt: game.updatedAt.toISOString(),
+        defaultNumItemsPerRound: game.defaultNumItemsPerRound,
         description: game.description,
-        id: game.id,
-        inputTags: game.inputTags.map((tag) => ({
-          createdAt: tag.createdAt.toISOString(),
-          description: tag.description,
-          id: tag.id,
-          name: tag.name,
-          updatedAt: tag.updatedAt.toISOString(),
-        })),
-        mode: game.mode,
-        name: game.name,
         gameObjects: input.includeGameObjects
           ? game.inputTags
               .flatMap((tag) => tag.gameObjects)
@@ -102,6 +89,18 @@ export const getById = adminOrApiKeyProtectedProcedure
                 name: go.name,
               }))
           : undefined,
+        id: game.id,
+        inputTags: game.inputTags.map((tag) => ({
+          createdAt: tag.createdAt.toISOString(),
+          description: tag.description,
+          id: tag.id,
+          name: tag.name,
+          updatedAt: tag.updatedAt.toISOString(),
+        })),
+        mode: game.mode,
+        modeConfigJson: game.modeConfigJson,
+        name: game.name,
+        updatedAt: game.updatedAt.toISOString(),
       },
     };
 
