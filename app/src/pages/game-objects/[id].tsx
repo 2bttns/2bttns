@@ -225,7 +225,6 @@ function GameObjectDetails(props: GameObjectDetailsProps) {
   const { gameObjectId } = props;
   const gameObjectQuery = api.gameObjects.getById.useQuery({
     id: gameObjectId,
-    includeTags: true,
   });
   const gameObject = gameObjectQuery.data?.gameObject;
 
