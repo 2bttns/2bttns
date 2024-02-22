@@ -1,6 +1,6 @@
 {
   "name": "@2bttns/2bttns-cli",
-  "version": "0.0.15-alpha",
+  "version": "0.0.16-alpha",
   "description": "The 2bttns command line interface.",
   "repository": {
     "type": "git",
@@ -16,6 +16,7 @@
     "start": "node dist/index.js",
     "prebuild": "./prebuild.sh",
     "build": "ncc build src/index.ts -o dist",
+    "build:skip-pre-post": "ncc build src/index.ts -o dist",
     "postbuild": "./postbuild.sh",
     "link": "npm link",
     "unlink": "npm unlink @2bttns/cli && rm -rf \"$(npm root -g)/@2bttns/2bttns-cli\""
@@ -39,6 +40,7 @@
     "config": "^3.3.9",
     "inquirer": "^9.2.10",
     "tmp": "^0.2.1",
+    "yaml": "^2.3.4",
     "zod": "^3.21.4"
   }
 }

@@ -7,10 +7,10 @@ TWOBTTNS_CONTAINER_NAME="2bttns"   # 2bttns container name created by the 2bttns
 # Start your containers via docker-compose
 docker-compose up -d 
 
-# # Apply the necessary 2bttns Prisma migrations to the database
+# Apply the necessary 2bttns Prisma migrations to the database
 docker container exec $TWOBTTNS_CONTAINER_NAME 2bttns-cli db migrate
 
-# # Seed the database with example data (optional)
+# Seed the database with example data (optional)
 docker container exec $TWOBTTNS_CONTAINER_NAME 2bttns-cli db seed
 
 # Ensure the postgresql service is running

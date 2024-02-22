@@ -11,6 +11,7 @@ import {
   validateEmail,
   validateUsername,
 } from "./createAdmin";
+import { install } from "./install";
 import { seed } from "./seed";
 import { CONFIG_KEYS, listConfigKeys, updateConfig } from "./updateConfig";
 export type { PrismaClient };
@@ -36,6 +37,22 @@ program.addOption(
     "Set this flag to ignore config values. This is useful if you want to use environment variables instead of config values."
   )
 );
+
+const installCommand = program
+  .command("new")
+  .addHelpText("before", "Instantiate a 2bttns app (requires Docker Compose)")
+  .option(
+    "-d, --dry-run",
+    "Log the docker-compose YAML the new 2bttns instance will use, but skips the creation of the file and skips running it."
+  )
+  .action(async ({ dryRun }) => {
+    try {
+      install({ dryRun });
+    } catch (e) {
+      if (e instanceof Error) console.error(e.message);
+      process.exit(1);
+    }
+  });
 
 const configCommand = program.command("config");
 const configGetCommand = configCommand.command("get");

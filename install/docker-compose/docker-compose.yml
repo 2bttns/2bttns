@@ -9,8 +9,33 @@ services:
     depends_on:
       - db
     environment:
+      # The postgreSQL database URL your 2bttns app should use
       DATABASE_URL: postgresql://username:password@db-hostname:5432/db
+
+      # Next Auth
+      # You can generate a new secret on the command line with:
+      # openssl rand -base64 32
+      # https://next-auth.js.org/configuration/options#secret
       NEXTAUTH_SECRET: placeholder-secret-remember-to-change
+
+      # Uncomment & fill out these variables to enable GitHub OAuth in your 2bttns admin console.
+      # GITHUB_ID: ""
+      # GITHUB_SECRET: ""
+
+      # Set the log level for the server
+      # Picking a lower log level will also log messages from higher levels
+      #    error: 0
+      #    warn: 1
+      #    info: 2 <- default
+      #    http: 3
+      #    verbose: 4
+      #    debug: 5
+      #    silly: 6
+      # SERVER_LOG_LEVEL: info
+
+      # You can change the log locale for the server
+      # This will change the logged date format according to the locale
+      # SERVER_LOG_LOCALE: en-US
   db:
     image: postgres:13
     container_name: db-hostname
