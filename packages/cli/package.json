@@ -1,6 +1,6 @@
 {
   "name": "@2bttns/2bttns-cli",
-  "version": "0.0.16-alpha",
+  "version": "1.0.0-beta",
   "description": "The 2bttns command line interface.",
   "repository": {
     "type": "git",

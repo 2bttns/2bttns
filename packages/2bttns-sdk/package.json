@@ -1,6 +1,6 @@
 {
   "name": "@2bttns/sdk",
-  "version": "1.1.0-alpha",
+  "version": "1.0.0-beta",
   "description": "The official 2bttns Node.js SDK",
   "main": "dist/index.js",
   "types": "types/index.d.ts",

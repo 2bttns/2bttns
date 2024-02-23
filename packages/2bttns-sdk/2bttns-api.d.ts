@@ -360,6 +360,7 @@ export interface operations {
                 /** @description Input Tag IDs */
                 inputTags: (string)[];
                 mode: string;
+                customCss: string | null;
               })[];
             tags?: ({
                 id: string;
