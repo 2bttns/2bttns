@@ -35,6 +35,11 @@ export interface paths {
      */
     get: operations["query.games.getAll"];
     /**
+     * Create Game 
+     * @description Create a new Game
+     */
+    post: operations["mutation.games.create"];
+    /**
      * Delete Games 
      * @description Delete one or more Games by their IDs
      */
@@ -50,14 +55,14 @@ export interface paths {
   "/games/{id}": {
     /**
      * Get Game by ID 
-     * @description Get a game by its ID
+     * @description Get a game by its ID.
      */
     get: operations["query.games.getById"];
   };
   "/games/getPlayerScores": {
     /**
      * Get Player Scores 
-     * @description Get a player's score data for a specific game
+     * @description Get a Player's score data for a specific Game.
      */
     get: operations["query.games.getPlayerScores"];
   };
@@ -67,6 +72,11 @@ export interface paths {
      * @description Get all Game Objects. Paginated by default. Supports filtering and sorting.
      */
     get: operations["query.gameObjects.getAll"];
+    /**
+     * Create GameObject 
+     * @description Create a new GameObject
+     */
+    post: operations["mutation.gameObjects.create"];
     /**
      * Delete Game Objects 
      * @description Delete one or more game objects by their IDs
@@ -79,6 +89,13 @@ export interface paths {
      * @description Get the total Game Object count. Supports filtering.
      */
     get: operations["query.gameObjects.getCount"];
+  };
+  "/game-objects/{id}": {
+    /**
+     * Get Game Object by ID 
+     * @description Get a Game Object by its ID.
+     */
+    get: operations["query.gameObjects.getById"];
   };
   "/game-objects/ranked": {
     /**
@@ -110,6 +127,13 @@ export interface paths {
      * @description Get Tag Count
      */
     get: operations["query.tags.getCount"];
+  };
+  "/tags/{id}": {
+    /**
+     * Get Tag by ID 
+     * @description Get a Tag by its ID.
+     */
+    get: operations["query.tags.getById"];
   };
   "/players/create": {
     /**
@@ -353,6 +377,42 @@ export interface operations {
     };
   };
   /**
+   * Create Game 
+   * @description Create a new Game
+   */
+  "mutation.games.create": {
+    requestBody: {
+      content: {
+        "application/json": {
+          /** @description ID value. Only alphanumeric, underscore, and hyphen are allowed. */
+          id?: string;
+          name: string;
+          description?: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Successful response */
+      200: {
+        content: {
+          "application/json": {
+            createdGame: {
+              id: string;
+              name: string;
+              description: string | null;
+              /** @description ISO date string */
+              createdAt: string;
+              /** @description ISO date string */
+              updatedAt: string;
+              mode: string;
+            };
+          };
+        };
+      };
+      default: components["responses"]["error"];
+    };
+  };
+  /**
    * Delete Games 
    * @description Delete one or more Games by their IDs
    */
@@ -419,7 +479,7 @@ export interface operations {
   };
   /**
    * Get Game by ID 
-   * @description Get a game by its ID
+   * @description Get a game by its ID.
    */
   "query.games.getById": {
     parameters: {
@@ -454,7 +514,9 @@ export interface operations {
                   name: string;
                   description: string | null;
                 })[];
+              defaultNumItemsPerRound: number | null;
               mode: string;
+              modeConfigJson: string | null;
               gameObjects?: ({
                   id: string;
                   name: string;
@@ -473,7 +535,7 @@ export interface operations {
   };
   /**
    * Get Player Scores 
-   * @description Get a player's score data for a specific game
+   * @description Get a Player's score data for a specific Game.
    */
   "query.games.getPlayerScores": {
     parameters: {
@@ -583,6 +645,46 @@ export interface operations {
     };
   };
   /**
+   * Create GameObject 
+   * @description Create a new GameObject
+   */
+  "mutation.gameObjects.create": {
+    requestBody: {
+      content: {
+        "application/json": {
+          /** @description ID value. Only alphanumeric, underscore, and hyphen are allowed. */
+          id?: string;
+          name: string;
+          description?: string;
+          tags?: ({
+              /** @description ID value. Only alphanumeric, underscore, and hyphen are allowed. */
+              id?: string;
+            })[];
+        };
+      };
+    };
+    responses: {
+      /** @description Successful response */
+      200: {
+        content: {
+          "application/json": {
+            createdGameObject: {
+              /** @description ID value. Only alphanumeric, underscore, and hyphen are allowed. */
+              id: string;
+              name: string;
+              description: string | null;
+              /** @description ISO date string */
+              createdAt: string;
+              /** @description ISO date string */
+              updatedAt: string;
+            };
+          };
+        };
+      };
+      default: components["responses"]["error"];
+    };
+  };
+  /**
    * Delete Game Objects 
    * @description Delete one or more game objects by their IDs
    */
@@ -641,6 +743,43 @@ export interface operations {
         content: {
           "application/json": {
             count: number;
+          };
+        };
+      };
+      default: components["responses"]["error"];
+    };
+  };
+  /**
+   * Get Game Object by ID 
+   * @description Get a Game Object by its ID.
+   */
+  "query.gameObjects.getById": {
+    parameters: {
+      path: {
+        /** @description ID value. Only alphanumeric, underscore, and hyphen are allowed. */
+        id: string;
+      };
+    };
+    responses: {
+      /** @description Successful response */
+      200: {
+        content: {
+          "application/json": {
+            gameObject: {
+              id: string;
+              name: string;
+              description: string | null;
+              /** @description ISO date string */
+              createdAt: string;
+              /** @description ISO date string */
+              updatedAt: string;
+              /** @description Tag IDs */
+              tags: ({
+                  id: string;
+                  name: string;
+                })[];
+              related: (string)[];
+            };
           };
         };
       };
@@ -799,6 +938,37 @@ export interface operations {
         content: {
           "application/json": {
             count: number;
+          };
+        };
+      };
+      default: components["responses"]["error"];
+    };
+  };
+  /**
+   * Get Tag by ID 
+   * @description Get a Tag by its ID.
+   */
+  "query.tags.getById": {
+    parameters: {
+      path: {
+        /** @description ID value. Only alphanumeric, underscore, and hyphen are allowed. */
+        id: string;
+      };
+    };
+    responses: {
+      /** @description Successful response */
+      200: {
+        content: {
+          "application/json": {
+            tag: {
+              id: string;
+              name: string;
+              description: string | null;
+              /** @description ISO date string */
+              createdAt: string;
+              /** @description ISO date string */
+              updatedAt: string;
+            };
           };
         };
       };
