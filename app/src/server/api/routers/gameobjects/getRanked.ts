@@ -1,5 +1,5 @@
 import type { PlayerScore, GameObject } from "@prisma/client";
-import { Decimal } from "@prisma/client/runtime";
+import { Decimal } from "@prisma/client/runtime/library";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { prisma } from "../../../db";

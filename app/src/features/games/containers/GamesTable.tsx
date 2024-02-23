@@ -94,7 +94,7 @@ export default function GamesTable(props: GamesTableProps) {
       tagFilter: tag?.include.join(","),
       tagExcludeFilter: tag?.exclude.join(","),
       untaggedFilter: tag?.untaggedFilter,
-      sortField: sorting?.sortField,
+      sortField: sorting?.sortField as keyof Omit<GameData, "customCss">,
       sortOrder: sorting?.order,
       excludeGames: gamesToExclude?.join(","),
       includeTagData: true,

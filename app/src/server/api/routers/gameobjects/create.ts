@@ -29,8 +29,8 @@ const output = z.object({
 export const create = adminOrApiKeyProtectedProcedure
   .meta({
     openapi: {
-      summary: "Create GameObject",
-      description: "Create a new GameObject",
+      summary: "Create Game Object",
+      description: "Create a new Game Object",
       tags: [OPENAPI_TAGS.GAME_OBJECTS],
       method: "POST",
       path: "/game-objects",

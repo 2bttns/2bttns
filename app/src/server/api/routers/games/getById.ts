@@ -29,6 +29,7 @@ const output = z.object({
     defaultNumItemsPerRound: z.number().nullable(),
     mode: z.string(),
     modeConfigJson: z.string().nullable(),
+    customCss: z.string().nullable(),
     gameObjects: z
       .array(
         z.object({
@@ -99,6 +100,7 @@ export const getById = adminOrApiKeyProtectedProcedure
         })),
         mode: game.mode,
         modeConfigJson: game.modeConfigJson,
+        customCss: game.customCss,
         name: game.name,
         updatedAt: game.updatedAt.toISOString(),
       },
