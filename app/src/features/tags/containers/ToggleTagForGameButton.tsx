@@ -53,11 +53,7 @@ export default function ToggleTagForGameButton(
           {
             game: {
               ...previous.game,
-              inputTags:
-                updatedInputTags?.map((t) => ({
-                  ...t,
-                  gameObjects: [],
-                })) ?? [],
+              inputTags: updatedInputTags ?? [],
             },
           }
         );

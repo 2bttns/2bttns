@@ -1,4 +1,4 @@
-import { Game, GameObject } from "@prisma/client";
+import type { Game, GameObject } from "@prisma/client";
 import { prisma } from "../db";
 
 export default async function getRandomGameObjects(

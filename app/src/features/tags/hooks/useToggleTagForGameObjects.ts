@@ -17,7 +17,6 @@ export function useToggleTagForGameObjects(
   const utils = api.useContext();
 
   const tagQuery = api.tags.getById.useQuery({ id: tagId });
-  const tagName = tagQuery.data?.tag.name ?? "Untitled Tag";
 
   const getGameObjectsCountQuery = api.gameObjects.getCount.useQuery({
     idFilter: gameObjectIds.join(","),

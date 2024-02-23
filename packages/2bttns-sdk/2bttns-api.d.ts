@@ -5,33 +5,28 @@
 
 
 export interface paths {
-  "/example/hello": {
+  "/authentication/generatePlayURL": {
     /**
-     * Say hello 
-     * @description Say hello to the world
+     * Generate play URL 
+     * @description Returns a URL you can use to send a user to play a game in 2bttns.
      */
-    get: operations["query.example.hello"];
+    get: operations["query.example.generatePlayURL"];
   };
-  "/example/create": {
+  "/authentication/token": {
     /**
-     * Create example 
-     * @description Create an example object in the database
+     * Generate JWT 
+     * @description Returns a JSON Web Token (JWT) you can use to authenticate API calls to 2bttns.
+     *       
+     * You can get the `app_id` and `secret` from your 2bttns admin console, under Settings/Apps.
      */
-    post: operations["mutation.example.create"];
+    get: operations["query.example.getJWT"];
   };
-  "/example/getAll": {
+  "/authentication/checkAuthType": {
     /**
-     * Get all examples 
-     * @description Get all examples
+     * Check Auth Type 
+     * @description Returns a message that tells you what type of authentication you used to call this endpoint, if you are authenticated.
      */
-    get: operations["query.example.getAll"];
-  };
-  "/example/getSecretMessage": {
-    /**
-     * Get secret message 
-     * @description This endpoint will return a message that tells you what type of authentication you used, if you are authenticated.
-     */
-    get: operations["query.example.getSecretMessage"];
+    get: operations["query.example.checkAuthType"];
   };
   "/games": {
     /**
@@ -39,6 +34,11 @@ export interface paths {
      * @description Get all Games. Paginated by default. Supports filtering and sorting.
      */
     get: operations["query.games.getAll"];
+    /**
+     * Create Game 
+     * @description Create a new Game
+     */
+    post: operations["mutation.games.create"];
     /**
      * Delete Games 
      * @description Delete one or more Games by their IDs
@@ -52,10 +52,17 @@ export interface paths {
      */
     get: operations["query.games.getCount"];
   };
+  "/games/{id}": {
+    /**
+     * Get Game by ID 
+     * @description Get a game by its ID.
+     */
+    get: operations["query.games.getById"];
+  };
   "/games/getPlayerScores": {
     /**
      * Get Player Scores 
-     * @description Get a player's score data for a specific game
+     * @description Get a Player's score data for a specific Game.
      */
     get: operations["query.games.getPlayerScores"];
   };
@@ -65,6 +72,11 @@ export interface paths {
      * @description Get all Game Objects. Paginated by default. Supports filtering and sorting.
      */
     get: operations["query.gameObjects.getAll"];
+    /**
+     * Create GameObject 
+     * @description Create a new GameObject
+     */
+    post: operations["mutation.gameObjects.create"];
     /**
      * Delete Game Objects 
      * @description Delete one or more game objects by their IDs
@@ -77,6 +89,13 @@ export interface paths {
      * @description Get the total Game Object count. Supports filtering.
      */
     get: operations["query.gameObjects.getCount"];
+  };
+  "/game-objects/{id}": {
+    /**
+     * Get Game Object by ID 
+     * @description Get a Game Object by its ID.
+     */
+    get: operations["query.gameObjects.getById"];
   };
   "/game-objects/ranked": {
     /**
@@ -108,6 +127,13 @@ export interface paths {
      * @description Get Tag Count
      */
     get: operations["query.tags.getCount"];
+  };
+  "/tags/{id}": {
+    /**
+     * Get Tag by ID 
+     * @description Get a Tag by its ID.
+     */
+    get: operations["query.tags.getById"];
   };
   "/players/create": {
     /**
@@ -210,79 +236,65 @@ export type external = Record<string, never>;
 export interface operations {
 
   /**
-   * Say hello 
-   * @description Say hello to the world
+   * Generate play URL 
+   * @description Returns a URL you can use to send a user to play a game in 2bttns.
    */
-  "query.example.hello": {
+  "query.example.generatePlayURL": {
     parameters: {
-      query?: {
-        text?: string;
+      query: {
+        /** @description ID of the app you've created in 2bttns */
+        app_id: string;
+        /** @description Secret of the app you've created in 2bttns */
+        secret: string;
+        /** @description ID of the game you want to play in 2bttns */
+        game_id: string;
+        /** @description ID of the player you want to play in 2bttns. If the player doesn't already exist, it will be created. */
+        player_id: string;
+        /** @description Number of items that should appear in the game round */
+        num_items: string;
+        callback_url?: string;
+        expires_in?: string;
       };
     };
     responses: {
       /** @description Successful response */
       200: {
         content: {
-          "application/json": {
-            greeting: string;
-          };
+          "application/json": string;
         };
       };
       default: components["responses"]["error"];
     };
   };
   /**
-   * Create example 
-   * @description Create an example object in the database
+   * Generate JWT 
+   * @description Returns a JSON Web Token (JWT) you can use to authenticate API calls to 2bttns.
+   *       
+   * You can get the `app_id` and `secret` from your 2bttns admin console, under Settings/Apps.
    */
-  "mutation.example.create": {
-    requestBody?: {
-      content: {
-        "application/json": {
-          id?: string;
-        };
+  "query.example.getJWT": {
+    parameters: {
+      query: {
+        app_id: string;
+        secret: string;
+        expires_in?: string;
       };
     };
     responses: {
       /** @description Successful response */
       200: {
         content: {
-          "application/json": {
-            id: string;
-          };
+          "application/json": string;
         };
       };
       default: components["responses"]["error"];
     };
   };
   /**
-   * Get all examples 
-   * @description Get all examples
+   * Check Auth Type 
+   * @description Returns a message that tells you what type of authentication you used to call this endpoint, if you are authenticated.
    */
-  "query.example.getAll": {
-    responses: {
-      /** @description Successful response */
-      200: {
-        content: {
-          "application/json": {
-            examples: ({
-                id: string;
-                /** Format: date-time */
-                createdAt: string;
-                /** Format: date-time */
-                updatedAt: string;
-              })[];
-          };
-        };
-      };
-      default: components["responses"]["error"];
-    };
-  };
-  /**
-   * Get secret message 
-   * @description This endpoint will return a message that tells you what type of authentication you used, if you are authenticated.
-   */
-  "query.example.getSecretMessage": {
+  "query.example.checkAuthType": {
     responses: {
       /** @description Successful response */
       200: {
@@ -365,6 +377,42 @@ export interface operations {
     };
   };
   /**
+   * Create Game 
+   * @description Create a new Game
+   */
+  "mutation.games.create": {
+    requestBody: {
+      content: {
+        "application/json": {
+          /** @description ID value. Only alphanumeric, underscore, and hyphen are allowed. */
+          id?: string;
+          name: string;
+          description?: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Successful response */
+      200: {
+        content: {
+          "application/json": {
+            createdGame: {
+              id: string;
+              name: string;
+              description: string | null;
+              /** @description ISO date string */
+              createdAt: string;
+              /** @description ISO date string */
+              updatedAt: string;
+              mode: string;
+            };
+          };
+        };
+      };
+      default: components["responses"]["error"];
+    };
+  };
+  /**
    * Delete Games 
    * @description Delete one or more Games by their IDs
    */
@@ -430,8 +478,64 @@ export interface operations {
     };
   };
   /**
+   * Get Game by ID 
+   * @description Get a game by its ID.
+   */
+  "query.games.getById": {
+    parameters: {
+      query?: {
+        includeGameObjects?: unknown;
+      };
+      path: {
+        /** @description ID value. Only alphanumeric, underscore, and hyphen are allowed. */
+        id: string;
+      };
+    };
+    responses: {
+      /** @description Successful response */
+      200: {
+        content: {
+          "application/json": {
+            game: {
+              id: string;
+              name: string;
+              description: string | null;
+              /** @description ISO date string */
+              createdAt: string;
+              /** @description ISO date string */
+              updatedAt: string;
+              /** @description Input Tag IDs */
+              inputTags: ({
+                  id: string;
+                  /** @description ISO date string */
+                  createdAt: string;
+                  /** @description ISO date string */
+                  updatedAt: string;
+                  name: string;
+                  description: string | null;
+                })[];
+              defaultNumItemsPerRound: number | null;
+              mode: string;
+              modeConfigJson: string | null;
+              gameObjects?: ({
+                  id: string;
+                  name: string;
+                  description: string | null;
+                  /** @description ISO date string */
+                  createdAt: string;
+                  /** @description ISO date string */
+                  updatedAt: string;
+                })[];
+            };
+          };
+        };
+      };
+      default: components["responses"]["error"];
+    };
+  };
+  /**
    * Get Player Scores 
-   * @description Get a player's score data for a specific game
+   * @description Get a Player's score data for a specific Game.
    */
   "query.games.getPlayerScores": {
     parameters: {
@@ -541,6 +645,46 @@ export interface operations {
     };
   };
   /**
+   * Create GameObject 
+   * @description Create a new GameObject
+   */
+  "mutation.gameObjects.create": {
+    requestBody: {
+      content: {
+        "application/json": {
+          /** @description ID value. Only alphanumeric, underscore, and hyphen are allowed. */
+          id?: string;
+          name: string;
+          description?: string;
+          tags?: ({
+              /** @description ID value. Only alphanumeric, underscore, and hyphen are allowed. */
+              id?: string;
+            })[];
+        };
+      };
+    };
+    responses: {
+      /** @description Successful response */
+      200: {
+        content: {
+          "application/json": {
+            createdGameObject: {
+              /** @description ID value. Only alphanumeric, underscore, and hyphen are allowed. */
+              id: string;
+              name: string;
+              description: string | null;
+              /** @description ISO date string */
+              createdAt: string;
+              /** @description ISO date string */
+              updatedAt: string;
+            };
+          };
+        };
+      };
+      default: components["responses"]["error"];
+    };
+  };
+  /**
    * Delete Game Objects 
    * @description Delete one or more game objects by their IDs
    */
@@ -599,6 +743,43 @@ export interface operations {
         content: {
           "application/json": {
             count: number;
+          };
+        };
+      };
+      default: components["responses"]["error"];
+    };
+  };
+  /**
+   * Get Game Object by ID 
+   * @description Get a Game Object by its ID.
+   */
+  "query.gameObjects.getById": {
+    parameters: {
+      path: {
+        /** @description ID value. Only alphanumeric, underscore, and hyphen are allowed. */
+        id: string;
+      };
+    };
+    responses: {
+      /** @description Successful response */
+      200: {
+        content: {
+          "application/json": {
+            gameObject: {
+              id: string;
+              name: string;
+              description: string | null;
+              /** @description ISO date string */
+              createdAt: string;
+              /** @description ISO date string */
+              updatedAt: string;
+              /** @description Tag IDs */
+              tags: ({
+                  id: string;
+                  name: string;
+                })[];
+              related: (string)[];
+            };
           };
         };
       };
@@ -757,6 +938,37 @@ export interface operations {
         content: {
           "application/json": {
             count: number;
+          };
+        };
+      };
+      default: components["responses"]["error"];
+    };
+  };
+  /**
+   * Get Tag by ID 
+   * @description Get a Tag by its ID.
+   */
+  "query.tags.getById": {
+    parameters: {
+      path: {
+        /** @description ID value. Only alphanumeric, underscore, and hyphen are allowed. */
+        id: string;
+      };
+    };
+    responses: {
+      /** @description Successful response */
+      200: {
+        content: {
+          "application/json": {
+            tag: {
+              id: string;
+              name: string;
+              description: string | null;
+              /** @description ISO date string */
+              createdAt: string;
+              /** @description ISO date string */
+              updatedAt: string;
+            };
           };
         };
       };
@@ -1009,21 +1221,21 @@ export interface operations {
               tags?: number;
             };
             games?: ({
-                id: string;
-                name: string;
-                description: string;
+                id?: string;
+                name?: string;
+                description?: string;
                 inputTagIds?: (string)[];
               })[];
             gameObjects?: ({
-                id: string;
-                name: string;
-                description: string;
+                id?: string;
+                name?: string;
+                description?: string;
                 tagIds?: (string)[];
               })[];
             tags?: ({
-                id: string;
-                name: string;
-                description: string;
+                id?: string;
+                name?: string;
+                description?: string;
               })[];
           };
         };
@@ -1041,6 +1253,20 @@ export interface operations {
         "application/json": {
           /** @description Base64 encoded JSON file to import */
           jsonBase64: string;
+          /**
+           * @description If true, the import will fail if any part of it fails. 
+           * 
+           * If false, the import will continue even if some parts fail. 
+           * @default false
+           */
+          allOrNothing?: boolean;
+          /**
+           * @description Generate new IDs for imported data and remap all references to them, instead of using existing IDs. 
+           * 
+           * This may result in duplicate entries with similar content but different IDs. 
+           * @default false
+           */
+          generateNewIds?: boolean;
         };
       };
     };
@@ -1049,7 +1275,26 @@ export interface operations {
       200: {
         content: {
           "application/json": {
-            message: string;
+            results: {
+              tags: {
+                successes: number;
+                failures: number;
+              };
+              gameObjects: {
+                successes: number;
+                failures: number;
+              };
+              games: {
+                successes: number;
+                failures: number;
+              };
+            };
+            allOrNothingFailed?: boolean;
+            logMessages?: ({
+                /** @enum {string} */
+                type: "info" | "error";
+                message: string;
+              })[];
           };
         };
       };

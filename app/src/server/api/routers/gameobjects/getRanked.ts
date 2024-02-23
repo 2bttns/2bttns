@@ -1,4 +1,4 @@
-import { GameObject, PlayerScore } from "@prisma/client";
+import type { PlayerScore, GameObject } from "@prisma/client";
 import { Decimal } from "@prisma/client/runtime";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
@@ -124,9 +124,7 @@ export const getRanked = adminOrApiKeyProtectedProcedure
         fromGameObject: {
           tags: {
             some: {
-              id: {
-                in: input.inputTags,
-              },
+              id: { in: input.inputTags.split(",") },
             },
           },
         },

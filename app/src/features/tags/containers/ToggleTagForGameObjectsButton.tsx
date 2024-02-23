@@ -51,7 +51,7 @@ export default function ToggleTagForGameObjectsButton(
       return `Apply tag to all`;
     }
     if (isLoading) return undefined;
-    if (operation === "add" || isTagAppliedToAll) return "Remove tag";
+    if (operation === "remove") return "Remove tag";
     return "Apply tag";
   }, [gameObjectIds.length, isLoading, operation, isTagAppliedToAll]);
 
