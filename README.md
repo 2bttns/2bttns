@@ -1,5 +1,10 @@
 # Welcome to 2bttns 👋
 
+<a href="https://2bttns.com"><img src="https://img.shields.io/badge/official site-2bttns.com-green.svg?style=for-the-badge"></a>
+<a href="https://docs.2bttns.com/docs/intro"><img src="https://img.shields.io/badge/docs-v1.0.0_beta-green.svg?style=for-the-badge"></a>
+<a href="https://hub.docker.com/r/2bttns/2bttns"><img src="https://img.shields.io/badge/docker hub-2bttns/2bttns-blue.svg?logo=docker&style=for-the-badge"></a>
+<a href="https://discord.com/invite/YkjQNyhmsT"><img src="https://img.shields.io/badge/chat-discord-yellow.svg?logo=discord&style=for-the-badge"></a>
+
 ## Getting Started
 Jump right in by checking out our [official documentation](https://www.2bttns.com/docs/intro)!
 
