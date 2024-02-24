@@ -28,6 +28,15 @@ class TwoBttnsApi {
             throw new Error("Raised an Error because `window` was detected -- this likely means you are trying to use the 2bttns SDK in a client-side context, which is not allowed. The 2bttns SDK is intended for server-side use only.");
         }
         const { appId, secret, url } = config;
+        if (!appId) {
+            throw new Error("appId is required");
+        }
+        if (!secret) {
+            throw new Error("secret is required");
+        }
+        if (!url) {
+            throw new Error("url is required");
+        }
         this.appId = appId;
         this.secret = secret;
         this.url = url;
