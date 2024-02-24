@@ -159,7 +159,7 @@ export default function TestRankedOutputs(props: ReturnType) {
               <>
                 Equivalent API call: GET /api/game-objects/ranked?playerId=
                 {selectedPlayer}&inputTags=
-                {inputTags.map((t) => t.key).join(",")}&outputTag=
+                {inputTags.map((t) => t.value).join(",")}&outputTag=
                 {outputTag}
               </>
             </Code>
