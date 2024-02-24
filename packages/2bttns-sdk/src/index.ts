@@ -57,6 +57,19 @@ export class TwoBttnsApi {
     }
 
     const { appId, secret, url } = config;
+
+    if (!appId) {
+      throw new Error("appId is required");
+    }
+
+    if (!secret) {
+      throw new Error("secret is required");
+    }
+
+    if (!url) {
+      throw new Error("url is required");
+    }
+
     this.appId = appId;
     this.secret = secret;
     this.url = url;
