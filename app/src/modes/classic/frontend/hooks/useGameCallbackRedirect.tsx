@@ -5,7 +5,7 @@ export type UseGameCallbackRedirectProps = {
   delayMs?: number;
 };
 export function useGameCallbackRedirect(props: UseGameCallbackRedirectProps) {
-  const { callbackUrl, delayMs = 5000 } = props;
+  const { callbackUrl, delayMs = 3000 } = props;
   const [isRedirecting, setRedirecting] = useState(false);
 
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
