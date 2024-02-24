@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { idSchema } from "../../../shared/z";
+import { OPENAPI_TAGS } from "../../openapi/openApiTags";
 import { adminOrApiKeyProtectedProcedure } from "../../trpc";
 
 const input = z.object({
@@ -12,8 +13,29 @@ const input = z.object({
   }),
 });
 
+const output = z.object({
+  updatedGameObject: z.object({
+    id: idSchema,
+    name: z.string(),
+    description: z.string().nullable(),
+    createdAt: z.string().describe("ISO date string"),
+    updatedAt: z.string().describe("ISO date string"),
+  }),
+});
+
 export const updateById = adminOrApiKeyProtectedProcedure
+  .meta({
+    openapi: {
+      summary: "Update Game Object by ID",
+      description: "Update a Game Object by its ID",
+      tags: [OPENAPI_TAGS.GAME_OBJECTS],
+      method: "PUT",
+      path: "/game-objects/{id}",
+      protect: true,
+    },
+  })
   .input(input)
+  .output(output)
   .mutation(async ({ ctx, input }) => {
     const updatedGameObject = await ctx.prisma.gameObject.update({
       where: {
@@ -31,6 +53,10 @@ export const updateById = adminOrApiKeyProtectedProcedure
     });
 
     return {
-      updatedGameObject,
+      updatedGameObject: {
+        ...updatedGameObject,
+        createdAt: updatedGameObject.createdAt.toISOString(),
+        updatedAt: updatedGameObject.updatedAt.toISOString(),
+      },
     };
   });

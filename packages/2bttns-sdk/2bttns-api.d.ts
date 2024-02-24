@@ -73,8 +73,8 @@ export interface paths {
      */
     get: operations["query.gameObjects.getAll"];
     /**
-     * Create GameObject 
-     * @description Create a new GameObject
+     * Create Game Object 
+     * @description Create a new Game Object
      */
     post: operations["mutation.gameObjects.create"];
     /**
@@ -518,6 +518,7 @@ export interface operations {
               defaultNumItemsPerRound: number | null;
               mode: string;
               modeConfigJson: string | null;
+              customCss: string | null;
               gameObjects?: ({
                   id: string;
                   name: string;
@@ -646,8 +647,8 @@ export interface operations {
     };
   };
   /**
-   * Create GameObject 
-   * @description Create a new GameObject
+   * Create Game Object 
+   * @description Create a new Game Object
    */
   "mutation.gameObjects.create": {
     requestBody: {
