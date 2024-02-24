@@ -15,6 +15,7 @@ const input = z.object({
     ),
   num_items: z
     .string()
+    .optional()
     .describe("Number of items that should appear in the game round"),
   callback_url: z
     .string()
@@ -100,8 +101,55 @@ export const generatePlayURL = adminOrApiKeyProtectedProcedure
       queryBuilder.append("game_id", gameId);
       queryBuilder.append("app_id", appId);
       queryBuilder.append("jwt", playerToken);
-      if (numItems) {
-        queryBuilder.append("num_items", numItems.toString());
+
+      if (numItems !== undefined) {
+        if (numItems === "ALL") {
+          queryBuilder.append("num_items", "ALL");
+        } else {
+          const parsed = parseInt(numItems);
+          if (isNaN(parsed)) {
+            throw new TRPCError({
+              code: "BAD_REQUEST",
+              message: 'num_items must be a valid number or "ALL"',
+            });
+          }
+
+          try {
+            const gameIdTags = await ctx.prisma.game.findFirstOrThrow({
+              where: {
+                id: gameId,
+              },
+              select: {
+                inputTags: true,
+              },
+            });
+
+            const maxItemsForGame = await ctx.prisma.gameObject.count({
+              where: {
+                tags: {
+                  some: {
+                    id: {
+                      in: gameIdTags.inputTags.map((inputTag) => inputTag.id),
+                    },
+                  },
+                },
+              },
+            });
+
+            if (parsed > maxItemsForGame) {
+              throw new Error(
+                `num_items must be less than or equal to the maximum number of items for this game: ${maxItemsForGame}`
+              );
+            }
+            queryBuilder.append("num_items", numItems.toString());
+          } catch (e) {
+            console.error(e);
+            throw new TRPCError({
+              code: "BAD_REQUEST",
+              message: e instanceof Error ? e.message : "Unknown error",
+            });
+          }
+        }
       }
 
       if (callbackUrl) {
