@@ -28,6 +28,13 @@ export interface paths {
      */
     get: operations["query.example.checkAuthType"];
   };
+  "/games/getPlayerScores": {
+    /**
+     * Get Player Scores 
+     * @description Get a Player's score data for a specific Game.
+     */
+    get: operations["query.games.getPlayerScores"];
+  };
   "/games": {
     /**
      * Get All Games 
@@ -58,13 +65,18 @@ export interface paths {
      * @description Get a game by its ID.
      */
     get: operations["query.games.getById"];
-  };
-  "/games/getPlayerScores": {
     /**
-     * Get Player Scores 
-     * @description Get a Player's score data for a specific Game.
+     * Update Game by ID 
+     * @description Update a Game by its ID
      */
-    get: operations["query.games.getPlayerScores"];
+    put: operations["mutation.games.updateById"];
+  };
+  "/game-objects/ranked": {
+    /**
+     * Get Ranked Results 
+     * @description Get ranked Game Object results for a player
+     */
+    get: operations["query.gameObjects.getRanked"];
   };
   "/game-objects": {
     /**
@@ -96,13 +108,11 @@ export interface paths {
      * @description Get a Game Object by its ID.
      */
     get: operations["query.gameObjects.getById"];
-  };
-  "/game-objects/ranked": {
     /**
-     * Get Ranked Results 
-     * @description Get ranked Game Object results for a player
+     * Update Game Object by ID 
+     * @description Update a Game Object by its ID
      */
-    get: operations["query.gameObjects.getRanked"];
+    put: operations["mutation.gameObjects.updateById"];
   };
   "/tags": {
     /**
@@ -134,6 +144,11 @@ export interface paths {
      * @description Get a Tag by its ID.
      */
     get: operations["query.tags.getById"];
+    /**
+     * Update Tag by ID 
+     * @description Update a Tag by its ID
+     */
+    put: operations["mutation.tags.updateById"];
   };
   "/players/create": {
     /**
@@ -250,8 +265,7 @@ export interface operations {
         game_id: string;
         /** @description ID of the player you want to play in 2bttns. If the player doesn't already exist, it will be created. */
         player_id: string;
-        /** @description Number of items that should appear in the game round */
-        num_items: string;
+        num_items?: string;
         callback_url?: string;
         expires_in?: string;
       };
@@ -300,6 +314,46 @@ export interface operations {
       200: {
         content: {
           "application/json": string;
+        };
+      };
+      default: components["responses"]["error"];
+    };
+  };
+  /**
+   * Get Player Scores 
+   * @description Get a Player's score data for a specific Game.
+   */
+  "query.games.getPlayerScores": {
+    parameters: {
+      query: {
+        /** @description The game id to get scores for */
+        game_id: string;
+        /** @description The player id to get scores for */
+        player_id: string;
+        /** @description Whether to include game objects in the response */
+        include_game_objects?: boolean;
+      };
+    };
+    responses: {
+      /** @description Successful response */
+      200: {
+        content: {
+          "application/json": {
+            playerScores: ({
+                createdAt: string;
+                updatedAt: string;
+                score: number;
+                playerId: string;
+                gameObjectId: string;
+                gameObject?: {
+                  id: string;
+                  createdAt: string;
+                  updatedAt: string;
+                  name: string;
+                  description: string | null;
+                };
+              })[];
+          };
         };
       };
       default: components["responses"]["error"];
@@ -536,18 +590,31 @@ export interface operations {
     };
   };
   /**
-   * Get Player Scores 
-   * @description Get a Player's score data for a specific Game.
+   * Update Game by ID 
+   * @description Update a Game by its ID
    */
-  "query.games.getPlayerScores": {
+  "mutation.games.updateById": {
     parameters: {
-      query: {
-        /** @description The game id to get scores for */
-        game_id: string;
-        /** @description The player id to get scores for */
-        player_id: string;
-        /** @description Whether to include game objects in the response */
-        include_game_objects?: boolean;
+      path: {
+        /** @description ID value. Only alphanumeric, underscore, and hyphen are allowed. */
+        id: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          data: {
+            /** @description ID value. Only alphanumeric, underscore, and hyphen are allowed. */
+            id?: string;
+            name?: string;
+            description?: string;
+            inputTags?: (string)[];
+            defaultNumItemsPerRound?: number | null;
+            mode?: string;
+            modeConfigJson?: string;
+            customCss?: string;
+          };
+        };
       };
     };
     responses: {
@@ -555,19 +622,55 @@ export interface operations {
       200: {
         content: {
           "application/json": {
-            playerScores: ({
-                createdAt: string;
-                updatedAt: string;
-                score: number;
-                playerId: string;
-                gameObjectId: string;
-                gameObject?: {
+            updatedGameObject: {
+              id: string;
+              /** @description ISO date string */
+              createdAt: string;
+              /** @description ISO date string */
+              updatedAt: string;
+              name: string;
+              description: string | null;
+              defaultNumItemsPerRound: number | null;
+              mode: string;
+              modeConfigJson: string | null;
+              customCss: string | null;
+            };
+          };
+        };
+      };
+      default: components["responses"]["error"];
+    };
+  };
+  /**
+   * Get Ranked Results 
+   * @description Get ranked Game Object results for a player
+   */
+  "query.gameObjects.getRanked": {
+    parameters: {
+      query: {
+        /** @description ID value. Only alphanumeric, underscore, and hyphen are allowed. */
+        playerId: string;
+        /**
+         * @description Specify comma-separated input tags that will be used to score the game objects associated with the output tag.
+         * 
+         * If the output tag is included in the input tags, the player's score for those game object will be used as base scores
+         */
+        inputTags: string;
+        /** @description Specify the output tag of the game objects to get ranked results for */
+        outputTag: string;
+      };
+    };
+    responses: {
+      /** @description Successful response */
+      200: {
+        content: {
+          "application/json": {
+            scores: ({
+                gameObject: {
                   id: string;
-                  createdAt: string;
-                  updatedAt: string;
                   name: string;
-                  description: string | null;
                 };
+                score: number;
               })[];
           };
         };
@@ -789,22 +892,27 @@ export interface operations {
     };
   };
   /**
-   * Get Ranked Results 
-   * @description Get ranked Game Object results for a player
+   * Update Game Object by ID 
+   * @description Update a Game Object by its ID
    */
-  "query.gameObjects.getRanked": {
+  "mutation.gameObjects.updateById": {
     parameters: {
-      query: {
+      path: {
         /** @description ID value. Only alphanumeric, underscore, and hyphen are allowed. */
-        playerId: string;
-        /**
-         * @description Specify comma-separated input tags that will be used to score the game objects associated with the output tag.
-         * 
-         * If the output tag is included in the input tags, the player's score for those game object will be used as base scores
-         */
-        inputTags: string;
-        /** @description Specify the output tag of the game objects to get ranked results for */
-        outputTag: string;
+        id: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          data: {
+            /** @description ID value. Only alphanumeric, underscore, and hyphen are allowed. */
+            id?: string;
+            name?: string;
+            description?: string;
+            tags?: (string)[];
+          };
+        };
       };
     };
     responses: {
@@ -812,13 +920,16 @@ export interface operations {
       200: {
         content: {
           "application/json": {
-            scores: ({
-                gameObject: {
-                  id: string;
-                  name: string;
-                };
-                score: number;
-              })[];
+            updatedGameObject: {
+              /** @description ID value. Only alphanumeric, underscore, and hyphen are allowed. */
+              id: string;
+              name: string;
+              description: string | null;
+              /** @description ISO date string */
+              createdAt: string;
+              /** @description ISO date string */
+              updatedAt: string;
+            };
           };
         };
       };
@@ -970,6 +1081,52 @@ export interface operations {
               createdAt: string;
               /** @description ISO date string */
               updatedAt: string;
+            };
+          };
+        };
+      };
+      default: components["responses"]["error"];
+    };
+  };
+  /**
+   * Update Tag by ID 
+   * @description Update a Tag by its ID
+   */
+  "mutation.tags.updateById": {
+    parameters: {
+      path: {
+        /** @description ID value. Only alphanumeric, underscore, and hyphen are allowed. */
+        id: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          data: {
+            /** @description ID value. Only alphanumeric, underscore, and hyphen are allowed. */
+            id?: string;
+            name?: string;
+            description?: string;
+            addGameObjects?: (string)[];
+            removeGameObjects?: (string)[];
+          };
+        };
+      };
+    };
+    responses: {
+      /** @description Successful response */
+      200: {
+        content: {
+          "application/json": {
+            updatedTag: {
+              id: string;
+              /** @description ISO date string */
+              createdAt: string;
+              /** @description ISO date string */
+              updatedAt: string;
+              name: string;
+              description: string | null;
+              gameObjectCount: number;
             };
           };
         };
