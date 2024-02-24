@@ -58,7 +58,7 @@ export default function TestRankedOutputs(props: ReturnType) {
     }
   );
 
-  const fullHeight = `calc(100vh - ${NAVBAR_HEIGHT_PX} - 2rem)`;
+  const fullHeight = `calc(100vh - ${NAVBAR_HEIGHT_PX})`;
 
   return (
     <Stack
@@ -69,9 +69,9 @@ export default function TestRankedOutputs(props: ReturnType) {
       color="whiteAlpha.900"
     >
       <Stack direction="column" spacing="1rem" height="100%" padding="1rem">
-        <h1>testRankedOutputs for {playerId}</h1>
+        <h1>Ranked Outputs Preview</h1>
         <HStack justifyContent="space-between">
-          <Text fontWeight="bold">Player</Text>
+          <Text fontWeight="bold">For player...</Text>
           <Box width="250px">
             {
               <Select
@@ -94,7 +94,7 @@ export default function TestRankedOutputs(props: ReturnType) {
           </Box>
         </HStack>
         <HStack justifyContent="space-between">
-          <Text fontWeight="bold">Output Tag</Text>
+          <Text fontWeight="bold">View ranked outputs for...</Text>
           <Box width="250px">
             {tagsQuery.data && (
               <Select
@@ -118,7 +118,7 @@ export default function TestRankedOutputs(props: ReturnType) {
         </HStack>
 
         <HStack justifyContent="space-between">
-          <Text fontWeight="bold">Input Tags</Text>
+          <Text fontWeight="bold">Relative to...</Text>
           {/* TODO: Replace with filter tags sidebar */}
           <Box width="250px" color="black">
             <MultiSelect
@@ -139,12 +139,41 @@ export default function TestRankedOutputs(props: ReturnType) {
         </HStack>
       </Stack>
       <Box height="100%" overflow="hidden" bgColor="white" flex={1}>
+        <Box
+          height="32px"
+          maxHeight="32px"
+          overflowX="scroll"
+          overflowY="clip"
+          backgroundColor={outputs.data ? "black" : "unset"}
+        >
+          {outputs.data && (
+            <Code
+              width="100%"
+              display="block"
+              fontFamily={"monospace"}
+              color="#97E998"
+              borderRadius="0"
+              whiteSpace={"nowrap"}
+              backgroundColor="black"
+            >
+              <>
+                Equivalent API call: GET /api/game-objects/ranked?playerId=
+                {selectedPlayer}&inputTags=
+                {inputTags.map((t) => t.key).join(",")}&outputTag=
+                {outputTag}
+              </>
+            </Code>
+          )}
+        </Box>
         <Code
           width="100%"
-          maxHeight="100%"
+          maxHeight="calc(100% - 32px)"
           overflowY="scroll"
           as="pre"
           display="block"
+          fontFamily={"monospace"}
+          padding="0"
+          margin="0"
         >
           {outputs.data && JSON.stringify(outputs.data.scores, null, 2)}
         </Code>

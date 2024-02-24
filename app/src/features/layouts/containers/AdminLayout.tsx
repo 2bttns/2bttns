@@ -29,11 +29,11 @@ const links: NavMenuLink[] = [
   { href: "/games", label: "Games" },
   { href: "/tags", label: "Tags" },
   { href: "/game-objects", label: "Game Objects" },
+  { href: "/ranked-outputs", label: "Outputs" },
   "divider",
   { href: "/settings", label: "Settings" },
   { href: "/api-documentation", label: "API" },
   { href: "https://docs.2bttns.com", label: "Documentation", external: true },
-  // { href: "/testRankedOutputs", label: "Outputs" },
 ];
 
 export default function AdminLayout(props: AdminLayoutProps) {
