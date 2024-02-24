@@ -186,8 +186,8 @@ export default function EditGameMode(props: EditGameModeProps) {
                           when a user plays a round.
                         </Text>
                         <Text>
-                          Set to <strong>ALL</strong> if all Game Objects should
-                          appear in a single round.
+                          Erasing this value to be empty will make the game use{" "}
+                          <strong>ALL</strong> Game Objects.
                         </Text>
                       </VStack>
                     ),
