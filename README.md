@@ -6,7 +6,7 @@
 <a href="https://discord.com/invite/YkjQNyhmsT"><img src="https://img.shields.io/badge/chat-discord-yellow.svg?logo=discord&style=for-the-badge"></a>
 
 ## Getting Started
-Jump right in by checking out our [official documentation](https://www.2bttns.com/docs/intro)!
+Jump right in by checking out our [official documentation](https://www.docs.2bttns.com)!
 
 ## Project Structure
 This repository contains the following folders:
