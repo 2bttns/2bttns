@@ -52,7 +52,7 @@ export default function EditGameMode(props: EditGameModeProps) {
   const [didMount, setDidMount] = useState(false);
 
   const gameQuery = api.games.getById.useQuery(
-    { id: gameId },
+    { id: gameId, includeGameObjects: true },
     {
       retry: false,
       onSuccess: ({ game: { mode, modeConfigJson } }) => {
@@ -204,26 +204,45 @@ export default function EditGameMode(props: EditGameModeProps) {
                   }
                   placeholder="ALL"
                   handleSave={async (nextValue) => {
-                    // Null means ALL
-                    // Otherwise this must be a number greater than 0
-                    let value: Game["defaultNumItemsPerRound"] = null;
-                    if (nextValue !== "") {
-                      try {
-                        const parsed = parseInt(nextValue, 10);
-                        if (isNaN(parsed)) throw new Error("Must be a number");
-                        if (parsed <= 0)
-                          throw new Error("Must be greater than 0");
-                        value = parsed;
-                      } catch (error) {
-                        throw error;
+                    try {
+                      // Null means ALL
+                      // Otherwise this must be a number greater than 0
+                      let value: Game["defaultNumItemsPerRound"] = null;
+                      if (nextValue !== "") {
+                        try {
+                          const parsed = parseInt(nextValue, 10);
+                          if (isNaN(parsed))
+                            throw new Error("Must be a number");
+                          if (parsed <= 1) {
+                            throw new Error("Must be greater than 1");
+                          } else if (
+                            gameQuery.data?.game.gameObjects !== undefined &&
+                            parsed > gameQuery.data.game.gameObjects.length
+                          ) {
+                            throw new Error(
+                              `Must be less than or equal to ${gameQuery.data.game.gameObjects.length}`
+                            );
+                          }
+
+                          value = parsed;
+                        } catch (error) {
+                          throw error;
+                        }
                       }
+                      await handleUpdateGame({
+                        id: gameId,
+                        data: {
+                          defaultNumItemsPerRound: value,
+                        },
+                      });
+                    } catch (error) {
+                      toast.closeAll();
+                      toast({
+                        title: "Error",
+                        status: "error",
+                        description: error ? error.toString() : "Unknown error",
+                      });
                     }
-                    await handleUpdateGame({
-                      id: gameId,
-                      data: {
-                        defaultNumItemsPerRound: value,
-                      },
-                    });
                   }}
                 />
               </Td>
