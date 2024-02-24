@@ -1,11 +1,13 @@
 # 2bttns
 
 <a href="https://2bttns.com"><img src="https://img.shields.io/badge/official site-2bttns.com-green.svg?style=for-the-badge"></a>
-<a href="https://docs.2bttns.com/docs/intro"><img src="https://img.shields.io/badge/docs-v0.0.1_alpha-green.svg?style=for-the-badge"></a>
+<a href="https://docs.2bttns.com/docs/intro"><img src="https://img.shields.io/badge/docs-v1.0.0_beta-green.svg?style=for-the-badge"></a>
 <a href="https://hub.docker.com/r/2bttns/2bttns"><img src="https://img.shields.io/badge/docker hub-2bttns/2bttns-blue.svg?logo=docker&style=for-the-badge"></a>
 <a href="https://discord.com/invite/YkjQNyhmsT"><img src="https://img.shields.io/badge/chat-discord-yellow.svg?logo=discord&style=for-the-badge"></a>
 
 ## Quickstart
+
+> See https://docs.2bttns.com/guides/quick-start
 
 ### For Windows Users:
 
@@ -17,11 +19,20 @@ You can find the instructions to do so here: https://docs.docker.com/desktop/wsl
 
 Be sure to run the following commands in a WSL terminal, which you can start by calling `wsl.exe` in your Windows Command Prompt / PowerShell.
 
-### Installation Scripts
+### Installation
 
-We've provided a few scripts to help you get started quickly with 2bttns. Feel free to customize them to your needs.
+We've provided a few ways to help you get started quickly with 2bttns. Feel free to customize them to your needs.
 
-#### i. via Docker Compose
+#### i. Automated Setup via `2bttns-cli new`
+
+The `2bttns-cli new` command will ask you for a few configuration values, create a 2bttns-ready Docker Compose file, and start it so you can quickly get your own applications integrated with 2bttns.
+
+```sh
+npx @2bttns/2bttns-cli new
+2bttns-cli new
+```
+
+#### ii. Manual Setup via Docker Compose
 
 > For additional information, see https://github.com/2bttns/2bttns/blob/main/install/docker-compose.
 
@@ -34,7 +45,7 @@ curl -s https://raw.githubusercontent.com/2bttns/2bttns/main/install/docker-comp
 
 ```
 
-#### ii. via Docker in the Command Line
+#### iii. Manual Setup via Docker in the Command Line
 
 > For additional information, see https://github.com/2bttns/2bttns/blob/main/install/docker-run
 

@@ -4,10 +4,11 @@ The 2bttns command line interface.
 
 ## Features
 
-- Apply the necessary 2bttns migrations to the database you intend to use with 2bttns (`2bttns db migrate`)
-- Apply example data to the database you intend to use with 2bttns (`2bttns db seed`)
-- Interactive command to create 2bttns console administrators (`2bttns admin create`), with command-line-only alternatives (`2bttns admin create credentials`, `2bttns admin create oauth-allow`)
-- Set configuration values via the command line (e.g. `2bttns config set db.url <value>`) to avoid having to specify them every time you run a command
+- Get up-and-running with a 2bttns installation using `2bttns-cli new`
+- Apply the necessary 2bttns migrations to the database you intend to use with 2bttns (`2bttns-cli db migrate`)
+- Apply example data to the database you intend to use with 2bttns (`2bttns-cli db seed`)
+- Interactive command to create 2bttns console administrators (`2bttns-cli admin create`), with command-line-only alternatives (`2bttns-cli admin create credentials`, `2bttns-cli admin create oauth-allow`)
+- Set configuration values via the command line (e.g. `2bttns-cli config set db.url <value>`) to avoid having to specify them every time you run a command
 
 ## Install
 
@@ -30,6 +31,14 @@ npx @2bttns/2bttns-cli <command>
 
 # If calling it via npx:
 npx @2bttns/2bttns-cli --help
+```
+
+### i. Automated 2bttns Setup via `2bttns-cli new`
+
+The `2bttns-cli new` command will ask you for a few configuration values, create a 2bttns-ready Docker Compose file, and start it so you can quickly get your own applications integrated with 2bttns.
+
+```sh
+2bttns-cli new
 ```
 
 ### DB Migrations & Seeding
