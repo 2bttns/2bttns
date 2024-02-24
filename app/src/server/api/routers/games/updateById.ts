@@ -1,5 +1,7 @@
+import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { idSchema } from "../../../shared/z";
+import { OPENAPI_TAGS } from "../../openapi/openApiTags";
 import { adminOrApiKeyProtectedProcedure } from "../../trpc";
 
 const input = z.object({
@@ -16,9 +18,47 @@ const input = z.object({
   }),
 });
 
+const output = z.object({
+  updatedGameObject: z.object({
+    id: z.string(),
+    createdAt: z.string().describe("ISO date string"),
+    updatedAt: z.string().describe("ISO date string"),
+    name: z.string(),
+    description: z.string().nullable(),
+    defaultNumItemsPerRound: z.number().nullable(),
+    mode: z.string(),
+    modeConfigJson: z.string().nullable(),
+    customCss: z.string().nullable(),
+  }),
+});
+
 export const updateById = adminOrApiKeyProtectedProcedure
+  .meta({
+    openapi: {
+      summary: "Update Game by ID",
+      description: "Update a Game by its ID",
+      tags: [OPENAPI_TAGS.GAMES],
+      method: "PUT",
+      path: "/games/{id}",
+      protect: true,
+    },
+  })
   .input(input)
+  .output(output)
   .mutation(async ({ ctx, input }) => {
+    console.log(input);
+
+    if (input.data.modeConfigJson) {
+      try {
+        JSON.parse(input.data.modeConfigJson);
+      } catch (error) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Invalid modeConfigJson",
+        });
+      }
+    }
+
     const updatedGameObject = await ctx.prisma.game.update({
       where: {
         id: input.id,
@@ -39,6 +79,10 @@ export const updateById = adminOrApiKeyProtectedProcedure
     });
 
     return {
-      updatedGameObject,
+      updatedGameObject: {
+        ...updatedGameObject,
+        createdAt: updatedGameObject.createdAt.toISOString(),
+        updatedAt: updatedGameObject.updatedAt.toISOString(),
+      },
     };
   });
