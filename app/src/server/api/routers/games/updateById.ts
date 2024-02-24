@@ -46,8 +46,6 @@ export const updateById = adminOrApiKeyProtectedProcedure
   .input(input)
   .output(output)
   .mutation(async ({ ctx, input }) => {
-    console.log(input);
-
     if (input.data.modeConfigJson) {
       try {
         JSON.parse(input.data.modeConfigJson);
