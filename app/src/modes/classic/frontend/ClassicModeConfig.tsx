@@ -32,7 +32,8 @@ export const replacePolicies: ReplacePolicy[] = [
   "replace-all",
 ];
 
-export const itemPolicies: ItemPolicyType[] = ["load-on-demand", "preload"];
+// TODO: Revisit load-on-demand to allow it to fetch repeat items without running into the same choice; needs more work.
+export const itemPolicies: ItemPolicyType[] = ["preload" /*"load-on-demand"*/];
 
 export type ClassicModeConfigProps = ConfigComponentProps<
   ClassicModeContainerProps["config"]
