@@ -275,10 +275,10 @@ const Play: NextPageWithLayout<ReturnType> = (props) => {
         />
       )}
       {!modeFrontendComponent && (
-        <h1>
+        <Text textAlign={"center"}>
           Game mode not found. If you are the administator, please update your
           game&apos;s configuration.
-        </h1>
+        </Text>
       )}
     </Layout>
   );
