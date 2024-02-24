@@ -242,6 +242,7 @@ export default function EditGameMode(props: EditGameModeProps) {
                         status: "error",
                         description: error ? error.toString() : "Unknown error",
                       });
+                      throw error;
                     }
                   }}
                 />
