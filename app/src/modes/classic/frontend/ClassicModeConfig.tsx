@@ -125,12 +125,12 @@ function ConfigItemPolicy({
                   the Game.
                 </Text>
                 <Box>
-                  <Code>load-on-demand</Code>
-                  <Text>Load Game Objects dynamically after each pick.</Text>
-                </Box>
-                <Box>
                   <Code>preload</Code>
                   <Text>Preload all Game Objects before the Game starts.</Text>
+                </Box>
+                <Box>
+                  Additional policies will be added in the future, along with
+                  the ability to create custom policies.
                 </Box>
               </VStack>
             ),

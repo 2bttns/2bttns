@@ -134,8 +134,8 @@ export default function EditGameMode(props: EditGameModeProps) {
                           functionality that define how a Game is played.
                         </Text>
                         <Text>
-                          Additional Modes can be installed or custom-built to
-                          support new types of Games.
+                          Coming Soon: Additional Modes that can be installed or
+                          custom-built to support new types of Games.
                         </Text>
                       </VStack>
                     ),
@@ -180,14 +180,20 @@ export default function EditGameMode(props: EditGameModeProps) {
                         fontSize="12px"
                         padding="1rem"
                       >
-                        <Text fontWeight="bold">ROUND LENGTH</Text>
+                        <Text fontWeight="bold">DEFAULT ROUND LENGTH</Text>
                         <Text>
-                          The total number of Game Objects that should appear
-                          when a user plays a round.
+                          The default number of Game Objects that should appear
+                          when a user plays this Game.
+                        </Text>
+                        <Text>
+                          This value should be greater than 1 and less than or
+                          equal to the maximum number of Game Objects associated
+                          with the Game&apos;s input tags.
                         </Text>
                         <Text>
                           Erasing this value to be empty will make the game use{" "}
-                          <strong>ALL</strong> Game Objects.
+                          <strong>ALL</strong> Game Objects associated with the
+                          Game&apos;s input tags.
                         </Text>
                       </VStack>
                     ),
