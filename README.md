@@ -5,10 +5,47 @@
 <a href="https://hub.docker.com/r/2bttns/2bttns"><img src="https://img.shields.io/badge/docker hub-2bttns/2bttns-blue.svg?logo=docker&style=for-the-badge"></a>
 <a href="https://discord.com/invite/YkjQNyhmsT"><img src="https://img.shields.io/badge/chat-discord-yellow.svg?logo=discord&style=for-the-badge"></a>
 
-## Getting Started
-Jump right in by checking out our [official documentation](https://docs.2bttns.com)!
+## What is 2bttns ❓
+**Integrate** a two-button game to **collect** user data and **tailor** **content** with a few lines of code. 
 
-## Project Structure
+**Ethical Data Collection🤔**: Grounded in human-in-the-loop design, 2bttns ensures that data-driven feeds remain ethical by enhancing algorithmic transparency and reducing bias, all without compromising the user experience.
+
+
+## Getting Started 🏁
+Read the [Quick Start tutorial](https://docs.2bttns.com/getting-started/quick-start) or start by following the steps below:
+
+**Installation ⏳**
+
+Install and use 2bttns in your project using this quick command (any where) to create a 2bttns Console instantly:
+
+```shell
+# You can install the 2bttns CLI globally via npm:
+npm i -g @2bttns/2bttns-cli
+```
+
+```shell
+# Alternatively, you can call it via npx without installing it globally.
+npx @2bttns/2bttns-cli <command>
+```
+
+(Ensure Docker is running! 🐳)
+
+```shell
+2bttns-cli new
+```
+
+This command will:
+
+- Create a `docker-compose.yml` file in the current directory.
+- Launch your Console at http://localhost:3262/.
+- Apply migrations to your specified PostgreSQL database.
+- Optionally seed the database with example data.
+
+The new command installs 2bttns with an optional PostgreSQL database, which can be swapped out later if needed.
+
+Enjoy 🎉
+
+## How this repository is organized 🔍
 This repository contains the following folders:
 
 - [`app/`](https://github.com/2bttns/2bttns/tree/main/app) - the core 2bttns web application that provides an Admin Panel, REST API, and User Interface for users to play games.
@@ -17,15 +54,6 @@ This repository contains the following folders:
 
 - [`packages/`](https://github.com/2bttns/2bttns/tree/main/packages) - packages that interact with 2bttns. Includes the official [2bttns Node.js SDK](https://github.com/2bttns/2bttns/tree/main/packages/2bttns-sdk) and [`create-2bttns-app`](https://github.com/2bttns/2bttns/tree/main/packages/create-2bttns-app) CLI tool.
 
-## Description ❓
-Quickly add a two-button game, collect data, and tailor in-app content to users with the 2bttns library. 100% Javascript. It empowers developers to create highly tailored and engaging user experiences while respecting user privacy.
-
-## Key Features 🏆
-- 🎮 **User-Driven Customization:** Let users provide feedback on their preferences through intuitive mini-games.
-- 📊 **Data Collection:** Gather valuable user preference data to personalize content and boost engagement.
-- 🎯 **Personalized Content Delivery:** Dynamically customize content based on user preferences for targeted recommendations.
-- 🙋‍♂️ **Human-in-the-Loop Design:** Involve users in data collection, reducing bias and giving them control over their experiences.
-- 🤝 **Seamless Integration:** Easily integrate 2bttns into your app with the provided SDK and API.
 
 ## License 👔
 2bttns is licensed under the [2bttns License 1.0](./profile/2bttns_LICENSE.md).
@@ -47,7 +75,7 @@ Quickly add a two-button game, collect data, and tailor in-app content to users 
 Remember to consult the full 2bttns License 1.0 for complete details and accurate information.
 
 ## Contributing 🌍
-We welcome contributions from the community to improve and enhance 2bttns. If you have any bug fixes, feature requests, or suggestions, please open an issue or submit a pull request to the [2bttns GitHub repository](https://github.com/2bttns/2bttns).
+We're building 2bttns out in the open. We welcome contributions from the community to improve and enhance 2bttns. If you have any bug fixes, feature requests, or suggestions, please open an issue or submit a pull request to the [2bttns GitHub repository](https://github.com/2bttns/2bttns).
 
 Please ensure that your contributions adhere to the [Contributor Covenant Code of Conduct](./profile/CODE_OF_CONDUCT.md).
 
