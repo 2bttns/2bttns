@@ -52,7 +52,7 @@ This repository contains the following folders:
 
 - [`examples/`](https://github.com/2bttns/2bttns/tree/main/examples/2bttns-example-app-next) - example applications that demonstrate common use cases of 2bttns.
 
-- [`packages/`](https://github.com/2bttns/2bttns/tree/main/packages) - packages that interact with 2bttns. Includes the official [2bttns Node.js SDK](https://github.com/2bttns/2bttns/tree/main/packages/2bttns-sdk) and [`create-2bttns-app`](https://github.com/2bttns/2bttns/tree/main/packages/create-2bttns-app) CLI tool.
+- [`packages/`](https://github.com/2bttns/2bttns/tree/main/packages) - packages that interact with 2bttns. Includes the official [2bttns Node.js SDK](https://github.com/2bttns/2bttns/tree/main/packages/2bttns-sdk) and the[`2bttns CLI`](https://github.com/2bttns/2bttns/tree/main/packages/cli) tool.
 
 
 ## License 👔
